@@ -525,6 +525,25 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 
+def cmd_export(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    payload = {
+        "akbp_version": "0.1-draft",
+        "exported_at": now_iso(),
+        "card": json.loads((base / "akbp.json").read_text(encoding="utf-8")) if (base / "akbp.json").exists() else None,
+        "claims": load_claims(base),
+        "sources": load_sources(base),
+        "entities": read_jsonl(base / "graph" / "entities.jsonl"),
+        "relations": read_jsonl(base / "graph" / "relations.jsonl"),
+    }
+    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+    else:
+        print(text, end="")
+    return 0
+
+
 def cmd_audit(args: argparse.Namespace) -> int:
     base = root(args.path)
     events = read_jsonl(base / ".akbp" / "audit.log.jsonl")
@@ -635,6 +654,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=10)
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
+
+    s = sub.add_parser("export")
+    s.add_argument("--output")
+    s.set_defaults(func=cmd_export)
 
     s = sub.add_parser("audit")
     s.add_argument("--limit", type=int, default=20)

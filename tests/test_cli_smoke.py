@@ -49,6 +49,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(pack["items"])
             self.assertIn("citations", pack["items"][0])
 
+            out = run_cli("--path", str(kb), "export")
+            exported = json.loads(out.stdout)
+            self.assertTrue(exported["claims"])
+            self.assertTrue(exported["sources"])
+
             out = run_cli("--path", str(kb), "audit", "--limit", "10")
             audit = json.loads(out.stdout)
             self.assertGreaterEqual(audit["count"], 1)
