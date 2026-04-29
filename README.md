@@ -103,6 +103,8 @@ akbp/
     audit-event.schema.json
     context-pack.schema.json
   examples/
+    level-0/
+    level-1/
     coding-agent/
     research/
     personal/
@@ -129,3 +131,15 @@ AKBP is not trying to replace repository instruction files, tool protocol, or ag
 ## Status
 
 Draft protocol with a small reference CLI. The next milestone is protocol-standard readiness: adoption convention, Knowledge Base Card, versioned spec, governance, and conformance tests.
+
+## Examples
+
+- `examples/level-0/` shows the minimal file convention.
+- `examples/level-1/` shows structured claims with evidence.
+
+Validate them with:
+
+```bash
+python3 cli/akbp.py --path examples/level-0 conformance --level 0
+python3 cli/akbp.py --path examples/level-1 conformance --level 1
+```

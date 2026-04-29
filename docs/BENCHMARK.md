@@ -67,3 +67,7 @@ Pass criteria: meaningful sections become evidence-backed claims, not one huge s
 Generated wiki pages should be useful to humans.
 
 Pass criteria: page has summary, evidence links, related pages, current status, and open questions.
+
+## Baseline fixtures
+
+The repo includes small conformance fixtures under `examples/level-0/` and `examples/level-1/`. These are not performance benchmarks. They are compatibility fixtures for future benchmark and adapter testing.

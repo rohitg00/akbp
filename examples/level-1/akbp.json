@@ -1,0 +1,32 @@
+{
+  "schema_version": "0.1-draft",
+  "name": "level-1-example",
+  "description": "AKBP structured claims and evidence example",
+  "root": ".",
+  "artifacts": {
+    "wiki": "wiki/",
+    "claims": "claims/claims.jsonl",
+    "entities": "graph/entities.jsonl",
+    "relations": "graph/relations.jsonl",
+    "sources": "raw/sources/",
+    "audit": ".akbp/audit.log.jsonl"
+  },
+  "capabilities": {
+    "remember": true,
+    "retrieve": true,
+    "crystallize": false,
+    "supersede": true,
+    "audit": true,
+    "sync": false
+  },
+  "retrieval": [
+    "keyword"
+  ],
+  "transports": [
+    "cli"
+  ],
+  "privacy": {
+    "default_scope": "project",
+    "secret_redaction": "required"
+  }
+}
