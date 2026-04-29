@@ -157,6 +157,16 @@ def load_claims(base: Path) -> list[dict[str, Any]]:
     return read_jsonl(base / "claims" / "claims.jsonl")
 
 
+def load_sources(base: Path) -> list[dict[str, Any]]:
+    return read_jsonl(base / "raw" / "sources" / "sources.jsonl")
+
+
+def known_evidence_ids(base: Path) -> set[str]:
+    ids = {s.get("id") for s in load_sources(base) if s.get("id")}
+    # Paths are still allowed for Level 1 compatibility, but source IDs are preferred.
+    return {str(i) for i in ids}
+
+
 def claim_required_fields() -> list[str]:
     return ["id", "text", "status", "confidence", "evidence", "created_at"]
 
@@ -425,11 +435,33 @@ def check_level_1(base: Path) -> list[dict[str, str]]:
             issues.append({"severity": "error", "message": err})
         if not claim.get("evidence") and claim.get("status") not in {"working", "redacted"}:
             issues.append({"severity": "error", "message": f"claim {cid} requires evidence unless working or redacted"})
+        for ev in claim.get("evidence", []):
+            if not isinstance(ev, str) or not ev.strip():
+                issues.append({"severity": "error", "message": f"claim {cid} has invalid evidence reference"})
     return issues
 
 
+
+
+def check_level_2(base: Path) -> list[dict[str, str]]:
+    issues = check_level_1(base)
+    # Level 2 is the retrieval contract: a conforming KB must be queryable and return context packs.
+    try:
+        results = collect_results(base, "reference project decision", 5)
+    except Exception as exc:  # pragma: no cover - defensive for third-party KBs
+        issues.append({"severity": "error", "message": f"retrieval failed: {exc}"})
+        return issues
+    if load_claims(base) and not isinstance(results, list):
+        issues.append({"severity": "error", "message": "retrieval must return a list"})
+    for result in results:
+        item = result_to_context_item(result)
+        for field in ["id", "type", "summary"]:
+            if field not in item:
+                issues.append({"severity": "error", "message": f"context item missing {field}"})
+    return issues
+
 def conformance_issues(base: Path, level: str) -> dict[str, Any]:
-    checks = {"0": check_level_0, "1": check_level_1}
+    checks = {"0": check_level_0, "1": check_level_1, "2": check_level_2}
     if level not in checks:
         return {
             "name": "Not implemented in reference CLI yet",
@@ -437,7 +469,7 @@ def conformance_issues(base: Path, level: str) -> dict[str, Any]:
             "issues": [{"severity": "error", "message": f"conformance level {level} is not implemented yet"}],
         }
     issues = checks[level](base)
-    names = {"0": "File convention", "1": "Structured claims and evidence"}
+    names = {"0": "File convention", "1": "Structured claims and evidence", "2": "Retrieval and context packs"}
     return {
         "name": names[level],
         "ok": not any(i["severity"] == "error" for i in issues),

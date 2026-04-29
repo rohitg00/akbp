@@ -24,3 +24,9 @@ class ConformanceExampleTest(unittest.TestCase):
         data = json.loads(out.stdout)
         self.assertTrue(data["ok"])
         self.assertTrue(data["levels"]["1"]["ok"])
+
+    def test_level_one_example_passes_level_two_retrieval(self):
+        out = run_cli("--path", str(ROOT / "examples" / "level-1"), "conformance", "--level", "2")
+        data = json.loads(out.stdout)
+        self.assertTrue(data["ok"])
+        self.assertTrue(data["levels"]["2"]["ok"])

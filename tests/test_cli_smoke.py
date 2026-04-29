@@ -70,11 +70,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             new_claim = json.loads(out.stdout)
             self.assertEqual(new_claim["supersedes"], [claim["id"]])
 
-            out = run_cli("--path", str(kb), "conformance", "--level", "1")
+            out = run_cli("--path", str(kb), "conformance", "--level", "2")
             conformance = json.loads(out.stdout)
             self.assertTrue(conformance["ok"])
             self.assertTrue(conformance["levels"]["0"]["ok"])
             self.assertTrue(conformance["levels"]["1"]["ok"])
+            self.assertTrue(conformance["levels"]["2"]["ok"])
 
             out = run_cli("--path", str(kb), "lint")
             self.assertTrue(json.loads(out.stdout)["ok"])

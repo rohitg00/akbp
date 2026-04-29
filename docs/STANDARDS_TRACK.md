@@ -99,8 +99,9 @@ AKBP conformance should be testable.
 ### Level 2: Retrieval
 
 - query returns ranked results
-- context packs match schema
+- context packs expose `id`, `type`, and `summary`
 - citations are preserved
+- retrieval does not require a hosted service
 
 ### Level 3: Lifecycle
 

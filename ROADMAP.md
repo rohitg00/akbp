@@ -55,7 +55,7 @@ Status: initial version added.
 Goal: make compatibility testable.
 
 - define Level 0 to Level 5 conformance checks
-- add `akbp conformance` with Level 0 and Level 1 implemented in the reference CLI
+- add `akbp conformance` with Level 0, Level 1, and Level 2 implemented in the reference CLI
 - add fixture knowledge bases
 - validate schemas, IDs, citations, lifecycle states, and context packs
 - publish adapter certification checklist
