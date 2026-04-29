@@ -19,6 +19,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             kb = Path(d) / "kb"
             run_cli("--path", str(kb), "init")
             self.assertTrue((kb / "wiki" / "index.md").exists())
+            self.assertTrue((kb / "AKBP.md").exists())
+            card = json.loads((kb / "akbp.json").read_text(encoding="utf-8"))
+            self.assertEqual(card["schema_version"], "0.1-draft")
+            self.assertIn("claims", card["artifacts"])
 
             out = run_cli(
                 "--path", str(kb),
@@ -40,6 +44,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(pack["query"], "continue Bun npm migration")
             self.assertTrue(pack["items"])
             self.assertIn("citations", pack["items"][0])
+
+            out = run_cli("--path", str(kb), "status")
+            status = json.loads(out.stdout)
+            self.assertTrue(status["card"])
+            self.assertTrue(status["entrypoint"])
 
             out = run_cli("--path", str(kb), "lint")
             self.assertTrue(json.loads(out.stdout)["ok"])

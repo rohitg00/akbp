@@ -38,6 +38,31 @@ The current ecosystem is fragmented: Obsidian vaults, Markdown memories, tool-se
 - Privacy and audit rules
 - Benchmarks for durable agent knowledge
 
+## Five-minute adoption
+
+A minimal AKBP knowledge base starts with two files:
+
+```text
+AKBP.md      human-readable entry point for agents and maintainers
+akbp.json    machine-readable Knowledge Base Card
+```
+
+Then add portable artifacts as the knowledge base matures:
+
+```text
+wiki/
+claims/claims.jsonl
+graph/entities.jsonl
+graph/relations.jsonl
+raw/sources/
+```
+
+Create the starter layout with:
+
+```bash
+python3 cli/akbp.py init
+```
+
 ## First implementation target
 
 The narrow MVP is coding-agent memory:

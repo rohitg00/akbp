@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/akbp-card.schema.json",
+  "title": "AKBP Knowledge Base Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "name", "root", "artifacts", "capabilities"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "AKBP protocol or draft version supported by this knowledge base."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wiki", "claims", "entities", "relations", "sources"],
+      "properties": {
+        "wiki": {"type": "string"},
+        "claims": {"type": "string"},
+        "entities": {"type": "string"},
+        "relations": {"type": "string"},
+        "sources": {"type": "string"},
+        "audit": {"type": "string"}
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"},
+      "required": ["remember", "retrieve", "crystallize", "audit"],
+      "properties": {
+        "remember": {"type": "boolean"},
+        "retrieve": {"type": "boolean"},
+        "crystallize": {"type": "boolean"},
+        "supersede": {"type": "boolean"},
+        "audit": {"type": "boolean"},
+        "sync": {"type": "boolean"}
+      }
+    },
+    "retrieval": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": ["keyword"]
+    },
+    "transports": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": ["cli"]
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default_scope": {
+          "type": "string",
+          "enum": ["private", "project", "team", "public", "local"]
+        },
+        "secret_redaction": {
+          "type": "string",
+          "enum": ["required", "recommended", "disabled"]
+        }
+      }
+    }
+  }
+}

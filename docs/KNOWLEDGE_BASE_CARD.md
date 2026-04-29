@@ -2,13 +2,13 @@
 
 AKBP needs a discovery artifact similar in spirit to tool-server implementation capabilities and agent communication Agent Cards.
 
-The proposed file is:
+The canonical file is:
 
 ```text
 akbp.json
 ```
 
-or, for embedded repository use:
+Local engines may also mirror selected settings in:
 
 ```text
 .akbp/config.json

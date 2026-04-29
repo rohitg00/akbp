@@ -24,3 +24,7 @@ https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/evidence.schema.jso
 ```
 
 If AKBP later owns a domain, update this document and the schemas in the same commit. Do not use non-resolving future domains in committed schemas.
+
+## Knowledge Base Card
+
+`schemas/akbp-card.schema.json` defines `akbp.json`, the machine-readable discovery card for an AKBP knowledge base.

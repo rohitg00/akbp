@@ -57,6 +57,67 @@ def ensure_dirs(base: Path) -> None:
         (base / rel).mkdir(parents=True, exist_ok=True)
 
 
+
+def default_card(base: Path) -> dict[str, Any]:
+    return {
+        "schema_version": "0.1-draft",
+        "name": base.name,
+        "description": "AKBP knowledge base",
+        "root": ".",
+        "artifacts": {
+            "wiki": "wiki/",
+            "claims": "claims/claims.jsonl",
+            "entities": "graph/entities.jsonl",
+            "relations": "graph/relations.jsonl",
+            "sources": "raw/sources/",
+            "audit": ".akbp/audit.log.jsonl",
+        },
+        "capabilities": {
+            "remember": True,
+            "retrieve": True,
+            "crystallize": True,
+            "supersede": False,
+            "audit": True,
+            "sync": False,
+        },
+        "retrieval": ["keyword"],
+        "transports": ["cli"],
+        "privacy": {
+            "default_scope": "project",
+            "secret_redaction": "required",
+        },
+    }
+
+
+def default_akbp_md(base: Path) -> str:
+    return f"""# AKBP
+
+This repository contains an AKBP-compatible knowledge base.
+
+## Purpose
+
+Describe what durable knowledge belongs here and who should use it.
+
+## Agent instructions
+
+- Read `akbp.json` before writing knowledge.
+- Store durable claims in `claims/claims.jsonl`.
+- Store human-readable synthesis in `wiki/`.
+- Preserve evidence for claims whenever possible.
+- Do not store secrets, credentials, tokens, cookies, or private keys.
+- Prefer updating existing pages over creating duplicate pages.
+
+## Layout
+
+```text
+wiki/                human-readable compiled knowledge
+claims/claims.jsonl  atomic durable claims
+graph/               entities and relations
+raw/sources/         immutable source material
+.akbp/               local engine state and audit logs
+```
+"""
+
 def append_jsonl(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -93,11 +154,15 @@ def write_if_missing(path: Path, content: str) -> None:
 def cmd_init(args: argparse.Namespace) -> int:
     base = root(args.path)
     ensure_dirs(base)
+    card = default_card(base)
+    write_if_missing(base / "akbp.json", json.dumps(card, indent=2) + "\n")
+    write_if_missing(base / "AKBP.md", default_akbp_md(base))
     write_if_missing(base / ".akbp" / "config.json", json.dumps({
         "version": "0.1",
         "name": base.name,
         "created_at": now_iso(),
-        "retrieval_modes": ["index", "jsonl"],
+        "card": "akbp.json",
+        "retrieval_modes": ["keyword", "jsonl"],
     }, indent=2) + "\n")
     write_if_missing(base / "wiki" / "index.md", "# AKBP Index\n\nGenerated index for this knowledge base.\n\n")
     write_if_missing(base / "wiki" / "log.md", "# AKBP Log\n\nAppend-only human-readable operation log.\n\n")
@@ -274,10 +339,23 @@ def cmd_crystallize(args: argparse.Namespace) -> int:
 def cmd_lint(args: argparse.Namespace) -> int:
     base = root(args.path)
     issues = []
-    required = ["wiki/index.md", "wiki/log.md", "claims/claims.jsonl", "graph/entities.jsonl", "graph/relations.jsonl"]
+    required = ["AKBP.md", "akbp.json", "wiki/index.md", "wiki/log.md", "claims/claims.jsonl", "graph/entities.jsonl", "graph/relations.jsonl"]
     for rel in required:
         if not (base / rel).exists():
             issues.append({"severity": "error", "message": f"missing {rel}"})
+    card_path = base / "akbp.json"
+    if card_path.exists():
+        try:
+            card = json.loads(card_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            issues.append({"severity": "error", "message": f"invalid akbp.json: {exc}"})
+        else:
+            for field in ["schema_version", "name", "root", "artifacts", "capabilities"]:
+                if field not in card:
+                    issues.append({"severity": "error", "message": f"akbp.json missing {field}"})
+            for artifact in ["wiki", "claims", "entities", "relations", "sources"]:
+                if artifact not in card.get("artifacts", {}):
+                    issues.append({"severity": "error", "message": f"akbp.json artifacts missing {artifact}"})
     for c in read_jsonl(base / "claims" / "claims.jsonl"):
         if not c.get("evidence"):
             issues.append({"severity": "warning", "message": f"claim {c.get('id')} has no evidence"})
@@ -289,7 +367,14 @@ def cmd_status(args: argparse.Namespace) -> int:
     base = root(args.path)
     claims = read_jsonl(base / "claims" / "claims.jsonl")
     pages = list((base / "wiki").rglob("*.md")) if (base / "wiki").exists() else []
-    print(json.dumps({"path": str(base), "claims": len(claims), "pages": len(pages), "initialized": (base / ".akbp/config.json").exists()}, indent=2))
+    print(json.dumps({
+        "path": str(base),
+        "claims": len(claims),
+        "pages": len(pages),
+        "initialized": (base / ".akbp/config.json").exists(),
+        "card": (base / "akbp.json").exists(),
+        "entrypoint": (base / "AKBP.md").exists(),
+    }, indent=2))
     return 0
 
 
