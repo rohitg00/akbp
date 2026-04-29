@@ -106,7 +106,8 @@ AKBP conformance should be testable.
 ### Level 3: Lifecycle
 
 - claims can be superseded
-- contradictions are represented
+- contradictions are represented as typed relations
+- relation confidence and evidence shape are validated
 - audit events are recorded
 
 ### Level 4: Tool protocol

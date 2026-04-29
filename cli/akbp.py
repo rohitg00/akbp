@@ -161,6 +161,14 @@ def load_sources(base: Path) -> list[dict[str, Any]]:
     return read_jsonl(base / "raw" / "sources" / "sources.jsonl")
 
 
+def load_relations(base: Path) -> list[dict[str, Any]]:
+    return read_jsonl(base / "graph" / "relations.jsonl")
+
+
+def write_relations(base: Path, rows: list[dict[str, Any]]) -> None:
+    write_jsonl(base / "graph" / "relations.jsonl", rows)
+
+
 def known_evidence_ids(base: Path) -> set[str]:
     ids = {s.get("id") for s in load_sources(base) if s.get("id")}
     # Paths are still allowed for Level 1 compatibility, but source IDs are preferred.
@@ -460,8 +468,29 @@ def check_level_2(base: Path) -> list[dict[str, str]]:
                 issues.append({"severity": "error", "message": f"context item missing {field}"})
     return issues
 
+def check_level_3(base: Path) -> list[dict[str, str]]:
+    issues = check_level_2(base)
+    claim_ids = {c.get("id") for c in load_claims(base)}
+    for relation in load_relations(base):
+        rid = relation.get("id", "<missing>")
+        for field in ["id", "source", "relation", "target", "confidence", "evidence", "created_at"]:
+            if field not in relation:
+                issues.append({"severity": "error", "message": f"relation {rid} missing {field}"})
+        if relation.get("relation") not in {"uses", "depends_on", "contradicts", "supersedes", "supports", "caused_by", "owned_by", "derived_from", "similar_to", "blocks", "implements", "references"}:
+            issues.append({"severity": "error", "message": f"relation {rid} has invalid type"})
+        confidence = relation.get("confidence")
+        if not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1:
+            issues.append({"severity": "error", "message": f"relation {rid} has invalid confidence"})
+        if relation.get("relation") in {"contradicts", "supersedes", "supports"}:
+            if relation.get("source") not in claim_ids:
+                issues.append({"severity": "error", "message": f"relation {rid} source claim does not exist"})
+            if relation.get("target") not in claim_ids:
+                issues.append({"severity": "error", "message": f"relation {rid} target claim does not exist"})
+    return issues
+
+
 def conformance_issues(base: Path, level: str) -> dict[str, Any]:
-    checks = {"0": check_level_0, "1": check_level_1, "2": check_level_2}
+    checks = {"0": check_level_0, "1": check_level_1, "2": check_level_2, "3": check_level_3}
     if level not in checks:
         return {
             "name": "Not implemented in reference CLI yet",
@@ -469,7 +498,7 @@ def conformance_issues(base: Path, level: str) -> dict[str, Any]:
             "issues": [{"severity": "error", "message": f"conformance level {level} is not implemented yet"}],
         }
     issues = checks[level](base)
-    names = {"0": "File convention", "1": "Structured claims and evidence", "2": "Retrieval and context packs"}
+    names = {"0": "File convention", "1": "Structured claims and evidence", "2": "Retrieval and context packs", "3": "Lifecycle relations"}
     return {
         "name": names[level],
         "ok": not any(i["severity"] == "error" for i in issues),
@@ -595,6 +624,38 @@ def cmd_cite(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_contradict(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    claims = load_claims(base)
+    claim_ids = {c.get("id") for c in claims}
+    if args.source_claim_id not in claim_ids or args.target_claim_id not in claim_ids:
+        print(json.dumps({"ok": False, "error": "both claims must exist"}, indent=2), file=sys.stderr)
+        return 1
+    relation = {
+        "id": stable_id("relation", "contradicts", args.source_claim_id, args.target_claim_id),
+        "source": args.source_claim_id,
+        "relation": "contradicts",
+        "target": args.target_claim_id,
+        "confidence": args.confidence,
+        "evidence": args.evidence or [],
+        "created_at": now_iso(),
+        "updated_at": now_iso(),
+    }
+    relations = load_relations(base)
+    if not any(r.get("id") == relation["id"] for r in relations):
+        relations.append(relation)
+        write_relations(base, relations)
+    for claim in claims:
+        if claim.get("id") in {args.source_claim_id, args.target_claim_id} and claim.get("status") not in {"superseded", "redacted", "archived"}:
+            claim["status"] = "contested"
+            claim["updated_at"] = now_iso()
+    write_jsonl(base / "claims" / "claims.jsonl", claims)
+    add_log(base, "contradict", f"- Source claim: `{args.source_claim_id}`\n- Target claim: `{args.target_claim_id}`\n")
+    audit(base, "contradict", {"source_claim_id": args.source_claim_id, "target_claim_id": args.target_claim_id, "relation_id": relation["id"]})
+    print(json.dumps(relation, indent=2, ensure_ascii=False))
+    return 0
+
+
 def cmd_supersede(args: argparse.Namespace) -> int:
     base = root(args.path)
     claims = load_claims(base)
@@ -679,6 +740,13 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("cite")
     s.add_argument("claim_id")
     s.set_defaults(func=cmd_cite)
+
+    s = sub.add_parser("contradict")
+    s.add_argument("source_claim_id")
+    s.add_argument("target_claim_id")
+    s.add_argument("--confidence", default=0.5, type=float)
+    s.add_argument("--evidence", action="append")
+    s.set_defaults(func=cmd_contradict)
 
     s = sub.add_parser("supersede")
     s.add_argument("old_claim_id")
