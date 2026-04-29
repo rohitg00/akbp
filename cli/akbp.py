@@ -336,10 +336,10 @@ def cmd_crystallize(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_lint(args: argparse.Namespace) -> int:
-    base = root(args.path)
-    issues = []
-    required = ["AKBP.md", "akbp.json", "wiki/index.md", "wiki/log.md", "claims/claims.jsonl", "graph/entities.jsonl", "graph/relations.jsonl"]
+
+def check_level_0(base: Path) -> list[dict[str, str]]:
+    issues: list[dict[str, str]] = []
+    required = ["AKBP.md", "akbp.json", "wiki/index.md", "claims/claims.jsonl", "graph/entities.jsonl", "graph/relations.jsonl"]
     for rel in required:
         if not (base / rel).exists():
             issues.append({"severity": "error", "message": f"missing {rel}"})
@@ -350,12 +350,52 @@ def cmd_lint(args: argparse.Namespace) -> int:
         except json.JSONDecodeError as exc:
             issues.append({"severity": "error", "message": f"invalid akbp.json: {exc}"})
         else:
-            for field in ["schema_version", "name", "root", "artifacts", "capabilities"]:
-                if field not in card:
-                    issues.append({"severity": "error", "message": f"akbp.json missing {field}"})
-            for artifact in ["wiki", "claims", "entities", "relations", "sources"]:
-                if artifact not in card.get("artifacts", {}):
-                    issues.append({"severity": "error", "message": f"akbp.json artifacts missing {artifact}"})
+            if not isinstance(card.get("artifacts"), dict):
+                issues.append({"severity": "error", "message": "akbp.json artifacts must be an object"})
+            if not isinstance(card.get("capabilities"), dict):
+                issues.append({"severity": "error", "message": "akbp.json capabilities must be an object"})
+            for capability in ["remember", "retrieve", "crystallize", "audit"]:
+                if capability not in card.get("capabilities", {}):
+                    issues.append({"severity": "error", "message": f"akbp.json capabilities missing {capability}"})
+    entrypoint = base / "AKBP.md"
+    if entrypoint.exists() and not entrypoint.read_text(encoding="utf-8", errors="ignore").startswith("# "):
+        issues.append({"severity": "error", "message": "AKBP.md must start with a level-one heading"})
+    return issues
+
+
+def cmd_conformance(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    requested = args.level
+    level0_issues = check_level_0(base)
+    levels = {
+        "0": {
+            "name": "File convention",
+            "ok": not any(i["severity"] == "error" for i in level0_issues),
+            "issues": level0_issues,
+        }
+    }
+    if requested != "0":
+        levels[requested] = {
+            "name": "Not implemented in reference CLI yet",
+            "ok": False,
+            "issues": [{"severity": "error", "message": f"conformance level {requested} is not implemented yet"}],
+        }
+    result = {
+        "path": str(base),
+        "requested_level": requested,
+        "ok": levels[requested]["ok"],
+        "levels": levels,
+    }
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 0 if result["ok"] else 1
+
+
+def cmd_lint(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    issues = check_level_0(base)
+    for rel in ["wiki/log.md"]:
+        if not (base / rel).exists():
+            issues.append({"severity": "error", "message": f"missing {rel}"})
     for c in read_jsonl(base / "claims" / "claims.jsonl"):
         if not c.get("evidence"):
             issues.append({"severity": "warning", "message": f"claim {c.get('id')} has no evidence"})
@@ -413,6 +453,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("lint")
     s.set_defaults(func=cmd_lint)
+
+    s = sub.add_parser("conformance")
+    s.add_argument("--level", default="0", choices=["0", "1", "2", "3", "4", "5"])
+    s.set_defaults(func=cmd_conformance)
 
     s = sub.add_parser("status")
     s.set_defaults(func=cmd_status)

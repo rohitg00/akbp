@@ -50,6 +50,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(status["card"])
             self.assertTrue(status["entrypoint"])
 
+            out = run_cli("--path", str(kb), "conformance", "--level", "0")
+            conformance = json.loads(out.stdout)
+            self.assertTrue(conformance["ok"])
+            self.assertTrue(conformance["levels"]["0"]["ok"])
+
             out = run_cli("--path", str(kb), "lint")
             self.assertTrue(json.loads(out.stdout)["ok"])
 
