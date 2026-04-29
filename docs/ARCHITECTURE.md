@@ -236,3 +236,7 @@ No UI
 ```
 
 Reason: protocol adoption matters more than UI polish. Let Obsidian, GitHub, editors, and existing agent UIs be the interface.
+
+## Local search index
+
+The reference CLI can build `.akbp/state.db` with SQLite FTS5. This is engine-owned state, not a portable protocol artifact. Portable knowledge remains in markdown, JSONL claims, sources, entities, and relations.

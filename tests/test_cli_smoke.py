@@ -42,6 +42,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             results = json.loads(out.stdout)["results"]
             self.assertTrue(results)
 
+            out = run_cli("--path", str(kb), "index")
+            indexed = json.loads(out.stdout)
+            self.assertGreaterEqual(indexed["rows"], 1)
+            out = run_cli("--path", str(kb), "search", "Bun")
+            searched = json.loads(out.stdout)
+            self.assertEqual(searched["backend"], "sqlite_fts5")
+            self.assertTrue(searched["results"])
 
             out = run_cli("--path", str(kb), "context", "continue Bun npm migration")
             pack = json.loads(out.stdout)

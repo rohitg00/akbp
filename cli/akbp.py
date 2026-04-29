@@ -7,12 +7,14 @@ It writes portable markdown + JSONL artifacts. It is intentionally boring.
 
 from __future__ import annotations
 
+import contextlib
 import argparse
 import datetime as dt
 import hashlib
 import json
 import os
 import re
+import sqlite3
 import sys
 from pathlib import Path
 from typing import Any, Iterable
@@ -554,6 +556,51 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 
+def cmd_index(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    db_path = base / ".akbp" / "state.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(db_path)
+    try:
+        con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(kind, object_id, path, text)")
+        con.execute("DELETE FROM search_index")
+        rows = 0
+        for claim in load_claims(base):
+            con.execute("INSERT INTO search_index(kind, object_id, path, text) VALUES (?, ?, ?, ?)", ("claim", claim.get("id"), "claims/claims.jsonl", claim.get("text", "")))
+            rows += 1
+        for rel, text in iter_markdown(base):
+            con.execute("INSERT INTO search_index(kind, object_id, path, text) VALUES (?, ?, ?, ?)", ("page", rel, rel, text))
+            rows += 1
+        con.commit()
+    finally:
+        con.close()
+    audit(base, "index", {"rows": rows, "db": str(db_path)})
+    print(json.dumps({"ok": True, "db": str(db_path), "rows": rows}, indent=2))
+    return 0
+
+
+def cmd_search(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    db_path = base / ".akbp" / "state.db"
+    if not db_path.exists():
+        return cmd_query(args)
+    con = sqlite3.connect(db_path)
+    try:
+        rows = con.execute(
+            "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
+            (args.query, args.limit),
+        ).fetchall()
+    except sqlite3.Error:
+        con.close()
+        return cmd_query(args)
+    finally:
+        with contextlib.suppress(Exception):
+            con.close()
+    results = [{"type": kind, "id": object_id, "path": path, "snippet": snippet, "rank": rank} for kind, object_id, path, snippet, rank in rows]
+    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "results": results}, indent=2, ensure_ascii=False))
+    return 0
+
+
 def cmd_export(args: argparse.Namespace) -> int:
     base = root(args.path)
     payload = {
@@ -715,6 +762,14 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=10)
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
+
+    s = sub.add_parser("index")
+    s.set_defaults(func=cmd_index)
+
+    s = sub.add_parser("search")
+    s.add_argument("query")
+    s.add_argument("--limit", type=int, default=10)
+    s.set_defaults(func=cmd_search)
 
     s = sub.add_parser("export")
     s.add_argument("--output")
