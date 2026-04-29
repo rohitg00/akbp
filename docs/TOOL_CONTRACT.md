@@ -140,3 +140,17 @@ Return a portable bundle of protocol artifacts: card, claims, sources, entities,
 ## `akbp.audit`
 
 Return recent audit events, optionally filtered by event type.
+
+## JSONL reference server
+
+`tool-server/akbp_tool_server.py` is a dependency-free JSONL server for local agent integrations. It reads one JSON request per line and writes one JSON response per line.
+
+Supported methods in the first server slice:
+
+- `akbp.status`
+- `akbp.query`
+- `akbp.context`
+- `akbp.remember`
+- `akbp.conformance`
+- `akbp.export`
+- `akbp.audit`

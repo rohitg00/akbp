@@ -143,3 +143,11 @@ Validate them with:
 python3 cli/akbp.py --path examples/level-0 conformance --level 0
 python3 cli/akbp.py --path examples/level-1 conformance --level 1
 ```
+
+## Local tool server
+
+The repo includes a dependency-free JSONL tool server for local agent integrations:
+
+```bash
+echo '{"id":"1","method":"akbp.status","path":"."}' | python3 tool-server/akbp_tool_server.py
+```
