@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akbp.dev/schemas/relation.schema.json",
+  "title": "AKBP Relation",
+  "type": "object",
+  "required": ["id", "source", "relation", "target", "confidence", "evidence", "created_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "source": { "type": "string" },
+    "relation": { "type": "string", "enum": ["uses", "depends_on", "contradicts", "supersedes", "supports", "caused_by", "owned_by", "derived_from", "similar_to", "blocks", "implements", "references"] },
+    "target": { "type": "string" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

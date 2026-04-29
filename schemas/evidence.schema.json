@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akbp.dev/schemas/evidence.schema.json",
+  "title": "AKBP Evidence",
+  "type": "object",
+  "required": ["id", "source_id", "locator", "created_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "source_id": { "type": "string" },
+    "source_type": { "type": "string", "enum": ["file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video"] },
+    "locator": { "type": "string" },
+    "quote": { "type": "string" },
+    "hash": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

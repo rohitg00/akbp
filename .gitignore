@@ -1,0 +1,11 @@
+.DS_Store
+.env
+.env.*
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.akbp/state.db
+.akbp/*.db
+.akbp/*.sqlite

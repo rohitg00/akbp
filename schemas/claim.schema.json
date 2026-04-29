@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akbp.dev/schemas/claim.schema.json",
+  "title": "AKBP Claim",
+  "type": "object",
+  "required": ["id", "text", "status", "confidence", "evidence", "created_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "text": { "type": "string" },
+    "type": { "type": "string", "enum": ["fact", "decision", "preference", "workflow", "observation", "question", "warning"] },
+    "status": { "type": "string", "enum": ["working", "actionable", "stable", "contested", "superseded", "archived", "redacted"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "entities": { "type": "array", "items": { "type": "string" } },
+    "supersedes": { "type": "array", "items": { "type": "string" } },
+    "superseded_by": { "type": ["string", "null"] },
+    "scope": { "type": "string", "enum": ["private", "project", "team", "public"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "last_confirmed_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}
