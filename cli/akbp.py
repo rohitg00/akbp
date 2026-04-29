@@ -525,6 +525,16 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 
+def cmd_audit(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    events = read_jsonl(base / ".akbp" / "audit.log.jsonl")
+    if args.event:
+        events = [e for e in events if e.get("event") == args.event]
+    events = events[-args.limit:]
+    print(json.dumps({"events": events, "count": len(events)}, indent=2, ensure_ascii=False))
+    return 0
+
+
 def cmd_source_add(args: argparse.Namespace) -> int:
     base = root(args.path)
     ensure_dirs(base)
@@ -625,6 +635,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=10)
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
+
+    s = sub.add_parser("audit")
+    s.add_argument("--limit", type=int, default=20)
+    s.add_argument("--event")
+    s.set_defaults(func=cmd_audit)
 
     s = sub.add_parser("source")
     source_sub = s.add_subparsers(dest="source_cmd", required=True)
