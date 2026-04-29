@@ -1,14 +1,3 @@
----
-title: "AKBP"
-type: "overview"
-status: "draft"
-tags:
-  - "akbp"
-  - "protocol"
-  - "agent-memory"
-created: "2026-04-29"
----
-
 # AKBP
 
 Agent Knowledge Base Protocol.

@@ -18,16 +18,12 @@ class RepoQualityTest(unittest.TestCase):
             )
             self.assertNotIn("akbp.dev", data["$id"])
 
-    def test_markdown_pages_have_gbrain_frontmatter(self):
+    def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
         self.assertGreaterEqual(len(markdown), 10)
         for path in markdown:
             text = path.read_text(encoding="utf-8")
-            self.assertTrue(text.startswith("---\n"), str(path.relative_to(ROOT)))
-            head = text.split("---", 2)[1]
-            self.assertIn("title:", head, str(path.relative_to(ROOT)))
-            self.assertIn("type:", head, str(path.relative_to(ROOT)))
-            self.assertIn("created:", head, str(path.relative_to(ROOT)))
+            self.assertTrue(text.startswith("# "), str(path.relative_to(ROOT)))
 
     def test_no_future_schema_domain(self):
         for path in list(ROOT.rglob("*.md")) + list(ROOT.rglob("*.json")):

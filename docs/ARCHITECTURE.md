@@ -1,13 +1,3 @@
----
-title: "AKBP Architecture"
-type: "architecture"
-status: "draft"
-tags:
-  - "akbp"
-  - "architecture"
-created: "2026-04-29"
----
-
 # AKBP Architecture
 
 ## System goal

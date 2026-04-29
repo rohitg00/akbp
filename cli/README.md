@@ -1,14 +1,3 @@
----
-title: "AKBP CLI"
-type: "implementation"
-status: "draft"
-tags:
-  - "akbp"
-  - "cli"
-  - "reference-implementation"
-created: "2026-04-29"
----
-
 # AKBP CLI
 
 Dependency-free reference CLI for AKBP Level 0/1.

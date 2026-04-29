@@ -1,14 +1,3 @@
----
-title: "AKBP Adapter Plan"
-type: "adapter-contract"
-status: "draft"
-tags:
-  - "akbp"
-  - "adapters"
-  - "agents"
-created: "2026-04-29"
----
-
 # AKBP Adapter Plan
 
 ## Adapter purpose

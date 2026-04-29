@@ -1,13 +1,3 @@
----
-title: "AKBP Schemas"
-type: "schema-guide"
-status: "draft"
-tags:
-  - "akbp"
-  - "schemas"
-created: "2026-04-29"
----
-
 # AKBP Schemas
 
 AKBP schemas are public JSON Schema documents for the protocol artifacts.

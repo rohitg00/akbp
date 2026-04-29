@@ -1,13 +1,3 @@
----
-title: "AKBP Build Plan"
-type: "build-plan"
-status: "draft"
-tags:
-  - "akbp"
-  - "build-plan"
-created: "2026-04-29"
----
-
 # AKBP Build Plan
 
 ## Goal
