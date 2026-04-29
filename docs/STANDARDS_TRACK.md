@@ -90,9 +90,11 @@ AKBP conformance should be testable.
 ### Level 1: Structured memory
 
 - valid claims
-- valid evidence
+- valid evidence shape
 - valid sources
 - stable IDs
+- unique claim IDs
+- lifecycle status validation
 
 ### Level 2: Retrieval
 

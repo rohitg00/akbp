@@ -136,6 +136,39 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return out
 
 
+
+
+def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+
+
+def load_claims(base: Path) -> list[dict[str, Any]]:
+    return read_jsonl(base / "claims" / "claims.jsonl")
+
+
+def claim_required_fields() -> list[str]:
+    return ["id", "text", "status", "confidence", "evidence", "created_at"]
+
+
+def validate_claim_shape(claim: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    for field in claim_required_fields():
+        if field not in claim:
+            errors.append(f"claim missing {field}")
+    if not isinstance(claim.get("id", ""), str) or not claim.get("id"):
+        errors.append("claim id must be a non-empty string")
+    if not isinstance(claim.get("text", ""), str) or not claim.get("text"):
+        errors.append("claim text must be a non-empty string")
+    if claim.get("status") not in {"working", "actionable", "stable", "contested", "superseded", "archived", "redacted"}:
+        errors.append(f"claim {claim.get('id')} has invalid status")
+    confidence = claim.get("confidence")
+    if not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1:
+        errors.append(f"claim {claim.get('id')} has invalid confidence")
+    if not isinstance(claim.get("evidence"), list):
+        errors.append(f"claim {claim.get('id')} evidence must be a list")
+    return errors
+
 def audit(base: Path, event: str, data: dict[str, Any]) -> None:
     append_jsonl(base / ".akbp" / "audit.log.jsonl", {
         "id": stable_id("audit", event, now_iso(), json.dumps(data, sort_keys=True)),
@@ -350,10 +383,16 @@ def check_level_0(base: Path) -> list[dict[str, str]]:
         except json.JSONDecodeError as exc:
             issues.append({"severity": "error", "message": f"invalid akbp.json: {exc}"})
         else:
+            for field in ["schema_version", "name", "root", "artifacts", "capabilities"]:
+                if field not in card:
+                    issues.append({"severity": "error", "message": f"akbp.json missing {field}"})
             if not isinstance(card.get("artifacts"), dict):
                 issues.append({"severity": "error", "message": "akbp.json artifacts must be an object"})
             if not isinstance(card.get("capabilities"), dict):
                 issues.append({"severity": "error", "message": "akbp.json capabilities must be an object"})
+            for artifact in ["wiki", "claims", "entities", "relations", "sources"]:
+                if artifact not in card.get("artifacts", {}):
+                    issues.append({"severity": "error", "message": f"akbp.json artifacts missing {artifact}"})
             for capability in ["remember", "retrieve", "crystallize", "audit"]:
                 if capability not in card.get("capabilities", {}):
                     issues.append({"severity": "error", "message": f"akbp.json capabilities missing {capability}"})
@@ -363,27 +402,48 @@ def check_level_0(base: Path) -> list[dict[str, str]]:
     return issues
 
 
+def check_level_1(base: Path) -> list[dict[str, str]]:
+    issues = check_level_0(base)
+    seen: set[str] = set()
+    for claim in load_claims(base):
+        cid = claim.get("id", "<missing>")
+        if cid in seen:
+            issues.append({"severity": "error", "message": f"duplicate claim id {cid}"})
+        seen.add(cid)
+        for err in validate_claim_shape(claim):
+            issues.append({"severity": "error", "message": err})
+        if not claim.get("evidence") and claim.get("status") not in {"working", "redacted"}:
+            issues.append({"severity": "error", "message": f"claim {cid} requires evidence unless working or redacted"})
+    return issues
+
+
+def conformance_issues(base: Path, level: str) -> dict[str, Any]:
+    checks = {"0": check_level_0, "1": check_level_1}
+    if level not in checks:
+        return {
+            "name": "Not implemented in reference CLI yet",
+            "ok": False,
+            "issues": [{"severity": "error", "message": f"conformance level {level} is not implemented yet"}],
+        }
+    issues = checks[level](base)
+    names = {"0": "File convention", "1": "Structured claims and evidence"}
+    return {
+        "name": names[level],
+        "ok": not any(i["severity"] == "error" for i in issues),
+        "issues": issues,
+    }
+
+
 def cmd_conformance(args: argparse.Namespace) -> int:
     base = root(args.path)
     requested = args.level
-    level0_issues = check_level_0(base)
-    levels = {
-        "0": {
-            "name": "File convention",
-            "ok": not any(i["severity"] == "error" for i in level0_issues),
-            "issues": level0_issues,
-        }
-    }
-    if requested != "0":
-        levels[requested] = {
-            "name": "Not implemented in reference CLI yet",
-            "ok": False,
-            "issues": [{"severity": "error", "message": f"conformance level {requested} is not implemented yet"}],
-        }
+    levels: dict[str, Any] = {}
+    for level in [str(i) for i in range(int(requested) + 1)]:
+        levels[level] = conformance_issues(base, level)
     result = {
         "path": str(base),
         "requested_level": requested,
-        "ok": levels[requested]["ok"],
+        "ok": all(levels[level]["ok"] for level in levels),
         "levels": levels,
     }
     print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -418,6 +478,56 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+
+
+def cmd_cite(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    claims = load_claims(base)
+    found = next((c for c in claims if c.get("id") == args.claim_id), None)
+    if not found:
+        print(json.dumps({"ok": False, "error": f"claim not found: {args.claim_id}"}, indent=2), file=sys.stderr)
+        return 1
+    print(json.dumps({
+        "claim_id": found["id"],
+        "text": found.get("text"),
+        "evidence": found.get("evidence", []),
+        "status": found.get("status"),
+    }, indent=2, ensure_ascii=False))
+    return 0
+
+
+def cmd_supersede(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    claims = load_claims(base)
+    old = next((c for c in claims if c.get("id") == args.old_claim_id), None)
+    if not old:
+        print(json.dumps({"ok": False, "error": f"claim not found: {args.old_claim_id}"}, indent=2), file=sys.stderr)
+        return 1
+    new_claim = {
+        "id": stable_id("claim", args.text, args.old_claim_id),
+        "text": args.text.strip(),
+        "type": args.type,
+        "status": "working",
+        "confidence": args.confidence,
+        "evidence": args.evidence or [],
+        "entities": args.entity or [],
+        "supersedes": [args.old_claim_id],
+        "superseded_by": None,
+        "scope": args.scope,
+        "created_at": now_iso(),
+        "updated_at": now_iso(),
+        "last_confirmed_at": None,
+    }
+    old["status"] = "superseded"
+    old["superseded_by"] = new_claim["id"]
+    old["updated_at"] = now_iso()
+    claims.append(new_claim)
+    write_jsonl(base / "claims" / "claims.jsonl", claims)
+    add_log(base, "supersede", f"- Old claim: `{args.old_claim_id}`\n- New claim: `{new_claim['id']}`\n")
+    audit(base, "supersede", {"old_claim_id": args.old_claim_id, "new_claim_id": new_claim["id"]})
+    print(json.dumps(new_claim, indent=2, ensure_ascii=False))
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="akbp", description="AKBP reference CLI")
     p.add_argument("--path", default=".", help="knowledge base path, default cwd")
@@ -445,6 +555,20 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=10)
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
+
+    s = sub.add_parser("cite")
+    s.add_argument("claim_id")
+    s.set_defaults(func=cmd_cite)
+
+    s = sub.add_parser("supersede")
+    s.add_argument("old_claim_id")
+    s.add_argument("text")
+    s.add_argument("--type", default="observation", choices=["fact", "decision", "preference", "workflow", "observation", "question", "warning"])
+    s.add_argument("--scope", default="project", choices=["private", "project", "team", "public"])
+    s.add_argument("--confidence", default=0.5, type=float)
+    s.add_argument("--evidence", action="append")
+    s.add_argument("--entity", action="append")
+    s.set_defaults(func=cmd_supersede)
 
     s = sub.add_parser("crystallize")
     s.add_argument("transcript")

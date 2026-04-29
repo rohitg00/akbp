@@ -55,7 +55,7 @@ Status: initial version added.
 Goal: make compatibility testable.
 
 - define Level 0 to Level 5 conformance checks
-- add `akbp conformance`
+- add `akbp conformance` with Level 0 and Level 1 implemented in the reference CLI
 - add fixture knowledge bases
 - validate schemas, IDs, citations, lifecycle states, and context packs
 - publish adapter certification checklist
@@ -68,8 +68,8 @@ Goal: give agents a standard tool interface.
 - `akbp.get_context`
 - `akbp.remember`
 - `akbp.crystallize_session`
-- `akbp.cite`
-- `akbp.supersede`
+- `akbp.cite`, currently available in the CLI
+- `akbp.supersede`, currently available in the CLI
 - `akbp.lint`
 - capability negotiation
 - structured errors

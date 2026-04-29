@@ -50,10 +50,26 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(status["card"])
             self.assertTrue(status["entrypoint"])
 
-            out = run_cli("--path", str(kb), "conformance", "--level", "0")
+            out = run_cli("--path", str(kb), "cite", claim["id"])
+            citation = json.loads(out.stdout)
+            self.assertEqual(citation["claim_id"], claim["id"])
+            self.assertEqual(citation["evidence"], ["README.md"])
+
+            out = run_cli(
+                "--path", str(kb),
+                "supersede", claim["id"],
+                "This project uses Python stdlib for the reference CLI",
+                "--type", "decision",
+                "--evidence", "cli/akbp.py",
+            )
+            new_claim = json.loads(out.stdout)
+            self.assertEqual(new_claim["supersedes"], [claim["id"]])
+
+            out = run_cli("--path", str(kb), "conformance", "--level", "1")
             conformance = json.loads(out.stdout)
             self.assertTrue(conformance["ok"])
             self.assertTrue(conformance["levels"]["0"]["ok"])
+            self.assertTrue(conformance["levels"]["1"]["ok"])
 
             out = run_cli("--path", str(kb), "lint")
             self.assertTrue(json.loads(out.stdout)["ok"])
