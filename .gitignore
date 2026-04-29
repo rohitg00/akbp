@@ -10,5 +10,5 @@ __pycache__/
 .akbp/*.db
 .akbp/*.sqlite
 
-# Local GBrain or maintenance outputs only
+# Local maintenance outputs only
 reports/

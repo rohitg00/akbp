@@ -155,22 +155,69 @@ def iter_markdown(base: Path) -> Iterable[tuple[str, str]]:
         yield str(p.relative_to(base)), p.read_text(encoding="utf-8", errors="ignore")
 
 
-def cmd_query(args: argparse.Namespace) -> int:
-    base = root(args.path)
+def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
     claims = read_jsonl(base / "claims" / "claims.jsonl")
-    results = []
+    results: list[dict[str, Any]] = []
     for c in claims:
-        score = score_query(args.query, c.get("text", ""))
+        score = score_query(query, c.get("text", ""))
         if score:
             results.append({"type": "claim", "score": score, "id": c["id"], "text": c["text"], "evidence": c.get("evidence", [])})
     for rel, text in iter_markdown(base):
-        score = score_query(args.query, text)
+        score = score_query(query, text)
         if score:
             snippet = re.sub(r"\s+", " ", text).strip()[:240]
             results.append({"type": "page", "score": score, "path": rel, "snippet": snippet})
     results.sort(key=lambda x: x["score"], reverse=True)
-    out = {"query": args.query, "results": results[: args.limit]}
+    return results[:limit]
+
+
+def cmd_query(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    out = {"query": args.query, "results": collect_results(base, args.query, args.limit)}
     print(json.dumps(out, indent=2, ensure_ascii=False))
+    return 0
+
+
+def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
+    if result["type"] == "claim":
+        return {
+            "id": result["id"],
+            "type": "claim",
+            "summary": result["text"],
+            "score": result["score"],
+            "citations": result.get("evidence", []),
+            "freshness": "unknown",
+        }
+    return {
+        "id": result["path"],
+        "type": "page",
+        "summary": result["snippet"],
+        "score": result["score"],
+        "citations": [result["path"]],
+        "freshness": "unknown",
+    }
+
+
+def cmd_context(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    results = collect_results(base, args.task, args.limit)
+    pack = {
+        "query": args.task,
+        "generated_at": now_iso(),
+        "items": [result_to_context_item(r) for r in results],
+        "warnings": [] if results else ["No matching AKBP context found."],
+    }
+    if args.markdown:
+        print(f"# AKBP Context Pack\n\nQuery: {pack['query']}\nGenerated: {pack['generated_at']}\n")
+        for item in pack["items"]:
+            print(f"## {item['type']}: {item['id']}\n")
+            print(item["summary"] + "\n")
+            if item["citations"]:
+                print("Citations: " + ", ".join(item["citations"]) + "\n")
+        for warning in pack["warnings"]:
+            print(f"> Warning: {warning}")
+    else:
+        print(json.dumps(pack, indent=2, ensure_ascii=False))
     return 0
 
 
@@ -267,6 +314,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("query")
     s.add_argument("--limit", type=int, default=10)
     s.set_defaults(func=cmd_query)
+
+    s = sub.add_parser("context")
+    s.add_argument("task")
+    s.add_argument("--limit", type=int, default=10)
+    s.add_argument("--markdown", action="store_true")
+    s.set_defaults(func=cmd_context)
 
     s = sub.add_parser("crystallize")
     s.add_argument("transcript")
