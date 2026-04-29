@@ -12,10 +12,10 @@ The first target is coding-agent memory, because that is where the pain is sharp
              ┌──────────────────────────┐
              │        AI Agents          │
              │ Claude, Cursor, Codex,    │
-             │ OpenClaw, Gemini, MCP     │
+             │ OpenClaw, Gemini, tool protocol     │
              └────────────┬─────────────┘
                           │
-                          │ CLI / MCP / SDK / HTTP
+                          │ CLI / tool protocol / SDK / HTTP
                           ▼
 ┌─────────────────────────────────────────────────────┐
 │                    AKBP Engine                       │
@@ -193,7 +193,7 @@ akbp graph <entity>
 akbp export --format markdown|json
 ```
 
-### MCP
+### tool protocol
 
 ```text
 akbp.search
@@ -230,7 +230,7 @@ For v0.1, build the reference engine as:
 TypeScript or Python CLI
 SQLite local DB
 Markdown + JSONL protocol artifacts
-MCP server wrapper
+tool-server implementation wrapper
 No hosted backend
 No UI
 ```

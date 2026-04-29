@@ -22,7 +22,7 @@ README.md
 SPEC.md
 docs/ARCHITECTURE.md
 docs/BUILD_PLAN.md
-docs/MCP_CONTRACT.md
+docs/tool protocol_CONTRACT.md
 docs/ADAPTERS.md
 docs/BENCHMARK.md
 schemas/*.schema.json
@@ -85,9 +85,9 @@ Definition of done:
 - Run `akbp crystallize` on a transcript and update wiki pages plus claims.
 - Run `akbp query` and return a context pack.
 
-## Phase 3: MCP server
+## Phase 3: tool-server implementation
 
-Expose the CLI functionality through MCP tools.
+Expose the CLI functionality through tool calls.
 
 Minimum tools:
 
@@ -102,7 +102,7 @@ akbp.cite
 
 Definition of done:
 
-- Claude Desktop or any MCP client can call AKBP tools.
+- Claude Desktop or any tool protocol client can call AKBP tools.
 - Tool outputs are compact and citation-friendly.
 - Writes are audited.
 
@@ -197,6 +197,6 @@ Those can come later. The first win is interoperability.
 5. Build `akbp init`.
 6. Build `akbp remember`.
 7. Build `akbp crystallize`.
-8. Build MCP tool contract.
+8. Build tool protocol tool contract.
 9. Add Claude Code adapter.
 10. Add Codex/OpenClaw adapter.

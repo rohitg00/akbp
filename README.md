@@ -12,7 +12,7 @@ The repo now includes a tiny reference CLI that can initialize a knowledge base,
 
 RAG retrieves and forgets. LLM Wiki compiles and compounds. AKBP makes that compiled knowledge portable across agents.
 
-The current ecosystem is fragmented: Obsidian vaults, Markdown memories, MCP servers, coding-agent session logs, graph memory systems, local search tools, and custom second-brain apps. AKBP defines the common layer between them.
+The current ecosystem is fragmented: Obsidian vaults, Markdown memories, tool-server implementations, coding-agent session logs, graph memory systems, local search tools, and custom second-brain apps. AKBP defines the common layer between them.
 
 ## Who it is for
 
@@ -20,7 +20,7 @@ The current ecosystem is fragmented: Obsidian vaults, Markdown memories, MCP ser
 - Research agents that compile sources into durable knowledge
 - Teams that need shared agent-readable context
 - Obsidian and Markdown users who want agent-maintained notes
-- MCP tool builders who need a standard memory contract
+- tool protocol tool builders who need a standard memory contract
 
 ## What AKBP standardizes
 
@@ -33,7 +33,7 @@ The current ecosystem is fragmented: Obsidian vaults, Markdown memories, MCP ser
 - Memory lifecycle rules
 - Retrieval contract
 - Agent hooks
-- MCP tool names
+- tool interface names
 - Sync and conflict behavior
 - Privacy and audit rules
 - Benchmarks for durable agent knowledge
@@ -60,7 +60,7 @@ akbp/
   docs/
     ARCHITECTURE.md
     BUILD_PLAN.md
-    MCP_CONTRACT.md
+    tool protocol_CONTRACT.md
     ADAPTERS.md
     BENCHMARK.md
     SCHEMAS.md
@@ -84,10 +84,19 @@ akbp/
     openclaw/
     gemini-cli/
   cli/
-  mcp/
+  tool-server/
   benchmark/
 ```
 
+## Relationship to other protocols
+
+AKBP is not trying to replace repository instruction files, tool protocol, or agent communication.
+
+- Repository instruction files tell coding agents how to work inside a repo.
+- Tool protocols let agents call tools and retrieve context.
+- Agent communication protocols let agents communicate and collaborate.
+- AKBP defines durable, portable knowledge that agents can discover, update, cite, and sync.
+
 ## Status
 
-Spec-first. CLI and MCP reference implementation next.
+Draft protocol with a small reference CLI. The next milestone is protocol-standard readiness: adoption convention, Knowledge Base Card, versioned spec, governance, and conformance tests.

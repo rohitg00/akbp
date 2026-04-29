@@ -1,8 +1,8 @@
-# AKBP MCP Contract
+# AKBP tool protocol Contract
 
 ## Goal
 
-Expose AKBP through stable MCP tools so any compatible agent can read, write, cite, and maintain a shared knowledge base.
+Expose AKBP through stable tool calls so any compatible agent can read, write, cite, and maintain a shared knowledge base.
 
 ## Tool naming
 
@@ -128,7 +128,7 @@ Archive low-value or stale claims without deleting evidence.
 
 ## Safety defaults
 
-- MCP write tools must support dry-run mode.
+- tool protocol write tools must support dry-run mode.
 - Destructive actions must be reversible.
 - Secret-like strings must be redacted before writes unless explicitly allowed by config.
 - Private scopes must not be returned to agents outside their configured visibility.

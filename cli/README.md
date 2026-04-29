@@ -17,4 +17,4 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 ## Context packs
 
-`akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of the planned `akbp.get_context` MCP tool.
+`akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of the planned `akbp.get_context` tool protocol tool.

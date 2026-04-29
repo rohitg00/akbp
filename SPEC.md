@@ -17,13 +17,13 @@ AKBP makes compiled knowledge portable across agents.
 ## 3. Design principles
 
 1. Local-first: markdown and git must be usable without a hosted service.
-2. Agent-neutral: the same knowledge base should work across Claude Code, Cursor, Codex, OpenClaw, Gemini CLI, MCP clients, and custom agents.
+2. Agent-neutral: the same knowledge base should work across Claude Code, Cursor, Codex, OpenClaw, Gemini CLI, tool clients, and custom agents.
 3. Evidence-backed: durable claims must cite evidence.
 4. Lifecycle-aware: knowledge can be reinforced, contradicted, superseded, decayed, or archived.
 5. Human-readable: humans should be able to browse the knowledge base in Obsidian, GitHub, editors, or terminals.
 6. Machine-operable: agents need structured schemas, stable IDs, and retrieval APIs.
 7. Safe by default: secrets and private data need visibility, redaction, and audit rules.
-8. Progressive: a simple markdown wiki can be AKBP Level 0. A full graph/vector/MCP system can be Level 5.
+8. Progressive: a simple markdown wiki can be AKBP Level 0. A full graph/vector/tool protocol system can be Level 5.
 
 ## 4. Canonical folder contract
 
@@ -224,7 +224,7 @@ Typed entities and relationships with graph traversal.
 
 ### Level 4: Automation
 
-Session hooks, ingest hooks, crystallization, lint, pruning, and MCP tools.
+Session hooks, ingest hooks, crystallization, lint, pruning, and tool calls.
 
 ### Level 5: Collaboration
 

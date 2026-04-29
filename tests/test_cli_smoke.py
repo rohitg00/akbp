@@ -48,7 +48,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
             transcript = Path(d) / "transcript.md"
-            transcript.write_text("We decided to use SQLite for local state.\nTODO: add MCP server.\n", encoding="utf-8")
+            transcript.write_text("We decided to use SQLite for local state.\nTODO: add tool-server implementation.\n", encoding="utf-8")
 
             run_cli("--path", str(kb), "init")
             out = run_cli("--path", str(kb), "crystallize", str(transcript), "--apply")
