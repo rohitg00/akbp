@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/source.schema.json",
+  "title": "AKBP Source",
+  "type": "object",
+  "required": ["id", "type", "locator", "created_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "type": { "type": "string", "enum": ["file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"] },
+    "locator": { "type": "string" },
+    "title": { "type": "string" },
+    "hash": { "type": "string" },
+    "immutable": { "type": "boolean", "default": true },
+    "scope": { "type": "string", "enum": ["private", "project", "team", "public"], "default": "project" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "metadata": { "type": "object", "additionalProperties": true }
+  }
+}

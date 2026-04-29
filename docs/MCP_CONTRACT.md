@@ -1,3 +1,13 @@
+---
+title: "AKBP MCP Contract"
+type: "mcp-contract"
+status: "draft"
+tags:
+  - "akbp"
+  - "mcp"
+created: "2026-04-29"
+---
+
 # AKBP MCP Contract
 
 ## Goal

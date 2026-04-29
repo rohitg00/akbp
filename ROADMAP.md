@@ -1,3 +1,13 @@
+---
+title: "AKBP Roadmap"
+type: "roadmap"
+status: "draft"
+tags:
+  - "akbp"
+  - "roadmap"
+created: "2026-04-29"
+---
+
 # AKBP Roadmap
 
 ## v0.1: Protocol foundation

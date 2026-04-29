@@ -1,3 +1,13 @@
+---
+title: "Research Example"
+type: "example"
+status: "draft"
+tags:
+  - "akbp"
+  - "research"
+created: "2026-04-29"
+---
+
 # Research Example
 
 Use AKBP to compile sources into durable research knowledge.

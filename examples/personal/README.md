@@ -1,3 +1,13 @@
+---
+title: "Personal Knowledge Example"
+type: "example"
+status: "draft"
+tags:
+  - "akbp"
+  - "personal-knowledge"
+created: "2026-04-29"
+---
+
 # Personal Knowledge Example
 
 Use AKBP as a local-first personal wiki maintained by agents.

@@ -1,3 +1,14 @@
+---
+title: "AKBP"
+type: "overview"
+status: "draft"
+tags:
+  - "akbp"
+  - "protocol"
+  - "agent-memory"
+created: "2026-04-29"
+---
+
 # AKBP
 
 Agent Knowledge Base Protocol.
@@ -61,11 +72,16 @@ akbp/
     MCP_CONTRACT.md
     ADAPTERS.md
     BENCHMARK.md
+    SCHEMAS.md
   schemas/
     claim.schema.json
     entity.schema.json
     relation.schema.json
     evidence.schema.json
+    source.schema.json
+    page.schema.json
+    audit-event.schema.json
+    context-pack.schema.json
   examples/
     coding-agent/
     research/

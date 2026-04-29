@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/page.schema.json",
+  "title": "AKBP Page",
+  "type": "object",
+  "required": ["id", "path", "title", "type", "created_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "path": { "type": "string" },
+    "title": { "type": "string" },
+    "type": { "type": "string", "enum": ["entity", "concept", "decision", "workflow", "session", "index", "log", "report", "source-summary"] },
+    "status": { "type": "string", "enum": ["draft", "active", "stale", "archived"], "default": "draft" },
+    "claims": { "type": "array", "items": { "type": "string" } },
+    "entities": { "type": "array", "items": { "type": "string" } },
+    "sources": { "type": "array", "items": { "type": "string" } },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

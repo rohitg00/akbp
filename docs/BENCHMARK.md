@@ -1,3 +1,14 @@
+---
+title: "AKBP Benchmark"
+type: "benchmark"
+status: "draft"
+tags:
+  - "akbp"
+  - "benchmark"
+  - "evaluation"
+created: "2026-04-29"
+---
+
 # AKBP Benchmark
 
 ## Purpose

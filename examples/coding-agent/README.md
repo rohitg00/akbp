@@ -1,3 +1,13 @@
+---
+title: "Coding Agent Example"
+type: "example"
+status: "draft"
+tags:
+  - "akbp"
+  - "coding-agent"
+created: "2026-04-29"
+---
+
 # Coding Agent Example
 
 Use AKBP to preserve project knowledge across agent sessions.

@@ -1,3 +1,14 @@
+---
+title: "AKBP Specification v0.1 Draft"
+type: "spec"
+status: "draft"
+tags:
+  - "akbp"
+  - "specification"
+  - "protocol"
+created: "2026-04-29"
+---
+
 # AKBP Specification v0.1 Draft
 
 ## 1. Definition

@@ -1,3 +1,13 @@
+---
+title: "AKBP Build Plan"
+type: "build-plan"
+status: "draft"
+tags:
+  - "akbp"
+  - "build-plan"
+created: "2026-04-29"
+---
+
 # AKBP Build Plan
 
 ## Goal
@@ -49,6 +59,8 @@ page
 audit event
 context pack
 ```
+
+Current draft schemas live in `schemas/` and are described in `docs/SCHEMAS.md`.
 
 Definition of done:
 

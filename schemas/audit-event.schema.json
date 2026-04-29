@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/audit-event.schema.json",
+  "title": "AKBP Audit Event",
+  "type": "object",
+  "required": ["id", "event", "created_at", "actor"],
+  "properties": {
+    "id": { "type": "string" },
+    "event": { "type": "string" },
+    "actor": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "object_ids": { "type": "array", "items": { "type": "string" } },
+    "dry_run": { "type": "boolean", "default": false },
+    "reversible": { "type": "boolean", "default": true },
+    "data": { "type": "object", "additionalProperties": true }
+  }
+}
