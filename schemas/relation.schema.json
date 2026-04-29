@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://akbp.dev/schemas/relation.schema.json",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/relation.schema.json",
   "title": "AKBP Relation",
   "type": "object",
   "required": ["id", "source", "relation", "target", "confidence", "evidence", "created_at"],

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://akbp.dev/schemas/claim.schema.json",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/claim.schema.json",
   "title": "AKBP Claim",
   "type": "object",
   "required": ["id", "text", "status", "confidence", "evidence", "created_at"],

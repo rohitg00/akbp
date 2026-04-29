@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://akbp.dev/schemas/entity.schema.json",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/entity.schema.json",
   "title": "AKBP Entity",
   "type": "object",
   "required": ["id", "name", "type", "created_at"],

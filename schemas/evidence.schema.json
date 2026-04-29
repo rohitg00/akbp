@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://akbp.dev/schemas/evidence.schema.json",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/evidence.schema.json",
   "title": "AKBP Evidence",
   "type": "object",
   "required": ["id", "source_id", "locator", "created_at"],
