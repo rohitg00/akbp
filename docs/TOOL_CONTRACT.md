@@ -132,3 +132,11 @@ Archive low-value or stale claims without deleting evidence.
 - Destructive actions must be reversible.
 - Secret-like strings must be redacted before writes unless explicitly allowed by config.
 - Private scopes must not be returned to agents outside their configured visibility.
+
+## `akbp.export`
+
+Return a portable bundle of protocol artifacts: card, claims, sources, entities, and relations. Local indexes and engine-owned state are excluded.
+
+## `akbp.audit`
+
+Return recent audit events, optionally filtered by event type.

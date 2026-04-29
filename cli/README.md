@@ -33,3 +33,7 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 ## Sources
 
 `akbp source add` records immutable source material before claims cite it. For local files, the CLI records a SHA-256 hash when the file exists.
+
+## Export
+
+`akbp export` emits a portable JSON bundle containing the card, claims, sources, entities, and relations. It is intentionally separate from local indexes or engine-owned state.
