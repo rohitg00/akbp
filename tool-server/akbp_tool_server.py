@@ -41,10 +41,22 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         "akbp.conformance": ["conformance", "--level", str(params.get("level", "0"))],
         "akbp.export": ["export"],
         "akbp.audit": ["audit", "--limit", str(params.get("limit", 20))],
+        "akbp.cite": ["cite", params.get("claim_id", "")],
+        "akbp.source.add": ["source", "add", params.get("locator", ""), "--type", params.get("type", "file")],
+        "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
+        "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
     }
     if method not in mapping:
         return {"id": request_id, "ok": False, "error": f"unknown method: {method}"}
-    argv = [a for a in mapping[method] if a != ""]
+    argv = [str(a) for a in mapping[method] if a != ""]
+    for evidence in params.get("evidence", []) or []:
+        if method in {"akbp.remember", "akbp.source.add", "akbp.supersede", "akbp.contradict"}:
+            argv.extend(["--evidence", str(evidence)])
+    for entity in params.get("entity", []) or []:
+        if method in {"akbp.remember", "akbp.supersede"}:
+            argv.extend(["--entity", str(entity)])
+    if method == "akbp.source.add" and params.get("title"):
+        argv.extend(["--title", str(params["title"])])
     code, stdout, stderr = run_cli(path, argv)
     try:
         payload = json.loads(stdout) if stdout.strip() else None

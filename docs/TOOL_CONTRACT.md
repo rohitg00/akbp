@@ -154,3 +154,7 @@ Supported methods in the first server slice:
 - `akbp.conformance`
 - `akbp.export`
 - `akbp.audit`
+- `akbp.cite`
+- `akbp.source.add`
+- `akbp.supersede`
+- `akbp.contradict`

@@ -31,6 +31,20 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[1]["id"], "2")
             self.assertTrue(lines[1]["result"]["items"])
 
+    def test_write_methods(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            requests = "\n".join([
+                json.dumps({"id": "source", "path": str(kb), "method": "akbp.source.add", "params": {"locator": "AKBP.md", "type": "file", "title": "Entry point"}}),
+                json.dumps({"id": "remember", "path": str(kb), "method": "akbp.remember", "params": {"text": "AKBP has a JSONL local tool server", "type": "fact", "evidence": ["AKBP.md"]}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertTrue(all(line["ok"] for line in lines))
+            self.assertEqual(lines[0]["result"]["type"], "file")
+            self.assertEqual(lines[1]["result"]["type"], "fact")
+
 
 if __name__ == "__main__":
     unittest.main()
