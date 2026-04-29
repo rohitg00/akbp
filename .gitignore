@@ -12,3 +12,8 @@ __pycache__/
 
 # Local maintenance outputs only
 reports/
+
+# Python packaging output
+build/
+dist/
+*.egg-info/
