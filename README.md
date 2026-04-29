@@ -89,6 +89,10 @@ akbp/
     ADAPTERS.md
     BENCHMARK.md
     SCHEMAS.md
+    TOOL_CONTRACT.md
+    STANDARDS_TRACK.md
+    KNOWLEDGE_BASE_CARD.md
+  spec/
   schemas/
     claim.schema.json
     entity.schema.json

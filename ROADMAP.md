@@ -38,6 +38,8 @@ Goal: make AKBP adoptable in five minutes.
 
 Goal: move from project docs to protocol-standard shape.
 
+Status: initial version added.
+
 - create `spec/latest.md`
 - create dated spec folder under `spec/YYYY-MM-DD/`
 - add changelog
