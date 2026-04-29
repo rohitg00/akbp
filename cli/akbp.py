@@ -36,6 +36,16 @@ def stable_id(prefix: str, *parts: str) -> str:
     return f"{prefix}_{h}"
 
 
+def file_hash(path: Path) -> str | None:
+    if not path.exists() or not path.is_file():
+        return None
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def root(path: str | None = None) -> Path:
     return Path(path or os.getcwd()).resolve()
 
@@ -200,6 +210,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     write_if_missing(base / "wiki" / "index.md", "# AKBP Index\n\nGenerated index for this knowledge base.\n\n")
     write_if_missing(base / "wiki" / "log.md", "# AKBP Log\n\nAppend-only human-readable operation log.\n\n")
     write_if_missing(base / "claims" / "claims.jsonl", "")
+    write_if_missing(base / "raw" / "sources" / "sources.jsonl", "")
     write_if_missing(base / "graph" / "entities.jsonl", "")
     write_if_missing(base / "graph" / "relations.jsonl", "")
     audit(base, "init", {"path": str(base)})
@@ -467,9 +478,11 @@ def cmd_status(args: argparse.Namespace) -> int:
     base = root(args.path)
     claims = read_jsonl(base / "claims" / "claims.jsonl")
     pages = list((base / "wiki").rglob("*.md")) if (base / "wiki").exists() else []
+    sources = read_jsonl(base / "raw" / "sources" / "sources.jsonl")
     print(json.dumps({
         "path": str(base),
         "claims": len(claims),
+        "sources": len(sources),
         "pages": len(pages),
         "initialized": (base / ".akbp/config.json").exists(),
         "card": (base / "akbp.json").exists(),
@@ -478,6 +491,31 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+
+
+def cmd_source_add(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    ensure_dirs(base)
+    locator = args.locator.strip()
+    source_hash = args.hash
+    if source_hash is None and args.type == "file":
+        source_hash = file_hash((base / locator).resolve()) or file_hash(Path(locator).resolve())
+    source = {
+        "id": args.id or stable_id("source", args.type, locator),
+        "type": args.type,
+        "locator": locator,
+        "title": args.title,
+        "hash": source_hash,
+        "immutable": not args.mutable,
+        "scope": args.scope,
+        "created_at": now_iso(),
+        "metadata": {},
+    }
+    append_jsonl(base / "raw" / "sources" / "sources.jsonl", source)
+    add_log(base, "source add", f"- Source: `{source['id']}`\n- Locator: {locator}\n")
+    audit(base, "source_add", {"source_id": source["id"], "locator": locator})
+    print(json.dumps(source, indent=2, ensure_ascii=False))
+    return 0
 
 
 def cmd_cite(args: argparse.Namespace) -> int:
@@ -555,6 +593,18 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=10)
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
+
+    s = sub.add_parser("source")
+    source_sub = s.add_subparsers(dest="source_cmd", required=True)
+    s_add = source_sub.add_parser("add")
+    s_add.add_argument("locator")
+    s_add.add_argument("--type", default="file", choices=["file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"])
+    s_add.add_argument("--title")
+    s_add.add_argument("--id")
+    s_add.add_argument("--hash")
+    s_add.add_argument("--mutable", action="store_true")
+    s_add.add_argument("--scope", default="project", choices=["private", "project", "team", "public"])
+    s_add.set_defaults(func=cmd_source_add)
 
     s = sub.add_parser("cite")
     s.add_argument("claim_id")

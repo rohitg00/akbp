@@ -24,12 +24,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(card["schema_version"], "0.1-draft")
             self.assertIn("claims", card["artifacts"])
 
+            out = run_cli("--path", str(kb), "source", "add", "README.md", "--type", "file", "--title", "Readme")
+            source = json.loads(out.stdout)
+            self.assertTrue(source["id"].startswith("source_"))
+
             out = run_cli(
                 "--path", str(kb),
                 "remember",
                 "This project uses Bun instead of npm",
                 "--type", "decision",
-                "--evidence", "README.md",
+                "--evidence", source["id"],
             )
             claim = json.loads(out.stdout)
             self.assertEqual(claim["type"], "decision")
@@ -47,13 +51,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             out = run_cli("--path", str(kb), "status")
             status = json.loads(out.stdout)
+            self.assertEqual(status["sources"], 1)
             self.assertTrue(status["card"])
             self.assertTrue(status["entrypoint"])
 
             out = run_cli("--path", str(kb), "cite", claim["id"])
             citation = json.loads(out.stdout)
             self.assertEqual(citation["claim_id"], claim["id"])
-            self.assertEqual(citation["evidence"], ["README.md"])
+            self.assertEqual(citation["evidence"], [source["id"]])
 
             out = run_cli(
                 "--path", str(kb),

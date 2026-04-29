@@ -27,3 +27,7 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 `akbp conformance --level 0` checks the minimal file convention: `AKBP.md`, `akbp.json`, portable artifact paths, and required card capabilities.
 
 `akbp conformance --level 1` also validates structured claims: required fields, unique IDs, lifecycle status, confidence range, and evidence shape.
+
+## Sources
+
+`akbp source add` records immutable source material before claims cite it. For local files, the CLI records a SHA-256 hash when the file exists.
