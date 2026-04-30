@@ -120,8 +120,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             data = json.loads(out.stdout)
             self.assertTrue(Path(data["page"]).exists())
 
-            claims = (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8")
-            self.assertIn("SQLite", claims)
+            claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertTrue(any("SQLite" in claim["text"] for claim in claims))
+            self.assertTrue(any(claim["type"] == "decision" for claim in claims))
+            self.assertTrue(any(claim["type"] == "observation" for claim in claims))
+            self.assertTrue(all(claim["evidence"][0].startswith("source_") for claim in claims))
+
+            sources = [json.loads(line) for line in (kb / "raw" / "sources" / "sources.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(sources[0]["type"], "transcript")
+
+            out = run_cli("--path", str(kb), "crystallize", str(transcript), "--apply")
+            rerun = json.loads(out.stdout)
+            self.assertTrue(rerun["skipped_claims"])
 
 
 if __name__ == "__main__":

@@ -38,6 +38,16 @@ python3 cli/akbp.py --path ./my-kb lint
 
 This implementation writes portable markdown and JSONL artifacts. It is intentionally small so other implementations can copy the behavior.
 
+## Crystallize
+
+`akbp crystallize transcript.md --apply` turns a session transcript into:
+
+- a session page under `wiki/sessions/`
+- a transcript source record under `raw/sources/sources.jsonl`
+- durable claims for detected decisions, actions, blockers, preferences, and questions
+
+The extractor is deliberately conservative and local. Re-running the same crystallization skips duplicate claim IDs instead of appending the same memory again.
+
 ## Context packs
 
 `akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of a local context retrieval call.

@@ -155,6 +155,35 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
 
 
+def append_claim_once(base: Path, claim: dict[str, Any]) -> bool:
+    claims_path = base / "claims" / "claims.jsonl"
+    existing = {c.get("id") for c in read_jsonl(claims_path)}
+    if claim["id"] in existing:
+        return False
+    append_jsonl(claims_path, claim)
+    return True
+
+
+def add_source_record(base: Path, locator: str, source_type: str = "file", title: str | None = None, scope: str = "project") -> dict[str, Any]:
+    source_path = Path(locator)
+    source = {
+        "id": stable_id("source", source_type, locator),
+        "type": source_type,
+        "locator": locator,
+        "title": title,
+        "hash": file_hash(source_path) if source_path.exists() else None,
+        "immutable": True,
+        "scope": scope,
+        "created_at": now_iso(),
+        "metadata": {},
+    }
+    sources_path = base / "raw" / "sources" / "sources.jsonl"
+    existing = {s.get("id") for s in read_jsonl(sources_path)}
+    if source["id"] not in existing:
+        append_jsonl(sources_path, source)
+    return source
+
+
 def load_claims(base: Path) -> list[dict[str, Any]]:
     return read_jsonl(base / "claims" / "claims.jsonl")
 
@@ -350,12 +379,65 @@ def cmd_context(args: argparse.Namespace) -> int:
     return 0
 
 
+def clean_line(line: str) -> str:
+    return re.sub(r"\s+", " ", line.strip("- *\t >")).strip()
+
+
+def unique_keep_order(items: Iterable[str], limit: int = 20) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        cleaned = clean_line(item)
+        if not cleaned or cleaned.lower() in seen:
+            continue
+        seen.add(cleaned.lower())
+        out.append(cleaned)
+        if len(out) >= limit:
+            break
+    return out
+
+
 def session_summary(text: str) -> dict[str, list[str]]:
-    lines = [l.strip("- *\t ") for l in text.splitlines() if l.strip()]
-    decisions = [l for l in lines if re.search(r"\b(decided|decision|choose|chose|use|using|must|should)\b", l, re.I)]
-    questions = [l for l in lines if "?" in l or re.search(r"\b(todo|open question|blocked|follow up)\b", l, re.I)]
+    lines = [clean_line(l) for l in text.splitlines() if clean_line(l)]
+    decisions = unique_keep_order(
+        l for l in lines
+        if re.search(r"\b(decided|decision|choose|chose|use|using|must|should|standardize|require|requires)\b", l, re.I)
+    )
+    actions = unique_keep_order(
+        l for l in lines
+        if re.search(r"\b(todo|next|follow up|follow-up|ship|implement|add|fix|update|wire|review)\b", l, re.I)
+    )
+    blockers = unique_keep_order(
+        l for l in lines
+        if re.search(r"\b(blocked|blocker|failed|failing|error|cannot|can't|missing|needs approval|requires approval)\b", l, re.I)
+    )
+    preferences = unique_keep_order(
+        l for l in lines
+        if re.search(r"\b(prefer|preference|do not|don't|never|always|avoid|keep|must not)\b", l, re.I)
+    )
+    questions = unique_keep_order(
+        l for l in lines
+        if "?" in l or re.search(r"\b(open question|question)\b", l, re.I)
+    )
     files = sorted(set(re.findall(r"(?:[\w.-]+/)+[\w.-]+", text)))[:50]
-    return {"decisions": decisions[:20], "questions": questions[:20], "files": files}
+    return {
+        "decisions": decisions,
+        "actions": actions,
+        "blockers": blockers,
+        "preferences": preferences,
+        "questions": questions,
+        "files": files,
+    }
+
+
+def summary_claim_type(section: str) -> str:
+    return {
+        "decisions": "decision",
+        "actions": "observation",
+        "blockers": "warning",
+        "preferences": "preference",
+        "questions": "question",
+    }.get(section, "observation")
 
 
 def cmd_crystallize(args: argparse.Namespace) -> int:
@@ -366,6 +448,8 @@ def cmd_crystallize(args: argparse.Namespace) -> int:
     summary = session_summary(text)
     sid = stable_id("session", str(transcript_path), text[:1000])
     page = base / "wiki" / "sessions" / f"{sid}.md"
+    source = add_source_record(base, str(transcript_path), "transcript", transcript_path.name) if args.apply else None
+    evidence = [source["id"]] if source else [str(transcript_path)]
     md = [f"# Session {sid}", "", f"Source: `{transcript_path}`", f"Created: {now_iso()}", ""]
     for section, items in summary.items():
         md.append(f"## {section.title()}")
@@ -375,28 +459,42 @@ def cmd_crystallize(args: argparse.Namespace) -> int:
         else:
             md.append("- None detected")
         md.append("")
+    created_claims: list[str] = []
+    skipped_claims: list[str] = []
     if args.apply:
         page.write_text("\n".join(md), encoding="utf-8")
-        for decision in summary["decisions"]:
-            claim = {
-                "id": stable_id("claim", decision, sid),
-                "text": decision,
-                "type": "decision",
-                "status": "working",
-                "confidence": 0.55,
-                "evidence": [str(transcript_path)],
-                "entities": [],
-                "supersedes": [],
-                "superseded_by": None,
-                "scope": "project",
-                "created_at": now_iso(),
-                "updated_at": now_iso(),
-                "last_confirmed_at": None,
-            }
-            append_jsonl(base / "claims" / "claims.jsonl", claim)
-        add_log(base, "crystallize", f"- Session: `{sid}`\n- Source: `{transcript_path}`\n- Page: `{page.relative_to(base)}`\n")
-        audit(base, "crystallize", {"session_id": sid, "source": str(transcript_path)})
-    print(json.dumps({"session_id": sid, "apply": args.apply, "summary": summary, "page": str(page)}, indent=2))
+        for section in ["decisions", "actions", "blockers", "preferences", "questions"]:
+            for item in summary[section]:
+                claim = {
+                    "id": stable_id("claim", section, item, sid),
+                    "text": item,
+                    "type": summary_claim_type(section),
+                    "status": "working",
+                    "confidence": 0.55,
+                    "evidence": evidence,
+                    "entities": [],
+                    "supersedes": [],
+                    "superseded_by": None,
+                    "scope": "project",
+                    "created_at": now_iso(),
+                    "updated_at": now_iso(),
+                    "last_confirmed_at": None,
+                }
+                if append_claim_once(base, claim):
+                    created_claims.append(claim["id"])
+                else:
+                    skipped_claims.append(claim["id"])
+        add_log(base, "crystallize", f"- Session: `{sid}`\n- Source: `{transcript_path}`\n- Page: `{page.relative_to(base)}`\n- Claims: {len(created_claims)} created, {len(skipped_claims)} skipped\n")
+        audit(base, "crystallize", {"session_id": sid, "source": str(transcript_path), "claims_created": len(created_claims)})
+    print(json.dumps({
+        "session_id": sid,
+        "apply": args.apply,
+        "summary": summary,
+        "page": str(page),
+        "source_id": source["id"] if source else None,
+        "created_claims": created_claims,
+        "skipped_claims": skipped_claims,
+    }, indent=2))
     return 0
 
 
