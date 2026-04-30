@@ -63,6 +63,15 @@ Create the starter layout with:
 python3 cli/akbp.py init
 ```
 
+Or install the local CLI:
+
+```bash
+python3 -m pip install .
+akbp --path ./my-kb init
+```
+
+See `docs/INSTALL.md` for install, build, and smoke-test instructions.
+
 ## First implementation target
 
 The narrow MVP is coding-agent memory:
@@ -85,9 +94,9 @@ akbp/
   docs/
     ARCHITECTURE.md
     BUILD_PLAN.md
-    tool protocol_CONTRACT.md
     ADAPTERS.md
     BENCHMARK.md
+    INSTALL.md
     SCHEMAS.md
     TOOL_CONTRACT.md
     STANDARDS_TRACK.md
@@ -130,7 +139,7 @@ AKBP is not trying to replace repository instruction files, tool protocol, or ag
 
 ## Status
 
-Draft protocol with a small reference CLI. The next milestone is protocol-standard readiness: adoption convention, Knowledge Base Card, versioned spec, governance, and conformance tests.
+Draft protocol with a small installable reference CLI, conformance checks, local search, and a JSONL local tool server. The next milestones are stronger extraction, adapter templates, and retrieval benchmark fixtures.
 
 ## Examples
 

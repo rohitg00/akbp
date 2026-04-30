@@ -1,6 +1,23 @@
 # AKBP CLI
 
-Dependency-free reference CLI for AKBP Level 0/1.
+Dependency-free reference CLI for AKBP.
+
+## Install
+
+Run directly from source:
+
+```bash
+python3 cli/akbp.py --help
+```
+
+Or install locally:
+
+```bash
+python3 -m pip install .
+akbp --help
+```
+
+See `../docs/INSTALL.md` for the full install and smoke-test flow.
 
 ## Usage
 
@@ -23,7 +40,7 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 ## Context packs
 
-`akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of the planned `akbp.get_context` tool protocol tool.
+`akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of a local context retrieval call.
 
 ## Conformance
 

@@ -1,4 +1,4 @@
-.PHONY: test guard smoke build clean
+.PHONY: test guard smoke install-smoke build clean
 
 test:
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -14,6 +14,12 @@ smoke:
 	python3 cli/akbp.py --path $$TMP/kb conformance --level 2; \
 	python3 cli/akbp.py --path $$TMP/kb index; \
 	python3 cli/akbp.py --path $$TMP/kb search smoke
+
+install-smoke:
+	TMP=$$(mktemp -d); \
+	python3 -m pip install . --target $$TMP/pkg >/tmp/akbp-install-smoke.log; \
+	PYTHONPATH=$$TMP/pkg python3 -m akbp --path $$TMP/kb init; \
+	PYTHONPATH=$$TMP/pkg python3 -c "import akbp, akbp_tool_server; print('install ok')"
 
 build:
 	python3 -m build
