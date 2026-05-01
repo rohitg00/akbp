@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json",
+  "title": "AKBP Tool Method Parameters",
+  "description": "Method-specific parameter schemas for the AKBP JSONL local tool server.",
+  "$defs": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10
+    },
+    "evidenceList": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    },
+    "entityList": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    },
+    "akbp.query.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query"],
+      "properties": {
+        "query": {"type": "string", "minLength": 1},
+        "limit": {"$ref": "#/$defs/limit"}
+      }
+    },
+    "akbp.context.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task"],
+      "properties": {
+        "task": {"type": "string", "minLength": 1},
+        "limit": {"$ref": "#/$defs/limit"}
+      }
+    },
+    "akbp.remember.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "type": {
+          "type": "string",
+          "enum": ["observation", "decision", "preference", "workflow", "fact", "question", "blocker"],
+          "default": "observation"
+        },
+        "evidence": {"$ref": "#/$defs/evidenceList"},
+        "entity": {"$ref": "#/$defs/entityList"},
+        "dry_run": {"type": "boolean", "default": false}
+      }
+    },
+    "akbp.source.add.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locator"],
+      "properties": {
+        "locator": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "default": "file"},
+        "title": {"type": "string"},
+        "evidence": {"$ref": "#/$defs/evidenceList"},
+        "dry_run": {"type": "boolean", "default": false}
+      }
+    },
+    "akbp.supersede.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["old_claim_id", "text"],
+      "properties": {
+        "old_claim_id": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "default": "observation"},
+        "evidence": {"$ref": "#/$defs/evidenceList"},
+        "entity": {"$ref": "#/$defs/entityList"},
+        "dry_run": {"type": "boolean", "default": false}
+      }
+    },
+    "akbp.contradict.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_claim_id", "target_claim_id"],
+      "properties": {
+        "source_claim_id": {"type": "string", "minLength": 1},
+        "target_claim_id": {"type": "string", "minLength": 1},
+        "evidence": {"$ref": "#/$defs/evidenceList"},
+        "dry_run": {"type": "boolean", "default": false}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "methods": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "akbp.query": {"$ref": "#/$defs/akbp.query.params"},
+        "akbp.context": {"$ref": "#/$defs/akbp.context.params"},
+        "akbp.remember": {"$ref": "#/$defs/akbp.remember.params"},
+        "akbp.source.add": {"$ref": "#/$defs/akbp.source.add.params"},
+        "akbp.supersede": {"$ref": "#/$defs/akbp.supersede.params"},
+        "akbp.contradict": {"$ref": "#/$defs/akbp.contradict.params"}
+      }
+    }
+  }
+}

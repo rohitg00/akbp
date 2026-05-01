@@ -164,6 +164,16 @@ Request and response envelopes are specified in:
 
 - `schemas/tool-request.schema.json`
 - `schemas/tool-response.schema.json`
+- `schemas/tool-methods.schema.json`
+
+`tool-methods.schema.json` defines the first method-specific parameter contracts for:
+
+- `akbp.query`
+- `akbp.context`
+- `akbp.remember`
+- `akbp.source.add`
+- `akbp.supersede`
+- `akbp.contradict`
 
 Every response uses the same envelope:
 
