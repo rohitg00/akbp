@@ -82,4 +82,4 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 ## SQLite index
 
-`akbp index` builds `.akbp/state.db` using SQLite FTS5 over claims and wiki pages. `akbp index --incremental` only rewrites changed documents and removes stale entries. `akbp search` sanitizes user input into a safe FTS query, uses the local index when present, and falls back to portable JSONL/markdown query otherwise.
+`akbp index` builds `.akbp/state.db` using SQLite FTS5 over claims and wiki pages. `akbp index --incremental` only rewrites changed documents and removes stale entries. After an index exists, write commands refresh it incrementally so newly remembered, ingested, superseded, contradicted, or crystallized knowledge is searchable without a manual reindex. `akbp search` sanitizes user input into a safe FTS query, uses the local index when present, and falls back to portable JSONL/markdown query otherwise.

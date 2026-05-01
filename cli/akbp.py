@@ -295,6 +295,7 @@ def cmd_remember(args: argparse.Namespace) -> int:
     append_jsonl(base / "claims" / "claims.jsonl", claim)
     add_log(base, "remember", f"- Claim: `{claim['id']}`\n- Text: {text}\n")
     audit(base, "remember", {"claim_id": claim["id"]})
+    auto_index_if_present(base)
     print(json.dumps(claim, indent=2, ensure_ascii=False))
     return 0
 
@@ -459,6 +460,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
             created_claims.append(claim["id"])
     add_log(base, "ingest", f"- Source: `{source['id']}`\n- Page: `{page.relative_to(base)}`\n- Claims: {len(created_claims)}\n")
     audit(base, "ingest", {"source_id": source["id"], "page": str(page.relative_to(base)), "claims_created": len(created_claims)})
+    auto_index_if_present(base)
     print(json.dumps({
         "ok": True,
         "source_id": source["id"],
@@ -575,6 +577,7 @@ def cmd_crystallize(args: argparse.Namespace) -> int:
                     skipped_claims.append(claim["id"])
         add_log(base, "crystallize", f"- Session: `{sid}`\n- Source: `{transcript_path}`\n- Page: `{page.relative_to(base)}`\n- Claims: {len(created_claims)} created, {len(skipped_claims)} skipped\n")
         audit(base, "crystallize", {"session_id": sid, "source": str(transcript_path), "claims_created": len(created_claims)})
+        auto_index_if_present(base)
     print(json.dumps({
         "session_id": sid,
         "apply": args.apply,
@@ -773,8 +776,7 @@ def ensure_search_tables(con: sqlite3.Connection) -> None:
     con.execute("CREATE TABLE IF NOT EXISTS search_meta (doc_key TEXT PRIMARY KEY, kind TEXT NOT NULL, object_id TEXT NOT NULL, path TEXT NOT NULL, digest TEXT NOT NULL, rowid INTEGER NOT NULL)")
 
 
-def cmd_index(args: argparse.Namespace) -> int:
-    base = root(args.path)
+def index_base(base: Path, *, incremental: bool) -> dict[str, Any]:
     db_path = base / ".akbp" / "state.db"
     db_path.parent.mkdir(parents=True, exist_ok=True)
     docs = index_documents(base)
@@ -782,7 +784,7 @@ def cmd_index(args: argparse.Namespace) -> int:
     rows = indexed = skipped = removed = 0
     try:
         ensure_search_tables(con)
-        if not args.incremental:
+        if not incremental:
             con.execute("DELETE FROM search_index")
             con.execute("DELETE FROM search_meta")
         existing = {row[0]: {"digest": row[1], "rowid": row[2]} for row in con.execute("SELECT doc_key, digest, rowid FROM search_meta")}
@@ -794,7 +796,7 @@ def cmd_index(args: argparse.Namespace) -> int:
                 removed += 1
         for doc in docs:
             old = existing.get(doc["doc_key"])
-            if args.incremental and old and old["digest"] == doc["digest"]:
+            if incremental and old and old["digest"] == doc["digest"]:
                 skipped += 1
                 continue
             if old:
@@ -809,8 +811,20 @@ def cmd_index(args: argparse.Namespace) -> int:
         con.commit()
     finally:
         con.close()
-    audit(base, "index", {"rows": rows, "indexed": indexed, "skipped": skipped, "removed": removed, "incremental": args.incremental, "db": str(db_path)})
-    print(json.dumps({"ok": True, "db": str(db_path), "rows": rows, "indexed": indexed, "skipped": skipped, "removed": removed, "incremental": args.incremental}, indent=2))
+    return {"ok": True, "db": str(db_path), "rows": rows, "indexed": indexed, "skipped": skipped, "removed": removed, "incremental": incremental}
+
+
+def auto_index_if_present(base: Path) -> dict[str, Any] | None:
+    if not (base / ".akbp" / "state.db").exists():
+        return None
+    return index_base(base, incremental=True)
+
+
+def cmd_index(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    result = index_base(base, incremental=args.incremental)
+    audit(base, "index", {k: v for k, v in result.items() if k != "ok"})
+    print(json.dumps(result, indent=2))
     return 0
 
 
@@ -904,6 +918,7 @@ def cmd_source_add(args: argparse.Namespace) -> int:
     append_jsonl(base / "raw" / "sources" / "sources.jsonl", source)
     add_log(base, "source add", f"- Source: `{source['id']}`\n- Locator: {locator}\n")
     audit(base, "source_add", {"source_id": source["id"], "locator": locator})
+    auto_index_if_present(base)
     print(json.dumps(source, indent=2, ensure_ascii=False))
     return 0
 
@@ -952,6 +967,7 @@ def cmd_contradict(args: argparse.Namespace) -> int:
     write_jsonl(base / "claims" / "claims.jsonl", claims)
     add_log(base, "contradict", f"- Source claim: `{args.source_claim_id}`\n- Target claim: `{args.target_claim_id}`\n")
     audit(base, "contradict", {"source_claim_id": args.source_claim_id, "target_claim_id": args.target_claim_id, "relation_id": relation["id"]})
+    auto_index_if_present(base)
     print(json.dumps(relation, indent=2, ensure_ascii=False))
     return 0
 
@@ -985,6 +1001,7 @@ def cmd_supersede(args: argparse.Namespace) -> int:
     write_jsonl(base / "claims" / "claims.jsonl", claims)
     add_log(base, "supersede", f"- Old claim: `{args.old_claim_id}`\n- New claim: `{new_claim['id']}`\n")
     audit(base, "supersede", {"old_claim_id": args.old_claim_id, "new_claim_id": new_claim["id"]})
+    auto_index_if_present(base)
     print(json.dumps(new_claim, indent=2, ensure_ascii=False))
     return 0
 

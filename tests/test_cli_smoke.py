@@ -95,6 +95,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             new_claim = json.loads(out.stdout)
             self.assertEqual(new_claim["supersedes"], [claim["id"]])
+            out = run_cli("--path", str(kb), "search", "stdlib")
+            self.assertTrue(json.loads(out.stdout)["results"])
 
             out = run_cli(
                 "--path", str(kb),
