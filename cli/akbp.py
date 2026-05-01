@@ -743,27 +743,92 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 
+def index_documents(base: Path) -> list[dict[str, str]]:
+    docs: list[dict[str, str]] = []
+    for claim in load_claims(base):
+        cid = str(claim.get("id", ""))
+        text = str(claim.get("text", ""))
+        docs.append({
+            "doc_key": f"claim:{cid}",
+            "kind": "claim",
+            "object_id": cid,
+            "path": "claims/claims.jsonl",
+            "text": text,
+            "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        })
+    for rel, text in iter_markdown(base):
+        docs.append({
+            "doc_key": f"page:{rel}",
+            "kind": "page",
+            "object_id": rel,
+            "path": rel,
+            "text": text,
+            "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        })
+    return docs
+
+
+def ensure_search_tables(con: sqlite3.Connection) -> None:
+    con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(kind, object_id, path, text)")
+    con.execute("CREATE TABLE IF NOT EXISTS search_meta (doc_key TEXT PRIMARY KEY, kind TEXT NOT NULL, object_id TEXT NOT NULL, path TEXT NOT NULL, digest TEXT NOT NULL, rowid INTEGER NOT NULL)")
+
+
 def cmd_index(args: argparse.Namespace) -> int:
     base = root(args.path)
     db_path = base / ".akbp" / "state.db"
     db_path.parent.mkdir(parents=True, exist_ok=True)
+    docs = index_documents(base)
     con = sqlite3.connect(db_path)
+    rows = indexed = skipped = removed = 0
     try:
-        con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(kind, object_id, path, text)")
-        con.execute("DELETE FROM search_index")
-        rows = 0
-        for claim in load_claims(base):
-            con.execute("INSERT INTO search_index(kind, object_id, path, text) VALUES (?, ?, ?, ?)", ("claim", claim.get("id"), "claims/claims.jsonl", claim.get("text", "")))
-            rows += 1
-        for rel, text in iter_markdown(base):
-            con.execute("INSERT INTO search_index(kind, object_id, path, text) VALUES (?, ?, ?, ?)", ("page", rel, rel, text))
-            rows += 1
+        ensure_search_tables(con)
+        if not args.incremental:
+            con.execute("DELETE FROM search_index")
+            con.execute("DELETE FROM search_meta")
+        existing = {row[0]: {"digest": row[1], "rowid": row[2]} for row in con.execute("SELECT doc_key, digest, rowid FROM search_meta")}
+        wanted = {doc["doc_key"] for doc in docs}
+        for doc_key, meta in existing.items():
+            if doc_key not in wanted:
+                con.execute("DELETE FROM search_index WHERE rowid = ?", (meta["rowid"],))
+                con.execute("DELETE FROM search_meta WHERE doc_key = ?", (doc_key,))
+                removed += 1
+        for doc in docs:
+            old = existing.get(doc["doc_key"])
+            if args.incremental and old and old["digest"] == doc["digest"]:
+                skipped += 1
+                continue
+            if old:
+                con.execute("DELETE FROM search_index WHERE rowid = ?", (old["rowid"],))
+            cur = con.execute("INSERT INTO search_index(kind, object_id, path, text) VALUES (?, ?, ?, ?)", (doc["kind"], doc["object_id"], doc["path"], doc["text"]))
+            con.execute(
+                "INSERT OR REPLACE INTO search_meta(doc_key, kind, object_id, path, digest, rowid) VALUES (?, ?, ?, ?, ?, ?)",
+                (doc["doc_key"], doc["kind"], doc["object_id"], doc["path"], doc["digest"], cur.lastrowid),
+            )
+            indexed += 1
+        rows = len(docs)
         con.commit()
     finally:
         con.close()
-    audit(base, "index", {"rows": rows, "db": str(db_path)})
-    print(json.dumps({"ok": True, "db": str(db_path), "rows": rows}, indent=2))
+    audit(base, "index", {"rows": rows, "indexed": indexed, "skipped": skipped, "removed": removed, "incremental": args.incremental, "db": str(db_path)})
+    print(json.dumps({"ok": True, "db": str(db_path), "rows": rows, "indexed": indexed, "skipped": skipped, "removed": removed, "incremental": args.incremental}, indent=2))
     return 0
+
+
+def fts_query(query: str) -> str:
+    terms = re.findall(r'"[^"]+"|[a-zA-Z0-9_/-]+', query)
+    cleaned = []
+    operators = {"AND", "OR", "NOT", "NEAR"}
+    for term in terms:
+        term = term.strip()
+        if not term or term.upper() in operators:
+            continue
+        if term.startswith('"') and term.endswith('"'):
+            phrase = re.sub(r'[^a-zA-Z0-9_/-]+', ' ', term[1:-1]).strip()
+            if phrase:
+                cleaned.append('"' + phrase.replace('"', '""') + '"')
+        else:
+            cleaned.append('"' + term.replace('"', '""') + '"')
+    return " OR ".join(cleaned) or '""'
 
 
 def cmd_search(args: argparse.Namespace) -> int:
@@ -772,10 +837,11 @@ def cmd_search(args: argparse.Namespace) -> int:
     if not db_path.exists():
         return cmd_query(args)
     con = sqlite3.connect(db_path)
+    query_used = fts_query(args.query)
     try:
         rows = con.execute(
             "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
-            (args.query, args.limit),
+            (query_used, args.limit),
         ).fetchall()
     except sqlite3.Error:
         con.close()
@@ -784,7 +850,7 @@ def cmd_search(args: argparse.Namespace) -> int:
         with contextlib.suppress(Exception):
             con.close()
     results = [{"type": kind, "id": object_id, "path": path, "snippet": snippet, "rank": rank} for kind, object_id, path, snippet, rank in rows]
-    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "results": results}, indent=2, ensure_ascii=False))
+    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": results}, indent=2, ensure_ascii=False))
     return 0
 
 
@@ -951,6 +1017,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_context)
 
     s = sub.add_parser("index")
+    s.add_argument("--incremental", action="store_true", help="only update changed index documents")
     s.set_defaults(func=cmd_index)
 
     s = sub.add_parser("search")

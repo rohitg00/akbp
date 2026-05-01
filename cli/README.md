@@ -26,6 +26,7 @@ python3 cli/akbp.py init --path ./my-kb
 python3 cli/akbp.py --path ./my-kb remember "This project uses Bun instead of npm" --type decision --evidence README.md
 python3 cli/akbp.py --path ./my-kb query "Bun npm"
 python3 cli/akbp.py --path ./my-kb index
+python3 cli/akbp.py --path ./my-kb index --incremental
 python3 cli/akbp.py --path ./my-kb search "Bun npm"
 python3 cli/akbp.py --path ./my-kb context "continue the package manager migration"
 python3 cli/akbp.py --path ./my-kb cite claim_123
@@ -81,4 +82,4 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 ## SQLite index
 
-`akbp index` builds `.akbp/state.db` using SQLite FTS5 over claims and wiki pages. `akbp search` uses that local index when present and falls back to portable JSONL/markdown query otherwise.
+`akbp index` builds `.akbp/state.db` using SQLite FTS5 over claims and wiki pages. `akbp index --incremental` only rewrites changed documents and removes stale entries. `akbp search` sanitizes user input into a safe FTS query, uses the local index when present, and falls back to portable JSONL/markdown query otherwise.
