@@ -109,6 +109,30 @@ class AkbpCliSmokeTest(unittest.TestCase):
             out = run_cli("--path", str(kb), "lint")
             self.assertTrue(json.loads(out.stdout)["ok"])
 
+    def test_ingest_imports_redacted_page_and_optional_claim(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("# Release Note\n\nDecision: ship small batches.\napi_key=sk-example123456789\n", encoding="utf-8")
+
+            run_cli("--path", str(kb), "init")
+            out = run_cli(
+                "--path", str(kb),
+                "ingest", str(note),
+                "--title", "Release note",
+                "--claim", "The release process uses small batches.",
+                "--claim-type", "decision",
+            )
+            data = json.loads(out.stdout)
+            self.assertTrue(data["ok"])
+            self.assertTrue(data["redacted"])
+            page = kb / data["page"]
+            self.assertTrue(page.exists())
+            self.assertIn("[REDACTED]", page.read_text(encoding="utf-8"))
+            self.assertNotIn("sk-example123456789", page.read_text(encoding="utf-8"))
+            claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(claims[0]["evidence"], [data["source_id"]])
+
     def test_crystallize_apply_creates_session_page_and_claim(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

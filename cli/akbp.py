@@ -382,6 +382,95 @@ def cmd_context(args: argparse.Namespace) -> int:
 def clean_line(line: str) -> str:
     return re.sub(r"\s+", " ", line.strip("- *\t >")).strip()
 
+def redact_text(text: str) -> str:
+    patterns = [
+        r"sk-[A-Za-z0-9_-]{8,}",
+        r"xox[baprs]-[A-Za-z0-9-]{8,}",
+        r"gh[pousr]_[A-Za-z0-9_]{16,}",
+        r"AKIA[0-9A-Z]{12,}",
+        r"(?i)(api[_-]?key|token|secret|password)\s*[:=]\s*[^\s`'\"]+",
+    ]
+    redacted = text
+    for pattern in patterns:
+        redacted = re.sub(pattern, "[REDACTED]", redacted)
+    return redacted
+
+
+def imported_page_path(base: Path, source: Path) -> Path:
+    return base / "wiki" / "imports" / f"{slugify(source.stem)}.md"
+
+
+def heading_summary(text: str, limit: int = 12) -> list[str]:
+    candidates = []
+    for line in text.splitlines():
+        cleaned = clean_line(line.lstrip("#"))
+        if not cleaned:
+            continue
+        if line.lstrip().startswith("#") or re.search(r"\b(decision|decided|must|should|prefer|blocker|todo|next|source|claim)\b", cleaned, re.I):
+            candidates.append(cleaned)
+    return unique_keep_order(candidates, limit)
+
+
+def cmd_ingest(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    ensure_dirs(base)
+    source_path = Path(args.file).resolve()
+    if not source_path.exists() or not source_path.is_file():
+        print(json.dumps({"ok": False, "error": f"file not found: {source_path}"}, indent=2), file=sys.stderr)
+        return 1
+    raw_text = source_path.read_text(encoding="utf-8", errors="ignore")
+    safe_text = redact_text(raw_text)
+    source = add_source_record(base, str(source_path), args.type, args.title or source_path.name, args.scope)
+    page = imported_page_path(base, source_path)
+    title = args.title or source_path.stem.replace("-", " ").replace("_", " ").title()
+    summary_items = heading_summary(safe_text)
+    body = [
+        f"# Imported Source: {title}",
+        "",
+        f"Source ID: `{source['id']}`",
+        f"Original locator: `{source_path}`",
+        f"Imported at: {now_iso()}",
+        "",
+        "## Extracted signals",
+        "",
+    ]
+    body.extend(f"- {item}" for item in summary_items) if summary_items else body.append("- None detected")
+    body.extend(["", "## Redacted content", "", safe_text.strip(), ""])
+    page.parent.mkdir(parents=True, exist_ok=True)
+    page.write_text("\n".join(body), encoding="utf-8")
+    created_claims = []
+    if args.claim:
+        claim = {
+            "id": stable_id("claim", args.claim, source["id"]),
+            "text": args.claim.strip(),
+            "type": args.claim_type,
+            "status": "working",
+            "confidence": args.confidence,
+            "evidence": [source["id"]],
+            "entities": args.entity or [],
+            "supersedes": [],
+            "superseded_by": None,
+            "scope": args.scope,
+            "created_at": now_iso(),
+            "updated_at": now_iso(),
+            "last_confirmed_at": None,
+        }
+        if append_claim_once(base, claim):
+            created_claims.append(claim["id"])
+    add_log(base, "ingest", f"- Source: `{source['id']}`\n- Page: `{page.relative_to(base)}`\n- Claims: {len(created_claims)}\n")
+    audit(base, "ingest", {"source_id": source["id"], "page": str(page.relative_to(base)), "claims_created": len(created_claims)})
+    print(json.dumps({
+        "ok": True,
+        "source_id": source["id"],
+        "page": str(page.relative_to(base)),
+        "signals": summary_items,
+        "created_claims": created_claims,
+        "redacted": raw_text != safe_text,
+    }, indent=2, ensure_ascii=False))
+    return 0
+
+
+
 
 def unique_keep_order(items: Iterable[str], limit: int = 20) -> list[str]:
     seen: set[str] = set()
@@ -910,6 +999,17 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--evidence", action="append")
     s.add_argument("--entity", action="append")
     s.set_defaults(func=cmd_supersede)
+
+    s = sub.add_parser("ingest")
+    s.add_argument("file")
+    s.add_argument("--type", default="file", choices=["file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"])
+    s.add_argument("--title")
+    s.add_argument("--scope", default="project", choices=["private", "project", "team", "public"])
+    s.add_argument("--claim", help="optional claim to create with the imported source as evidence")
+    s.add_argument("--claim-type", default="observation", choices=["fact", "decision", "preference", "workflow", "observation", "question", "warning"])
+    s.add_argument("--confidence", default=0.5, type=float)
+    s.add_argument("--entity", action="append")
+    s.set_defaults(func=cmd_ingest)
 
     s = sub.add_parser("crystallize")
     s.add_argument("transcript")

@@ -32,11 +32,16 @@ python3 cli/akbp.py --path ./my-kb cite claim_123
 python3 cli/akbp.py --path ./my-kb supersede claim_123 "Use the stdlib CLI until package metadata exists" --type decision --evidence cli/akbp.py
 python3 cli/akbp.py --path ./my-kb contradict claim_123 claim_456 --evidence source_123
 python3 cli/akbp.py --path ./my-kb conformance --level 3
+python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "The project ships small verified batches." --claim-type decision
 python3 cli/akbp.py --path ./my-kb crystallize transcript.md --apply
 python3 cli/akbp.py --path ./my-kb lint
 ```
 
 This implementation writes portable markdown and JSONL artifacts. It is intentionally small so other implementations can copy the behavior.
+
+## Ingest
+
+`akbp ingest notes.md` imports a local file into `wiki/imports/`, records a source in `raw/sources/sources.jsonl`, extracts lightweight signals from headings and decision-like lines, and redacts common token/key patterns from the imported page. Use `--claim` to create one evidence-backed claim while importing.
 
 ## Crystallize
 

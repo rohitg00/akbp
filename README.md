@@ -140,7 +140,7 @@ AKBP is not trying to replace repository instruction files, tool protocol, or ag
 
 ## Status
 
-Draft protocol with a small installable reference CLI, conformance checks, local search, and a JSONL local tool server. The next milestones are stronger extraction, adapter templates, and retrieval benchmark fixtures.
+Draft protocol with a small installable reference CLI, conformance checks, ingest, local search, retrieval benchmarks, adapter templates, and a JSONL local tool server. The next milestones are stronger extraction, richer adapters, and incremental indexing.
 
 ## Examples
 
