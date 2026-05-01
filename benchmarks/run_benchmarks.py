@@ -10,7 +10,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +56,96 @@ def retrieval_results(data: dict[str, Any]) -> list[dict[str, Any]]:
     return results
 
 
-def score_scenario(data: dict[str, Any]) -> dict[str, Any]:
+def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+
+
+def run_cli(kb: Path, *args: str) -> dict[str, Any]:
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "akbp.py"), "--path", str(kb), *args],
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(proc.stdout) if proc.stdout.strip().startswith(("{", "[")) else {"stdout": proc.stdout}
+
+
+def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
+    run_cli(kb, "init")
+    setup = data.get("setup", {})
+    sources = []
+    for source in setup.get("sources", []) or []:
+        sources.append({
+            "id": source["id"],
+            "type": source.get("type", "file"),
+            "locator": source.get("locator", source["id"]),
+            "title": source.get("title"),
+            "hash": None,
+            "immutable": True,
+            "scope": source.get("scope", "project"),
+            "created_at": source.get("created_at", "2026-01-01T00:00:00Z"),
+            "metadata": source.get("metadata", {}),
+        })
+    claims = []
+    for claim in setup.get("claims", []) or []:
+        claims.append({
+            "id": claim["id"],
+            "text": claim["text"],
+            "type": claim.get("type", "observation"),
+            "status": claim.get("status", "working"),
+            "confidence": claim.get("confidence", 0.5),
+            "evidence": claim.get("evidence", []),
+            "entities": claim.get("entities", []),
+            "supersedes": claim.get("supersedes", []),
+            "superseded_by": claim.get("superseded_by"),
+            "scope": claim.get("scope", "project"),
+            "created_at": claim.get("created_at", "2026-01-01T00:00:00Z"),
+            "updated_at": claim.get("updated_at", "2026-01-01T00:00:00Z"),
+            "last_confirmed_at": claim.get("last_confirmed_at"),
+        })
+    relations = []
+    for relation in setup.get("relations", []) or []:
+        relations.append({
+            "id": relation["id"],
+            "source": relation["source"],
+            "target": relation["target"],
+            "relation": relation.get("relation", "related_to"),
+            "evidence": relation.get("evidence", []),
+            "created_at": relation.get("created_at", "2026-01-01T00:00:00Z"),
+        })
+    write_jsonl(kb / "raw" / "sources" / "sources.jsonl", sources)
+    write_jsonl(kb / "claims" / "claims.jsonl", claims)
+    write_jsonl(kb / "graph" / "relations.jsonl", relations)
+
+
+def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
+    if not data.get("setup", {}).get("claims"):
+        return {"ok": True, "skipped": "scenario has no stored claims"}
+    with tempfile.TemporaryDirectory() as d:
+        kb = Path(d) / "kb"
+        scenario_to_kb(data, kb)
+        query = run_cli(kb, "query", data.get("query", ""), "--limit", "20")
+        context = run_cli(kb, "context", data.get("query", ""), "--limit", "20")
+    expected = data.get("expected", {})
+    query_ids = {item.get("id") for item in query.get("results", [])}
+    context_ids = {item.get("id") for item in context.get("items", [])}
+    checks = []
+    for claim_id in expected.get("must_retrieve", []) or []:
+        checks.append({
+            "name": "akbp_query_or_context_must_retrieve",
+            "ok": claim_id in query_ids or claim_id in context_ids,
+            "details": claim_id,
+        })
+    return {
+        "ok": all(check["ok"] for check in checks),
+        "query_result_ids": sorted(x for x in query_ids if x),
+        "context_item_ids": sorted(x for x in context_ids if x),
+        "checks": checks,
+    }
+
+
+def score_scenario(data: dict[str, Any], *, real_akbp: bool = False) -> dict[str, Any]:
     expected = data.get("expected", {})
     setup = data.get("setup", {})
     claims = setup.get("claims", []) or []
@@ -93,11 +184,15 @@ def score_scenario(data: dict[str, Any]) -> dict[str, Any]:
         for phrase in expected["answer_should_include"]:
             add("answer_should_include", phrase.lower() in combined, phrase)
 
-    return {
+    report = {
         "ok": all(check["ok"] for check in checks),
         "retrieved": retrieved,
         "checks": checks,
     }
+    if real_akbp:
+        report["akbp"] = score_real_akbp(data)
+        report["ok"] = report["ok"] and report["akbp"]["ok"]
+    return report
 
 
 def check_scenario(data: dict[str, Any]) -> list[str]:
@@ -160,7 +255,7 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     return issues
 
 
-def run(fixtures: Path, *, score: bool = False) -> dict[str, Any]:
+def run(fixtures: Path, *, score: bool = False, real_akbp: bool = False) -> dict[str, Any]:
     scenarios = load_scenarios(fixtures)
     results = []
     for path, data in scenarios:
@@ -172,13 +267,13 @@ def run(fixtures: Path, *, score: bool = False) -> dict[str, Any]:
             "issues": issues,
         }
         if score and not issues:
-            scoring = score_scenario(data)
+            scoring = score_scenario(data, real_akbp=real_akbp)
             result["score"] = scoring
             result["ok"] = result["ok"] and scoring["ok"]
         results.append(result)
     return {
         "ok": all(item["ok"] for item in results) and bool(results),
-        "mode": "score" if score else "validate",
+        "mode": "akbp-score" if real_akbp else ("score" if score else "validate"),
         "count": len(results),
         "fixtures": str(fixtures.relative_to(ROOT) if fixtures.is_relative_to(ROOT) else fixtures),
         "results": results,
@@ -189,8 +284,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate AKBP benchmark fixtures.")
     parser.add_argument("--fixtures", default=str(DEFAULT_FIXTURES), help="Fixture directory containing */scenario.json files.")
     parser.add_argument("--score", action="store_true", help="Run deterministic fixture scoring checks.")
+    parser.add_argument("--akbp", action="store_true", help="Populate a temporary AKBP knowledge base and check real query/context results.")
     args = parser.parse_args(argv)
-    report = run(Path(args.fixtures).resolve(), score=args.score)
+    report = run(Path(args.fixtures).resolve(), score=args.score or args.akbp, real_akbp=args.akbp)
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 0 if report["ok"] else 1
 

@@ -32,12 +32,14 @@ class BenchmarkFixtureTest(unittest.TestCase):
 
     def test_benchmark_runner_passes(self):
         runner = ROOT / "benchmarks" / "run_benchmarks.py"
-        proc = subprocess.run([sys.executable, str(runner), "--score"], text=True, capture_output=True, check=True)
+        proc = subprocess.run([sys.executable, str(runner), "--akbp"], text=True, capture_output=True, check=True)
         report = json.loads(proc.stdout)
         self.assertTrue(report["ok"])
-        self.assertEqual(report["mode"], "score")
+        self.assertEqual(report["mode"], "akbp-score")
         self.assertGreaterEqual(report["count"], 4)
         self.assertTrue(all("score" in item for item in report["results"]))
+        scored = [item for item in report["results"] if "akbp" in item["score"] and not item["score"]["akbp"].get("skipped")]
+        self.assertTrue(scored)
 
 
 if __name__ == "__main__":

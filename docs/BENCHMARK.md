@@ -82,6 +82,8 @@ make benchmark
 
 The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. It also has a deterministic `--score` mode that checks expected retrieval, citations, conflict flags, supersession behavior, and safe-secret outcomes against fixture data.
 
+`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture and checks real `akbp query` and `akbp context` retrieval against expected claim ids.
+
 Initial scenarios:
 
 - `preference-recall`: recall a durable preference with citation.
