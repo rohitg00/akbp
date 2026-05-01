@@ -26,7 +26,7 @@ METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 
 
 def method_schema_ref(method: str) -> str | None:
-    if method in {"akbp.query", "akbp.context", "akbp.remember", "akbp.source.add", "akbp.ingest", "akbp.supersede", "akbp.contradict"}:
+    if method in {"akbp.query", "akbp.context", "akbp.index", "akbp.search", "akbp.remember", "akbp.source.add", "akbp.ingest", "akbp.supersede", "akbp.contradict"}:
         return f"{METHODS_SCHEMA}#/$defs/{method}.params"
     return None
 
@@ -35,6 +35,7 @@ WRITE_METHODS = {
     "akbp.remember",
     "akbp.source.add",
     "akbp.ingest",
+    "akbp.index",
     "akbp.supersede",
     "akbp.contradict",
 }
@@ -44,6 +45,8 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.status": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
     "akbp.context": {"write": False, "params": ["task", "limit"]},
+    "akbp.index": {"write": True, "params": ["incremental"]},
+    "akbp.search": {"write": False, "params": ["query", "limit"]},
     "akbp.remember": {"write": True, "params": ["text", "type", "evidence", "entity"]},
     "akbp.conformance": {"write": False, "params": ["level"]},
     "akbp.export": {"write": False, "params": []},
@@ -93,6 +96,7 @@ def capabilities() -> dict[str, Any]:
         "examples": [
             {"id": "status-1", "method": "akbp.status", "path": "."},
             {"id": "query-1", "method": "akbp.query", "path": ".", "params": {"query": "deployment", "limit": 5}},
+            {"id": "search-1", "method": "akbp.search", "path": ".", "params": {"query": "deployment", "limit": 5}},
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
         ],
@@ -104,6 +108,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.status": ["status"],
         "akbp.query": ["query", params.get("query", ""), "--limit", str(params.get("limit", 10))],
         "akbp.context": ["context", params.get("task", ""), "--limit", str(params.get("limit", 10))],
+        "akbp.index": ["index"],
+        "akbp.search": ["search", params.get("query", ""), "--limit", str(params.get("limit", 10))],
         "akbp.remember": ["remember", params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.conformance": ["conformance", "--level", str(params.get("level", "0"))],
         "akbp.export": ["export"],
@@ -115,6 +121,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
     }
     argv = [str(a) for a in mapping[method] if a != ""]
+    if method == "akbp.index" and params.get("incremental"):
+        argv.append("--incremental")
     for evidence in params.get("evidence", []) or []:
         if method in WRITE_METHODS:
             argv.extend(["--evidence", str(evidence)])

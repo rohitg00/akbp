@@ -33,8 +33,12 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
             self.assertIn("akbp.ingest", lines[0]["result"]["methods"])
+            self.assertIn("akbp.index", lines[0]["result"]["methods"])
+            self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertTrue(lines[0]["result"]["methods"]["akbp.remember"]["params_schema"].endswith("#/$defs/akbp.remember.params"))
             self.assertTrue(lines[0]["result"]["methods"]["akbp.ingest"]["params_schema"].endswith("#/$defs/akbp.ingest.params"))
+            self.assertTrue(lines[0]["result"]["methods"]["akbp.index"]["params_schema"].endswith("#/$defs/akbp.index.params"))
+            self.assertTrue(lines[0]["result"]["methods"]["akbp.search"]["params_schema"].endswith("#/$defs/akbp.search.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
             self.assertEqual(lines[2]["id"], "2")
@@ -57,6 +61,23 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[2]["result"]["type"], "fact")
             claims = (kb / "claims" / "claims.jsonl").read_text()
             self.assertNotIn("AKBP dry run does not write", claims)
+
+    def test_index_and_search_methods(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            run_cli("--path", str(kb), "remember", "SQLite index supports tool server search", "--evidence", "AKBP.md")
+            requests = "\n".join([
+                json.dumps({"id": "index", "path": str(kb), "method": "akbp.index", "params": {"incremental": True}}),
+                json.dumps({"id": "search", "path": str(kb), "method": "akbp.search", "params": {"query": "SQLite: search", "limit": 5}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertTrue(lines[0]["ok"])
+            self.assertTrue(lines[0]["result"]["incremental"])
+            self.assertTrue(lines[1]["ok"])
+            self.assertEqual(lines[1]["result"]["backend"], "sqlite_fts5")
+            self.assertTrue(lines[1]["result"]["results"])
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:

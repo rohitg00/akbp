@@ -215,6 +215,36 @@
           "default": false
         }
       }
+    },
+    "akbp.index.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "incremental": {
+          "type": "boolean",
+          "default": false
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "akbp.search.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "$ref": "#/$defs/limit"
+        }
+      }
     }
   },
   "type": "object",
@@ -230,20 +260,26 @@
         "akbp.context": {
           "$ref": "#/$defs/akbp.context.params"
         },
+        "akbp.index": {
+          "$ref": "#/$defs/akbp.index.params"
+        },
+        "akbp.search": {
+          "$ref": "#/$defs/akbp.search.params"
+        },
         "akbp.remember": {
           "$ref": "#/$defs/akbp.remember.params"
         },
         "akbp.source.add": {
           "$ref": "#/$defs/akbp.source.add.params"
         },
+        "akbp.ingest": {
+          "$ref": "#/$defs/akbp.ingest.params"
+        },
         "akbp.supersede": {
           "$ref": "#/$defs/akbp.supersede.params"
         },
         "akbp.contradict": {
           "$ref": "#/$defs/akbp.contradict.params"
-        },
-        "akbp.ingest": {
-          "$ref": "#/$defs/akbp.ingest.params"
         }
       }
     }

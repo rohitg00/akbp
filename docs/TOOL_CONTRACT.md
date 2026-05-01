@@ -151,6 +151,8 @@ Supported methods in the first server slice:
 - `akbp.status`
 - `akbp.query`
 - `akbp.context`
+- `akbp.index`
+- `akbp.search`
 - `akbp.remember`
 - `akbp.conformance`
 - `akbp.export`
@@ -173,6 +175,8 @@ Request and response envelopes are specified in:
 
 - `akbp.query`
 - `akbp.context`
+- `akbp.index`
+- `akbp.search`
 - `akbp.remember`
 - `akbp.source.add`
 - `akbp.ingest`
@@ -217,6 +221,13 @@ Importing a local file through the JSONL server uses `akbp.ingest`:
 
 ```json
 {"id":"2","method":"akbp.ingest","path":".","params":{"file":"notes.md","claim":"The project ships small verified batches","claim_type":"decision"}}
+```
+
+Agents can also manage the local search index and query it:
+
+```json
+{"id":"3","method":"akbp.index","path":".","params":{"incremental":true}}
+{"id":"4","method":"akbp.search","path":".","params":{"query":"rollback release","limit":5}}
 ```
 
 A dry-run write returns the planned command arguments and does not mutate the knowledge base.

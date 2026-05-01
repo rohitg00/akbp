@@ -14,7 +14,7 @@ AKBP schemas are public JSON Schema documents for the protocol artifacts.
 - `context-pack.schema.json`: compact retrieval output for agents.
 - `tool-request.schema.json`: JSONL local tool server request envelope.
 - `tool-response.schema.json`: JSONL local tool server response envelope and structured errors.
-- `tool-methods.schema.json`: method-specific parameter schemas for query, context, remember, source add, ingest, supersede, and contradict.
+- `tool-methods.schema.json`: method-specific parameter schemas for query, context, index, search, remember, source add, ingest, supersede, and contradict.
 
 ## Schema IDs
 
