@@ -70,7 +70,7 @@ Pass criteria: page has summary, evidence links, related pages, current status, 
 
 ## Baseline fixtures
 
-The repo includes small conformance fixtures under `examples/level-0/` and `examples/level-1/`. These are not performance benchmarks. They are compatibility fixtures for future benchmark and adapter testing.
+The repo includes small conformance fixtures under `examples/level-0/`, `examples/level-1/`, and `examples/level-3/`. These are not performance benchmarks. They are compatibility fixtures for future benchmark and adapter testing.
 
 Benchmark scenario fixtures live under `benchmarks/fixtures/`.
 

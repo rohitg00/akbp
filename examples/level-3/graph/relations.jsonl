@@ -1,0 +1,2 @@
+{"confidence": 0.95, "created_at": "2026-04-15T09:15:00Z", "evidence": ["source_sprint_note"], "id": "rel_small_batches_supersedes_large_release", "relation": "supersedes", "source": "claim_small_verified_batches", "target": "claim_large_release_plan"}
+{"confidence": 0.8, "created_at": "2026-04-15T09:16:00Z", "evidence": ["source_sprint_note"], "id": "rel_rollback_supports_small_batches", "relation": "supports", "source": "claim_release_needs_rollback_notes", "target": "claim_small_verified_batches"}

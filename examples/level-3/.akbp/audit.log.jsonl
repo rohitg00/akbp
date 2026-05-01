@@ -1,0 +1,1 @@
+{"created_at": "2026-04-15T09:20:00Z", "data": {"example": "level-3", "records": {"claims": 3, "relations": 2, "sources": 2}}, "event": "example.created", "id": "audit_level3_example_created"}

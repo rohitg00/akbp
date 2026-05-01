@@ -114,6 +114,7 @@ akbp/
   examples/
     level-0/
     level-1/
+    level-3/
     coding-agent/
     research/
     personal/
@@ -145,12 +146,14 @@ Draft protocol with a small installable reference CLI, conformance checks, local
 
 - `examples/level-0/` shows the minimal file convention.
 - `examples/level-1/` shows structured claims with evidence.
+- `examples/level-3/` shows lifecycle relations with concrete JSONL records.
 
 Validate them with:
 
 ```bash
 python3 cli/akbp.py --path examples/level-0 conformance --level 0
 python3 cli/akbp.py --path examples/level-1 conformance --level 1
+python3 cli/akbp.py --path examples/level-3 conformance --level 3
 ```
 
 ## Local tool server

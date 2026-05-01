@@ -30,3 +30,9 @@ class ConformanceExampleTest(unittest.TestCase):
         data = json.loads(out.stdout)
         self.assertTrue(data["ok"])
         self.assertTrue(data["levels"]["2"]["ok"])
+
+    def test_level_three_example_passes_lifecycle_relations(self):
+        out = run_cli("--path", str(ROOT / "examples" / "level-3"), "conformance", "--level", "3")
+        data = json.loads(out.stdout)
+        self.assertTrue(data["ok"])
+        self.assertTrue(data["levels"]["3"]["ok"])
