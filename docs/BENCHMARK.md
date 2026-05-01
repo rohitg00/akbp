@@ -80,7 +80,7 @@ Run fixture validation with:
 make benchmark
 ```
 
-The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. Later runners can add retrieval scoring on top of the same fixtures.
+The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. It also has a deterministic `--score` mode that checks expected retrieval, citations, conflict flags, supersession behavior, and safe-secret outcomes against fixture data.
 
 Initial scenarios:
 

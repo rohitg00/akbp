@@ -22,7 +22,7 @@ install-smoke:
 	PYTHONPATH=$$TMP/pkg python3 -c "import akbp, akbp_tool_server; print('install ok')"
 
 benchmark:
-	python3 benchmarks/run_benchmarks.py
+	python3 benchmarks/run_benchmarks.py --score
 
 build:
 	python3 -m build

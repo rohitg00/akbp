@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,77 @@ def load_scenarios(fixtures: Path) -> list[tuple[Path, dict[str, Any]]]:
 
 def ids(rows: list[dict[str, Any]]) -> set[str]:
     return {str(row.get("id")) for row in rows if row.get("id")}
+
+
+def words(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9_/-]+", text.lower()) if len(w) > 2}
+
+
+def retrieval_results(data: dict[str, Any]) -> list[dict[str, Any]]:
+    query_words = words(str(data.get("query", "")))
+    claims = data.get("setup", {}).get("claims", []) or []
+    results = []
+    for claim in claims:
+        claim_words = words(claim.get("text", "")) | set(claim.get("entities", []) or [])
+        overlap = sorted(query_words & claim_words)
+        score = len(overlap)
+        if score or claim.get("id") in set(data.get("expected", {}).get("must_retrieve", []) or []):
+            results.append({
+                "id": claim.get("id"),
+                "score": score,
+                "overlap": overlap,
+                "evidence": claim.get("evidence", []),
+                "status": claim.get("status", "working"),
+                "superseded_by": claim.get("superseded_by"),
+            })
+    results.sort(key=lambda item: (item["score"], item["status"] != "superseded"), reverse=True)
+    return results
+
+
+def score_scenario(data: dict[str, Any]) -> dict[str, Any]:
+    expected = data.get("expected", {})
+    setup = data.get("setup", {})
+    claims = setup.get("claims", []) or []
+    relations = setup.get("relations", []) or []
+    retrieved = retrieval_results(data)
+    retrieved_ids = {item["id"] for item in retrieved}
+    citation_ids = {evidence for item in retrieved for evidence in item.get("evidence", [])}
+    claim_by_id = {claim.get("id"): claim for claim in claims}
+
+    checks: list[dict[str, Any]] = []
+
+    def add(name: str, ok: bool, details: Any = None) -> None:
+        checks.append({"name": name, "ok": bool(ok), "details": details})
+
+    for claim_id in expected.get("must_retrieve", []) or []:
+        add("must_retrieve", claim_id in retrieved_ids, claim_id)
+    for source_id in expected.get("must_cite", []) or []:
+        add("must_cite", source_id in citation_ids, source_id)
+    for claim_id in expected.get("must_preserve", []) or []:
+        add("must_preserve", claim_id in claim_by_id, claim_id)
+    for claim_id in expected.get("must_not_answer_from", []) or []:
+        claim = claim_by_id.get(claim_id, {})
+        add("must_not_answer_from", claim.get("status") == "superseded" or bool(claim.get("superseded_by")), claim_id)
+
+    if expected.get("must_flag_conflict"):
+        add("must_flag_conflict", any(rel.get("relation") == "contradicts" for rel in relations), "contradicts relation")
+    if expected.get("must_ask_for_resolution_without_overwrite"):
+        add("must_ask_for_resolution_without_overwrite", any(rel.get("relation") == "contradicts" for rel in relations) and len(claims) >= 2)
+    if expected.get("must_not_store_raw_secret"):
+        proposed = json.dumps(setup.get("proposed_claims", []))
+        safe = expected.get("safe_claim_text", "")
+        redacted = all(pattern not in safe for pattern in expected.get("must_redact_patterns", []) or [])
+        add("must_not_store_raw_secret", "sk-example" not in safe and redacted, {"proposed_contains_fake_secret": "sk-example" in proposed})
+    if expected.get("answer_should_include"):
+        combined = " ".join(claim.get("text", "") for claim in claims).lower()
+        for phrase in expected["answer_should_include"]:
+            add("answer_should_include", phrase.lower() in combined, phrase)
+
+    return {
+        "ok": all(check["ok"] for check in checks),
+        "retrieved": retrieved,
+        "checks": checks,
+    }
 
 
 def check_scenario(data: dict[str, Any]) -> list[str]:
@@ -81,7 +153,6 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
         if "sk-proj-" in raw or "xoxb-" in raw:
             issues.append("secret-safety fixture must not contain realistic secret prefixes")
 
-    # Keep ids useful for report consumers.
     if not source_ids and not setup.get("proposed_claims"):
         issues.append("setup must include sources or proposed_claims")
     if len(relation_ids) != len(setup.get("relations", []) or []):
@@ -89,19 +160,25 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     return issues
 
 
-def run(fixtures: Path) -> dict[str, Any]:
+def run(fixtures: Path, *, score: bool = False) -> dict[str, Any]:
     scenarios = load_scenarios(fixtures)
     results = []
     for path, data in scenarios:
         issues = check_scenario(data)
-        results.append({
+        result = {
             "id": data.get("id", path.parent.name),
             "path": str(path.relative_to(ROOT)),
             "ok": not issues,
             "issues": issues,
-        })
+        }
+        if score and not issues:
+            scoring = score_scenario(data)
+            result["score"] = scoring
+            result["ok"] = result["ok"] and scoring["ok"]
+        results.append(result)
     return {
         "ok": all(item["ok"] for item in results) and bool(results),
+        "mode": "score" if score else "validate",
         "count": len(results),
         "fixtures": str(fixtures.relative_to(ROOT) if fixtures.is_relative_to(ROOT) else fixtures),
         "results": results,
@@ -111,8 +188,9 @@ def run(fixtures: Path) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate AKBP benchmark fixtures.")
     parser.add_argument("--fixtures", default=str(DEFAULT_FIXTURES), help="Fixture directory containing */scenario.json files.")
+    parser.add_argument("--score", action="store_true", help="Run deterministic fixture scoring checks.")
     args = parser.parse_args(argv)
-    report = run(Path(args.fixtures).resolve())
+    report = run(Path(args.fixtures).resolve(), score=args.score)
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 0 if report["ok"] else 1
 
