@@ -147,6 +147,7 @@ Return recent audit events, optionally filtered by event type.
 
 Supported methods in the first server slice:
 
+- `akbp.capabilities`
 - `akbp.status`
 - `akbp.query`
 - `akbp.context`
@@ -158,3 +159,39 @@ Supported methods in the first server slice:
 - `akbp.source.add`
 - `akbp.supersede`
 - `akbp.contradict`
+
+Every response uses the same envelope:
+
+```json
+{
+  "id": "request-id",
+  "ok": true,
+  "result": {},
+  "error": null
+}
+```
+
+Errors are structured:
+
+```json
+{
+  "id": "request-id",
+  "ok": false,
+  "result": null,
+  "error": {
+    "code": "unknown_method",
+    "message": "unknown method: akbp.missing",
+    "details": {
+      "available_methods": []
+    }
+  }
+}
+```
+
+Write methods support request-level dry run:
+
+```json
+{"id":"1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths"}}
+```
+
+A dry-run write returns the planned command arguments and does not mutate the knowledge base.

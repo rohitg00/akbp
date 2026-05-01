@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Installed entrypoint for the AKBP JSONL tool server."""
+"""Installed entrypoint for the AKBP JSONL tool server.
+
+This is intentionally dependency-free. It reads one JSON request per line from
+stdin and writes one JSON response per line to stdout.
+"""
 
 from __future__ import annotations
 
@@ -11,6 +15,28 @@ from typing import Any
 
 import akbp
 
+WRITE_METHODS = {
+    "akbp.remember",
+    "akbp.source.add",
+    "akbp.supersede",
+    "akbp.contradict",
+}
+
+METHODS: dict[str, dict[str, Any]] = {
+    "akbp.capabilities": {"write": False, "params": []},
+    "akbp.status": {"write": False, "params": []},
+    "akbp.query": {"write": False, "params": ["query", "limit"]},
+    "akbp.context": {"write": False, "params": ["task", "limit"]},
+    "akbp.remember": {"write": True, "params": ["text", "type", "evidence", "entity"]},
+    "akbp.conformance": {"write": False, "params": ["level"]},
+    "akbp.export": {"write": False, "params": []},
+    "akbp.audit": {"write": False, "params": ["limit"]},
+    "akbp.cite": {"write": False, "params": ["claim_id"]},
+    "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence"]},
+    "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity"]},
+    "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence"]},
+}
+
 
 def run_cli(path: str, argv: list[str]) -> tuple[int, str, str]:
     out = io.StringIO()
@@ -20,11 +46,33 @@ def run_cli(path: str, argv: list[str]) -> tuple[int, str, str]:
     return int(code or 0), out.getvalue(), err.getvalue()
 
 
-def handle(req: dict[str, Any]) -> dict[str, Any]:
-    request_id = req.get("id")
-    path = req.get("path", ".")
-    method = req.get("method")
-    params = req.get("params", {}) or {}
+def error_response(request_id: Any, code: str, message: str, *, details: Any = None) -> dict[str, Any]:
+    error: dict[str, Any] = {"code": code, "message": message}
+    if details is not None:
+        error["details"] = details
+    return {"id": request_id, "ok": False, "result": None, "error": error}
+
+
+def capabilities() -> dict[str, Any]:
+    return {
+        "protocol": "akbp-jsonl-tool-server",
+        "version": "0.1-draft",
+        "features": {
+            "structured_errors": True,
+            "capability_discovery": True,
+            "dry_run": True,
+            "jsonl_transport": True,
+        },
+        "methods": METHODS,
+        "examples": [
+            {"id": "status-1", "method": "akbp.status", "path": "."},
+            {"id": "query-1", "method": "akbp.query", "path": ".", "params": {"query": "deployment", "limit": 5}},
+            {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
+        ],
+    }
+
+
+def build_argv(method: str, params: dict[str, Any]) -> list[str]:
     mapping = {
         "akbp.status": ["status"],
         "akbp.query": ["query", params.get("query", ""), "--limit", str(params.get("limit", 10))],
@@ -38,23 +86,54 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
     }
-    if method not in mapping:
-        return {"id": request_id, "ok": False, "error": f"unknown method: {method}"}
     argv = [str(a) for a in mapping[method] if a != ""]
     for evidence in params.get("evidence", []) or []:
-        if method in {"akbp.remember", "akbp.source.add", "akbp.supersede", "akbp.contradict"}:
+        if method in WRITE_METHODS:
             argv.extend(["--evidence", str(evidence)])
     for entity in params.get("entity", []) or []:
         if method in {"akbp.remember", "akbp.supersede"}:
             argv.extend(["--entity", str(entity)])
     if method == "akbp.source.add" and params.get("title"):
         argv.extend(["--title", str(params["title"])])
-    code, stdout, stderr = run_cli(path, argv)
+    return argv
+
+
+def parse_payload(stdout: str) -> Any:
+    if not stdout.strip():
+        return None
     try:
-        payload = json.loads(stdout) if stdout.strip() else None
+        return json.loads(stdout)
     except json.JSONDecodeError:
-        payload = stdout
-    return {"id": request_id, "ok": code == 0, "result": payload, "error": stderr.strip() or None}
+        return stdout
+
+
+def handle(req: dict[str, Any]) -> dict[str, Any]:
+    request_id = req.get("id")
+    method = req.get("method")
+    path = str(req.get("path", "."))
+    params = req.get("params", {}) or {}
+    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
+
+    if not isinstance(params, dict):
+        return error_response(request_id, "invalid_params", "params must be an object")
+    if method == "akbp.capabilities":
+        return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
+    if method not in METHODS:
+        return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
+
+    argv = build_argv(method, params)
+    if dry_run and method in WRITE_METHODS:
+        return {
+            "id": request_id,
+            "ok": True,
+            "result": {"dry_run": True, "method": method, "path": path, "argv": argv, "would_write": True},
+            "error": None,
+        }
+
+    code, stdout, stderr = run_cli(path, argv)
+    if code != 0:
+        return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"exit_code": code, "stdout": stdout})
+    return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
 
 
 def main() -> int:
@@ -62,11 +141,18 @@ def main() -> int:
         line = line.strip()
         if not line:
             continue
+        request_id = None
         try:
             req = json.loads(line)
+            if not isinstance(req, dict):
+                print(json.dumps(error_response(None, "invalid_request", "request must be a JSON object"), ensure_ascii=False), flush=True)
+                continue
+            request_id = req.get("id")
             res = handle(req)
-        except Exception as exc:  # pragma: no cover
-            res = {"id": None, "ok": False, "error": str(exc)}
+        except json.JSONDecodeError as exc:
+            res = error_response(None, "invalid_json", str(exc))
+        except Exception as exc:  # pragma: no cover - defensive server boundary
+            res = error_response(request_id, "internal_error", str(exc))
         print(json.dumps(res, ensure_ascii=False), flush=True)
     return 0
 
