@@ -211,16 +211,32 @@ Errors are structured:
 }
 ```
 
+## Write-mode safety
+
+Write-capable methods must be treated as reviewable operations by default.
+
+Agents should:
+
+1. call `akbp.capabilities` first and check the advertised method list and `params_schema` references
+2. use request-level `dry_run: true` before the first write in a session
+3. show the planned write to the user or calling runtime when approval is required
+4. repeat the same request without `dry_run` only after approval or trusted local policy
+5. use project-local scope unless the user explicitly asks for team or public memory
+6. cite evidence for durable claims and avoid storing transient logs
+7. redact secret-like strings before sending write requests
+
 Write methods support request-level dry run:
 
 ```json
-{"id":"1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths"}}
+{"id":"1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths","type":"workflow","evidence":["release-notes.md"]}}
 ```
 
-Importing a local file through the JSONL server uses `akbp.ingest`:
+Dry-run write responses return planned command arguments and do not mutate the knowledge base. Clients should render them as a reviewable change, not as committed memory.
+
+Importing a local file through the JSONL server should also start with dry-run when the caller is unsure about scope or content sensitivity:
 
 ```json
-{"id":"2","method":"akbp.ingest","path":".","params":{"file":"notes.md","claim":"The project ships small verified batches","claim_type":"decision"}}
+{"id":"2","method":"akbp.ingest","path":".","dry_run":true,"params":{"file":"notes.md","claim":"The project ships small verified batches","claim_type":"decision"}}
 ```
 
 Agents can also manage the local search index and query it:
