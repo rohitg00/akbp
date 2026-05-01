@@ -12,6 +12,8 @@ AKBP schemas are public JSON Schema documents for the protocol artifacts.
 - `page.schema.json`: metadata for human-readable markdown pages.
 - `audit-event.schema.json`: append-only operation history.
 - `context-pack.schema.json`: compact retrieval output for agents.
+- `tool-request.schema.json`: JSONL local tool server request envelope.
+- `tool-response.schema.json`: JSONL local tool server response envelope and structured errors.
 
 ## Schema IDs
 

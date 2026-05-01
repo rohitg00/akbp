@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class RepoQualityTest(unittest.TestCase):
     def test_all_schemas_parse_and_use_resolvable_ids(self):
         schemas = sorted((ROOT / "schemas").glob("*.json"))
-        self.assertGreaterEqual(len(schemas), 8)
+        self.assertGreaterEqual(len(schemas), 10)
         for path in schemas:
             data = json.loads(path.read_text(encoding="utf-8"))
             self.assertIn("$schema", data)
@@ -17,6 +17,16 @@ class RepoQualityTest(unittest.TestCase):
                 data["$id"],
             )
             self.assertNotIn("akbp.dev", data["$id"])
+
+    def test_tool_envelope_schemas_exist(self):
+        request_schema = json.loads((ROOT / "schemas" / "tool-request.schema.json").read_text(encoding="utf-8"))
+        response_schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+        self.assertIn("id", request_schema["required"])
+        self.assertIn("method", request_schema["required"])
+        self.assertIn("dry_run", request_schema["properties"])
+        self.assertEqual(response_schema["required"], ["id", "ok", "result", "error"])
+        error_schema = response_schema["properties"]["error"]["anyOf"][1]
+        self.assertEqual(error_schema["required"], ["code", "message"])
 
     def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]

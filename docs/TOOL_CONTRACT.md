@@ -160,6 +160,11 @@ Supported methods in the first server slice:
 - `akbp.supersede`
 - `akbp.contradict`
 
+Request and response envelopes are specified in:
+
+- `schemas/tool-request.schema.json`
+- `schemas/tool-response.schema.json`
+
 Every response uses the same envelope:
 
 ```json

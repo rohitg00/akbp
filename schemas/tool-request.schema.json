@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-request.schema.json",
+  "title": "AKBP Tool Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "method"],
+  "properties": {
+    "id": {
+      "description": "Client-provided request identifier copied into the response.",
+      "type": ["string", "number"]
+    },
+    "method": {
+      "description": "AKBP tool method name.",
+      "type": "string",
+      "pattern": "^akbp\\.[a-z0-9_.-]+$"
+    },
+    "path": {
+      "description": "Knowledge base root path. Defaults to the current working directory when omitted.",
+      "type": "string",
+      "default": "."
+    },
+    "dry_run": {
+      "description": "When true, write methods return planned work without mutating the knowledge base.",
+      "type": "boolean",
+      "default": false
+    },
+    "params": {
+      "description": "Method-specific parameters.",
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  }
+}

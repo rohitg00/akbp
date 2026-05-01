@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-response.schema.json",
+  "title": "AKBP Tool Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "ok", "result", "error"],
+  "properties": {
+    "id": {
+      "description": "Request identifier copied from the matching request when available.",
+      "type": ["string", "number", "null"]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "result": {
+      "description": "Method-specific response payload when ok is true, otherwise null.",
+      "type": ["object", "array", "string", "number", "boolean", "null"]
+    },
+    "error": {
+      "description": "Structured error object when ok is false, otherwise null.",
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$"
+            },
+            "message": {
+              "type": "string"
+            },
+            "details": {
+              "type": ["object", "array", "string", "number", "boolean", "null"]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
