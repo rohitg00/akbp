@@ -166,6 +166,8 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
+`akbp.capabilities` returns these schema URLs under `result.schemas`, and returns each method's `params_schema` reference when a method-specific contract exists.
+
 `tool-methods.schema.json` defines the first method-specific parameter contracts for:
 
 - `akbp.query`

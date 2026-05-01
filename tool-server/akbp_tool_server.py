@@ -19,6 +19,18 @@ sys.path.insert(0, str(ROOT / "cli"))
 
 import akbp  # noqa: E402
 
+SCHEMA_BASE = "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas"
+REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
+RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
+METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
+
+
+def method_schema_ref(method: str) -> str | None:
+    if method in {"akbp.query", "akbp.context", "akbp.remember", "akbp.source.add", "akbp.supersede", "akbp.contradict"}:
+        return f"{METHODS_SCHEMA}#/$defs/{method}.params"
+    return None
+
+
 WRITE_METHODS = {
     "akbp.remember",
     "akbp.source.add",
@@ -67,7 +79,15 @@ def capabilities() -> dict[str, Any]:
             "dry_run": True,
             "jsonl_transport": True,
         },
-        "methods": METHODS,
+        "schemas": {
+            "request": REQUEST_SCHEMA,
+            "response": RESPONSE_SCHEMA,
+            "methods": METHODS_SCHEMA,
+        },
+        "methods": {
+            name: {**meta, **({"params_schema": ref} if (ref := method_schema_ref(name)) else {})}
+            for name, meta in METHODS.items()
+        },
         "examples": [
             {"id": "status-1", "method": "akbp.status", "path": "."},
             {"id": "query-1", "method": "akbp.query", "path": ".", "params": {"query": "deployment", "limit": 5}},
