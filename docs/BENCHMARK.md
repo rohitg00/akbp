@@ -74,6 +74,14 @@ The repo includes small conformance fixtures under `examples/level-0/` and `exam
 
 Benchmark scenario fixtures live under `benchmarks/fixtures/`.
 
+Run fixture validation with:
+
+```bash
+make benchmark
+```
+
+The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. Later runners can add retrieval scoring on top of the same fixtures.
+
 Initial scenarios:
 
 - `preference-recall`: recall a durable preference with citation.

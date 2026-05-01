@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -27,6 +29,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("sk-example", text)
         self.assertNotIn("sk-proj-", text)
         self.assertNotIn("xoxb-", text)
+
+    def test_benchmark_runner_passes(self):
+        runner = ROOT / "benchmarks" / "run_benchmarks.py"
+        proc = subprocess.run([sys.executable, str(runner)], text=True, capture_output=True, check=True)
+        report = json.loads(proc.stdout)
+        self.assertTrue(report["ok"])
+        self.assertGreaterEqual(report["count"], 4)
 
 
 if __name__ == "__main__":
