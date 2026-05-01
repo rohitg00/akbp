@@ -1,5 +1,7 @@
 # AKBP
 
+[![CI](https://github.com/rohitg00/akbp/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/akbp/actions/workflows/ci.yml)
+
 Agent Knowledge Base Protocol.
 
 Agents should not start every session with amnesia.
@@ -7,6 +9,8 @@ Agents should not start every session with amnesia.
 AKBP is an open, local-first protocol for agent-maintained knowledge bases. It lets AI agents compile, update, cite, supersede, and share knowledge across sessions, tools, and runtimes.
 
 The repo now includes a tiny reference CLI that can initialize a knowledge base, remember claims, crystallize transcripts, query memory, and return agent-ready context packs.
+
+CI runs the public-reference guard, tests, CLI smoke flow, retrieval benchmarks, and install smoke flow on pushes and pull requests.
 
 ## Why
 
