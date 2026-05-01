@@ -1,0 +1,17 @@
+{
+  "adapter": "editor-coding-agent",
+  "akbp": {
+    "root": ".",
+    "transport": "jsonl-tool-server",
+    "server_command": ["akbp-tool-server"],
+    "context": {
+      "auto_fetch_on_task_start": true,
+      "limit": 8
+    },
+    "writes": {
+      "default_dry_run": true,
+      "show_review_before_apply": true,
+      "allowed_types": ["decision", "preference", "workflow", "fact", "blocker"]
+    }
+  }
+}
