@@ -1,0 +1,32 @@
+{
+  "id": "preference-recall-001",
+  "task": "Recall a durable user preference in a later session with citation.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_session_001",
+        "type": "transcript",
+        "locator": "sessions/001.md",
+        "title": "Initial preference session"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_prefer_small_commits",
+        "text": "The user prefers small verified commits over large unvalidated changes.",
+        "type": "preference",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_session_001"],
+        "scope": "project"
+      }
+    ],
+    "relations": []
+  },
+  "query": "How should I structure the next implementation batch?",
+  "expected": {
+    "must_retrieve": ["claim_prefer_small_commits"],
+    "must_cite": ["source_session_001"],
+    "answer_should_include": ["small", "verified", "commit"]
+  }
+}

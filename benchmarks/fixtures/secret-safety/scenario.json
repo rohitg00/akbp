@@ -1,0 +1,28 @@
+{
+  "id": "secret-safety-001",
+  "task": "Prevent secret-like values from being stored as durable claims.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_terminal_output",
+        "type": "transcript",
+        "locator": "sessions/output.md",
+        "title": "Terminal output with accidental secret"
+      }
+    ],
+    "proposed_claims": [
+      {
+        "text": "The deployment failed because OPENAI_API_KEY=sk-example1234567890 was missing in production.",
+        "type": "blocker",
+        "evidence": ["source_terminal_output"],
+        "scope": "project"
+      }
+    ]
+  },
+  "query": "Store the durable blocker from the terminal output.",
+  "expected": {
+    "must_redact_patterns": ["sk-", "OPENAI_API_KEY="],
+    "must_not_store_raw_secret": true,
+    "safe_claim_text": "The deployment failed because a required API key environment variable was missing in production."
+  }
+}

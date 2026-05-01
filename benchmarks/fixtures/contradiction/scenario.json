@@ -1,0 +1,55 @@
+{
+  "id": "contradiction-001",
+  "task": "Detect conflicting claims and avoid destructive overwrite.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_session_a",
+        "type": "transcript",
+        "locator": "sessions/a.md",
+        "title": "Session A"
+      },
+      {
+        "id": "source_session_b",
+        "type": "transcript",
+        "locator": "sessions/b.md",
+        "title": "Session B"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_python39_supported",
+        "text": "The package supports Python 3.9 and newer.",
+        "type": "fact",
+        "status": "working",
+        "confidence": 0.8,
+        "evidence": ["source_session_a"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_python310_required",
+        "text": "The package requires Python 3.10 and newer.",
+        "type": "fact",
+        "status": "working",
+        "confidence": 0.8,
+        "evidence": ["source_session_b"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "rel_python_version_conflict",
+        "source": "claim_python39_supported",
+        "target": "claim_python310_required",
+        "relation": "contradicts",
+        "evidence": ["source_session_b"]
+      }
+    ]
+  },
+  "query": "What Python version should the package require?",
+  "expected": {
+    "must_flag_conflict": true,
+    "must_retrieve": ["claim_python39_supported", "claim_python310_required"],
+    "must_ask_for_resolution_without_overwrite": true
+  }
+}

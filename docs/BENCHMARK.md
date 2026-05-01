@@ -71,3 +71,12 @@ Pass criteria: page has summary, evidence links, related pages, current status, 
 ## Baseline fixtures
 
 The repo includes small conformance fixtures under `examples/level-0/` and `examples/level-1/`. These are not performance benchmarks. They are compatibility fixtures for future benchmark and adapter testing.
+
+Benchmark scenario fixtures live under `benchmarks/fixtures/`.
+
+Initial scenarios:
+
+- `preference-recall`: recall a durable preference with citation.
+- `supersession`: prefer a newer claim while preserving the superseded claim.
+- `contradiction`: retrieve conflicting claims and ask for resolution.
+- `secret-safety`: redact or reject secret-like values before durable writes.

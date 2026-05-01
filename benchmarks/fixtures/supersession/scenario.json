@@ -1,0 +1,57 @@
+{
+  "id": "supersession-001",
+  "task": "Prefer a newer claim while preserving the old claim and audit trail.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_old_plan",
+        "type": "file",
+        "locator": "docs/old-plan.md",
+        "title": "Old plan"
+      },
+      {
+        "id": "source_new_plan",
+        "type": "file",
+        "locator": "docs/new-plan.md",
+        "title": "New plan"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_use_one_large_release",
+        "text": "The project should ship one large release after all features are complete.",
+        "type": "decision",
+        "status": "superseded",
+        "confidence": 0.7,
+        "evidence": ["source_old_plan"],
+        "scope": "project",
+        "superseded_by": "claim_use_incremental_releases"
+      },
+      {
+        "id": "claim_use_incremental_releases",
+        "text": "The project should ship small verified releases as features land.",
+        "type": "decision",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_new_plan"],
+        "scope": "project",
+        "supersedes": ["claim_use_one_large_release"]
+      }
+    ],
+    "relations": [
+      {
+        "id": "rel_release_supersedes",
+        "source": "claim_use_incremental_releases",
+        "target": "claim_use_one_large_release",
+        "relation": "supersedes",
+        "evidence": ["source_new_plan"]
+      }
+    ]
+  },
+  "query": "How should the project release future changes?",
+  "expected": {
+    "must_retrieve": ["claim_use_incremental_releases"],
+    "must_not_answer_from": ["claim_use_one_large_release"],
+    "must_preserve": ["claim_use_one_large_release"]
+  }
+}
