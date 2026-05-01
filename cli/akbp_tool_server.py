@@ -22,7 +22,7 @@ METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 
 
 def method_schema_ref(method: str) -> str | None:
-    if method in {"akbp.query", "akbp.context", "akbp.remember", "akbp.source.add", "akbp.supersede", "akbp.contradict"}:
+    if method in {"akbp.query", "akbp.context", "akbp.remember", "akbp.source.add", "akbp.ingest", "akbp.supersede", "akbp.contradict"}:
         return f"{METHODS_SCHEMA}#/$defs/{method}.params"
     return None
 
@@ -30,6 +30,7 @@ def method_schema_ref(method: str) -> str | None:
 WRITE_METHODS = {
     "akbp.remember",
     "akbp.source.add",
+    "akbp.ingest",
     "akbp.supersede",
     "akbp.contradict",
 }
@@ -45,6 +46,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.audit": {"write": False, "params": ["limit"]},
     "akbp.cite": {"write": False, "params": ["claim_id"]},
     "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence"]},
+    "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity"]},
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence"]},
 }
@@ -88,6 +90,7 @@ def capabilities() -> dict[str, Any]:
             {"id": "status-1", "method": "akbp.status", "path": "."},
             {"id": "query-1", "method": "akbp.query", "path": ".", "params": {"query": "deployment", "limit": 5}},
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
+            {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
         ],
     }
 
@@ -103,6 +106,7 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.audit": ["audit", "--limit", str(params.get("limit", 20))],
         "akbp.cite": ["cite", params.get("claim_id", "")],
         "akbp.source.add": ["source", "add", params.get("locator", ""), "--type", params.get("type", "file")],
+        "akbp.ingest": ["ingest", params.get("file", ""), "--type", params.get("type", "file")],
         "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
     }
@@ -111,10 +115,17 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         if method in WRITE_METHODS:
             argv.extend(["--evidence", str(evidence)])
     for entity in params.get("entity", []) or []:
-        if method in {"akbp.remember", "akbp.supersede"}:
+        if method in {"akbp.remember", "akbp.supersede", "akbp.ingest"}:
             argv.extend(["--entity", str(entity)])
-    if method == "akbp.source.add" and params.get("title"):
+    if method in {"akbp.source.add", "akbp.ingest"} and params.get("title"):
         argv.extend(["--title", str(params["title"])])
+    if method == "akbp.ingest":
+        if params.get("claim"):
+            argv.extend(["--claim", str(params["claim"])])
+        if params.get("claim_type"):
+            argv.extend(["--claim-type", str(params["claim_type"])])
+        if params.get("confidence") is not None:
+            argv.extend(["--confidence", str(params["confidence"])])
     return argv
 
 

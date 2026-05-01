@@ -32,7 +32,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
+            self.assertIn("akbp.ingest", lines[0]["result"]["methods"])
             self.assertTrue(lines[0]["result"]["methods"]["akbp.remember"]["params_schema"].endswith("#/$defs/akbp.remember.params"))
+            self.assertTrue(lines[0]["result"]["methods"]["akbp.ingest"]["params_schema"].endswith("#/$defs/akbp.ingest.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
             self.assertEqual(lines[2]["id"], "2")
@@ -55,6 +57,29 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[2]["result"]["type"], "fact")
             claims = (kb / "claims" / "claims.jsonl").read_text()
             self.assertNotIn("AKBP dry run does not write", claims)
+
+    def test_ingest_method_imports_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("# Note\n\nDecision: keep imports redacted.\ntoken=sk-example123456789\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            request = json.dumps({
+                "id": "ingest",
+                "path": str(kb),
+                "method": "akbp.ingest",
+                "params": {
+                    "file": str(note),
+                    "claim": "Imported notes should be redacted.",
+                    "claim_type": "decision",
+                },
+            }) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertTrue(line["result"]["redacted"])
+            page = kb / line["result"]["page"]
+            self.assertIn("[REDACTED]", page.read_text(encoding="utf-8"))
 
     def test_structured_errors(self):
         requests = json.dumps({"id": "bad", "method": "akbp.missing"}) + "\n"

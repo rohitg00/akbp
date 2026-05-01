@@ -12,82 +12,208 @@
     },
     "evidenceList": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {
+        "type": "string"
+      },
       "default": []
     },
     "entityList": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {
+        "type": "string"
+      },
       "default": []
     },
     "akbp.query.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["query"],
+      "required": [
+        "query"
+      ],
       "properties": {
-        "query": {"type": "string", "minLength": 1},
-        "limit": {"$ref": "#/$defs/limit"}
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "$ref": "#/$defs/limit"
+        }
       }
     },
     "akbp.context.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["task"],
+      "required": [
+        "task"
+      ],
       "properties": {
-        "task": {"type": "string", "minLength": 1},
-        "limit": {"$ref": "#/$defs/limit"}
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "$ref": "#/$defs/limit"
+        }
       }
     },
     "akbp.remember.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["text"],
+      "required": [
+        "text"
+      ],
       "properties": {
-        "text": {"type": "string", "minLength": 1},
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
         "type": {
           "type": "string",
-          "enum": ["observation", "decision", "preference", "workflow", "fact", "question", "blocker"],
+          "enum": [
+            "observation",
+            "decision",
+            "preference",
+            "workflow",
+            "fact",
+            "question",
+            "blocker"
+          ],
           "default": "observation"
         },
-        "evidence": {"$ref": "#/$defs/evidenceList"},
-        "entity": {"$ref": "#/$defs/entityList"},
-        "dry_run": {"type": "boolean", "default": false}
+        "evidence": {
+          "$ref": "#/$defs/evidenceList"
+        },
+        "entity": {
+          "$ref": "#/$defs/entityList"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "akbp.source.add.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["locator"],
+      "required": [
+        "locator"
+      ],
       "properties": {
-        "locator": {"type": "string", "minLength": 1},
-        "type": {"type": "string", "default": "file"},
-        "title": {"type": "string"},
-        "evidence": {"$ref": "#/$defs/evidenceList"},
-        "dry_run": {"type": "boolean", "default": false}
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "default": "file"
+        },
+        "title": {
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidenceList"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "akbp.supersede.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["old_claim_id", "text"],
+      "required": [
+        "old_claim_id",
+        "text"
+      ],
       "properties": {
-        "old_claim_id": {"type": "string", "minLength": 1},
-        "text": {"type": "string", "minLength": 1},
-        "type": {"type": "string", "default": "observation"},
-        "evidence": {"$ref": "#/$defs/evidenceList"},
-        "entity": {"$ref": "#/$defs/entityList"},
-        "dry_run": {"type": "boolean", "default": false}
+        "old_claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "default": "observation"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidenceList"
+        },
+        "entity": {
+          "$ref": "#/$defs/entityList"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "akbp.contradict.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source_claim_id", "target_claim_id"],
+      "required": [
+        "source_claim_id",
+        "target_claim_id"
+      ],
       "properties": {
-        "source_claim_id": {"type": "string", "minLength": 1},
-        "target_claim_id": {"type": "string", "minLength": 1},
-        "evidence": {"$ref": "#/$defs/evidenceList"},
-        "dry_run": {"type": "boolean", "default": false}
+        "source_claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidenceList"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "akbp.ingest.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "default": "file"
+        },
+        "title": {
+          "type": "string"
+        },
+        "claim": {
+          "type": "string"
+        },
+        "claim_type": {
+          "type": "string",
+          "default": "observation"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "entity": {
+          "$ref": "#/$defs/entityList"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
       }
     }
   },
@@ -98,12 +224,27 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "akbp.query": {"$ref": "#/$defs/akbp.query.params"},
-        "akbp.context": {"$ref": "#/$defs/akbp.context.params"},
-        "akbp.remember": {"$ref": "#/$defs/akbp.remember.params"},
-        "akbp.source.add": {"$ref": "#/$defs/akbp.source.add.params"},
-        "akbp.supersede": {"$ref": "#/$defs/akbp.supersede.params"},
-        "akbp.contradict": {"$ref": "#/$defs/akbp.contradict.params"}
+        "akbp.query": {
+          "$ref": "#/$defs/akbp.query.params"
+        },
+        "akbp.context": {
+          "$ref": "#/$defs/akbp.context.params"
+        },
+        "akbp.remember": {
+          "$ref": "#/$defs/akbp.remember.params"
+        },
+        "akbp.source.add": {
+          "$ref": "#/$defs/akbp.source.add.params"
+        },
+        "akbp.supersede": {
+          "$ref": "#/$defs/akbp.supersede.params"
+        },
+        "akbp.contradict": {
+          "$ref": "#/$defs/akbp.contradict.params"
+        },
+        "akbp.ingest": {
+          "$ref": "#/$defs/akbp.ingest.params"
+        }
       }
     }
   }

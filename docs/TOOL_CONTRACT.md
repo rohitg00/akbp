@@ -157,6 +157,7 @@ Supported methods in the first server slice:
 - `akbp.audit`
 - `akbp.cite`
 - `akbp.source.add`
+- `akbp.ingest`
 - `akbp.supersede`
 - `akbp.contradict`
 
@@ -174,6 +175,7 @@ Request and response envelopes are specified in:
 - `akbp.context`
 - `akbp.remember`
 - `akbp.source.add`
+- `akbp.ingest`
 - `akbp.supersede`
 - `akbp.contradict`
 
@@ -209,6 +211,12 @@ Write methods support request-level dry run:
 
 ```json
 {"id":"1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths"}}
+```
+
+Importing a local file through the JSONL server uses `akbp.ingest`:
+
+```json
+{"id":"2","method":"akbp.ingest","path":".","params":{"file":"notes.md","claim":"The project ships small verified batches","claim_type":"decision"}}
 ```
 
 A dry-run write returns the planned command arguments and does not mutate the knowledge base.
