@@ -2,9 +2,24 @@
 
 ## Unreleased
 
-- Add Level 0 adoption convention with `AKBP.md` and `akbp.json`.
-- Add Knowledge Base Card schema.
-- Add Level 0 conformance check in the reference CLI.
+### Added
+
+- Add Agent Knowledge Base Protocol draft with portable artifacts for wiki pages, claims, entities, relations, sources, audit events, context packs, and knowledge base cards.
+- Add dependency-free Python reference CLI with init, remember, query, context, ingest, crystallize, source, cite, supersede, contradict, index, search, export, audit, lint, conformance, and status commands.
+- Add JSONL local tool server with capability discovery, structured errors, method schema references, dry-run write safety, and query/context/write/index/search methods.
+- Add JSON schemas for core AKBP records, context packs, tool request/response envelopes, and tool method parameters.
+- Add conformance checks through Level 3, covering file convention, structured claims/evidence, retrieval/context packs, and lifecycle relations.
+- Add SQLite FTS5 local search with incremental indexing, stale entry cleanup, safe query sanitization, and automatic index refresh after write commands when state exists.
+- Add safe local file ingest with common credential redaction, source records, imported wiki pages, lightweight signal extraction, and optional claim creation.
+- Add conservative transcript crystallization for decisions, actions, blockers, preferences, questions, and touched files with citations and duplicate skipping.
+- Add benchmark fixtures and runner for preference recall, supersession, contradiction handling, secret-safety, and real AKBP retrieval checks.
+- Add examples for Level 0, Level 1, Level 3 lifecycle records, coding-agent flow, research/personal templates, and end-to-end agent workflow.
+- Add adapter templates and docs for runtime-neutral coding-agent startup, retrieval, write, ingest, index, and citation loops.
+- Add install, schema, benchmark, tool contract, agent flow, release readiness, and release notes draft documentation.
+
+### Validation
+
+- Current release-candidate validation uses `make guard`, `make test`, `make smoke`, `make benchmark`, and `make install-smoke`.
 
 ## 2026-04-29 draft
 
