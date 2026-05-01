@@ -1,0 +1,34 @@
+{
+  "schema_version": "0.1-draft",
+  "name": "end-to-end-agent-flow",
+  "description": "End-to-end AKBP flow for ingest, remember, index, search, context, and cite",
+  "root": ".",
+  "artifacts": {
+    "wiki": "wiki/",
+    "claims": "claims/claims.jsonl",
+    "entities": "graph/entities.jsonl",
+    "relations": "graph/relations.jsonl",
+    "sources": "raw/sources/",
+    "audit": ".akbp/audit.log.jsonl"
+  },
+  "capabilities": {
+    "remember": true,
+    "retrieve": true,
+    "crystallize": false,
+    "supersede": true,
+    "audit": true,
+    "sync": false
+  },
+  "retrieval": [
+    "keyword",
+    "sqlite_fts5"
+  ],
+  "transports": [
+    "cli",
+    "jsonl-tool-server"
+  ],
+  "privacy": {
+    "default_scope": "project",
+    "secret_redaction": "required"
+  }
+}

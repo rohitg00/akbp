@@ -36,3 +36,12 @@ class ConformanceExampleTest(unittest.TestCase):
         data = json.loads(out.stdout)
         self.assertTrue(data["ok"])
         self.assertTrue(data["levels"]["3"]["ok"])
+
+    def test_end_to_end_agent_flow_example_passes(self):
+        example = ROOT / "examples" / "end-to-end-agent-flow"
+        out = run_cli("--path", str(example), "conformance", "--level", "3")
+        data = json.loads(out.stdout)
+        self.assertTrue(data["ok"])
+        out = run_cli("--path", str(example), "query", "database migrations rollback")
+        results = json.loads(out.stdout)["results"]
+        self.assertTrue(results)

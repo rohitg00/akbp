@@ -99,6 +99,7 @@ akbp/
     INSTALL.md
     SCHEMAS.md
     TOOL_CONTRACT.md
+    AGENT_FLOW.md
     STANDARDS_TRACK.md
     KNOWLEDGE_BASE_CARD.md
   spec/
@@ -115,6 +116,7 @@ akbp/
     level-0/
     level-1/
     level-3/
+    end-to-end-agent-flow/
     coding-agent/
     research/
     personal/
@@ -147,6 +149,7 @@ Draft protocol with a small installable reference CLI, conformance checks, inges
 - `examples/level-0/` shows the minimal file convention.
 - `examples/level-1/` shows structured claims with evidence.
 - `examples/level-3/` shows lifecycle relations with concrete JSONL records.
+- `examples/end-to-end-agent-flow/` shows ingest, remember, index, search, context, and cite flow.
 
 Validate them with:
 

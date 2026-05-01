@@ -1,0 +1,1 @@
+{"confidence": 0.8, "created_at": "2026-05-01T16:42:00Z", "evidence": ["source_release_note"], "id": "rel_rollback_supports_migration_batches", "relation": "references", "source": "rollback", "target": "database-migrations"}
