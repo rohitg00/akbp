@@ -70,7 +70,7 @@ python3 -m pip install .
 akbp --path ./my-kb init
 ```
 
-See `docs/INSTALL.md` for install, build, and smoke-test instructions.
+See `docs/INSTALL.md` for install, build, and smoke-test instructions. See `docs/RELEASE.md` for release readiness, validation, and early contributor guidance.
 
 ## Quickstart
 
@@ -111,6 +111,7 @@ akbp/
     ADAPTERS.md
     BENCHMARK.md
     INSTALL.md
+    RELEASE.md
     SCHEMAS.md
     TOOL_CONTRACT.md
     AGENT_FLOW.md
