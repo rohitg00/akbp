@@ -72,6 +72,20 @@ akbp --path ./my-kb init
 
 See `docs/INSTALL.md` for install, build, and smoke-test instructions.
 
+## Quickstart
+
+Run the end-to-end local flow in under five commands:
+
+```bash
+python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Capture the durable decision from this note." --claim-type decision
+python3 cli/akbp.py --path ./my-kb index --incremental
+python3 cli/akbp.py --path ./my-kb search "durable decision"
+python3 cli/akbp.py --path ./my-kb context "continue this project"
+```
+
+For a complete runnable example, see `docs/AGENT_FLOW.md` and `examples/end-to-end-agent-flow/`.
+
 ## First implementation target
 
 The narrow MVP is coding-agent memory:
