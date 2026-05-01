@@ -12,7 +12,13 @@ A generic coding-agent adapter template is available at:
 adapters/coding-agent-template/
 ```
 
-Use this template before creating runtime-specific adapters. It defines startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
+A complete runtime-neutral example adapter is available at:
+
+```text
+adapters/example-coding-agent/
+```
+
+Use the template before creating runtime-specific adapters. Use the example to confirm the minimum complete file shape. Both define startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
 
 ## Required adapter files
 

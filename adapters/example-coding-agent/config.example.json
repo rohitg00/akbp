@@ -1,0 +1,17 @@
+{
+  "adapter": "example-coding-agent",
+  "akbp": {
+    "root_discovery": ["akbp.json"],
+    "preferred_transport": "jsonl-tool-server",
+    "server_command": ["akbp-tool-server"],
+    "cli_command": "akbp",
+    "startup": {
+      "context_limit": 8,
+      "require_capability_check": true
+    },
+    "writes": {
+      "dry_run_first": true,
+      "require_approval_for_scope": ["team", "public"]
+    }
+  }
+}
