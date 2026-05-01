@@ -45,6 +45,25 @@ class RepoQualityTest(unittest.TestCase):
                 continue
             self.assertNotIn("akbp.dev", path.read_text(encoding="utf-8"), str(path.relative_to(ROOT)))
 
+    def test_adapter_templates_are_complete(self):
+        required_files = {
+            "README.md",
+            "instructions.md",
+            "config.example.json",
+            "session-start.md",
+            "session-end.md",
+            "privacy.md",
+        }
+        adapters_root = ROOT / "adapters"
+        adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
+        self.assertGreaterEqual(len(adapters), 3)
+        for adapter in adapters:
+            missing = sorted(name for name in required_files if not (adapter / name).is_file())
+            self.assertEqual(missing, [], str(adapter.relative_to(ROOT)))
+            config = json.loads((adapter / "config.example.json").read_text(encoding="utf-8"))
+            self.assertIn("adapter", config)
+            self.assertIn("akbp", config)
+
 
 if __name__ == "__main__":
     unittest.main()
