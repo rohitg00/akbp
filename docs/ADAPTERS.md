@@ -68,6 +68,21 @@ Integration style:
 - CLI/tool protocol calls
 - local workspace discovery
 
+## Contributing an adapter
+
+Use this checklist before opening a pull request:
+
+- Start from `adapters/coding-agent-template/` unless the target environment is not a coding agent.
+- Keep runtime-specific setup in adapter docs, not in the protocol spec.
+- Point the startup and shutdown loop to `docs/AGENT_FLOW.md`.
+- Use public-safe runtime names and avoid private workspace paths, tokens, screenshots, cookies, logs, or user-specific config.
+- Include `README.md`, `instructions.md`, `config.example.json`, `session-start.md`, `session-end.md`, and `privacy.md` when the runtime supports those concepts.
+- Show both read flow and write flow: retrieve context first, write cited durable records after work, then validate or index when useful.
+- Prefer `dry_run` examples for write-capable tool-server calls.
+- Keep durable output in AKBP artifacts: markdown wiki pages, JSONL claims, JSONL graph records, sources, audit events, and context packs.
+- Do not introduce a new memory format or runtime-only storage as the source of truth.
+- Run `make guard`, `make test`, `make smoke`, and `make benchmark` before submitting.
+
 ## Adapter rule
 
 Adapters must not invent their own memory format. They can add runtime-specific instructions, but durable artifacts must remain AKBP-compatible.
