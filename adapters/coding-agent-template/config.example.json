@@ -1,0 +1,15 @@
+{
+  "akbp": {
+    "root": ".",
+    "transport": "jsonl-tool-server",
+    "server_command": ["akbp-tool-server"],
+    "startup_context": {
+      "method": "akbp.context",
+      "limit": 8
+    },
+    "writes": {
+      "default_dry_run": true,
+      "require_user_approval": true
+    }
+  }
+}

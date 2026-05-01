@@ -4,6 +4,16 @@
 
 Adapters make AKBP usable from specific agent runtimes without changing the protocol.
 
+## Reference template
+
+A generic coding-agent adapter template is available at:
+
+```text
+adapters/coding-agent-template/
+```
+
+Use this template before creating runtime-specific adapters. It defines startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
+
 ## Required adapter files
 
 Each adapter should include:
