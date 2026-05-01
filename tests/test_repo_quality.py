@@ -64,6 +64,16 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn("adapter", config)
             self.assertIn("akbp", config)
 
+    def test_adapters_reference_agent_flow(self):
+        adapters_root = ROOT / "adapters"
+        adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
+        for adapter in adapters:
+            markdown_text = "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in sorted(adapter.glob("*.md"))
+            )
+            self.assertIn("docs/AGENT_FLOW.md", markdown_text, str(adapter.relative_to(ROOT)))
+
 
 if __name__ == "__main__":
     unittest.main()
