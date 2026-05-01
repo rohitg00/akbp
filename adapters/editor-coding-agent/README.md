@@ -28,3 +28,7 @@ Show memory writes as a reviewable diff-like list:
 - evidence
 - scope
 - whether it supersedes an older claim
+
+## Recommended AKBP loop
+
+Editor agents should follow `docs/AGENT_FLOW.md` while keeping writes reviewable in the UI: ingest or cite source material, propose evidence-backed claims, refresh the index, and surface citations beside retrieved context.

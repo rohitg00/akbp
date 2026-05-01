@@ -22,3 +22,7 @@ Adapters may translate runtime-specific events into AKBP calls, but durable know
 - `graph/`
 - `raw/sources/`
 - `.akbp/audit.log.jsonl`
+
+## Recommended flow
+
+Use `docs/AGENT_FLOW.md` as the default loop for runtime integrations: ingest source material, remember evidence-backed claims, refresh the index, retrieve with search/context, and cite claims when prior knowledge affects work.

@@ -28,3 +28,7 @@ After approval, send the same request with `dry_run` set to `false` or omitted.
 akbp --path . context "current task" --limit 8
 akbp --path . remember "The repo uses make smoke before releases" --type workflow --evidence Makefile
 ```
+
+## Recommended AKBP loop
+
+For substantial tasks, follow `docs/AGENT_FLOW.md`: fetch context first, use dry-run writes for new durable knowledge, refresh the index after writes, then use `akbp.search` or `akbp.context` before continuing related work.

@@ -13,3 +13,7 @@ Example request:
 ```json
 {"id":"ctx-1","method":"akbp.context","path":".","params":{"task":"implement safe writes","limit":8}}
 ```
+
+## Retrieval loop
+
+For the full startup and retrieval loop, see `docs/AGENT_FLOW.md`. Prefer `akbp.context` for task planning and `akbp.search` for targeted lookup.
