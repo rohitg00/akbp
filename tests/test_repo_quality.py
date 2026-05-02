@@ -122,10 +122,18 @@ class RepoQualityTest(unittest.TestCase):
             "## Write-mode safety",
             "akbp.capabilities",
             '"dry_run":true',
+            "request-level `dry_run:true`",
             "project-local scope",
             "redact secret-like strings",
         ]:
             self.assertIn(required, text)
+
+    def test_tool_contract_documents_crystallize_envelope(self):
+        text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        self.assertIn('"method": "akbp.crystallize_session"', text)
+        self.assertIn('"dry_run": true', text)
+        self.assertIn('"params": {', text)
+        self.assertIn('"apply": true', text)
 
     def test_tool_contract_lists_supported_jsonl_methods(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")

@@ -82,15 +82,20 @@ Input:
 
 ### akbp.crystallize_session
 
-Convert a session transcript into durable knowledge. Start with `dry_run:true`; only set `apply:true` after reviewing the summary.
+Convert a session transcript into durable knowledge. Start with request-level `dry_run:true`; only set `params.apply:true` after reviewing the summary.
 
-Input:
+Request envelope:
 
 ```json
 {
-  "transcript": "transcript.md",
-  "apply": false,
-  "dry_run": true
+  "id": "crystallize-preview",
+  "method": "akbp.crystallize_session",
+  "path": ".",
+  "dry_run": true,
+  "params": {
+    "transcript": "transcript.md",
+    "apply": true
+  }
 }
 ```
 
