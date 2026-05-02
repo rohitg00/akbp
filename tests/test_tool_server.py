@@ -135,6 +135,8 @@ class ToolServerTest(unittest.TestCase):
             line = json.loads(proc.stdout)
             self.assertTrue(line["ok"])
             self.assertTrue(line["result"]["dry_run"])
+            self.assertTrue(line["result"]["review_required"])
+            self.assertIn("redaction", line["result"]["apply_instruction"])
             self.assertTrue(line["result"]["redacted"])
             self.assertIn("claims/claims.jsonl", line["result"]["would_write"])
             self.assertFalse((kb / "claims" / "claims.jsonl").exists())

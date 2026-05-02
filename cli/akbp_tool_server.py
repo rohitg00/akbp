@@ -237,7 +237,11 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
         if code != 0:
             return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"exit_code": code, "stdout": stdout})
-        return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
+        result = parse_payload(stdout)
+        if isinstance(result, dict):
+            result.setdefault("review_required", True)
+            result.setdefault("apply_instruction", "Repeat the same request without dry_run only after reviewing redaction status, extracted signals, claim ids, and would_write paths.")
+        return {"id": request_id, "ok": True, "result": result, "error": None}
 
     if dry_run and method in WRITE_METHODS:
         return {
