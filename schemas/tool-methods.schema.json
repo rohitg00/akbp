@@ -298,6 +298,27 @@
           "minLength": 1
         }
       }
+    },
+    "akbp.crystallize_session.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transcript"
+      ],
+      "properties": {
+        "transcript": {
+          "type": "string",
+          "minLength": 1
+        },
+        "apply": {
+          "type": "boolean",
+          "default": false
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      }
     }
   },
   "type": "object",
@@ -351,6 +372,9 @@
         },
         "akbp.cite": {
           "$ref": "#/$defs/akbp.cite.params"
+        },
+        "akbp.crystallize_session": {
+          "$ref": "#/$defs/akbp.crystallize_session.params"
         }
       }
     }

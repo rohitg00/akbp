@@ -85,16 +85,15 @@ Input:
 
 ### akbp.crystallize_session
 
-Convert a session transcript into durable knowledge.
+Convert a session transcript into durable knowledge. Start with `dry_run:true`; only set `apply:true` after reviewing the summary.
 
 Input:
 
 ```json
 {
-  "transcript": "string",
-  "agent": "string",
-  "project": "string",
-  "mode": "dry_run|apply"
+  "transcript": "transcript.md",
+  "apply": false,
+  "dry_run": true
 }
 ```
 
@@ -102,11 +101,13 @@ Output:
 
 ```json
 {
-  "claims_created": 0,
-  "claims_updated": 0,
-  "pages_updated": [],
-  "relations_created": 0,
-  "warnings": []
+  "session_id": "session_...",
+  "apply": false,
+  "summary": {},
+  "page": "wiki/sessions/session_....md",
+  "source_id": null,
+  "created_claims": [],
+  "skipped_claims": []
 }
 ```
 

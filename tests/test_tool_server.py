@@ -36,7 +36,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
-            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite"]:
+            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
                 self.assertTrue(lines[0]["result"]["methods"][method]["params_schema"].endswith(f"#/$defs/{method}.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
@@ -100,6 +100,23 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(line["result"]["redacted"])
             page = kb / line["result"]["page"]
             self.assertIn("[REDACTED]", page.read_text(encoding="utf-8"))
+
+    def test_crystallize_session_method(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            transcript = Path(d) / "session.md"
+            transcript.write_text("# Session\n\nDecision: keep agent knowledge portable.\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            requests = "\n".join([
+                json.dumps({"id": "dry", "path": str(kb), "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": str(transcript), "apply": True}}),
+                json.dumps({"id": "apply", "path": str(kb), "method": "akbp.crystallize_session", "params": {"transcript": str(transcript), "apply": True}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertTrue(lines[0]["result"]["dry_run"])
+            self.assertIn("--apply", lines[0]["result"]["argv"])
+            self.assertTrue(lines[1]["ok"])
+            self.assertTrue(lines[1]["result"]["created_claims"])
 
     def test_structured_errors(self):
         requests = json.dumps({"id": "bad", "method": "akbp.missing"}) + "\n"

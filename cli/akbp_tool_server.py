@@ -34,6 +34,7 @@ WRITE_METHODS = {
     "akbp.index",
     "akbp.supersede",
     "akbp.contradict",
+    "akbp.crystallize_session",
 }
 
 METHODS: dict[str, dict[str, Any]] = {
@@ -52,6 +53,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity"]},
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence"]},
+    "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply"]},
 }
 
 
@@ -115,6 +117,7 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.ingest": ["ingest", params.get("file", ""), "--type", params.get("type", "file")],
         "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
+        "akbp.crystallize_session": ["crystallize", params.get("transcript", "")],
     }
     argv = [str(a) for a in mapping[method] if a != ""]
     if method == "akbp.index" and params.get("incremental"):
@@ -127,6 +130,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
             argv.extend(["--entity", str(entity)])
     if method in {"akbp.source.add", "akbp.ingest"} and params.get("title"):
         argv.extend(["--title", str(params["title"])])
+    if method == "akbp.crystallize_session" and params.get("apply"):
+        argv.append("--apply")
     if method == "akbp.ingest":
         if params.get("claim"):
             argv.extend(["--claim", str(params["claim"])])
