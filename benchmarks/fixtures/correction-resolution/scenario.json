@@ -1,0 +1,93 @@
+{
+  "id": "correction-resolution-001",
+  "task": "Prefer a newer correction while preserving the old claim and requiring explicit resolution before overwriting durable knowledge.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_old_design_note",
+        "type": "file",
+        "locator": "notes/old-search-plan.md",
+        "title": "Old search plan"
+      },
+      {
+        "id": "source_review_session",
+        "type": "transcript",
+        "locator": "sessions/review-correction.md",
+        "title": "Review correction session"
+      },
+      {
+        "id": "source_validation_result",
+        "type": "file",
+        "locator": "logs/search-validation.txt",
+        "title": "Search validation result"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_query_requires_exact_phrase_only",
+        "text": "The local search query parser only supports exact phrase queries.",
+        "type": "fact",
+        "status": "working",
+        "confidence": 0.45,
+        "evidence": ["source_old_design_note"],
+        "entities": ["search", "query", "parser"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_query_supports_tokenized_terms",
+        "text": "The local search query parser supports tokenized terms and quoted phrases after sanitization.",
+        "type": "fact",
+        "status": "stable",
+        "confidence": 0.88,
+        "evidence": ["source_review_session", "source_validation_result"],
+        "entities": ["search", "query", "parser", "sanitization"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_conflict_needs_resolution_note",
+        "text": "When a newer correction conflicts with an older claim, preserve both claims and add an explicit resolution note before treating the old claim as superseded.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.82,
+        "evidence": ["source_review_session"],
+        "entities": ["conflict", "resolution", "supersession"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_new_query_claim_contradicts_old",
+        "source": "claim_query_supports_tokenized_terms",
+        "target": "claim_query_requires_exact_phrase_only",
+        "relation": "contradicts",
+        "evidence": ["source_review_session", "source_validation_result"]
+      },
+      {
+        "id": "relation_resolution_handles_query_conflict",
+        "source": "claim_conflict_needs_resolution_note",
+        "target": "claim_query_supports_tokenized_terms",
+        "relation": "supports",
+        "evidence": ["source_review_session"]
+      }
+    ]
+  },
+  "query": "What should I do when a newer search parser correction conflicts with an older claim?",
+  "expected": {
+    "must_retrieve": [
+      "claim_query_supports_tokenized_terms",
+      "claim_conflict_needs_resolution_note"
+    ],
+    "must_preserve": ["claim_query_requires_exact_phrase_only"],
+    "must_flag_conflict": true,
+    "must_ask_for_resolution_without_overwrite": true,
+    "must_cite": [
+      "source_review_session",
+      "source_validation_result"
+    ],
+    "answer_should_include": [
+      "correction",
+      "conflicts",
+      "resolution"
+    ]
+  }
+}

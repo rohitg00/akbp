@@ -25,6 +25,7 @@ The scenario file includes:
 - `preference-recall`: recall a durable user preference with evidence.
 - `supersession`: prefer a newer claim while preserving the old claim.
 - `contradiction`: detect conflicting claims and require resolution.
+- `correction-resolution`: prefer a newer correction while preserving old conflicting knowledge until explicit resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
 - `session-crystallization`: retrieve workflow claims from a structured coding-agent session with citations.
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.
