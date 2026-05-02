@@ -1,4 +1,4 @@
-.PHONY: test guard smoke install-smoke benchmark validate build clean
+.PHONY: test guard smoke install-smoke benchmark-score benchmark validate build clean
 
 test:
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -21,10 +21,13 @@ install-smoke:
 	PYTHONPATH=$$TMP/pkg python3 -m akbp --path $$TMP/kb init; \
 	PYTHONPATH=$$TMP/pkg python3 -c "import akbp, akbp_tool_server; print('install ok')"
 
+benchmark-score:
+	python3 benchmarks/run_benchmarks.py --score
+
 benchmark:
 	python3 benchmarks/run_benchmarks.py --akbp
 
-validate: guard test smoke benchmark install-smoke
+validate: guard test smoke benchmark-score benchmark install-smoke
 
 build:
 	python3 -m build

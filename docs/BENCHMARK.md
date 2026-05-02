@@ -74,13 +74,19 @@ The repo includes small conformance fixtures under `examples/level-0/`, `example
 
 Benchmark scenario fixtures live under `benchmarks/fixtures/`.
 
-Run fixture validation with:
+Run deterministic fixture scoring with:
+
+```bash
+make benchmark-score
+```
+
+Run real AKBP retrieval scoring with:
 
 ```bash
 make benchmark
 ```
 
-The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. It also has a deterministic `--score` mode that checks expected retrieval, citations, conflict flags, supersession behavior, and safe-secret outcomes against fixture data.
+The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, and safe-secret outcomes against fixture data.
 
 `make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture and checks real `akbp query` and `akbp context` retrieval against expected claim ids.
 

@@ -34,6 +34,7 @@ This expands to:
 make guard
 make test
 make smoke
+make benchmark-score
 make benchmark
 make install-smoke
 ```
@@ -43,7 +44,7 @@ Expected result:
 - public reference guard passes
 - unit and conformance tests pass
 - CLI smoke flow passes
-- benchmark fixtures pass in real AKBP retrieval mode
+- benchmark fixtures pass deterministic scoring and real AKBP retrieval modes
 - install smoke verifies packaged imports and CLI entrypoint
 
 ## Manual sanity checks
