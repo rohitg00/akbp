@@ -109,9 +109,13 @@ Included benchmark fixtures:
 - preference recall
 - supersession
 - contradiction
+- correction resolution
+- import safety
+- multi-agent handoff
 - secret safety
+- session crystallization
 
-The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior. It also covers import safety, multi-agent handoff, and correction-resolution scenarios.
+The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set.
 
 ## Validation for this release candidate
 

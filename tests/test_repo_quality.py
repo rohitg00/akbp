@@ -194,7 +194,17 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("make validate", release_notes)
         self.assertIn("make benchmark-score", release_notes)
         self.assertIn("ingest dry-run preview responses", release_notes)
-        self.assertIn("import safety", release_notes)
+        for fixture in [
+            "preference recall",
+            "supersession",
+            "contradiction",
+            "correction resolution",
+            "import safety",
+            "multi-agent handoff",
+            "secret safety",
+            "session crystallization",
+        ]:
+            self.assertIn(fixture, release_notes)
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertIn("claim-text redaction", changelog)
         self.assertIn("dry-run previews", changelog)
