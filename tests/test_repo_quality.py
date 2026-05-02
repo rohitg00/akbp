@@ -143,6 +143,9 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_doc)
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_notes)
         self.assertIn("adapters/example-coding-agent/", release_notes)
+        self.assertIn("akbp.crystallize_session", release_notes)
+        self.assertIn("make validate", release_notes)
+        self.assertIn("make benchmark-score", release_notes)
 
     def test_docs_use_current_context_method_name(self):
         for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:

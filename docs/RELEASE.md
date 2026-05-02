@@ -96,9 +96,11 @@ Before tagging:
 
 ## Validation
 
+- `make validate`
 - `make guard`
 - `make test`
 - `make smoke`
+- `make benchmark-score`
 - `make benchmark`
 - `make install-smoke`
 

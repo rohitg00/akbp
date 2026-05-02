@@ -84,8 +84,9 @@ The local tool server currently supports:
 - `akbp.source.add`
 - `akbp.supersede`
 - `akbp.contradict`
+- `akbp.crystallize_session`
 
-It includes capability discovery, schema references, structured errors, dry-run write support, write-safety guidance, and local search/index tools.
+It includes capability discovery, schema references for every supported method, structured errors, dry-run write support, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
 
 ## Examples and benchmarks
 
@@ -117,9 +118,13 @@ The benchmark runner validates fixture shape and can populate a temporary AKBP k
 Run before tagging:
 
 ```bash
+make validate
+
+# expands to:
 make guard
 make test
 make smoke
+make benchmark-score
 make benchmark
 make install-smoke
 ```
