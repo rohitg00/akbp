@@ -1,0 +1,83 @@
+{
+  "id": "multi-agent-handoff-001",
+  "task": "A later coding agent should retrieve prior handoff context with citations before continuing work.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_agent_a_session",
+        "type": "transcript",
+        "locator": "sessions/agent-a-tool-server-hardening.md",
+        "title": "Agent A tool-server hardening session"
+      },
+      {
+        "id": "source_agent_b_session",
+        "type": "transcript",
+        "locator": "sessions/agent-b-adapter-docs.md",
+        "title": "Agent B adapter docs session"
+      },
+      {
+        "id": "source_validation_log",
+        "type": "file",
+        "locator": "logs/validation-make-validate.txt",
+        "title": "Validation log"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_tool_server_schema_refs_complete",
+        "text": "Agent A completed JSONL tool server schema references for every supported method.",
+        "type": "fact",
+        "status": "stable",
+        "confidence": 0.85,
+        "evidence": ["source_agent_a_session", "source_validation_log"],
+        "entities": ["tool-server", "schema", "handoff"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_adapter_docs_use_crystallize_shutdown",
+        "text": "Agent B updated adapter shutdown docs to use crystallize dry-run before apply.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.8,
+        "evidence": ["source_agent_b_session"],
+        "entities": ["adapter", "crystallize", "handoff"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_next_agent_should_run_validate",
+        "text": "The next agent continuing this handoff should run make validate before pushing changes.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_validation_log"],
+        "entities": ["handoff", "validate", "next-agent"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_adapter_depends_on_tool_schema_refs",
+        "source": "claim_adapter_docs_use_crystallize_shutdown",
+        "target": "claim_tool_server_schema_refs_complete",
+        "relation": "depends_on",
+        "evidence": ["source_agent_b_session"]
+      }
+    ]
+  },
+  "query": "What should the next agent know for this handoff before updating adapters?",
+  "expected": {
+    "must_retrieve": [
+      "claim_adapter_docs_use_crystallize_shutdown",
+      "claim_next_agent_should_run_validate"
+    ],
+    "must_cite": [
+      "source_agent_b_session",
+      "source_validation_log"
+    ],
+    "answer_should_include": [
+      "handoff",
+      "adapter",
+      "validate"
+    ]
+  }
+}
