@@ -193,6 +193,12 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("akbp.crystallize_session", release_notes)
         self.assertIn("make validate", release_notes)
         self.assertIn("make benchmark-score", release_notes)
+        self.assertIn("ingest dry-run preview responses", release_notes)
+        self.assertIn("import safety", release_notes)
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        self.assertIn("claim-text redaction", changelog)
+        self.assertIn("dry-run previews", changelog)
+        self.assertIn("import safety", changelog)
 
     def test_docs_use_current_context_method_name(self):
         for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:

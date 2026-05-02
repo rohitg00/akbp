@@ -15,7 +15,7 @@ Release candidate scope:
 - Defines a local-first knowledge base layout with `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, source records, and audit history.
 - Ships a dependency-free Python reference CLI and JSONL local tool server.
 - Adds conformance checks through Level 3: file convention, structured claims, retrieval/context packs, and lifecycle relations.
-- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, secret-safety, and end-to-end agent flow.
+- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, secret-safety, and end-to-end agent flow.
 
 ## Protocol surface
 
@@ -86,7 +86,7 @@ The local tool server currently supports:
 - `akbp.contradict`
 - `akbp.crystallize_session`
 
-It includes capability discovery, schema references for every supported method, structured errors, dry-run write support, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
+It includes capability discovery, schema references for every supported method, structured errors, dry-run write support, ingest dry-run preview responses, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
 
 ## Examples and benchmarks
 
@@ -111,7 +111,7 @@ Included benchmark fixtures:
 - contradiction
 - secret safety
 
-The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior.
+The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior. It also covers import safety, multi-agent handoff, and correction-resolution scenarios.
 
 ## Validation for this release candidate
 
@@ -136,7 +136,7 @@ make install-smoke
 - Hosted docs are not available yet.
 - Cross-device sync is specified as a future protocol area, not implemented in the reference CLI.
 - Crystallization is deliberately conservative and local.
-- Ingest is local-file oriented and does not fetch remote sources.
+- Ingest is local-file oriented and does not fetch remote sources. It now supports dry-run previews and redacts imported pages plus optional claim text before durable writes.
 - Adapter coverage is intentionally runtime-neutral first; runtime-specific adapters should start from the public template and example fixture.
 
 ## Suggested announcement angle
