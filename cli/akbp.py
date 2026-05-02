@@ -921,21 +921,44 @@ def cmd_index(args: argparse.Namespace) -> int:
     return 0
 
 
+def fts_term(token: str) -> str | None:
+    token = token.strip()
+    if not token:
+        return None
+    if token.startswith('"') and token.endswith('"'):
+        phrase = re.sub(r'[^a-zA-Z0-9_/-]+', ' ', token[1:-1]).strip()
+        return '"' + phrase.replace('"', '""') + '"' if phrase else None
+    cleaned = re.sub(r'[^a-zA-Z0-9_/-]+', '', token)
+    return '"' + cleaned.replace('"', '""') + '"' if cleaned else None
+
+
 def fts_query(query: str) -> str:
-    terms = re.findall(r'"[^"]+"|[a-zA-Z0-9_/-]+', query)
-    cleaned = []
-    operators = {"AND", "OR", "NOT", "NEAR"}
-    for term in terms:
-        term = term.strip()
-        if not term or term.upper() in operators:
+    raw_tokens = re.findall(r'"[^"]+"|[a-zA-Z0-9_/-]+', query)
+    tokens = [(token.upper(), token) for token in raw_tokens if token.strip()]
+    operators = {"AND", "OR", "NOT"}
+    has_operator = any(upper in operators for upper, _ in tokens)
+    if not has_operator:
+        cleaned = [term for _, token in tokens if (term := fts_term(token))]
+        return " OR ".join(cleaned) or '""'
+
+    parts: list[str] = []
+    expecting_term = True
+    for upper, token in tokens:
+        if upper in {"AND", "OR", "NOT"}:
+            if not expecting_term:
+                parts.append(upper)
+                expecting_term = True
             continue
-        if term.startswith('"') and term.endswith('"'):
-            phrase = re.sub(r'[^a-zA-Z0-9_/-]+', ' ', term[1:-1]).strip()
-            if phrase:
-                cleaned.append('"' + phrase.replace('"', '""') + '"')
-        else:
-            cleaned.append('"' + term.replace('"', '""') + '"')
-    return " OR ".join(cleaned) or '""'
+        term = fts_term(token)
+        if not term:
+            continue
+        if not expecting_term:
+            parts.append("OR")
+        parts.append(term)
+        expecting_term = False
+    while parts and parts[-1] in operators:
+        parts.pop()
+    return " ".join(parts) or '""'
 
 
 def cmd_search(args: argparse.Namespace) -> int:

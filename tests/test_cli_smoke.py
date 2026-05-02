@@ -55,6 +55,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(searched["fts_query"], '"Bun" OR "npm" OR "migration"')
             self.assertTrue(searched["results"])
 
+            out = run_cli("--path", str(kb), "search", "Bun AND npm")
+            searched = json.loads(out.stdout)
+            self.assertEqual(searched["fts_query"], '"Bun" AND "npm"')
+            self.assertTrue(any("Bun" in item["snippet"] for item in searched["results"]))
+
+            out = run_cli("--path", str(kb), "search", "Bun NOT migration")
+            searched = json.loads(out.stdout)
+            self.assertEqual(searched["fts_query"], '"Bun" NOT "migration"')
+            self.assertTrue(searched["results"])
+
             out = run_cli("--path", str(kb), "index", "--incremental")
             indexed_again = json.loads(out.stdout)
             self.assertGreaterEqual(indexed_again["skipped"], 1)
