@@ -105,6 +105,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(line["result"]["redacted"])
             page = kb / line["result"]["page"]
             self.assertIn("[REDACTED]", page.read_text(encoding="utf-8"))
+            claims = [json.loads(row) for row in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertNotIn("sk-example123456789", claims[0]["text"])
 
     def test_crystallize_session_method(self):
         with tempfile.TemporaryDirectory() as d:

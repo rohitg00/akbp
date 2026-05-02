@@ -145,6 +145,27 @@ class AkbpCliSmokeTest(unittest.TestCase):
             claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
             self.assertEqual(claims[0]["evidence"], [data["source_id"]])
 
+    def test_ingest_redacts_optional_claim_text(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("# Incident Note\n\nBlocker: deployment failed.\n", encoding="utf-8")
+
+            run_cli("--path", str(kb), "init")
+            out = run_cli(
+                "--path", str(kb),
+                "ingest", str(note),
+                "--claim", "Deployment failed because token=sk-example123456789 was copied into logs.",
+                "--claim-type", "warning",
+            )
+            data = json.loads(out.stdout)
+            self.assertTrue(data["ok"])
+            self.assertTrue(data["redacted"])
+            claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertIn("[REDACTED]", claims[0]["text"])
+            self.assertNotIn("sk-example123456789", claims[0]["text"])
+            self.assertNotIn("token=", claims[0]["text"])
+
     def test_crystallize_apply_creates_session_page_and_claim(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

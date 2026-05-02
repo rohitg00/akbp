@@ -486,10 +486,14 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     page.parent.mkdir(parents=True, exist_ok=True)
     page.write_text("\n".join(body), encoding="utf-8")
     created_claims = []
+    claim_redacted = False
     if args.claim:
+        raw_claim_text = args.claim.strip()
+        safe_claim_text = redact_text(raw_claim_text)
+        claim_redacted = raw_claim_text != safe_claim_text
         claim = {
-            "id": stable_id("claim", args.claim, source["id"]),
-            "text": args.claim.strip(),
+            "id": stable_id("claim", safe_claim_text, source["id"]),
+            "text": safe_claim_text,
             "type": args.claim_type,
             "status": "working",
             "confidence": args.confidence,
@@ -513,7 +517,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         "page": str(page.relative_to(base)),
         "signals": summary_items,
         "created_claims": created_claims,
-        "redacted": raw_text != safe_text,
+        "redacted": raw_text != safe_text or claim_redacted,
     }, indent=2, ensure_ascii=False))
     return 0
 
