@@ -1,0 +1,68 @@
+{
+  "id": "import-safety-001",
+  "task": "Validate that imported JSONL objects are checked and redacted for secret-like values before durable writes.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_jsonl_export",
+        "type": "file",
+        "locator": "imports/session-export.jsonl",
+        "title": "Session export JSONL"
+      }
+    ],
+    "import_objects": [
+      {
+        "kind": "source",
+        "id": "source_imported_terminal_log",
+        "type": "transcript",
+        "locator": "imports/terminal-log.md",
+        "title": "Imported terminal log",
+        "text": "Deployment failed after EXAMPLE_API_TOKEN=token-example-123456 appeared in terminal output."
+      },
+      {
+        "kind": "claim",
+        "id": "claim_imported_deploy_blocker",
+        "text": "Deployment failed after EXAMPLE_API_TOKEN=token-example-123456 appeared in terminal output.",
+        "type": "blocker",
+        "status": "working",
+        "confidence": 0.5,
+        "evidence": [
+          "source_jsonl_export"
+        ],
+        "scope": "project"
+      },
+      {
+        "kind": "claim",
+        "id": "claim_imported_safe_blocker",
+        "text": "Deployment failed after an example API token appeared in terminal output.",
+        "type": "blocker",
+        "status": "working",
+        "confidence": 0.7,
+        "evidence": [
+          "source_jsonl_export"
+        ],
+        "scope": "project"
+      }
+    ]
+  },
+  "query": "Can I import these JSONL objects into durable memory?",
+  "expected": {
+    "must_reject_import_ids": [
+      "source_imported_terminal_log",
+      "claim_imported_deploy_blocker"
+    ],
+    "must_allow_import_ids": [
+      "claim_imported_safe_blocker"
+    ],
+    "must_redact_patterns": [
+      "EXAMPLE_API_TOKEN=",
+      "token-example-123456"
+    ],
+    "safe_claim_text": "Deployment failed after a redacted example API token appeared in terminal output.",
+    "answer_should_include": [
+      "import",
+      "JSONL",
+      "redact"
+    ]
+  }
+}

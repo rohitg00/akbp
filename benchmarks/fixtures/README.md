@@ -27,5 +27,6 @@ The scenario file includes:
 - `contradiction`: detect conflicting claims and require resolution.
 - `correction-resolution`: prefer a newer correction while preserving old conflicting knowledge until explicit resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
+- `import-safety`: validate JSONL import objects for redaction or rejection before durable writes.
 - `session-crystallization`: retrieve workflow claims from a structured coding-agent session with citations.
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.

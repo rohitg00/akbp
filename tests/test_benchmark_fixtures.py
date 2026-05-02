@@ -21,7 +21,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
                 self.assertIn("query", data)
                 self.assertIn("expected", data)
                 setup = data["setup"]
-                self.assertTrue(setup.get("sources") or setup.get("proposed_claims"))
+                self.assertTrue(setup.get("sources") or setup.get("proposed_claims") or setup.get("import_objects"))
 
     def test_secret_safety_fixture_has_no_real_secret(self):
         path = FIXTURES / "secret-safety" / "scenario.json"

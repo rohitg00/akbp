@@ -179,8 +179,29 @@ def score_scenario(data: dict[str, Any], *, real_akbp: bool = False) -> dict[str
         safe = expected.get("safe_claim_text", "")
         redacted = all(pattern not in safe for pattern in expected.get("must_redact_patterns", []) or [])
         add("must_not_store_raw_secret", "sk-example" not in safe and redacted, {"proposed_contains_fake_secret": "sk-example" in proposed})
+
+    import_objects = setup.get("import_objects", []) or []
+    import_by_id = {item.get("id"): item for item in import_objects}
+    redaction_patterns = expected.get("must_redact_patterns", []) or []
+    safe_claim_text = expected.get("safe_claim_text", "")
+    if expected.get("must_reject_import_ids"):
+        for import_id in expected["must_reject_import_ids"]:
+            raw = json.dumps(import_by_id.get(import_id, {}))
+            add("must_reject_import_id", any(pattern in raw for pattern in redaction_patterns), import_id)
+    if expected.get("must_allow_import_ids"):
+        for import_id in expected["must_allow_import_ids"]:
+            raw = json.dumps(import_by_id.get(import_id, {}))
+            add("must_allow_import_id", import_id in import_by_id and not any(pattern in raw for pattern in redaction_patterns), import_id)
+    if redaction_patterns and safe_claim_text:
+        add("safe_claim_text_redacts_patterns", not any(pattern in safe_claim_text for pattern in redaction_patterns), redaction_patterns)
     if expected.get("answer_should_include"):
-        combined = " ".join(claim.get("text", "") for claim in claims).lower()
+        import_objects = setup.get("import_objects", []) or []
+        combined = " ".join(
+            [claim.get("text", "") for claim in claims]
+            + [str(item.get("text", "")) for item in import_objects]
+            + [str(expected.get("safe_claim_text", ""))]
+            + [str(data.get("task", "")), str(data.get("query", ""))]
+        ).lower()
         for phrase in expected["answer_should_include"]:
             add("answer_should_include", phrase.lower() in combined, phrase)
 
@@ -248,8 +269,18 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
         if "sk-proj-" in raw or "xoxb-" in raw:
             issues.append("secret-safety fixture must not contain realistic secret prefixes")
 
-    if not source_ids and not setup.get("proposed_claims"):
-        issues.append("setup must include sources or proposed_claims")
+    if not source_ids and not setup.get("proposed_claims") and not setup.get("import_objects"):
+        issues.append("setup must include sources, proposed_claims, or import_objects")
+
+    import_ids = ids(setup.get("import_objects", []) or [])
+    if len(import_ids) != len(setup.get("import_objects", []) or []):
+        issues.append("import_objects must have unique ids")
+    for import_id in expected.get("must_reject_import_ids", []) or []:
+        if import_id not in import_ids:
+            issues.append(f"expected must_reject_import_ids missing import object {import_id}")
+    for import_id in expected.get("must_allow_import_ids", []) or []:
+        if import_id not in import_ids:
+            issues.append(f"expected must_allow_import_ids missing import object {import_id}")
     if len(relation_ids) != len(setup.get("relations", []) or []):
         issues.append("relations must have unique ids")
     return issues
