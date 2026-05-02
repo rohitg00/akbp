@@ -37,6 +37,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             claim = json.loads(out.stdout)
             self.assertEqual(claim["type"], "decision")
+            run_cli(
+                "--path", str(kb),
+                "remember",
+                "Database migrations use small verified batches",
+                "--type", "workflow",
+                "--evidence", source["id"],
+            )
 
             out = run_cli("--path", str(kb), "query", "Bun npm")
             results = json.loads(out.stdout)["results"]
@@ -63,6 +70,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             out = run_cli("--path", str(kb), "search", "Bun NOT migration")
             searched = json.loads(out.stdout)
             self.assertEqual(searched["fts_query"], '"Bun" NOT "migration"')
+            self.assertTrue(searched["results"])
+
+            out = run_cli("--path", str(kb), "search", '"small verified" batches')
+            searched = json.loads(out.stdout)
+            self.assertEqual(searched["fts_query"], '"small verified" OR "batches"')
+            self.assertTrue(any("small verified" in item["snippet"] for item in searched["results"]))
+
+            out = run_cli("--path", str(kb), "search", "database/migrations; small_verified!")
+            searched = json.loads(out.stdout)
+            self.assertEqual(searched["fts_query"], '"database/migrations" OR "small_verified"')
             self.assertTrue(searched["results"])
 
             out = run_cli("--path", str(kb), "index", "--incremental")
