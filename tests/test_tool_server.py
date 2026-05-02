@@ -162,6 +162,7 @@ class ToolServerTest(unittest.TestCase):
     def test_invalid_params_are_structured_before_cli(self):
         requests = "\n".join([
             json.dumps({"id": "shape", "method": "akbp.search", "params": "not an object"}),
+            json.dumps({"id": "unknown", "method": "akbp.search", "params": {"query": "release", "surprise": True}}),
             json.dumps({"id": "missing", "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": ""}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
@@ -169,8 +170,12 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(lines[0]["error"]["code"], "invalid_params")
         self.assertEqual(lines[0]["error"]["message"], "params must be an object")
         self.assertEqual(lines[1]["error"]["code"], "invalid_params")
-        self.assertEqual(lines[1]["error"]["details"]["missing"], ["transcript"])
-        self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.crystallize_session.params"))
+        self.assertEqual(lines[1]["error"]["details"]["unknown"], ["surprise"])
+        self.assertIn("query", lines[1]["error"]["details"]["allowed"])
+        self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.search.params"))
+        self.assertEqual(lines[2]["error"]["code"], "invalid_params")
+        self.assertEqual(lines[2]["error"]["details"]["missing"], ["transcript"])
+        self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.crystallize_session.params"))
 
 
 if __name__ == "__main__":

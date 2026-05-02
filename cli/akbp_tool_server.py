@@ -174,6 +174,11 @@ def missing_required_params(method: str, params: dict[str, Any]) -> list[str]:
     return missing
 
 
+def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
+    allowed = set(METHODS.get(method, {}).get("params", []))
+    return sorted(name for name in params if name not in allowed)
+
+
 def handle(req: dict[str, Any]) -> dict[str, Any]:
     request_id = req.get("id")
     method = req.get("method")
@@ -187,6 +192,15 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
+
+    unknown = unknown_params(method, params)
+    if unknown:
+        return error_response(
+            request_id,
+            "invalid_params",
+            f"unknown params for {method}: {', '.join(unknown)}",
+            details={"unknown": unknown, "allowed": METHODS[method]["params"], "params_schema": method_schema_ref(method)},
+        )
 
     missing = missing_required_params(method, params)
     if missing:
