@@ -54,7 +54,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.audit": {"write": False, "params": ["limit"]},
     "akbp.cite": {"write": False, "params": ["claim_id"]},
     "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence"]},
-    "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity"]},
+    "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity", "dry_run"]},
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply"]},
@@ -202,6 +202,12 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         )
 
     argv = build_argv(method, params)
+    if dry_run and method == "akbp.ingest":
+        code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
+        if code != 0:
+            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"exit_code": code, "stdout": stdout})
+        return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
+
     if dry_run and method in WRITE_METHODS:
         return {
             "id": request_id,

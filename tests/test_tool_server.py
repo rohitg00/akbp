@@ -108,6 +108,32 @@ class ToolServerTest(unittest.TestCase):
             claims = [json.loads(row) for row in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
             self.assertNotIn("sk-example123456789", claims[0]["text"])
 
+
+    def test_ingest_dry_run_returns_redacted_preview(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("# Preview Note\n\nDecision: dry-run before import.\napi_key=sk-example123456789\n", encoding="utf-8")
+            request = json.dumps({
+                "id": "ingest-dry",
+                "path": str(kb),
+                "method": "akbp.ingest",
+                "dry_run": True,
+                "params": {
+                    "file": str(note),
+                    "claim": "Preview import after token=sk-example123456789 appears.",
+                    "claim_type": "warning",
+                },
+            }) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertTrue(line["result"]["dry_run"])
+            self.assertTrue(line["result"]["redacted"])
+            self.assertIn("claims/claims.jsonl", line["result"]["would_write"])
+            self.assertFalse((kb / "claims" / "claims.jsonl").exists())
+            self.assertFalse((kb / line["result"]["page"]).exists())
+
     def test_crystallize_session_method(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
