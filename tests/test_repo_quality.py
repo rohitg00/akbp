@@ -105,11 +105,23 @@ class RepoQualityTest(unittest.TestCase):
 
     def test_validate_target_is_documented_and_used_by_ci(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
         ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         self.assertIn("validate: guard test smoke benchmark install-smoke", makefile)
+        self.assertIn("make validate", readme)
         self.assertIn("make validate", release_doc)
         self.assertIn("make validate", ci)
+
+    def test_readme_lists_tracked_adapter_directories(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for adapter in [
+            "coding-agent-template/",
+            "example-coding-agent/",
+            "terminal-coding-agent/",
+            "editor-coding-agent/",
+        ]:
+            self.assertIn(adapter, readme)
 
 
 if __name__ == "__main__":

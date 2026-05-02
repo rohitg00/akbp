@@ -10,7 +10,7 @@ AKBP is an open, local-first protocol for agent-maintained knowledge bases. It l
 
 The repo now includes a tiny reference CLI that can initialize a knowledge base, remember claims, crystallize transcripts, query memory, and return agent-ready context packs.
 
-CI runs the public-reference guard, tests, CLI smoke flow, retrieval benchmarks, and install smoke flow on pushes and pull requests.
+CI runs `make validate`, which covers the public-reference guard, tests, CLI smoke flow, retrieval benchmarks, and install smoke flow on pushes and pull requests.
 
 ## Why
 
@@ -141,11 +141,10 @@ akbp/
     research/
     personal/
   adapters/
-    claude-code/
-    codex/
-    cursor/
-    openclaw/
-    gemini-cli/
+    coding-agent-template/
+    example-coding-agent/
+    terminal-coding-agent/
+    editor-coding-agent/
   cli/
   tool-server/
   benchmark/
@@ -162,7 +161,7 @@ AKBP is not trying to replace repository instruction files, tool protocol, or ag
 
 ## Status
 
-Draft protocol with a small installable reference CLI, conformance checks, ingest, local search, retrieval benchmarks, adapter templates, and a JSONL local tool server. The next milestones are stronger extraction, richer adapters, and incremental indexing.
+Draft protocol with a small installable reference CLI, conformance checks, ingest, local search, retrieval benchmarks, adapter templates, a complete runtime-neutral adapter example, and a JSONL local tool server. The next milestones are stronger extraction, richer runtime-specific adapters, and optional retrieval backends.
 
 ## Examples
 
