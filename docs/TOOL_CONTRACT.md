@@ -244,7 +244,7 @@ Write methods support request-level dry run:
 {"id":"1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths","type":"workflow","evidence":["release-notes.md"]}}
 ```
 
-Dry-run write responses return planned command arguments and do not mutate the knowledge base. Clients should render them as a reviewable change, not as committed memory.
+Dry-run write responses return planned command arguments and do not mutate the knowledge base. Non-ingest write dry-runs also include `review_required:true` and an `apply_instruction` telling clients to repeat the same request without `dry_run` only after user approval or trusted local policy. Clients should render them as a reviewable change, not as committed memory.
 
 Importing a local file through the JSONL server should also start with dry-run when the caller is unsure about scope or content sensitivity:
 

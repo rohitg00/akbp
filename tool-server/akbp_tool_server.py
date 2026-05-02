@@ -247,7 +247,15 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         return {
             "id": request_id,
             "ok": True,
-            "result": {"dry_run": True, "method": method, "path": path, "argv": argv, "would_write": True},
+            "result": {
+                "dry_run": True,
+                "method": method,
+                "path": path,
+                "argv": argv,
+                "would_write": True,
+                "review_required": True,
+                "apply_instruction": "Repeat the same request without dry_run only after user approval or trusted local policy.",
+            },
             "error": None,
         }
 

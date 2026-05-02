@@ -62,7 +62,10 @@ class ToolServerTest(unittest.TestCase):
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
             self.assertTrue(all(line["ok"] for line in lines))
             self.assertTrue(lines[0]["result"]["dry_run"])
+            self.assertTrue(lines[0]["result"]["review_required"])
+            self.assertIn("approval", lines[0]["result"]["apply_instruction"])
             self.assertTrue(lines[1]["result"]["dry_run"])
+            self.assertTrue(lines[1]["result"]["review_required"])
             self.assertEqual(lines[1]["result"]["method"], "akbp.source.add")
             self.assertEqual(lines[2]["result"]["type"], "file")
             self.assertEqual(lines[3]["result"]["type"], "fact")
