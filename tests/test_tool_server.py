@@ -36,6 +36,11 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
+            examples = lines[0]["result"]["examples"]
+            crystallize_examples = [item for item in examples if item["method"] == "akbp.crystallize_session"]
+            self.assertTrue(crystallize_examples)
+            self.assertTrue(crystallize_examples[0]["dry_run"])
+            self.assertTrue(crystallize_examples[0]["params"]["apply"])
             for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
                 self.assertTrue(lines[0]["result"]["methods"][method]["params_schema"].endswith(f"#/$defs/{method}.params"))
             self.assertEqual(lines[1]["id"], "1")
