@@ -460,17 +460,41 @@ def heading_summary(text: str, limit: int = 12) -> list[str]:
 
 def cmd_ingest(args: argparse.Namespace) -> int:
     base = root(args.path)
-    ensure_dirs(base)
     source_path = Path(args.file).resolve()
     if not source_path.exists() or not source_path.is_file():
         print(json.dumps({"ok": False, "error": f"file not found: {source_path}"}, indent=2), file=sys.stderr)
         return 1
     raw_text = source_path.read_text(encoding="utf-8", errors="ignore")
     safe_text = redact_text(raw_text)
-    source = add_source_record(base, str(source_path), args.type, args.title or source_path.name, args.scope)
+    source_id = stable_id("source", args.type, str(source_path))
     page = imported_page_path(base, source_path)
     title = args.title or source_path.stem.replace("-", " ").replace("_", " ").title()
     summary_items = heading_summary(safe_text)
+    raw_claim_text = args.claim.strip() if args.claim else ""
+    safe_claim_text = redact_text(raw_claim_text) if raw_claim_text else ""
+    claim_redacted = bool(raw_claim_text and raw_claim_text != safe_claim_text)
+    claim_id = stable_id("claim", safe_claim_text, source_id) if safe_claim_text else None
+    if args.dry_run:
+        print(json.dumps({
+            "ok": True,
+            "dry_run": True,
+            "source_id": source_id,
+            "page": str(page.relative_to(base)),
+            "signals": summary_items,
+            "created_claims": [claim_id] if claim_id else [],
+            "redacted": raw_text != safe_text or claim_redacted,
+            "would_write": [
+                "raw/sources/sources.jsonl",
+                str(page.relative_to(base)),
+                *(["claims/claims.jsonl"] if claim_id else []),
+                "logs/log.md",
+                "logs/audit.jsonl",
+            ],
+        }, indent=2, ensure_ascii=False))
+        return 0
+
+    ensure_dirs(base)
+    source = add_source_record(base, str(source_path), args.type, args.title or source_path.name, args.scope)
     body = [
         f"# Imported Source: {title}",
         "",
@@ -486,11 +510,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     page.parent.mkdir(parents=True, exist_ok=True)
     page.write_text("\n".join(body), encoding="utf-8")
     created_claims = []
-    claim_redacted = False
-    if args.claim:
-        raw_claim_text = args.claim.strip()
-        safe_claim_text = redact_text(raw_claim_text)
-        claim_redacted = raw_claim_text != safe_claim_text
+    if safe_claim_text:
         claim = {
             "id": stable_id("claim", safe_claim_text, source["id"]),
             "text": safe_claim_text,
@@ -1166,6 +1186,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--claim-type", default="observation", choices=["fact", "decision", "preference", "workflow", "observation", "question", "warning"])
     s.add_argument("--confidence", default=0.5, type=float)
     s.add_argument("--entity", action="append")
+    s.add_argument("--dry-run", action="store_true", help="preview redacted import writes without changing the knowledge base")
     s.set_defaults(func=cmd_ingest)
 
     s = sub.add_parser("crystallize")

@@ -166,6 +166,28 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertNotIn("sk-example123456789", claims[0]["text"])
             self.assertNotIn("token=", claims[0]["text"])
 
+
+    def test_ingest_dry_run_previews_redacted_writes_without_creating_kb(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("# Import Preview\n\nDecision: preview before write.\napi_key=sk-example123456789\n", encoding="utf-8")
+
+            out = run_cli(
+                "--path", str(kb),
+                "ingest", str(note),
+                "--claim", "Preview import with token=sk-example123456789 before write.",
+                "--dry-run",
+            )
+            data = json.loads(out.stdout)
+            self.assertTrue(data["ok"])
+            self.assertTrue(data["dry_run"])
+            self.assertTrue(data["redacted"])
+            self.assertIn("claims/claims.jsonl", data["would_write"])
+            self.assertFalse((kb / "raw" / "sources" / "sources.jsonl").exists())
+            self.assertFalse((kb / "claims" / "claims.jsonl").exists())
+            self.assertFalse((kb / data["page"]).exists())
+
     def test_crystallize_apply_creates_session_page_and_claim(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
