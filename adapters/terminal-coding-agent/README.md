@@ -37,4 +37,4 @@ akbp --path . remember "The repo uses make smoke before releases" --type workflo
 
 ## Recommended AKBP loop
 
-For substantial tasks, follow `docs/AGENT_FLOW.md`: fetch context first, use dry-run writes for new durable knowledge, refresh the index after writes, then use `akbp.search` or `akbp.context` before continuing related work.
+For substantial tasks, follow `docs/AGENT_FLOW.md`: fetch context first, start source imports with ingest dry-run, use dry-run writes for new durable knowledge, refresh the index after writes, then use `akbp.search` or `akbp.context` before continuing related work.

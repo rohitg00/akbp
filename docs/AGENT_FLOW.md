@@ -6,6 +6,7 @@ This page shows a minimal end-to-end AKBP workflow for agents.
 
 ```bash
 python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Database migrations ship in small verified batches." --claim-type decision --dry-run
 python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Database migrations ship in small verified batches." --claim-type decision
 python3 cli/akbp.py --path ./my-kb index --incremental
 python3 cli/akbp.py --path ./my-kb search "database migrations rollback"
@@ -13,9 +14,11 @@ python3 cli/akbp.py --path ./my-kb context "prepare the next migration release"
 python3 cli/akbp.py --path ./my-kb cite claim_small_verified_migrations
 ```
 
+The first ingest command is a preview. Review the redaction status, extracted signals, claim ids, and would-write paths before repeating it without `--dry-run`.
+
 ## JSONL tool-server flow
 
-Start write-capable calls with dry-run when the runtime does not already have durable-memory approval:
+Start write-capable calls with dry-run when the runtime does not already have durable-memory approval. For `akbp.ingest`, the dry-run response returns the same redacted preview fields as the CLI preview:
 
 ```json
 {"id":"1","method":"akbp.ingest","path":"./my-kb","dry_run":true,"params":{"file":"notes.md","claim":"Database migrations ship in small verified batches.","claim_type":"decision"}}
@@ -46,7 +49,8 @@ After review or approval, apply the same crystallization and refresh the index:
 ## Safety notes
 
 - Run write methods with `dry_run: true` when an agent is unsure.
-- Ingest redacts common token and key patterns before writing imported pages.
+- Start source imports with `akbp ingest --dry-run` or JSONL `akbp.ingest` plus request-level `dry_run:true`, then apply only after review.
+- Ingest redacts common token and key patterns before writing imported pages and optional claims.
 - Claims should cite source IDs, not uncited memory.
 - Local indexes are engine-owned state and can be rebuilt from JSONL and markdown artifacts.
 

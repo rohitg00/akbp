@@ -167,6 +167,19 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn('"dry_run":true', text)
         self.assertIn('"apply":true', text)
         self.assertIn("After review or approval", text)
+        self.assertIn("akbp ingest --dry-run", text)
+        self.assertIn("redaction status", text)
+        self.assertIn("would-write paths", text)
+
+    def test_adapter_docs_start_ingest_with_dry_run(self):
+        for rel in [
+            "adapters/coding-agent-template/README.md",
+            "adapters/editor-coding-agent/README.md",
+            "adapters/terminal-coding-agent/README.md",
+            "adapters/coding-agent-template/session-end.md",
+        ]:
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertIn("ingest dry-run", text, rel)
 
     def test_release_docs_match_package_version(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")

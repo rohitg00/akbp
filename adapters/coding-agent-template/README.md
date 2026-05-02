@@ -25,4 +25,4 @@ Adapters may translate runtime-specific events into AKBP calls, but durable know
 
 ## Recommended flow
 
-Use `docs/AGENT_FLOW.md` as the default loop for runtime integrations: ingest source material, retrieve with search/context, run `akbp.crystallize_session` for transcript-backed session memory with dry-run preview, refresh the index, and cite claims when prior knowledge affects work.
+Use `docs/AGENT_FLOW.md` as the default loop for runtime integrations: preview source imports with ingest dry-run, apply approved imports, retrieve with search/context, run `akbp.crystallize_session` for transcript-backed session memory with dry-run preview, refresh the index, and cite claims when prior knowledge affects work.

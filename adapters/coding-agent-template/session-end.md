@@ -23,4 +23,4 @@ Example direct claim dry-run request:
 
 ## Write loop
 
-For the full write flow, see `docs/AGENT_FLOW.md`. Prefer source-backed `akbp.ingest` or transcript-backed `akbp.crystallize_session`, then refresh the index with `akbp.index` when the integration does not auto-refresh it.
+For the full write flow, see `docs/AGENT_FLOW.md`. Prefer source-backed `akbp.ingest` with ingest dry-run preview first, or transcript-backed `akbp.crystallize_session`, then refresh the index with `akbp.index` when the integration does not auto-refresh it.

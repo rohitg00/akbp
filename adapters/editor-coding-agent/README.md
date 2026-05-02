@@ -37,4 +37,4 @@ Show memory writes as a reviewable diff-like list:
 
 ## Recommended AKBP loop
 
-Editor agents should follow `docs/AGENT_FLOW.md` while keeping writes reviewable in the UI: ingest or cite source material, propose evidence-backed claims, refresh the index, and surface citations beside retrieved context.
+Editor agents should follow `docs/AGENT_FLOW.md` while keeping writes reviewable in the UI: preview source imports with ingest dry-run, apply approved imports or cite source material, propose evidence-backed claims, refresh the index, and surface citations beside retrieved context.
