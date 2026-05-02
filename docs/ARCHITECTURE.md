@@ -186,26 +186,34 @@ all destructive operations reversible
 akbp init
 akbp ingest <file|url|folder>
 akbp query "what do we know about X?"
+akbp context "continue this task"
 akbp remember "fact or observation"
 akbp crystallize <transcript.md>
+akbp index --incremental
+akbp search "what changed?"
 akbp lint
-akbp graph <entity>
-akbp export --format markdown|json
+akbp export
 ```
 
 ### tool protocol
 
 ```text
+akbp.capabilities
+akbp.status
+akbp.query
+akbp.context
+akbp.index
 akbp.search
-akbp.get_context
 akbp.remember
-akbp.update_claim
-akbp.link_entities
-akbp.crystallize_session
-akbp.lint
+akbp.conformance
+akbp.export
+akbp.audit
 akbp.cite
+akbp.source.add
+akbp.ingest
 akbp.supersede
-akbp.archive
+akbp.contradict
+akbp.crystallize_session
 ```
 
 ### Adapter contract

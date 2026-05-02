@@ -106,6 +106,7 @@ class RepoQualityTest(unittest.TestCase):
     def test_tool_contract_lists_supported_jsonl_methods(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         self.assertNotIn("akbp.get_context", text)
+        self.assertNotIn("### akbp.archive", text)
         for method in [
             "akbp.capabilities",
             "akbp.status",
@@ -142,6 +143,12 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_doc)
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_notes)
         self.assertIn("adapters/example-coding-agent/", release_notes)
+
+    def test_docs_use_current_context_method_name(self):
+        for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertNotIn("akbp.get_context", text, rel)
+            self.assertIn("akbp.context", text, rel)
 
     def test_cli_readme_documents_crystallize_preview(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")

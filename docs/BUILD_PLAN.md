@@ -92,12 +92,18 @@ Expose the CLI functionality through tool calls.
 Minimum tools:
 
 ```text
+akbp.capabilities
+akbp.status
+akbp.query
+akbp.context
+akbp.index
 akbp.search
-akbp.get_context
 akbp.remember
-akbp.crystallize_session
-akbp.lint
+akbp.export
+akbp.audit
 akbp.cite
+akbp.ingest
+akbp.crystallize_session
 ```
 
 Definition of done:

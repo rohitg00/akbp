@@ -116,13 +116,13 @@ Return evidence for a claim or answer.
 
 Mark an old claim as replaced by a newer claim.
 
-### akbp.lint
+### akbp.conformance
 
-Run health checks.
+Run protocol conformance checks for a requested level.
 
-### akbp.archive
+### akbp.audit
 
-Archive low-value or stale claims without deleting evidence.
+Return recent audit events.
 
 ## Safety defaults
 
@@ -161,6 +161,8 @@ Supported methods in the first server slice:
 - `akbp.supersede`
 - `akbp.contradict`
 - `akbp.crystallize_session`
+
+The CLI also has local-only commands such as `akbp lint`; those are not JSONL server methods unless listed above.
 
 Request and response envelopes are specified in:
 
