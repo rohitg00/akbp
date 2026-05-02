@@ -147,7 +147,7 @@ akbp/
     editor-coding-agent/
   cli/
   tool-server/
-  benchmark/
+  benchmarks/
 ```
 
 ## Relationship to other protocols

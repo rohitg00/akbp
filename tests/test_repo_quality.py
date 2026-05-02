@@ -248,6 +248,15 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(adapter, readme)
 
+    def test_readme_and_release_docs_use_current_layout(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        self.assertIn("benchmarks/", readme)
+        self.assertNotIn("  benchmark/", readme)
+        self.assertIn("benchmarks/fixtures/", release_doc)
+        self.assertIn("dry-run", release_doc)
+        self.assertIn("adapters/coding-agent-template/", release_doc)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -49,7 +49,7 @@ Expected result:
 
 ## Manual sanity checks
 
-Run the five-command quickstart from `README.md` in a temporary directory.
+Run the five-command quickstart from `README.md` in a temporary directory. Because ingest is preview-first for agents, review the `--dry-run` preview before applying imports.
 
 Run the end-to-end example:
 
@@ -59,7 +59,18 @@ python3 cli/akbp.py --path examples/end-to-end-agent-flow query "database migrat
 python3 cli/akbp.py --path examples/end-to-end-agent-flow context "prepare migration release"
 ```
 
-Run the JSONL tool server examples from `docs/TOOL_CONTRACT.md`.
+Run the JSONL tool server examples from `docs/TOOL_CONTRACT.md`, starting write-capable examples with request-level `dry_run: true` before applying writes.
+
+## Artifact sanity checks
+
+Before tagging, inspect the repository layout in `README.md` and make sure documented directories match tracked paths. Current adapter directories are:
+
+- `adapters/coding-agent-template/`
+- `adapters/example-coding-agent/`
+- `adapters/terminal-coding-agent/`
+- `adapters/editor-coding-agent/`
+
+Current benchmark fixtures live under `benchmarks/fixtures/`, not a generated local benchmark output directory.
 
 ## Public repo guardrails
 
