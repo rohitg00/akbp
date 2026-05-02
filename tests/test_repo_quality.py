@@ -30,7 +30,23 @@ class RepoQualityTest(unittest.TestCase):
         error_schema = response_schema["properties"]["error"]["anyOf"][1]
         self.assertEqual(error_schema["required"], ["code", "message"])
         defs = method_schema["$defs"]
-        for name in ["akbp.query.params", "akbp.context.params", "akbp.index.params", "akbp.search.params", "akbp.remember.params", "akbp.source.add.params", "akbp.ingest.params", "akbp.supersede.params", "akbp.contradict.params"]:
+        for name in [
+            "akbp.capabilities.params",
+            "akbp.status.params",
+            "akbp.query.params",
+            "akbp.context.params",
+            "akbp.index.params",
+            "akbp.search.params",
+            "akbp.remember.params",
+            "akbp.source.add.params",
+            "akbp.ingest.params",
+            "akbp.supersede.params",
+            "akbp.contradict.params",
+            "akbp.conformance.params",
+            "akbp.export.params",
+            "akbp.audit.params",
+            "akbp.cite.params",
+        ]:
             self.assertIn(name, defs)
 
     def test_markdown_pages_start_with_heading_not_frontmatter(self):

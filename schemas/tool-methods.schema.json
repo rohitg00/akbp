@@ -245,6 +245,59 @@
           "$ref": "#/$defs/limit"
         }
       }
+    },
+    "akbp.capabilities.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    },
+    "akbp.status.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    },
+    "akbp.conformance.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "default": "0"
+        }
+      }
+    },
+    "akbp.export.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    },
+    "akbp.audit.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "$ref": "#/$defs/limit"
+        }
+      }
+    },
+    "akbp.cite.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     }
   },
   "type": "object",
@@ -280,6 +333,24 @@
         },
         "akbp.contradict": {
           "$ref": "#/$defs/akbp.contradict.params"
+        },
+        "akbp.capabilities": {
+          "$ref": "#/$defs/akbp.capabilities.params"
+        },
+        "akbp.status": {
+          "$ref": "#/$defs/akbp.status.params"
+        },
+        "akbp.conformance": {
+          "$ref": "#/$defs/akbp.conformance.params"
+        },
+        "akbp.export": {
+          "$ref": "#/$defs/akbp.export.params"
+        },
+        "akbp.audit": {
+          "$ref": "#/$defs/akbp.audit.params"
+        },
+        "akbp.cite": {
+          "$ref": "#/$defs/akbp.cite.params"
         }
       }
     }

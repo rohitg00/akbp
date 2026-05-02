@@ -22,7 +22,7 @@ METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 
 
 def method_schema_ref(method: str) -> str | None:
-    if method in {"akbp.query", "akbp.context", "akbp.index", "akbp.search", "akbp.remember", "akbp.source.add", "akbp.ingest", "akbp.supersede", "akbp.contradict"}:
+    if method in METHODS:
         return f"{METHODS_SCHEMA}#/$defs/{method}.params"
     return None
 

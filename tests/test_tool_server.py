@@ -35,10 +35,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.ingest", lines[0]["result"]["methods"])
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
-            self.assertTrue(lines[0]["result"]["methods"]["akbp.remember"]["params_schema"].endswith("#/$defs/akbp.remember.params"))
-            self.assertTrue(lines[0]["result"]["methods"]["akbp.ingest"]["params_schema"].endswith("#/$defs/akbp.ingest.params"))
-            self.assertTrue(lines[0]["result"]["methods"]["akbp.index"]["params_schema"].endswith("#/$defs/akbp.index.params"))
-            self.assertTrue(lines[0]["result"]["methods"]["akbp.search"]["params_schema"].endswith("#/$defs/akbp.search.params"))
+            self.assertIn("akbp.audit", lines[0]["result"]["methods"])
+            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite"]:
+                self.assertTrue(lines[0]["result"]["methods"][method]["params_schema"].endswith(f"#/$defs/{method}.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
             self.assertEqual(lines[2]["id"], "2")
