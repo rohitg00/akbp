@@ -12,6 +12,14 @@ A release should identify:
 - supported JSONL tool-server methods
 - known limitations
 
+Current release-candidate scope:
+
+- protocol draft: initial public draft
+- reference CLI version: `0.1.0` from `pyproject.toml`
+- supported conformance levels: Level 0 through Level 3
+- JSONL tool server: local stdio JSONL request/response server
+- package status: alpha
+
 ## Required local checks
 
 Run the full verification set from the repository root:

@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -84,6 +85,13 @@ class RepoQualityTest(unittest.TestCase):
             "redact secret-like strings",
         ]:
             self.assertIn(required, text)
+
+    def test_release_docs_match_package_version(self):
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        match = re.search(r'^version = "([^"]+)"', pyproject, re.MULTILINE)
+        self.assertIsNotNone(match)
+        self.assertIn(f"reference CLI version: `{match.group(1)}`", release_doc)
 
 
 if __name__ == "__main__":
