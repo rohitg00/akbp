@@ -56,6 +56,19 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply"]},
 }
 
+REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
+    "akbp.query": ("query",),
+    "akbp.context": ("task",),
+    "akbp.search": ("query",),
+    "akbp.remember": ("text",),
+    "akbp.cite": ("claim_id",),
+    "akbp.source.add": ("locator",),
+    "akbp.ingest": ("file",),
+    "akbp.supersede": ("old_claim_id", "text"),
+    "akbp.contradict": ("source_claim_id", "target_claim_id"),
+    "akbp.crystallize_session": ("transcript",),
+}
+
 
 def run_cli(path: str, argv: list[str]) -> tuple[int, str, str]:
     out = io.StringIO()
@@ -151,19 +164,37 @@ def parse_payload(stdout: str) -> Any:
         return stdout
 
 
+def missing_required_params(method: str, params: dict[str, Any]) -> list[str]:
+    missing = []
+    for name in REQUIRED_PARAMS.get(method, ()):
+        value = params.get(name)
+        if value is None or (isinstance(value, str) and not value.strip()):
+            missing.append(name)
+    return missing
+
+
 def handle(req: dict[str, Any]) -> dict[str, Any]:
     request_id = req.get("id")
     method = req.get("method")
     path = str(req.get("path", "."))
     params = req.get("params", {}) or {}
-    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
 
     if not isinstance(params, dict):
         return error_response(request_id, "invalid_params", "params must be an object")
+    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
     if method == "akbp.capabilities":
         return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
+
+    missing = missing_required_params(method, params)
+    if missing:
+        return error_response(
+            request_id,
+            "invalid_params",
+            f"missing required params for {method}: {', '.join(missing)}",
+            details={"missing": missing, "params_schema": method_schema_ref(method)},
+        )
 
     argv = build_argv(method, params)
     if dry_run and method in WRITE_METHODS:
