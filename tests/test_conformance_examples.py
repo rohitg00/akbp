@@ -45,3 +45,15 @@ class ConformanceExampleTest(unittest.TestCase):
         out = run_cli("--path", str(example), "query", "database migrations rollback")
         results = json.loads(out.stdout)["results"]
         self.assertTrue(results)
+
+    def test_coding_agent_structured_transcript_crystallizes(self):
+        transcript = ROOT / "examples" / "coding-agent" / "structured-session-transcript.md"
+        out = run_cli("--path", str(ROOT / "examples" / "level-0"), "crystallize", str(transcript))
+        data = json.loads(out.stdout)
+        summary = data["summary"]
+        self.assertIn("Use the JSONL tool server as the adapter boundary for local coding agents.", summary["decisions"])
+        self.assertIn("Prefer dry-run memory writes before applying durable claims.", summary["preferences"])
+        self.assertIn("hosted docs cannot use a protocol domain until it serves real schema files.", summary["blockers"])
+        self.assertIn("Update docs/AGENT_FLOW.md after changing the session-end workflow.", summary["actions"])
+        self.assertIn("Should runtime-specific adapters live in this repo or separate packages?", summary["questions"])
+        self.assertIn("adapters/coding-agent-template/session-end.md", summary["files"])
