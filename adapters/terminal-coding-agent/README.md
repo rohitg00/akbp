@@ -14,10 +14,16 @@ It uses the AKBP JSONL tool server when available and falls back to the AKBP CLI
 
 ## Write flow
 
-Use dry-run first unless the user already approved durable memory writes.
+Use dry-run first unless the user already approved durable memory writes. Prefer transcript-backed crystallization at session end:
 
 ```json
-{"id":"remember-dry-run","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"The repo uses make smoke before releases","type":"workflow","evidence":["Makefile"]}}
+{"id":"terminal-crystallize","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+```
+
+Use direct claims for small standalone facts:
+
+```json
+{"id":"remember-dry-run","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"The repo uses make validate before releases","type":"workflow","evidence":["Makefile"]}}
 ```
 
 After approval, send the same request with `dry_run` set to `false` or omitted.

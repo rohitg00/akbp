@@ -13,7 +13,13 @@ The adapter keeps AKBP as the durable knowledge format while letting the editor 
 
 ## Write flow
 
-Editor agents should not silently write durable memory. Use dry-run for proposed writes and ask for approval before applying them.
+Editor agents should not silently write durable memory. Use dry-run for proposed writes and ask for approval before applying them. Prefer transcript-backed crystallization for accepted session summaries:
+
+```json
+{"id":"editor-crystallize","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+```
+
+Use direct claims for small standalone facts:
 
 ```json
 {"id":"pref-dry-run","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Prefer small verified commits over large unvalidated changes","type":"preference","evidence":["session-summary.md"]}}

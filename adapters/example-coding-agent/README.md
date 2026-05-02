@@ -14,10 +14,16 @@ It is intentionally runtime-neutral. Copy it when starting a new adapter, then r
 
 ## Write flow
 
-Use dry-run first:
+Use dry-run first. Prefer transcript-backed crystallization when a session summary exists:
 
 ```json
-{"id":"example-write","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"The project validates releases with make smoke","type":"workflow","evidence":["Makefile"]}}
+{"id":"example-crystallize","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+```
+
+Use direct claims when there is no transcript or summary to crystallize:
+
+```json
+{"id":"example-write","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"The project validates releases with make validate","type":"workflow","evidence":["Makefile"]}}
 ```
 
 Apply only after review or explicit approval.
