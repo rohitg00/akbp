@@ -74,6 +74,17 @@ class RepoQualityTest(unittest.TestCase):
             )
             self.assertIn("docs/AGENT_FLOW.md", markdown_text, str(adapter.relative_to(ROOT)))
 
+    def test_tool_contract_documents_write_safety(self):
+        text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        for required in [
+            "## Write-mode safety",
+            "akbp.capabilities",
+            '"dry_run":true',
+            "project-local scope",
+            "redact secret-like strings",
+        ]:
+            self.assertIn(required, text)
+
 
 if __name__ == "__main__":
     unittest.main()

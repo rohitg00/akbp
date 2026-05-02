@@ -246,4 +246,3 @@ Agents can also manage the local search index and query it:
 {"id":"4","method":"akbp.search","path":".","params":{"query":"rollback release","limit":5}}
 ```
 
-A dry-run write returns the planned command arguments and does not mutate the knowledge base.
