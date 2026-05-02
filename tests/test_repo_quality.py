@@ -106,10 +106,12 @@ class RepoQualityTest(unittest.TestCase):
     def test_validate_target_is_documented_and_used_by_ci(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        install_doc = (ROOT / "docs" / "INSTALL.md").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
         ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         self.assertIn("validate: guard test smoke benchmark install-smoke", makefile)
         self.assertIn("make validate", readme)
+        self.assertIn("make validate", install_doc)
         self.assertIn("make validate", release_doc)
         self.assertIn("make validate", ci)
 

@@ -76,12 +76,12 @@ akbp-tool-server  JSONL local tool server
 
 ## Verify
 
-Run the local checks before publishing or tagging a release:
+Run the full local validation set before publishing or tagging a release:
 
 ```bash
-make test
-make guard
-make smoke
+make validate
 ```
 
-`make guard` checks that public docs and paths avoid known placeholder or restricted references.
+`make validate` runs the public-reference guard, unit and conformance tests, CLI smoke flow, retrieval benchmarks, and install smoke flow.
+
+For faster local iteration, run individual targets such as `make test`, `make guard`, or `make smoke`.
