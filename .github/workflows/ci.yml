@@ -23,17 +23,5 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Guard public references
-        run: make guard
-
-      - name: Run tests
-        run: make test
-
-      - name: Run CLI smoke flow
-        run: make smoke
-
-      - name: Run retrieval benchmarks
-        run: make benchmark
-
-      - name: Run install smoke flow
-        run: make install-smoke
+      - name: Run full validation
+        run: make validate

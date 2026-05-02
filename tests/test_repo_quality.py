@@ -103,6 +103,14 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_notes)
         self.assertIn("adapters/example-coding-agent/", release_notes)
 
+    def test_validate_target_is_documented_and_used_by_ci(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertIn("validate: guard test smoke benchmark install-smoke", makefile)
+        self.assertIn("make validate", release_doc)
+        self.assertIn("make validate", ci)
+
 
 if __name__ == "__main__":
     unittest.main()

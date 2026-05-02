@@ -25,6 +25,12 @@ Current release-candidate scope:
 Run the full verification set from the repository root:
 
 ```bash
+make validate
+```
+
+This expands to:
+
+```bash
 make guard
 make test
 make smoke
