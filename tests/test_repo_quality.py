@@ -120,6 +120,12 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_notes)
         self.assertIn("adapters/example-coding-agent/", release_notes)
 
+    def test_cli_readme_documents_crystallize_preview(self):
+        text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("akbp crystallize transcript.md` previews", text)
+        self.assertIn("akbp crystallize transcript.md --apply", text)
+        self.assertIn("without writing durable artifacts", text)
+
     def test_validate_target_is_documented_and_used_by_ci(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

@@ -34,6 +34,7 @@ python3 cli/akbp.py --path ./my-kb supersede claim_123 "Use the stdlib CLI until
 python3 cli/akbp.py --path ./my-kb contradict claim_123 claim_456 --evidence source_123
 python3 cli/akbp.py --path ./my-kb conformance --level 3
 python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "The project ships small verified batches." --claim-type decision
+python3 cli/akbp.py --path ./my-kb crystallize transcript.md
 python3 cli/akbp.py --path ./my-kb crystallize transcript.md --apply
 python3 cli/akbp.py --path ./my-kb lint
 ```
@@ -46,7 +47,9 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 ## Crystallize
 
-`akbp crystallize transcript.md --apply` turns a session transcript into:
+`akbp crystallize transcript.md` previews extracted decisions, actions, blockers, preferences, questions, and file references without writing durable artifacts.
+
+`akbp crystallize transcript.md --apply` turns the reviewed summary into:
 
 - a session page under `wiki/sessions/`
 - a transcript source record under `raw/sources/sources.jsonl`
