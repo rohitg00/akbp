@@ -46,6 +46,7 @@ Expected result:
 - CLI smoke flow passes
 - benchmark fixtures pass deterministic scoring and real AKBP retrieval modes
 - install smoke verifies packaged imports and CLI entrypoint
+- source distribution manifest includes protocol docs, schemas, examples, adapters, and benchmark fixtures
 
 ## Manual sanity checks
 
@@ -80,6 +81,7 @@ Before tagging:
 - public docs must avoid non-resolving future domains
 - markdown docs must start with `# `
 - generated local indexes, build artifacts, and temporary reports must stay out of git
+- `MANIFEST.in` includes release artifacts without pulling generated state or temporary files
 - examples must not contain real secrets or realistic credential prefixes
 
 ## Release notes template

@@ -65,6 +65,8 @@ python3 -m build
 
 Generated files appear in `dist/`.
 
+The source distribution includes the protocol docs, schemas, examples, adapters, and benchmark fixtures via `MANIFEST.in`. The installed console scripts remain the dependency-free reference CLI and JSONL tool server.
+
 ## Console commands
 
 The package installs two console commands:

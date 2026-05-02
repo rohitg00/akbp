@@ -257,6 +257,15 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("dry-run", release_doc)
         self.assertIn("adapters/coding-agent-template/", release_doc)
 
+    def test_source_distribution_manifest_includes_protocol_artifacts(self):
+        manifest = (ROOT / "MANIFEST.in").read_text(encoding="utf-8")
+        install_doc = (ROOT / "docs" / "INSTALL.md").read_text(encoding="utf-8")
+        release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        for path in ["docs", "spec", "schemas", "examples", "adapters", "benchmarks", "tool-server"]:
+            self.assertIn(path, manifest)
+        self.assertIn("MANIFEST.in", install_doc)
+        self.assertIn("MANIFEST.in", release_doc)
+
 
 if __name__ == "__main__":
     unittest.main()
