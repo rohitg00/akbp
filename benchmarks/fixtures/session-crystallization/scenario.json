@@ -1,0 +1,77 @@
+{
+  "id": "session-crystallization-001",
+  "task": "Retrieve durable knowledge crystallized from a structured coding-agent session.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_structured_session_001",
+        "type": "transcript",
+        "locator": "sessions/structured-coding-agent-session.md",
+        "title": "Structured coding-agent session"
+      },
+      {
+        "id": "source_agent_flow_doc",
+        "type": "file",
+        "locator": "docs/AGENT_FLOW.md",
+        "title": "Agent flow documentation"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_use_tool_server_boundary",
+        "text": "Local coding-agent adapters should use the JSONL tool server as the adapter boundary.",
+        "type": "decision",
+        "status": "working",
+        "confidence": 0.75,
+        "evidence": ["source_structured_session_001"],
+        "entities": ["JSONL", "tool-server", "adapters"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_dry_run_before_apply",
+        "text": "Agents should preview durable memory writes with dry-run before applying them.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.85,
+        "evidence": ["source_structured_session_001", "source_agent_flow_doc"],
+        "entities": ["dry-run", "memory", "agent-flow"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_index_after_crystallize",
+        "text": "After applying transcript crystallization, refresh the local index so new claims are searchable.",
+        "type": "workflow",
+        "status": "working",
+        "confidence": 0.7,
+        "evidence": ["source_agent_flow_doc"],
+        "entities": ["crystallize", "index", "search"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_dry_run_supports_boundary",
+        "source": "claim_dry_run_before_apply",
+        "target": "claim_use_tool_server_boundary",
+        "relation": "supports",
+        "evidence": ["source_agent_flow_doc"]
+      }
+    ]
+  },
+  "query": "How should a coding agent write memory at the end of a session?",
+  "expected": {
+    "must_retrieve": [
+      "claim_dry_run_before_apply",
+      "claim_index_after_crystallize"
+    ],
+    "must_cite": [
+      "source_structured_session_001",
+      "source_agent_flow_doc"
+    ],
+    "answer_should_include": [
+      "dry-run",
+      "applying",
+      "index"
+    ]
+  }
+}

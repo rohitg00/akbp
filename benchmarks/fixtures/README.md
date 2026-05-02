@@ -26,3 +26,4 @@ The scenario file includes:
 - `supersession`: prefer a newer claim while preserving the old claim.
 - `contradiction`: detect conflicting claims and require resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
+- `session-crystallization`: retrieve workflow claims from a structured coding-agent session with citations.
