@@ -192,6 +192,9 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("akbp crystallize transcript.md` previews", text)
         self.assertIn("akbp crystallize transcript.md --apply", text)
         self.assertIn("without writing durable artifacts", text)
+        self.assertIn("structured transcript sections", text)
+        self.assertIn("Action Items", text)
+        self.assertIn("speaker prefixes", text)
 
     def test_validate_target_is_documented_and_used_by_ci(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")

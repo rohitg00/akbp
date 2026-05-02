@@ -49,6 +49,8 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 `akbp crystallize transcript.md` previews extracted decisions, actions, blockers, preferences, questions, and file references without writing durable artifacts.
 
+The extractor recognizes structured transcript sections such as `Decisions`, `Action Items`, `Blockers`, `Preferences`, and `Open Questions`. It also normalizes bullets, checkboxes, speaker prefixes, and labels such as `Blocker:` or `Question:` before proposing durable claims.
+
 `akbp crystallize transcript.md --apply` turns the reviewed summary into:
 
 - a session page under `wiki/sessions/`
