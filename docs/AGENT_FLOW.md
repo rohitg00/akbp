@@ -30,6 +30,19 @@ After review or approval, repeat the same request without `dry_run`, then refres
 {"id":"5","method":"akbp.context","path":"./my-kb","params":{"task":"prepare the next migration release","limit":5}}
 ```
 
+At session end, preview transcript crystallization before writing durable session memory:
+
+```json
+{"id":"6","method":"akbp.crystallize_session","path":"./my-kb","dry_run":true,"params":{"transcript":"session.md","apply":true}}
+```
+
+After review or approval, apply the same crystallization and refresh the index:
+
+```json
+{"id":"7","method":"akbp.crystallize_session","path":"./my-kb","params":{"transcript":"session.md","apply":true}}
+{"id":"8","method":"akbp.index","path":"./my-kb","params":{"incremental":true}}
+```
+
 ## Safety notes
 
 - Run write methods with `dry_run: true` when an agent is unsure.

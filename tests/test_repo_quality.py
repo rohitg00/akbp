@@ -131,7 +131,9 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")
         self.assertIn("Start write-capable calls with dry-run", text)
         self.assertIn('"method":"akbp.ingest"', text)
+        self.assertIn('"method":"akbp.crystallize_session"', text)
         self.assertIn('"dry_run":true', text)
+        self.assertIn('"apply":true', text)
         self.assertIn("After review or approval", text)
 
     def test_release_docs_match_package_version(self):
