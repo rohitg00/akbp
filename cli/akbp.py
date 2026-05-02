@@ -383,6 +383,52 @@ def cmd_context(args: argparse.Namespace) -> int:
 def clean_line(line: str) -> str:
     return re.sub(r"\s+", " ", line.strip("- *\t >")).strip()
 
+
+SESSION_SECTION_ALIASES = {
+    "decisions": "decisions",
+    "decision": "decisions",
+    "actions": "actions",
+    "action items": "actions",
+    "action item": "actions",
+    "todos": "actions",
+    "todo": "actions",
+    "next steps": "actions",
+    "next step": "actions",
+    "blockers": "blockers",
+    "blocker": "blockers",
+    "risks": "blockers",
+    "risk": "blockers",
+    "preferences": "preferences",
+    "preference": "preferences",
+    "rules": "preferences",
+    "constraints": "preferences",
+    "questions": "questions",
+    "open questions": "questions",
+    "question": "questions",
+}
+
+
+def normalize_session_line(line: str) -> str:
+    line = re.sub(r"^\s*#{1,6}\s+", "", line)
+    line = re.sub(r"^\s*(?:[-*]|\d+[.)])\s+", "", line)
+    line = re.sub(r"^\s*\[[ xX]\]\s+", "", line)
+    line = re.sub(r"^\s*(?:user|assistant|agent|system|developer|me|you|rohit)\s*:\s*", "", line, flags=re.I)
+    line = re.sub(r"^\s*[A-Z][\w .-]{1,32}\s*:\s+", "", line)
+    line = re.sub(
+        r"^\s*(?:decision|decided|action item|action|todo|next step|blocker|blocked|preference|prefer|question|open question)\s*:\s*",
+        "",
+        line,
+        flags=re.I,
+    )
+    return clean_line(line)
+
+
+def session_section(line: str) -> str | None:
+    heading = re.match(r"^\s*#{1,6}\s+(.+?)\s*$", line)
+    label = heading.group(1) if heading else line.strip()
+    label = re.sub(r"[:：]\s*$", "", label).strip().lower()
+    return SESSION_SECTION_ALIASES.get(label)
+
 def redact_text(text: str) -> str:
     patterns = [
         r"sk-[A-Za-z0-9_-]{8,}",
@@ -489,26 +535,49 @@ def unique_keep_order(items: Iterable[str], limit: int = 20) -> list[str]:
 
 
 def session_summary(text: str) -> dict[str, list[str]]:
-    lines = [clean_line(l) for l in text.splitlines() if clean_line(l)]
+    section_items: dict[str, list[str]] = {name: [] for name in ["decisions", "actions", "blockers", "preferences", "questions"]}
+    current_section: str | None = None
+    lines: list[str] = []
+
+    for raw in text.splitlines():
+        if not clean_line(raw):
+            continue
+        detected_section = session_section(raw)
+        is_heading = raw.lstrip().startswith("#") or bool(re.match(r"^\s*\w[\w -]{0,40}:\s*$", raw))
+        if detected_section and is_heading:
+            current_section = detected_section
+            continue
+        normalized = normalize_session_line(raw)
+        if not normalized:
+            continue
+        lines.append(normalized)
+        if current_section and (re.match(r"^\s*(?:[-*]|\d+[.)]|\[[ xX]\])", raw) or ":" in raw):
+            section_items[current_section].append(normalized)
+
     decisions = unique_keep_order(
-        l for l in lines
+        list(section_items["decisions"]) + [l for l in lines
         if re.search(r"\b(decided|decision|choose|chose|use|using|must|should|standardize|require|requires)\b", l, re.I)
+        ]
     )
     actions = unique_keep_order(
-        l for l in lines
+        list(section_items["actions"]) + [l for l in lines
         if re.search(r"\b(todo|next|follow up|follow-up|ship|implement|add|fix|update|wire|review)\b", l, re.I)
+        ]
     )
     blockers = unique_keep_order(
-        l for l in lines
+        list(section_items["blockers"]) + [l for l in lines
         if re.search(r"\b(blocked|blocker|failed|failing|error|cannot|can't|missing|needs approval|requires approval)\b", l, re.I)
+        ]
     )
     preferences = unique_keep_order(
-        l for l in lines
+        list(section_items["preferences"]) + [l for l in lines
         if re.search(r"\b(prefer|preference|do not|don't|never|always|avoid|keep|must not)\b", l, re.I)
+        ]
     )
     questions = unique_keep_order(
-        l for l in lines
+        list(section_items["questions"]) + [l for l in lines
         if "?" in l or re.search(r"\b(open question|question)\b", l, re.I)
+        ]
     )
     files = sorted(set(re.findall(r"(?:[\w.-]+/)+[\w.-]+", text)))[:50]
     return {

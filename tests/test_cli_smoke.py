@@ -169,6 +169,40 @@ class AkbpCliSmokeTest(unittest.TestCase):
             rerun = json.loads(out.stdout)
             self.assertTrue(rerun["skipped_claims"])
 
+    def test_crystallize_extracts_structured_session_sections(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            transcript = Path(d) / "structured-session.md"
+            transcript.write_text(
+                "\n".join([
+                    "# Session",
+                    "## Decisions",
+                    "- Use the JSONL tool server as the adapter boundary.",
+                    "## Preferences",
+                    "Rohit: Prefer dry-run first writes before apply.",
+                    "## Blockers",
+                    "Blocker: OPENAI_API_KEY is missing for embeddings.",
+                    "## Action Items",
+                    "- Update docs/AGENT_FLOW.md and cli/akbp.py.",
+                    "## Open Questions",
+                    "Question: Should adapters be runtime-specific?",
+                    "Files touched: docs/AGENT_FLOW.md, cli/akbp.py",
+                ]),
+                encoding="utf-8",
+            )
+
+            run_cli("--path", str(kb), "init")
+            out = run_cli("--path", str(kb), "crystallize", str(transcript))
+            data = json.loads(out.stdout)
+            summary = data["summary"]
+            self.assertIn("Use the JSONL tool server as the adapter boundary.", summary["decisions"])
+            self.assertIn("Prefer dry-run first writes before apply.", summary["preferences"])
+            self.assertIn("OPENAI_API_KEY is missing for embeddings.", summary["blockers"])
+            self.assertIn("Update docs/AGENT_FLOW.md and cli/akbp.py.", summary["actions"])
+            self.assertIn("Should adapters be runtime-specific?", summary["questions"])
+            self.assertIn("docs/AGENT_FLOW.md", summary["files"])
+            self.assertIn("cli/akbp.py", summary["files"])
+
 
 if __name__ == "__main__":
     unittest.main()
