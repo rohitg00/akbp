@@ -54,6 +54,7 @@ class ToolServerTest(unittest.TestCase):
             run_cli("--path", str(kb), "init")
             requests = "\n".join([
                 json.dumps({"id": "dry", "path": str(kb), "method": "akbp.remember", "dry_run": True, "params": {"text": "AKBP dry run does not write"}}),
+                json.dumps({"id": "param-dry", "path": str(kb), "method": "akbp.source.add", "params": {"locator": "AKBP.md", "dry_run": True}}),
                 json.dumps({"id": "source", "path": str(kb), "method": "akbp.source.add", "params": {"locator": "AKBP.md", "type": "file", "title": "Entry point"}}),
                 json.dumps({"id": "remember", "path": str(kb), "method": "akbp.remember", "params": {"text": "AKBP has a JSONL local tool server", "type": "fact", "evidence": ["AKBP.md"]}}),
             ]) + "\n"
@@ -61,8 +62,10 @@ class ToolServerTest(unittest.TestCase):
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
             self.assertTrue(all(line["ok"] for line in lines))
             self.assertTrue(lines[0]["result"]["dry_run"])
-            self.assertEqual(lines[1]["result"]["type"], "file")
-            self.assertEqual(lines[2]["result"]["type"], "fact")
+            self.assertTrue(lines[1]["result"]["dry_run"])
+            self.assertEqual(lines[1]["result"]["method"], "akbp.source.add")
+            self.assertEqual(lines[2]["result"]["type"], "file")
+            self.assertEqual(lines[3]["result"]["type"], "fact")
             claims = (kb / "claims" / "claims.jsonl").read_text()
             self.assertNotIn("AKBP dry run does not write", claims)
 
