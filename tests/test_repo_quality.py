@@ -89,9 +89,12 @@ class RepoQualityTest(unittest.TestCase):
     def test_release_docs_match_package_version(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
         match = re.search(r'^version = "([^"]+)"', pyproject, re.MULTILINE)
         self.assertIsNotNone(match)
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_doc)
+        self.assertIn(f"reference CLI version: `{match.group(1)}`", release_notes)
+        self.assertIn("adapters/example-coding-agent/", release_notes)
 
 
 if __name__ == "__main__":

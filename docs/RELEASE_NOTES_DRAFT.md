@@ -2,6 +2,13 @@
 
 This draft captures the current protocol and reference implementation state for an initial public release.
 
+Release candidate scope:
+
+- protocol draft: initial public draft
+- reference CLI version: `0.1.0`
+- conformance: Level 0 through Level 3
+- package status: alpha
+
 ## Highlights
 
 - Introduces Agent Knowledge Base Protocol as a portable convention for durable agent knowledge.
@@ -78,7 +85,7 @@ The local tool server currently supports:
 - `akbp.supersede`
 - `akbp.contradict`
 
-It includes capability discovery, schema references, structured errors, dry-run write support, and local search/index tools.
+It includes capability discovery, schema references, structured errors, dry-run write support, write-safety guidance, and local search/index tools.
 
 ## Examples and benchmarks
 
@@ -91,6 +98,10 @@ Included examples:
 - `examples/coding-agent/`
 - `examples/research/`
 - `examples/personal/`
+- `adapters/coding-agent-template/`
+- `adapters/example-coding-agent/`
+- `adapters/terminal-coding-agent/`
+- `adapters/editor-coding-agent/`
 
 Included benchmark fixtures:
 
@@ -121,6 +132,7 @@ make install-smoke
 - Cross-device sync is specified as a future protocol area, not implemented in the reference CLI.
 - Crystallization is deliberately conservative and local.
 - Ingest is local-file oriented and does not fetch remote sources.
+- Adapter coverage is intentionally runtime-neutral first; runtime-specific adapters should start from the public template and example fixture.
 
 ## Suggested announcement angle
 
