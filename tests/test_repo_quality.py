@@ -86,6 +86,13 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_agent_flow_starts_writes_with_dry_run(self):
+        text = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")
+        self.assertIn("Start write-capable calls with dry-run", text)
+        self.assertIn('"method":"akbp.ingest"', text)
+        self.assertIn('"dry_run":true', text)
+        self.assertIn("After review or approval", text)
+
     def test_release_docs_match_package_version(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
