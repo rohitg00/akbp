@@ -151,6 +151,21 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[1]["ok"])
             self.assertTrue(lines[1]["result"]["created_claims"])
 
+
+    def test_invalid_request_envelope_is_structured_before_dispatch(self):
+        requests = "\n".join([
+            json.dumps({"method": "akbp.status"}),
+            json.dumps({"id": "bad-method", "method": "status"}),
+            json.dumps({"id": "bad-dry", "method": "akbp.status", "dry_run": "yes"}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_request"] * 3)
+        self.assertIn("tool-request.schema.json", lines[0]["error"]["details"]["schema"])
+        self.assertIn("missing required field: id", lines[0]["error"]["details"]["errors"])
+        self.assertIn("method must be an akbp.* string", lines[1]["error"]["details"]["errors"])
+        self.assertIn("dry_run must be a boolean", lines[2]["error"]["details"]["errors"])
+
     def test_structured_errors(self):
         requests = json.dumps({"id": "bad", "method": "akbp.missing"}) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)

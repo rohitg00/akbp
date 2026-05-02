@@ -165,6 +165,23 @@ def parse_payload(stdout: str) -> Any:
         return stdout
 
 
+def request_shape_errors(req: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if "id" not in req:
+        errors.append("missing required field: id")
+    elif not isinstance(req.get("id"), (str, int, float)) or isinstance(req.get("id"), bool):
+        errors.append("id must be a string or number")
+    if "method" not in req:
+        errors.append("missing required field: method")
+    elif not isinstance(req.get("method"), str) or not req.get("method", "").startswith("akbp."):
+        errors.append("method must be an akbp.* string")
+    if "path" in req and not isinstance(req.get("path"), str):
+        errors.append("path must be a string")
+    if "dry_run" in req and not isinstance(req.get("dry_run"), bool):
+        errors.append("dry_run must be a boolean")
+    return errors
+
+
 def missing_required_params(method: str, params: dict[str, Any]) -> list[str]:
     missing = []
     for name in REQUIRED_PARAMS.get(method, ()):
@@ -181,6 +198,10 @@ def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
 
 def handle(req: dict[str, Any]) -> dict[str, Any]:
     request_id = req.get("id")
+    shape_errors = request_shape_errors(req)
+    if shape_errors:
+        return error_response(request_id, "invalid_request", "request does not match AKBP tool request envelope", details={"errors": shape_errors, "schema": REQUEST_SCHEMA})
+
     method = req.get("method")
     path = str(req.get("path", "."))
     params = req.get("params", {}) or {}
