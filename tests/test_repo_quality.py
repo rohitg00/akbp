@@ -103,6 +103,29 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_tool_contract_lists_supported_jsonl_methods(self):
+        text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        self.assertNotIn("akbp.get_context", text)
+        for method in [
+            "akbp.capabilities",
+            "akbp.status",
+            "akbp.query",
+            "akbp.context",
+            "akbp.index",
+            "akbp.search",
+            "akbp.remember",
+            "akbp.conformance",
+            "akbp.export",
+            "akbp.audit",
+            "akbp.cite",
+            "akbp.source.add",
+            "akbp.ingest",
+            "akbp.supersede",
+            "akbp.contradict",
+            "akbp.crystallize_session",
+        ]:
+            self.assertIn(method, text)
+
     def test_agent_flow_starts_writes_with_dry_run(self):
         text = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")
         self.assertIn("Start write-capable calls with dry-run", text)

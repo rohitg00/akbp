@@ -42,7 +42,7 @@ Output:
 }
 ```
 
-### akbp.get_context
+### akbp.context
 
 Return compact context for an agent task.
 
@@ -51,9 +51,7 @@ Input:
 ```json
 {
   "task": "string",
-  "agent": "codex",
-  "project": "optional-project-id",
-  "max_tokens": 3000
+  "limit": 10
 }
 ```
 
@@ -61,10 +59,9 @@ Output:
 
 ```json
 {
-  "context": "markdown string",
-  "claims": [],
-  "warnings": [],
-  "citations": []
+  "task": "string",
+  "items": [],
+  "warnings": []
 }
 ```
 
@@ -163,6 +160,7 @@ Supported methods in the first server slice:
 - `akbp.ingest`
 - `akbp.supersede`
 - `akbp.contradict`
+- `akbp.crystallize_session`
 
 Request and response envelopes are specified in:
 
@@ -172,17 +170,24 @@ Request and response envelopes are specified in:
 
 `akbp.capabilities` returns these schema URLs under `result.schemas`, and returns each method's `params_schema` reference when a method-specific contract exists.
 
-`tool-methods.schema.json` defines the first method-specific parameter contracts for:
+`tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method, including:
 
+- `akbp.capabilities`
+- `akbp.status`
 - `akbp.query`
 - `akbp.context`
 - `akbp.index`
 - `akbp.search`
 - `akbp.remember`
+- `akbp.conformance`
+- `akbp.export`
+- `akbp.audit`
+- `akbp.cite`
 - `akbp.source.add`
 - `akbp.ingest`
 - `akbp.supersede`
 - `akbp.contradict`
+- `akbp.crystallize_session`
 
 Every response uses the same envelope:
 
