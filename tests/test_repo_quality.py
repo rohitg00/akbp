@@ -101,6 +101,13 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn('"dry_run":true', text, str(adapter.relative_to(ROOT)))
             self.assertIn('"apply":true', text, str(adapter.relative_to(ROOT)))
 
+    def test_adapter_docs_use_current_validation_and_crystallize_flow(self):
+        text = (ROOT / "docs" / "ADAPTERS.md").read_text(encoding="utf-8")
+        self.assertIn("akbp.crystallize_session", text)
+        self.assertIn("dry-run preview before apply", text)
+        self.assertIn("Run `make validate`", text)
+        self.assertNotIn("Run `make guard`, `make test`, `make smoke`, and `make benchmark`", text)
+
     def test_tool_contract_documents_write_safety(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         for required in [
