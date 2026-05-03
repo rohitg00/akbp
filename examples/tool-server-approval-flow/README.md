@@ -33,6 +33,23 @@ Expected behavior:
 - `result.apply_instruction` explains when to repeat the request
 - the knowledge base is not mutated
 
+The response matches the `#/$defs/dry_run_review_result` shape from `schemas/tool-response.schema.json`:
+
+```json
+{
+  "id": "remember-preview",
+  "ok": true,
+  "result": {
+    "dry_run": true,
+    "method": "akbp.remember",
+    "would_write": true,
+    "review_required": true,
+    "apply_instruction": "Repeat the same request without dry_run only after user approval or trusted local policy."
+  },
+  "error": null
+}
+```
+
 ## Rejected apply without approval
 
 ```bash
@@ -46,6 +63,26 @@ Expected behavior:
 - `error.code:"approval_required"`
 - `error.details.review_required:true`
 - `error.details.apply_instruction` tells the caller to repeat with `approved:true` after approval or trusted local policy
+
+The response matches the `#/$defs/approval_required_details` shape from `schemas/tool-response.schema.json`:
+
+```json
+{
+  "id": "remember-unapproved",
+  "ok": false,
+  "result": null,
+  "error": {
+    "code": "approval_required",
+    "message": "akbp.remember requires approved:true for non-dry-run writes",
+    "details": {
+      "method": "akbp.remember",
+      "dry_run": false,
+      "review_required": true,
+      "apply_instruction": "Repeat the same request with approved:true only after user approval or trusted local policy."
+    }
+  }
+}
+```
 
 ## Apply after approval
 
