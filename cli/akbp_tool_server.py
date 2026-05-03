@@ -299,7 +299,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         result = parse_payload(stdout)
         if isinstance(result, dict):
             result.setdefault("review_required", True)
-            result.setdefault("apply_instruction", "Repeat the same request without dry_run only after reviewing redaction status, extracted signals, claim ids, and would_write paths.")
+            result.setdefault("apply_instruction", "Repeat the same request without dry_run only after reviewing redaction status, extracted signals, claim ids, would_write paths, and approval or trusted local policy.")
         return {"id": request_id, "ok": True, "result": result, "error": None}
 
     if dry_run and method in WRITE_METHODS:

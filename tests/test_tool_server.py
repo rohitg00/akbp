@@ -83,6 +83,42 @@ class ToolServerTest(unittest.TestCase):
             claims = (kb / "claims" / "claims.jsonl").read_text()
             self.assertNotIn("AKBP dry run does not write", claims)
 
+    def test_all_write_methods_enforce_approval_boundary(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            transcript = Path(d) / "session.md"
+            transcript.write_text("# Session\n\nDecision: review before apply.\n", encoding="utf-8")
+            note = Path(d) / "note.md"
+            note.write_text("# Note\n\nDecision: import safely.\n", encoding="utf-8")
+            examples = {
+                "akbp.remember": {"text": "Adapters dry-run before durable writes"},
+                "akbp.source.add": {"locator": "AKBP.md"},
+                "akbp.ingest": {"file": str(note), "claim": "Imports start with review."},
+                "akbp.index": {"incremental": True},
+                "akbp.supersede": {"old_claim_id": "claim_old", "text": "Newer claim requires review."},
+                "akbp.contradict": {"source_claim_id": "claim_a", "target_claim_id": "claim_b"},
+                "akbp.crystallize_session": {"transcript": str(transcript), "apply": True},
+            }
+            requests = []
+            for method, params in examples.items():
+                requests.append(json.dumps({"id": f"dry-{method}", "path": str(kb), "method": method, "dry_run": True, "params": params}))
+                requests.append(json.dumps({"id": f"reject-{method}", "path": str(kb), "method": method, "params": params}))
+            proc = subprocess.run([sys.executable, str(SERVER)], input="\n".join(requests) + "\n", text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertEqual(len(lines), len(requests))
+            for dry, rejected in zip(lines[0::2], lines[1::2]):
+                with self.subTest(request=dry["id"]):
+                    self.assertTrue(dry["ok"])
+                    self.assertTrue(dry["result"]["dry_run"])
+                    self.assertTrue(dry["result"]["review_required"])
+                    self.assertIn("approval", dry["result"]["apply_instruction"])
+                with self.subTest(request=rejected["id"]):
+                    self.assertFalse(rejected["ok"])
+                    self.assertEqual(rejected["error"]["code"], "approval_required")
+                    self.assertTrue(rejected["error"]["details"]["review_required"])
+                    self.assertIn("approved:true", rejected["error"]["message"])
+                    self.assertIn("approved:true", rejected["error"]["details"]["apply_instruction"])
+
     def test_index_and_search_methods(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
