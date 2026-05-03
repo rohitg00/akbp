@@ -484,6 +484,64 @@
           }
         }
       }
+    },
+    "context_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "query",
+        "generated_at",
+        "items",
+        "warnings"
+      ],
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "search_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "query",
+        "backend",
+        "results"
+      ],
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "backend": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fts_query": {
+          "type": "string"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
     }
   }
 }

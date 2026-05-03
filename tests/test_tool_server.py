@@ -101,6 +101,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("features", capabilities["required"])
         self.assertIn("methods", capabilities["required"])
         self.assertEqual(capabilities["properties"]["protocol"], {"const": "akbp-jsonl-tool-server"})
+        self.assertIn("items", defs["context_result"]["required"])
+        self.assertIn("warnings", defs["context_result"]["required"])
+        self.assertIn("backend", defs["search_result"]["required"])
+        self.assertIn("results", defs["search_result"]["required"])
         invalid_request = defs["invalid_request_details"]
         invalid_params = defs["invalid_params_details"]
         unknown_method = defs["unknown_method_details"]
@@ -179,6 +183,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
             self.assertEqual(lines[2]["id"], "2")
+            assert_matches_required_schema(self, lines[2]["result"], schema_def("context_result"))
             self.assertTrue(lines[2]["result"]["items"])
 
     def test_write_methods_and_dry_run(self):
@@ -266,6 +271,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["ok"])
             self.assertTrue(lines[0]["result"]["incremental"])
             self.assertTrue(lines[1]["ok"])
+            assert_matches_required_schema(self, lines[1]["result"], schema_def("search_result"))
             self.assertEqual(lines[1]["result"]["backend"], "sqlite_fts5")
             self.assertTrue(lines[1]["result"]["results"])
 
