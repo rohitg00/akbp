@@ -184,6 +184,8 @@ class RepoQualityTest(unittest.TestCase):
             "adapters/openclaw/session-end.md",
             "adapters/codex/README.md",
             "adapters/codex/session-end.md",
+            "adapters/claude-code/README.md",
+            "adapters/claude-code/session-end.md",
         ]:
             text = (ROOT / rel).read_text(encoding="utf-8")
             self.assertIn("ingest dry-run", text, rel)
@@ -201,6 +203,9 @@ class RepoQualityTest(unittest.TestCase):
             "adapters/codex/README.md",
             "adapters/codex/instructions.md",
             "adapters/codex/privacy.md",
+            "adapters/claude-code/README.md",
+            "adapters/claude-code/instructions.md",
+            "adapters/claude-code/privacy.md",
             "docs/ADAPTERS.md",
         ]:
             text = (ROOT / rel).read_text(encoding="utf-8")
@@ -299,6 +304,7 @@ class RepoQualityTest(unittest.TestCase):
             "editor-coding-agent/",
             "openclaw/",
             "codex/",
+            "claude-code/",
         ]:
             self.assertIn(adapter, readme)
 

@@ -147,6 +147,7 @@ akbp/
     editor-coding-agent/
     openclaw/
     codex/
+    claude-code/
   cli/
   tool-server/
   benchmarks/

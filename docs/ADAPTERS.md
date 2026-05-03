@@ -41,6 +41,12 @@ privacy.md
 
 ## Claude Code
 
+Reference adapter:
+
+```text
+adapters/claude-code/
+```
+
 Integration style:
 
 - `CLAUDE.md` instruction block
