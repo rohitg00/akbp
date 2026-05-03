@@ -21,7 +21,7 @@ python3 cli/akbp.py --path "$TMP_KB" init
 ## Preview a write
 
 ```bash
-printf '%s\n' '{"id":"remember-preview","method":"akbp.remember","path":"'"$TMP_KB"'","dry_run":true,"params":{"text":"Agents need rollback paths before production changes","type":"policy","evidence":["release-review.md"]}}' \
+printf '%s\n' '{"id":"remember-preview","method":"akbp.remember","path":"'"$TMP_KB"'","dry_run":true,"params":{"text":"Agents need rollback paths before production changes","type":"workflow","evidence":["release-review.md"]}}' \
   | python3 tool-server/akbp_tool_server.py
 ```
 
@@ -36,7 +36,7 @@ Expected behavior:
 ## Rejected apply without approval
 
 ```bash
-printf '%s\n' '{"id":"remember-unapproved","method":"akbp.remember","path":"'"$TMP_KB"'","params":{"text":"Agents need rollback paths before production changes","type":"policy","evidence":["release-review.md"]}}' \
+printf '%s\n' '{"id":"remember-unapproved","method":"akbp.remember","path":"'"$TMP_KB"'","params":{"text":"Agents need rollback paths before production changes","type":"workflow","evidence":["release-review.md"]}}' \
   | python3 tool-server/akbp_tool_server.py
 ```
 
@@ -50,7 +50,7 @@ Expected behavior:
 ## Apply after approval
 
 ```bash
-printf '%s\n' '{"id":"remember-approved","method":"akbp.remember","path":"'"$TMP_KB"'","approved":true,"params":{"text":"Agents need rollback paths before production changes","type":"policy","evidence":["release-review.md"]}}' \
+printf '%s\n' '{"id":"remember-approved","method":"akbp.remember","path":"'"$TMP_KB"'","approved":true,"params":{"text":"Agents need rollback paths before production changes","type":"workflow","evidence":["release-review.md"]}}' \
   | python3 tool-server/akbp_tool_server.py
 ```
 

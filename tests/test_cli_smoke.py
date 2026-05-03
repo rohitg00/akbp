@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "cli" / "akbp.py"
+SERVER = ROOT / "tool-server" / "akbp_tool_server.py"
 
 
 def run_cli(*args):
@@ -214,6 +215,65 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse((kb / "raw" / "sources" / "sources.jsonl").exists())
             self.assertFalse((kb / "claims" / "claims.jsonl").exists())
             self.assertFalse((kb / data["page"]).exists())
+
+
+    def test_tool_server_approval_flow_example_behavior(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            text = "Agents need rollback paths before production changes"
+            requests = "\n".join([
+                json.dumps({
+                    "id": "remember-preview",
+                    "method": "akbp.remember",
+                    "path": str(kb),
+                    "dry_run": True,
+                    "params": {"text": text, "type": "workflow", "evidence": ["release-review.md"]},
+                }),
+                json.dumps({
+                    "id": "remember-unapproved",
+                    "method": "akbp.remember",
+                    "path": str(kb),
+                    "params": {"text": text, "type": "workflow", "evidence": ["release-review.md"]},
+                }),
+                json.dumps({
+                    "id": "remember-approved",
+                    "method": "akbp.remember",
+                    "path": str(kb),
+                    "approved": True,
+                    "params": {"text": text, "type": "workflow", "evidence": ["release-review.md"]},
+                }),
+                json.dumps({
+                    "id": "index-approved",
+                    "method": "akbp.index",
+                    "path": str(kb),
+                    "approved": True,
+                    "params": {"incremental": True},
+                }),
+                json.dumps({
+                    "id": "context",
+                    "method": "akbp.context",
+                    "path": str(kb),
+                    "params": {"task": "prepare production release", "limit": 5},
+                }),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True, cwd=str(ROOT))
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertTrue(lines[0]["ok"])
+            self.assertTrue(lines[0]["result"]["dry_run"])
+            self.assertTrue(lines[0]["result"]["review_required"])
+            self.assertIn("apply_instruction", lines[0]["result"])
+            self.assertFalse(lines[1]["ok"])
+            self.assertEqual(lines[1]["error"]["code"], "approval_required")
+            self.assertTrue(lines[1]["error"]["details"]["review_required"])
+            self.assertTrue(lines[2]["ok"])
+            self.assertEqual(lines[2]["result"]["type"], "workflow")
+            self.assertTrue(lines[3]["ok"])
+            self.assertTrue(lines[3]["result"]["incremental"])
+            self.assertTrue(lines[4]["ok"])
+            self.assertTrue(lines[4]["result"]["items"])
+            claims = (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8")
+            self.assertEqual(claims.count(text), 1)
 
     def test_crystallize_apply_creates_session_page_and_claim(self):
         with tempfile.TemporaryDirectory() as d:
