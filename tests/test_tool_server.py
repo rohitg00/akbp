@@ -27,10 +27,17 @@ def assert_matches_required_schema(testcase, payload, schema):
             continue
         if "const" in spec:
             testcase.assertEqual(payload[field], spec["const"])
-        if spec.get("type") == "string":
+        expected_type = spec.get("type")
+        if expected_type == "string":
             testcase.assertIsInstance(payload[field], str)
             if spec.get("minLength"):
                 testcase.assertGreaterEqual(len(payload[field]), spec["minLength"])
+        elif expected_type == "object":
+            testcase.assertIsInstance(payload[field], dict)
+        elif expected_type == "array":
+            testcase.assertIsInstance(payload[field], list)
+        elif expected_type == "boolean":
+            testcase.assertIsInstance(payload[field], bool)
 
 
 def assert_response_envelope(testcase, payload):
@@ -84,6 +91,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", dry_run["required"])
+        capabilities = defs["capabilities_result"]
+        self.assertIn("features", capabilities["required"])
+        self.assertIn("methods", capabilities["required"])
+        self.assertEqual(capabilities["properties"]["protocol"], {"const": "akbp-jsonl-tool-server"})
         invalid_request = defs["invalid_request_details"]
         invalid_params = defs["invalid_params_details"]
         unknown_method = defs["unknown_method_details"]
@@ -112,6 +123,7 @@ class ToolServerTest(unittest.TestCase):
         )
         line = json.loads(proc.stdout)
         self.assertTrue(line["ok"])
+        assert_matches_required_schema(self, line["result"], schema_def("capabilities_result"))
         methods = line["result"]["methods"]
         self.assertGreaterEqual(len(methods), 10)
         for method, meta in methods.items():

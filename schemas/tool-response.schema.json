@@ -219,6 +219,119 @@
           }
         }
       }
+    },
+    "capabilities_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "protocol",
+        "version",
+        "features",
+        "schemas",
+        "methods",
+        "examples"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "akbp-jsonl-tool-server"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "features": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "structured_errors",
+            "capability_discovery",
+            "dry_run",
+            "write_review_required",
+            "write_apply_requires_approval",
+            "jsonl_transport"
+          ],
+          "properties": {
+            "structured_errors": {
+              "const": true
+            },
+            "capability_discovery": {
+              "const": true
+            },
+            "dry_run": {
+              "const": true
+            },
+            "write_review_required": {
+              "const": true
+            },
+            "write_apply_requires_approval": {
+              "const": true
+            },
+            "jsonl_transport": {
+              "const": true
+            }
+          }
+        },
+        "schemas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "request",
+            "response",
+            "methods"
+          ],
+          "properties": {
+            "request": {
+              "type": "string",
+              "minLength": 1
+            },
+            "response": {
+              "type": "string",
+              "minLength": 1
+            },
+            "methods": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "methods": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "write",
+              "params",
+              "review_required",
+              "params_schema"
+            ],
+            "properties": {
+              "write": {
+                "type": "boolean"
+              },
+              "params": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "review_required": {
+                "type": "boolean"
+              },
+              "params_schema": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
     }
   }
 }
