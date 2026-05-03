@@ -38,6 +38,12 @@ def assert_matches_required_schema(testcase, payload, schema):
             testcase.assertIsInstance(payload[field], list)
         elif expected_type == "boolean":
             testcase.assertIsInstance(payload[field], bool)
+        elif expected_type == "integer":
+            testcase.assertIsInstance(payload[field], int)
+            if "minimum" in spec:
+                testcase.assertGreaterEqual(payload[field], spec["minimum"])
+        elif expected_type == "number":
+            testcase.assertIsInstance(payload[field], (int, float))
 
 
 def assert_response_envelope(testcase, payload):
@@ -109,6 +115,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("entrypoint", defs["status_result"]["required"])
         self.assertIn("indexed", defs["index_result"]["required"])
         self.assertIn("incremental", defs["index_result"]["required"])
+        self.assertIn("claim_id", defs["cite_result"]["required"])
+        self.assertIn("events", defs["audit_result"]["required"])
+        self.assertIn("claims", defs["export_result"]["required"])
         invalid_request = defs["invalid_request_details"]
         invalid_params = defs["invalid_params_details"]
         unknown_method = defs["unknown_method_details"]
@@ -280,6 +289,29 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[1]["result"], schema_def("search_result"))
             self.assertEqual(lines[1]["result"]["backend"], "sqlite_fts5")
             self.assertTrue(lines[1]["result"]["results"])
+
+
+    def test_audit_cite_and_export_response_shapes(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            claim = json.loads(run_cli("--path", str(kb), "remember", "AKBP cite output has evidence", "--evidence", "AKBP.md").stdout)["id"]
+            requests = "\n".join([
+                json.dumps({"id": "cite", "path": str(kb), "method": "akbp.cite", "params": {"claim_id": claim}}),
+                json.dumps({"id": "audit", "path": str(kb), "method": "akbp.audit", "params": {"limit": 5}}),
+                json.dumps({"id": "export", "path": str(kb), "method": "akbp.export"}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertEqual(len(lines), 3)
+            for line in lines:
+                self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, lines[0]["result"], schema_def("cite_result"))
+            assert_matches_required_schema(self, lines[1]["result"], schema_def("audit_result"))
+            assert_matches_required_schema(self, lines[2]["result"], schema_def("export_result"))
+            self.assertEqual(lines[0]["result"]["claim_id"], claim)
+            self.assertGreaterEqual(lines[1]["result"]["count"], 2)
+            self.assertTrue(lines[2]["result"]["claims"])
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:

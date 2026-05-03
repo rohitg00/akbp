@@ -623,6 +623,106 @@
           "type": "boolean"
         }
       }
+    },
+    "cite_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "claim_id",
+        "text",
+        "evidence",
+        "status"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "audit_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "events",
+        "count"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "export_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "akbp_version",
+        "exported_at",
+        "card",
+        "claims",
+        "sources",
+        "entities",
+        "relations"
+      ],
+      "properties": {
+        "akbp_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exported_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "card": {
+          "type": "object"
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
     }
   }
 }
