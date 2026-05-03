@@ -1,0 +1,96 @@
+{
+  "id": "adapter-write-safety-001",
+  "task": "Ensure runtime adapters consistently enforce approval-gated durable writes instead of applying memory changes directly.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_adapter_config_policy",
+        "type": "file",
+        "locator": "adapters/*/config.example.json",
+        "title": "Adapter write policy configuration"
+      },
+      {
+        "id": "source_adapter_readme_policy",
+        "type": "file",
+        "locator": "adapters/*/README.md",
+        "title": "Adapter approval-gated write safety guidance"
+      },
+      {
+        "id": "source_agent_flow_write_boundary",
+        "type": "file",
+        "locator": "docs/AGENT_FLOW.md",
+        "title": "Agent flow write boundary"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_adapter_configs_require_approval_gate",
+        "text": "Adapter configs must set project default scope, dry_run_first true, require_review_metadata true, and apply_requires_approved true for durable writes.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_adapter_config_policy"],
+        "entities": ["adapter", "config", "dry_run_first", "require_review_metadata", "apply_requires_approved", "project"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_adapter_docs_require_review_boundary",
+        "text": "Adapter docs must instruct clients to call capabilities, fetch context, start ingest dry-run, preview crystallize_session with dry_run, surface review_required and apply_instruction, and apply only with approved:true.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_adapter_readme_policy", "source_agent_flow_write_boundary"],
+        "entities": ["adapter", "akbp.capabilities", "akbp.context", "ingest", "dry_run", "akbp.crystallize_session", "review_required", "apply_instruction", "approved:true"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_adapters_must_not_store_sensitive_runtime_data",
+        "text": "Adapters must not store secrets, tokens, cookies, auth headers, private DMs, or raw logs with credentials in durable knowledge.",
+        "type": "warning",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_adapter_readme_policy"],
+        "entities": ["adapter", "privacy", "secrets", "tokens", "cookies", "logs"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_adapter_docs_support_config_gate",
+        "source": "claim_adapter_docs_require_review_boundary",
+        "target": "claim_adapter_configs_require_approval_gate",
+        "relation": "supports",
+        "evidence": ["source_adapter_readme_policy"]
+      },
+      {
+        "id": "relation_privacy_supports_write_boundary",
+        "source": "claim_adapters_must_not_store_sensitive_runtime_data",
+        "target": "claim_adapter_docs_require_review_boundary",
+        "relation": "supports",
+        "evidence": ["source_adapter_readme_policy"]
+      }
+    ]
+  },
+  "query": "What must every runtime adapter do before applying durable memory writes?",
+  "expected": {
+    "must_retrieve": [
+      "claim_adapter_configs_require_approval_gate",
+      "claim_adapter_docs_require_review_boundary",
+      "claim_adapters_must_not_store_sensitive_runtime_data"
+    ],
+    "must_cite": [
+      "source_adapter_config_policy",
+      "source_adapter_readme_policy",
+      "source_agent_flow_write_boundary"
+    ],
+    "answer_should_include": [
+      "dry_run_first",
+      "require_review_metadata",
+      "apply_requires_approved",
+      "review_required",
+      "apply_instruction",
+      "approved:true",
+      "secrets"
+    ]
+  }
+}

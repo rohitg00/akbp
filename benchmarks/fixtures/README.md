@@ -22,6 +22,7 @@ The scenario file includes:
 
 ## Current fixtures
 
+- `adapter-write-safety`: require runtime adapters to share the same dry-run, review metadata, approved write, and privacy boundary.
 - `preference-recall`: recall a durable user preference with evidence.
 - `supersession`: prefer a newer claim while preserving the old claim.
 - `contradiction`: detect conflicting claims and require resolution.

@@ -39,6 +39,22 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("approval", text)
         self.assertIn("claim_agents_must_not_apply_without_review", data["expected"]["must_retrieve"])
 
+    def test_adapter_write_safety_fixture_covers_approval_policy(self):
+        path = FIXTURES / "adapter-write-safety" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        text = json.dumps(data)
+        for required in [
+            "dry_run_first",
+            "require_review_metadata",
+            "apply_requires_approved",
+            "review_required",
+            "apply_instruction",
+            "approved:true",
+            "secrets",
+        ]:
+            self.assertIn(required, text)
+        self.assertIn("claim_adapter_docs_require_review_boundary", data["expected"]["must_retrieve"])
+
     def test_benchmark_runner_passes(self):
         runner = ROOT / "benchmarks" / "run_benchmarks.py"
         proc = subprocess.run([sys.executable, str(runner), "--akbp"], text=True, capture_output=True, check=True)
