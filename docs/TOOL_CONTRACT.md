@@ -227,7 +227,8 @@ Errors are structured:
 The response schema also names common result and error detail shapes used by adapters:
 
 - `#/$defs/capabilities_result`: the capability discovery result with protocol, feature flags, schema URLs, methods, and examples.
-- `#/$defs/dry_run_review_result`: a dry-run write result with `dry_run:true`, `review_required:true`, and `apply_instruction`.
+- `#/$defs/dry_run_review_result`: a generic dry-run write result with `dry_run:true`, `review_required:true`, and `apply_instruction`.
+- `#/$defs/ingest_dry_run_result`: an `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/approval_required_details`: an `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/invalid_request_details`: request-envelope validation details with `errors` and `schema`.
 - `#/$defs/invalid_params_details`: parameter validation details with `params_schema` plus missing, unknown, allowed, or type-error metadata when relevant.

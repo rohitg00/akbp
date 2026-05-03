@@ -85,12 +85,15 @@ class ToolServerTest(unittest.TestCase):
         defs = schema["$defs"]
         approval = defs["approval_required_details"]
         dry_run = defs["dry_run_review_result"]
+        ingest_dry_run = defs["ingest_dry_run_result"]
         self.assertEqual(approval["properties"]["dry_run"], {"const": False})
         self.assertEqual(approval["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", approval["required"])
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", dry_run["required"])
+        for field in ["source_id", "page", "signals", "created_claims", "redacted", "would_write"]:
+            self.assertIn(field, ingest_dry_run["required"])
         capabilities = defs["capabilities_result"]
         self.assertIn("features", capabilities["required"])
         self.assertIn("methods", capabilities["required"])
@@ -314,6 +317,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("redaction", line["result"]["apply_instruction"])
             self.assertTrue(line["result"]["redacted"])
             self.assertIn("claims/claims.jsonl", line["result"]["would_write"])
+            assert_matches_required_schema(self, line["result"], schema_def("ingest_dry_run_result"))
             self.assertFalse((kb / "claims" / "claims.jsonl").exists())
             self.assertFalse((kb / line["result"]["page"]).exists())
 

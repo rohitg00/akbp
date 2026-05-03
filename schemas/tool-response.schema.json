@@ -332,6 +332,66 @@
           }
         }
       }
+    },
+    "ingest_dry_run_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ok",
+        "dry_run",
+        "source_id",
+        "page",
+        "signals",
+        "created_claims",
+        "redacted",
+        "would_write",
+        "review_required",
+        "apply_instruction"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "dry_run": {
+          "const": true
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "redacted": {
+          "type": "boolean"
+        },
+        "would_write": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review_required": {
+          "const": true
+        },
+        "apply_instruction": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     }
   }
 }
