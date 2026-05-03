@@ -129,6 +129,18 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_tool_contract_documents_write_review_response_shapes(self):
+        text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        for required in [
+            "#/$defs/dry_run_review_result",
+            "#/$defs/approval_required_details",
+            "review_required:true",
+            "apply_instruction",
+            "approved:true",
+            "control-flow contracts",
+        ]:
+            self.assertIn(required, text)
+
     def test_tool_contract_documents_crystallize_envelope(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         self.assertIn('"method": "akbp.crystallize_session"', text)

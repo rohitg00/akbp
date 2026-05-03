@@ -224,6 +224,13 @@ Errors are structured:
 }
 ```
 
+The response schema also names the write-review shapes used by adapters:
+
+- `#/$defs/dry_run_review_result`: a dry-run write result with `dry_run:true`, `review_required:true`, and `apply_instruction`.
+- `#/$defs/approval_required_details`: an `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
+
+Adapters should treat both shapes as control-flow contracts. They are not advisory prose. A dry-run result must be rendered for review, and an `approval_required` error must stop the apply path until the caller repeats the request with `approved:true` after approval or trusted local policy.
+
 ## Write-mode safety
 
 Write-capable methods must be treated as reviewable operations by default.
