@@ -49,6 +49,32 @@ class ToolServerTest(unittest.TestCase):
         details = schema["properties"]["error"]["anyOf"][1]["properties"]["details"]
         self.assertIn({"$ref": "#/$defs/approval_required_details"}, details["anyOf"])
 
+    def test_capabilities_method_schema_refs_match_schema_defs(self):
+        method_schema = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        defs = method_schema["$defs"]
+        proc = subprocess.run(
+            [sys.executable, str(SERVER)],
+            input=json.dumps({"id": "caps", "method": "akbp.capabilities"}) + "\n",
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        line = json.loads(proc.stdout)
+        self.assertTrue(line["ok"])
+        methods = line["result"]["methods"]
+        self.assertGreaterEqual(len(methods), 10)
+        for method, meta in methods.items():
+            with self.subTest(method=method):
+                ref = meta.get("params_schema")
+                self.assertIsNotNone(ref)
+                self.assertTrue(ref.startswith(line["result"]["schemas"]["methods"] + "#/$defs/"))
+                def_name = ref.rsplit("/", 1)[-1]
+                self.assertIn(def_name, defs)
+                self.assertEqual(bool(meta["write"]), bool(meta["review_required"]))
+                params = set(meta["params"])
+                schema_params = set(defs[def_name].get("properties", {}))
+                self.assertEqual(params, schema_params, method)
+
     def test_status_context_and_capabilities_methods(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
