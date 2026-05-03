@@ -60,7 +60,7 @@ python3 cli/akbp.py --path examples/end-to-end-agent-flow query "database migrat
 python3 cli/akbp.py --path examples/end-to-end-agent-flow context "prepare migration release"
 ```
 
-Run the JSONL tool server examples from `docs/TOOL_CONTRACT.md`, starting write-capable examples with request-level `dry_run: true` before applying writes.
+Run the JSONL tool server examples from `docs/TOOL_CONTRACT.md`, starting write-capable examples with request-level `dry_run: true` before applying writes. Confirm write dry-runs surface `review_required` and `apply_instruction`, and do not apply them until approval or trusted local policy exists.
 
 ## Artifact sanity checks
 
@@ -77,6 +77,7 @@ Current benchmark fixtures live under `benchmarks/fixtures/`, not a generated lo
 
 Before tagging:
 
+- tag creation and public release announcement require explicit maintainer approval
 - schema `$id` values must resolve to GitHub raw URLs
 - public docs must avoid non-resolving future domains
 - markdown docs must start with `# `

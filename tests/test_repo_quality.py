@@ -265,6 +265,12 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(adapter, readme)
 
+    def test_release_docs_require_review_gated_writes_and_approval(self):
+        text = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        self.assertIn("review_required", text)
+        self.assertIn("apply_instruction", text)
+        self.assertIn("explicit maintainer approval", text)
+
     def test_readme_and_release_docs_use_current_layout(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
