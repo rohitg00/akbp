@@ -30,6 +30,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["id"], "caps")
             self.assertTrue(lines[0]["result"]["features"]["capability_discovery"])
             self.assertTrue(lines[0]["result"]["features"]["write_review_required"])
+            self.assertTrue(lines[0]["result"]["features"]["write_apply_requires_approval"])
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
@@ -58,20 +59,27 @@ class ToolServerTest(unittest.TestCase):
             requests = "\n".join([
                 json.dumps({"id": "dry", "path": str(kb), "method": "akbp.remember", "dry_run": True, "params": {"text": "AKBP dry run does not write"}}),
                 json.dumps({"id": "param-dry", "path": str(kb), "method": "akbp.source.add", "params": {"locator": "AKBP.md", "dry_run": True}}),
-                json.dumps({"id": "source", "path": str(kb), "method": "akbp.source.add", "params": {"locator": "AKBP.md", "type": "file", "title": "Entry point"}}),
-                json.dumps({"id": "remember", "path": str(kb), "method": "akbp.remember", "params": {"text": "AKBP has a JSONL local tool server", "type": "fact", "evidence": ["AKBP.md"]}}),
+                json.dumps({"id": "unapproved", "path": str(kb), "method": "akbp.remember", "params": {"text": "AKBP should reject unapproved non-dry-run writes"}}),
+                json.dumps({"id": "source", "path": str(kb), "method": "akbp.source.add", "approved": True, "params": {"locator": "AKBP.md", "type": "file", "title": "Entry point"}}),
+                json.dumps({"id": "remember", "path": str(kb), "method": "akbp.remember", "approved": True, "params": {"text": "AKBP has a JSONL local tool server", "type": "fact", "evidence": ["AKBP.md"]}}),
             ]) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
-            self.assertTrue(all(line["ok"] for line in lines))
+            self.assertTrue(lines[0]["ok"])
+            self.assertTrue(lines[1]["ok"])
+            self.assertFalse(lines[2]["ok"])
+            self.assertEqual(lines[2]["error"]["code"], "approval_required")
+            self.assertIn("approved:true", lines[2]["error"]["message"])
+            self.assertTrue(lines[3]["ok"])
+            self.assertTrue(lines[4]["ok"])
             self.assertTrue(lines[0]["result"]["dry_run"])
             self.assertTrue(lines[0]["result"]["review_required"])
             self.assertIn("approval", lines[0]["result"]["apply_instruction"])
             self.assertTrue(lines[1]["result"]["dry_run"])
             self.assertTrue(lines[1]["result"]["review_required"])
             self.assertEqual(lines[1]["result"]["method"], "akbp.source.add")
-            self.assertEqual(lines[2]["result"]["type"], "file")
-            self.assertEqual(lines[3]["result"]["type"], "fact")
+            self.assertEqual(lines[3]["result"]["type"], "file")
+            self.assertEqual(lines[4]["result"]["type"], "fact")
             claims = (kb / "claims" / "claims.jsonl").read_text()
             self.assertNotIn("AKBP dry run does not write", claims)
 
@@ -81,7 +89,7 @@ class ToolServerTest(unittest.TestCase):
             run_cli("--path", str(kb), "init")
             run_cli("--path", str(kb), "remember", "SQLite index supports tool server search", "--evidence", "AKBP.md")
             requests = "\n".join([
-                json.dumps({"id": "index", "path": str(kb), "method": "akbp.index", "params": {"incremental": True}}),
+                json.dumps({"id": "index", "path": str(kb), "method": "akbp.index", "approved": True, "params": {"incremental": True}}),
                 json.dumps({"id": "search", "path": str(kb), "method": "akbp.search", "params": {"query": "SQLite: search", "limit": 5}}),
             ]) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
@@ -102,6 +110,7 @@ class ToolServerTest(unittest.TestCase):
                 "id": "ingest",
                 "path": str(kb),
                 "method": "akbp.ingest",
+                "approved": True,
                 "params": {
                     "file": str(note),
                     "claim": "Imported notes should be redacted.",
@@ -153,7 +162,7 @@ class ToolServerTest(unittest.TestCase):
             run_cli("--path", str(kb), "init")
             requests = "\n".join([
                 json.dumps({"id": "dry", "path": str(kb), "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": str(transcript), "apply": True}}),
-                json.dumps({"id": "apply", "path": str(kb), "method": "akbp.crystallize_session", "params": {"transcript": str(transcript), "apply": True}}),
+                json.dumps({"id": "apply", "path": str(kb), "method": "akbp.crystallize_session", "approved": True, "params": {"transcript": str(transcript), "apply": True}}),
             ]) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -168,14 +177,16 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"method": "akbp.status"}),
             json.dumps({"id": "bad-method", "method": "status"}),
             json.dumps({"id": "bad-dry", "method": "akbp.status", "dry_run": "yes"}),
+            json.dumps({"id": "bad-approved", "method": "akbp.status", "approved": "yes"}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_request"] * 3)
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_request"] * 4)
         self.assertIn("tool-request.schema.json", lines[0]["error"]["details"]["schema"])
         self.assertIn("missing required field: id", lines[0]["error"]["details"]["errors"])
         self.assertIn("method must be an akbp.* string", lines[1]["error"]["details"]["errors"])
         self.assertIn("dry_run must be a boolean", lines[2]["error"]["details"]["errors"])
+        self.assertIn("approved must be a boolean", lines[3]["error"]["details"]["errors"])
 
     def test_structured_errors(self):
         requests = json.dumps({"id": "bad", "method": "akbp.missing"}) + "\n"

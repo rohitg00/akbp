@@ -26,7 +26,7 @@ Use direct claims for small standalone facts:
 {"id":"remember-dry-run","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"The repo uses make validate before releases","type":"workflow","evidence":["Makefile"]}}
 ```
 
-If the dry-run response includes `review_required`, print the planned command and `apply_instruction`. After approval, send the same request with `dry_run` set to `false` or omitted.
+If the dry-run response includes `review_required`, print the planned command and `apply_instruction`. After approval, send the same request with `approved:true` and `dry_run` set to `false` or omitted.
 
 ## CLI fallback
 

@@ -233,7 +233,7 @@ Agents should:
 1. call `akbp.capabilities` first and check the advertised method list and `params_schema` references
 2. use request-level `dry_run: true` before the first write in a session
 3. show the planned write to the user or calling runtime when approval is required
-4. repeat the same request without `dry_run` only after approval or trusted local policy
+4. repeat the same request with `approved: true` and without `dry_run` only after approval or trusted local policy
 5. use project-local scope unless the user explicitly asks for team or public memory
 6. cite evidence for durable claims and avoid storing transient logs
 7. redact secret-like strings before sending write requests
@@ -244,7 +244,13 @@ Write methods support request-level dry run:
 {"id":"1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths","type":"workflow","evidence":["release-notes.md"]}}
 ```
 
-Dry-run write responses return planned command arguments and do not mutate the knowledge base. Non-ingest write dry-runs also include `review_required:true` and an `apply_instruction` telling clients to repeat the same request without `dry_run` only after user approval or trusted local policy. Clients should render them as a reviewable change, not as committed memory.
+Dry-run write responses return planned command arguments and do not mutate the knowledge base. Non-ingest write dry-runs also include `review_required:true` and an `apply_instruction` telling clients to repeat the same request without `dry_run` only after user approval or trusted local policy. Clients should render them as a reviewable change, not as committed memory. Non-dry-run write requests must include request-level `approved:true`; otherwise the server returns `approval_required`.
+
+Approved apply example:
+
+```json
+{"id":"1-apply","method":"akbp.remember","path":".","approved":true,"params":{"text":"Agents need rollback paths","type":"workflow","evidence":["release-notes.md"]}}
+```
 
 Importing a local file through the JSONL server should also start with dry-run when the caller is unsure about scope or content sensitivity:
 
@@ -257,7 +263,7 @@ For `akbp.ingest`, dry-run executes the CLI preview and returns redacted import 
 Agents can also manage the local search index and query it:
 
 ```json
-{"id":"3","method":"akbp.index","path":".","params":{"incremental":true}}
+{"id":"3","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}
 {"id":"4","method":"akbp.search","path":".","params":{"query":"rollback release","limit":5}}
 ```
 

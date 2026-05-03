@@ -26,6 +26,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("id", request_schema["required"])
         self.assertIn("method", request_schema["required"])
         self.assertIn("dry_run", request_schema["properties"])
+        self.assertIn("approved", request_schema["properties"])
         self.assertEqual(response_schema["required"], ["id", "ok", "result", "error"])
         error_schema = response_schema["properties"]["error"]["anyOf"][1]
         self.assertEqual(error_schema["required"], ["code", "message"])

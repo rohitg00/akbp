@@ -25,6 +25,11 @@
       "type": "boolean",
       "default": false
     },
+    "approved": {
+      "description": "When true, the caller confirms a non-dry-run write has been approved by a user or trusted local policy.",
+      "type": "boolean",
+      "default": false
+    },
     "params": {
       "description": "Method-specific parameters.",
       "type": "object",

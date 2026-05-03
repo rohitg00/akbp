@@ -15,7 +15,7 @@ Use AKBP as the durable knowledge layer for this project.
 - Store decisions, preferences, blockers, workflows, and durable project facts.
 - Keep transient logs out of the knowledge base unless they explain a durable decision.
 - Use dry-run for writes when the user has not clearly approved durable memory changes.
-- If a dry-run response includes `review_required`, show the planned change and follow `apply_instruction` before applying.
+- If a dry-run response includes `review_required`, show the planned change and follow `apply_instruction` before applying with `approved:true`.
 
 ## On session end
 

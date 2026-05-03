@@ -98,6 +98,7 @@ def capabilities() -> dict[str, Any]:
             "capability_discovery": True,
             "dry_run": True,
             "write_review_required": True,
+            "write_apply_requires_approval": True,
             "jsonl_transport": True,
         },
         "schemas": {
@@ -118,6 +119,7 @@ def capabilities() -> dict[str, Any]:
             {"id": "query-1", "method": "akbp.query", "path": ".", "params": {"query": "deployment", "limit": 5}},
             {"id": "search-1", "method": "akbp.search", "path": ".", "params": {"query": "deployment", "limit": 5}},
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
+            {"id": "safe-write-apply-1", "method": "akbp.remember", "path": ".", "approved": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
             {"id": "crystallize-1", "method": "akbp.crystallize_session", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
         ],
@@ -188,6 +190,8 @@ def request_shape_errors(req: dict[str, Any]) -> list[str]:
         errors.append("path must be a string")
     if "dry_run" in req and not isinstance(req.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
+    if "approved" in req and not isinstance(req.get("approved"), bool):
+        errors.append("approved must be a boolean")
     return errors
 
 
@@ -317,6 +321,19 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             },
             "error": None,
         }
+
+    if method in WRITE_METHODS and not bool(req.get("approved")):
+        return error_response(
+            request_id,
+            "approval_required",
+            f"{method} requires approved:true for non-dry-run writes",
+            details={
+                "method": method,
+                "dry_run": False,
+                "review_required": True,
+                "apply_instruction": "Repeat the same request with approved:true only after user approval or trusted local policy.",
+            },
+        )
 
     code, stdout, stderr = run_cli(path, argv)
     if code != 0:
