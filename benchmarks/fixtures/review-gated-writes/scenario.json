@@ -23,8 +23,15 @@
         "type": "workflow",
         "status": "stable",
         "confidence": 0.9,
-        "evidence": ["source_tool_contract_review"],
-        "entities": ["dry-run", "review_required", "apply_instruction", "tool-server"],
+        "evidence": [
+          "source_tool_contract_review"
+        ],
+        "entities": [
+          "dry-run",
+          "review_required",
+          "apply_instruction",
+          "tool-server"
+        ],
         "scope": "project"
       },
       {
@@ -33,8 +40,16 @@
         "type": "policy",
         "status": "stable",
         "confidence": 0.9,
-        "evidence": ["source_tool_contract_review", "source_adapter_review_guidance"],
-        "entities": ["approval", "write-safety", "adapter", "dry-run"],
+        "evidence": [
+          "source_tool_contract_review",
+          "source_adapter_review_guidance"
+        ],
+        "entities": [
+          "approval",
+          "write-safety",
+          "adapter",
+          "dry-run"
+        ],
         "scope": "project"
       },
       {
@@ -43,8 +58,15 @@
         "type": "fact",
         "status": "stable",
         "confidence": 0.85,
-        "evidence": ["source_tool_contract_review"],
-        "entities": ["read-only", "query", "search", "context"],
+        "evidence": [
+          "source_tool_contract_review"
+        ],
+        "entities": [
+          "read-only",
+          "query",
+          "search",
+          "context"
+        ],
         "scope": "project"
       }
     ],
@@ -54,7 +76,114 @@
         "source": "claim_dry_run_returns_review_metadata",
         "target": "claim_agents_must_not_apply_without_review",
         "relation": "supports",
-        "evidence": ["source_tool_contract_review"]
+        "evidence": [
+          "source_tool_contract_review"
+        ]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "remember-dry-run",
+        "method": "akbp.remember",
+        "approved": false,
+        "params": {
+          "text": "Dry-run review metadata should be shown before apply.",
+          "type": "workflow",
+          "evidence": [
+            "source_tool_contract_review"
+          ],
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "dry_run",
+          "method",
+          "argv",
+          "would_write",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "dry_run": true,
+          "would_write": true,
+          "review_required": true
+        }
+      },
+      {
+        "id": "source-dry-run",
+        "method": "akbp.source.add",
+        "approved": false,
+        "params": {
+          "locator": "docs/TOOL_CONTRACT.md",
+          "type": "file",
+          "title": "Tool contract",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "dry_run",
+          "method",
+          "argv",
+          "would_write",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "dry_run": true,
+          "would_write": true,
+          "review_required": true
+        }
+      },
+      {
+        "id": "supersede-dry-run",
+        "method": "akbp.supersede",
+        "approved": false,
+        "params": {
+          "old_claim_id": "claim_read_only_methods_skip_review_gate",
+          "text": "Write methods require review metadata before apply.",
+          "type": "workflow",
+          "evidence": [
+            "source_tool_contract_review"
+          ],
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "dry_run",
+          "method",
+          "argv",
+          "would_write",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "dry_run": true,
+          "would_write": true,
+          "review_required": true
+        }
+      },
+      {
+        "id": "contradict-dry-run",
+        "method": "akbp.contradict",
+        "approved": false,
+        "params": {
+          "source_claim_id": "claim_read_only_methods_skip_review_gate",
+          "target_claim_id": "claim_agents_must_not_apply_without_review",
+          "evidence": [
+            "source_tool_contract_review"
+          ],
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "dry_run",
+          "method",
+          "argv",
+          "would_write",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "dry_run": true,
+          "would_write": true,
+          "review_required": true
+        }
       }
     ]
   },
@@ -73,6 +202,12 @@
       "apply_instruction",
       "approval",
       "dry_run"
+    ],
+    "must_dry_run_tool_methods": [
+      "akbp.remember",
+      "akbp.source.add",
+      "akbp.supersede",
+      "akbp.contradict"
     ]
   }
 }

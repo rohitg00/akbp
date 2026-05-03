@@ -176,10 +176,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
             continue
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
         missing = [field for field in request.get("expected_result_fields", []) or [] if field not in result]
+        mismatched = {key: {"expected": value, "actual": result.get(key)} for key, value in (request.get("expected_result_values", {}) or {}).items() if result.get(key) != value}
         checks.append({
             "name": "akbp_tool_apply_response_shape",
-            "ok": bool(output.get("ok")) and not missing,
-            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing},
+            "ok": bool(output.get("ok")) and not missing and not mismatched,
+            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched},
         })
     return {
         "ok": all(check["ok"] for check in checks),
@@ -259,6 +260,10 @@ def score_scenario(data: dict[str, Any], *, real_akbp: bool = False) -> dict[str
         rejected_methods = {request.get("method") for request in setup.get("tool_server_requests", []) or [] if request.get("expected_error_code")}
         for method in expected["must_reject_tool_methods"]:
             add("must_reject_tool_method", method in rejected_methods, method)
+    if expected.get("must_dry_run_tool_methods"):
+        dry_run_methods = {request.get("method") for request in setup.get("tool_server_requests", []) or [] if request.get("params", {}).get("dry_run") is True}
+        for method in expected["must_dry_run_tool_methods"]:
+            add("must_dry_run_tool_method", method in dry_run_methods, method)
 
     report = {
         "ok": all(check["ok"] for check in checks),
@@ -348,6 +353,10 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for method in expected.get("must_reject_tool_methods", []) or []:
         if method not in rejected_methods:
             issues.append(f"expected must_reject_tool_methods missing rejection request for {method}")
+    dry_run_methods = {request.get("method") for request in tool_requests if request.get("params", {}).get("dry_run") is True}
+    for method in expected.get("must_dry_run_tool_methods", []) or []:
+        if method not in dry_run_methods:
+            issues.append(f"expected must_dry_run_tool_methods missing dry-run request for {method}")
     for request in tool_requests:
         if not request.get("expected_result_fields") and not request.get("expected_error_code"):
             issues.append(f"tool request {request.get('id')} must declare expected_result_fields or expected_error_code")
