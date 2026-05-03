@@ -164,6 +164,16 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
     output_by_id = {output.get("id"): output for output in tool_outputs}
     for request in requests:
         output = output_by_id.get(request.get("id"), {})
+        if request.get("expected_error_code"):
+            error = output.get("error") if isinstance(output.get("error"), dict) else {}
+            details = error.get("details") if isinstance(error.get("details"), dict) else {}
+            missing = [field for field in request.get("expected_error_fields", []) or [] if field not in details]
+            checks.append({
+                "name": "akbp_tool_rejection_shape",
+                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing,
+                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "code": error.get("code")},
+            })
+            continue
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
         missing = [field for field in request.get("expected_result_fields", []) or [] if field not in result]
         checks.append({
@@ -245,6 +255,10 @@ def score_scenario(data: dict[str, Any], *, real_akbp: bool = False) -> dict[str
         requested_methods = {request.get("method") for request in setup.get("tool_server_requests", []) or [] if request.get("approved") is True}
         for method in expected["must_apply_tool_methods"]:
             add("must_apply_tool_method", method in requested_methods, method)
+    if expected.get("must_reject_tool_methods"):
+        rejected_methods = {request.get("method") for request in setup.get("tool_server_requests", []) or [] if request.get("expected_error_code")}
+        for method in expected["must_reject_tool_methods"]:
+            add("must_reject_tool_method", method in rejected_methods, method)
 
     report = {
         "ok": all(check["ok"] for check in checks),
@@ -330,9 +344,13 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for method in expected.get("must_apply_tool_methods", []) or []:
         if method not in requested_methods:
             issues.append(f"expected must_apply_tool_methods missing approved request for {method}")
+    rejected_methods = {request.get("method") for request in tool_requests if request.get("expected_error_code")}
+    for method in expected.get("must_reject_tool_methods", []) or []:
+        if method not in rejected_methods:
+            issues.append(f"expected must_reject_tool_methods missing rejection request for {method}")
     for request in tool_requests:
-        if not request.get("expected_result_fields"):
-            issues.append(f"tool request {request.get('id')} must declare expected_result_fields")
+        if not request.get("expected_result_fields") and not request.get("expected_error_code"):
+            issues.append(f"tool request {request.get('id')} must declare expected_result_fields or expected_error_code")
     if len(relation_ids) != len(setup.get("relations", []) or []):
         issues.append("relations must have unique ids")
     return issues

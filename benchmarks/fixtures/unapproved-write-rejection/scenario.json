@@ -1,0 +1,141 @@
+{
+  "id": "unapproved-write-rejection-001",
+  "task": "Verify non-dry-run JSONL writes are rejected until clients pass request-level approved:true.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_write_approval_gate",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract approval gate"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_unapproved_writes_rejected",
+        "text": "Write-capable JSONL methods reject non-dry-run requests without request-level approved:true and return approval_required details.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_write_approval_gate"
+        ],
+        "entities": [
+          "approved:true",
+          "approval_required",
+          "write-safety",
+          "JSONL"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_existing_write_policy",
+        "text": "The durable knowledge write policy must be reviewed before applying changes.",
+        "type": "workflow",
+        "status": "working",
+        "confidence": 0.7,
+        "evidence": [
+          "source_write_approval_gate"
+        ],
+        "entities": [
+          "write-safety",
+          "review"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "remember-unapproved",
+        "method": "akbp.remember",
+        "approved": false,
+        "params": {
+          "text": "Unapproved write should be rejected.",
+          "type": "workflow",
+          "evidence": [
+            "source_write_approval_gate"
+          ]
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "apply_instruction"
+        ]
+      },
+      {
+        "id": "source-unapproved",
+        "method": "akbp.source.add",
+        "approved": false,
+        "params": {
+          "locator": "docs/TOOL_CONTRACT.md",
+          "type": "file",
+          "title": "Tool contract"
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "apply_instruction"
+        ]
+      },
+      {
+        "id": "supersede-unapproved",
+        "method": "akbp.supersede",
+        "approved": false,
+        "params": {
+          "old_claim_id": "claim_existing_write_policy",
+          "text": "The reviewed write policy supersedes the old policy.",
+          "type": "workflow",
+          "evidence": [
+            "source_write_approval_gate"
+          ]
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "apply_instruction"
+        ]
+      },
+      {
+        "id": "contradict-unapproved",
+        "method": "akbp.contradict",
+        "approved": false,
+        "params": {
+          "source_claim_id": "claim_existing_write_policy",
+          "target_claim_id": "claim_unapproved_writes_rejected",
+          "evidence": [
+            "source_write_approval_gate"
+          ]
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "apply_instruction"
+        ]
+      }
+    ]
+  },
+  "query": "What should happen for write-safety when a client sends a non-dry-run JSONL write without approved:true?",
+  "expected": {
+    "must_retrieve": [
+      "claim_unapproved_writes_rejected"
+    ],
+    "must_cite": [
+      "source_write_approval_gate"
+    ],
+    "answer_should_include": [
+      "approved:true",
+      "approval_required",
+      "write-safety"
+    ],
+    "must_reject_tool_methods": [
+      "akbp.remember",
+      "akbp.source.add",
+      "akbp.supersede",
+      "akbp.contradict"
+    ]
+  }
+}
