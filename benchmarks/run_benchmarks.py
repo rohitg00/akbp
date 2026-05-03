@@ -71,6 +71,27 @@ def run_cli(kb: Path, *args: str) -> dict[str, Any]:
     return json.loads(proc.stdout) if proc.stdout.strip().startswith(("{", "[")) else {"stdout": proc.stdout}
 
 
+def run_tool_server(requests: list[dict[str, Any]], kb: Path) -> list[dict[str, Any]]:
+    envelopes = []
+    for request in requests:
+        envelope = {
+            "id": request["id"],
+            "path": str(kb),
+            "method": request["method"],
+            "approved": bool(request.get("approved")),
+            "params": request.get("params", {}),
+        }
+        envelopes.append(json.dumps(envelope, sort_keys=True))
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "tool-server" / "akbp_tool_server.py")],
+        input="\n".join(envelopes) + "\n",
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return [json.loads(line) for line in proc.stdout.splitlines() if line.strip()]
+
+
 def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
     run_cli(kb, "init")
     setup = data.get("setup", {})
@@ -120,13 +141,15 @@ def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
 
 
 def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
-    if not data.get("setup", {}).get("claims"):
+    setup = data.get("setup", {})
+    if not setup.get("claims") and not setup.get("tool_server_requests"):
         return {"ok": True, "skipped": "scenario has no stored claims"}
     with tempfile.TemporaryDirectory() as d:
         kb = Path(d) / "kb"
         scenario_to_kb(data, kb)
         query = run_cli(kb, "query", data.get("query", ""), "--limit", "20")
         context = run_cli(kb, "context", data.get("query", ""), "--limit", "20")
+        tool_outputs = run_tool_server(setup.get("tool_server_requests", []) or [], kb) if setup.get("tool_server_requests") else []
     expected = data.get("expected", {})
     query_ids = {item.get("id") for item in query.get("results", [])}
     context_ids = {item.get("id") for item in context.get("items", [])}
@@ -137,10 +160,22 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
             "ok": claim_id in query_ids or claim_id in context_ids,
             "details": claim_id,
         })
+    requests = setup.get("tool_server_requests", []) or []
+    output_by_id = {output.get("id"): output for output in tool_outputs}
+    for request in requests:
+        output = output_by_id.get(request.get("id"), {})
+        result = output.get("result") if isinstance(output.get("result"), dict) else {}
+        missing = [field for field in request.get("expected_result_fields", []) or [] if field not in result]
+        checks.append({
+            "name": "akbp_tool_apply_response_shape",
+            "ok": bool(output.get("ok")) and not missing,
+            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing},
+        })
     return {
         "ok": all(check["ok"] for check in checks),
         "query_result_ids": sorted(x for x in query_ids if x),
         "context_item_ids": sorted(x for x in context_ids if x),
+        "tool_output_ids": sorted(x for x in output_by_id if x),
         "checks": checks,
     }
 
@@ -196,14 +231,20 @@ def score_scenario(data: dict[str, Any], *, real_akbp: bool = False) -> dict[str
         add("safe_claim_text_redacts_patterns", not any(pattern in safe_claim_text for pattern in redaction_patterns), redaction_patterns)
     if expected.get("answer_should_include"):
         import_objects = setup.get("import_objects", []) or []
+        tool_requests = setup.get("tool_server_requests", []) or []
         combined = " ".join(
             [claim.get("text", "") for claim in claims]
             + [str(item.get("text", "")) for item in import_objects]
+            + [json.dumps(request, sort_keys=True) for request in tool_requests]
             + [str(expected.get("safe_claim_text", ""))]
             + [str(data.get("task", "")), str(data.get("query", ""))]
         ).lower()
         for phrase in expected["answer_should_include"]:
             add("answer_should_include", phrase.lower() in combined, phrase)
+    if expected.get("must_apply_tool_methods"):
+        requested_methods = {request.get("method") for request in setup.get("tool_server_requests", []) or [] if request.get("approved") is True}
+        for method in expected["must_apply_tool_methods"]:
+            add("must_apply_tool_method", method in requested_methods, method)
 
     report = {
         "ok": all(check["ok"] for check in checks),
@@ -269,8 +310,8 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
         if "sk-proj-" in raw or "xoxb-" in raw:
             issues.append("secret-safety fixture must not contain realistic secret prefixes")
 
-    if not source_ids and not setup.get("proposed_claims") and not setup.get("import_objects"):
-        issues.append("setup must include sources, proposed_claims, or import_objects")
+    if not source_ids and not setup.get("proposed_claims") and not setup.get("import_objects") and not setup.get("tool_server_requests"):
+        issues.append("setup must include sources, proposed_claims, import_objects, or tool_server_requests")
 
     import_ids = ids(setup.get("import_objects", []) or [])
     if len(import_ids) != len(setup.get("import_objects", []) or []):
@@ -281,6 +322,17 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for import_id in expected.get("must_allow_import_ids", []) or []:
         if import_id not in import_ids:
             issues.append(f"expected must_allow_import_ids missing import object {import_id}")
+    tool_requests = setup.get("tool_server_requests", []) or []
+    request_ids = ids(tool_requests)
+    if len(request_ids) != len(tool_requests):
+        issues.append("tool_server_requests must have unique ids")
+    requested_methods = {request.get("method") for request in tool_requests if request.get("approved") is True}
+    for method in expected.get("must_apply_tool_methods", []) or []:
+        if method not in requested_methods:
+            issues.append(f"expected must_apply_tool_methods missing approved request for {method}")
+    for request in tool_requests:
+        if not request.get("expected_result_fields"):
+            issues.append(f"tool request {request.get('id')} must declare expected_result_fields")
     if len(relation_ids) != len(setup.get("relations", []) or []):
         issues.append("relations must have unique ids")
     return issues

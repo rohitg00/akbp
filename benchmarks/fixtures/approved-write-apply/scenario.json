@@ -1,0 +1,158 @@
+{
+  "id": "approved-write-apply-001",
+  "task": "Verify approved JSONL write calls return concrete records that adapters can inspect after review approval.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_write_contract",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract write apply response shapes"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_old_apply_flow",
+        "text": "The old write flow did not require adapters to inspect schema-backed apply responses.",
+        "type": "observation",
+        "status": "working",
+        "confidence": 0.6,
+        "evidence": [
+          "source_write_contract"
+        ],
+        "entities": [
+          "write-apply",
+          "adapter"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_reviewed_apply_output",
+        "text": "After approval, JSONL write methods return schema-backed claim, source, or relation records that clients can inspect and audit.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_write_contract"
+        ],
+        "entities": [
+          "approved:true",
+          "schema-backed",
+          "write-apply",
+          "audit"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "remember-apply",
+        "method": "akbp.remember",
+        "approved": true,
+        "params": {
+          "text": "Approved write apply responses must be schema-backed.",
+          "type": "workflow",
+          "evidence": [
+            "source_write_contract"
+          ]
+        },
+        "expected_result_fields": [
+          "id",
+          "text",
+          "type",
+          "status",
+          "confidence",
+          "evidence",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "id": "source-apply",
+        "method": "akbp.source.add",
+        "approved": true,
+        "params": {
+          "locator": "docs/TOOL_CONTRACT.md",
+          "type": "file",
+          "title": "Tool contract"
+        },
+        "expected_result_fields": [
+          "id",
+          "type",
+          "locator",
+          "title",
+          "immutable",
+          "scope",
+          "created_at",
+          "metadata"
+        ]
+      },
+      {
+        "id": "supersede-apply",
+        "method": "akbp.supersede",
+        "approved": true,
+        "params": {
+          "old_claim_id": "claim_old_apply_flow",
+          "text": "Adapters should inspect schema-backed write-apply outputs after approval.",
+          "type": "workflow",
+          "evidence": [
+            "source_write_contract"
+          ]
+        },
+        "expected_result_fields": [
+          "id",
+          "text",
+          "type",
+          "status",
+          "confidence",
+          "evidence",
+          "supersedes",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "id": "contradict-apply",
+        "method": "akbp.contradict",
+        "approved": true,
+        "params": {
+          "source_claim_id": "claim_old_apply_flow",
+          "target_claim_id": "claim_reviewed_apply_output",
+          "evidence": [
+            "source_write_contract"
+          ]
+        },
+        "expected_result_fields": [
+          "id",
+          "source",
+          "relation",
+          "target",
+          "confidence",
+          "evidence",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    ]
+  },
+  "query": "What should clients inspect after an approved:true JSONL write apply call?",
+  "expected": {
+    "must_retrieve": [
+      "claim_reviewed_apply_output"
+    ],
+    "must_cite": [
+      "source_write_contract"
+    ],
+    "answer_should_include": [
+      "approved:true",
+      "schema-backed",
+      "audit"
+    ],
+    "must_apply_tool_methods": [
+      "akbp.remember",
+      "akbp.source.add",
+      "akbp.supersede",
+      "akbp.contradict"
+    ]
+  }
+}
