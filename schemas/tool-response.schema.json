@@ -392,6 +392,98 @@
           "minLength": 1
         }
       }
+    },
+    "crystallize_session_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "session_id",
+        "apply",
+        "summary",
+        "page",
+        "source_id",
+        "created_claims",
+        "skipped_claims"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "apply": {
+          "type": "boolean"
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "decisions",
+            "actions",
+            "blockers",
+            "preferences",
+            "questions",
+            "files"
+          ],
+          "properties": {
+            "decisions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "blockers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "preferences": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "questions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "page": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

@@ -92,8 +92,11 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", dry_run["required"])
+        crystallize = defs["crystallize_session_result"]
         for field in ["source_id", "page", "signals", "created_claims", "redacted", "would_write"]:
             self.assertIn(field, ingest_dry_run["required"])
+        for field in ["session_id", "summary", "page", "source_id", "created_claims", "skipped_claims"]:
+            self.assertIn(field, crystallize["required"])
         capabilities = defs["capabilities_result"]
         self.assertIn("features", capabilities["required"])
         self.assertIn("methods", capabilities["required"])
@@ -336,6 +339,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["dry_run"])
             self.assertIn("--apply", lines[0]["result"]["argv"])
             self.assertTrue(lines[1]["ok"])
+            assert_matches_required_schema(self, lines[1]["result"], schema_def("crystallize_session_result"))
             self.assertTrue(lines[1]["result"]["created_claims"])
 
 
