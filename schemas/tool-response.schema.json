@@ -542,6 +542,87 @@
           }
         }
       }
+    },
+    "status_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "path",
+        "claims",
+        "sources",
+        "pages",
+        "initialized",
+        "card",
+        "entrypoint"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claims": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "initialized": {
+          "type": "boolean"
+        },
+        "card": {
+          "type": "boolean"
+        },
+        "entrypoint": {
+          "type": "boolean"
+        }
+      }
+    },
+    "index_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ok",
+        "db",
+        "rows",
+        "indexed",
+        "skipped",
+        "removed",
+        "incremental"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "db": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "indexed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "removed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "incremental": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }
