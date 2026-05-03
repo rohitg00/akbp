@@ -239,8 +239,9 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/audit_event`: the nested event shape returned by `akbp.audit`.
 - `#/$defs/exported_claim`: the nested claim shape returned by `akbp.export`.
 - `#/$defs/claim_result`: the claim shape returned by approved `akbp.remember` and `akbp.supersede`.
-- `#/$defs/source_result`: the source record returned by approved `akbp.source.add`.
-- `#/$defs/relation_result`: the relation record returned by approved `akbp.contradict`.
+- `#/$defs/source_result`: the source record returned by approved `akbp.source.add` and nested in `akbp.export`.
+- `#/$defs/entity_result`: the entity record nested in `akbp.export`.
+- `#/$defs/relation_result`: the relation record returned by approved `akbp.contradict` and nested in `akbp.export`.
 - `#/$defs/dry_run_review_result`: a generic dry-run write result with `dry_run:true`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/ingest_dry_run_result`: an `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/crystallize_session_result`: an approved or previewed session crystallization result with `session_id`, extracted `summary`, output page, source id, created claims, and skipped claims.

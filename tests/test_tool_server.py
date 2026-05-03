@@ -124,6 +124,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("confidence", defs["exported_claim"]["required"])
         self.assertIn("text", defs["claim_result"]["required"])
         self.assertIn("locator", defs["source_result"]["required"])
+        self.assertIn("name", defs["entity_result"]["required"])
         self.assertIn("relation", defs["relation_result"]["required"])
         invalid_request = defs["invalid_request_details"]
         invalid_params = defs["invalid_params_details"]
@@ -333,6 +334,9 @@ class ToolServerTest(unittest.TestCase):
             kb = Path(d) / "kb"
             run_cli("--path", str(kb), "init")
             claim = json.loads(run_cli("--path", str(kb), "remember", "AKBP cite output has evidence", "--evidence", "AKBP.md").stdout)["id"]
+            other_claim = json.loads(run_cli("--path", str(kb), "remember", "AKBP export can include relations", "--evidence", "REL.md").stdout)["id"]
+            run_cli("--path", str(kb), "source", "add", "AKBP.md", "--title", "AKBP doc")
+            run_cli("--path", str(kb), "contradict", claim, other_claim, "--evidence", "review.md")
             requests = "\n".join([
                 json.dumps({"id": "cite", "path": str(kb), "method": "akbp.cite", "params": {"claim_id": claim}}),
                 json.dumps({"id": "audit", "path": str(kb), "method": "akbp.audit", "params": {"limit": 5}}),
@@ -352,6 +356,10 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[1]["result"]["events"][0], schema_def("audit_event"))
             self.assertTrue(lines[2]["result"]["claims"])
             assert_matches_required_schema(self, lines[2]["result"]["claims"][0], schema_def("exported_claim"))
+            self.assertTrue(lines[2]["result"]["sources"])
+            assert_matches_required_schema(self, lines[2]["result"]["sources"][0], schema_def("source_result"))
+            self.assertTrue(lines[2]["result"]["relations"])
+            assert_matches_required_schema(self, lines[2]["result"]["relations"][0], schema_def("relation_result"))
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:

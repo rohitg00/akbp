@@ -707,19 +707,19 @@
         "sources": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/source_result"
           }
         },
         "entities": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/entity_result"
           }
         },
         "relations": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/relation_result"
           }
         }
       }
@@ -1035,6 +1035,49 @@
         "updated_at": {
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "entity_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "name",
+        "type",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "page": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated_at": {
+          "type": "string"
         }
       }
     }
