@@ -49,6 +49,12 @@ Integration style:
 
 ## Codex
 
+Reference adapter:
+
+```text
+adapters/codex/
+```
+
 Integration style:
 
 - `repository instruction files` instruction block
