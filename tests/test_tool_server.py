@@ -29,6 +29,7 @@ class ToolServerTest(unittest.TestCase):
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
             self.assertEqual(lines[0]["id"], "caps")
             self.assertTrue(lines[0]["result"]["features"]["capability_discovery"])
+            self.assertTrue(lines[0]["result"]["features"]["write_review_required"])
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])

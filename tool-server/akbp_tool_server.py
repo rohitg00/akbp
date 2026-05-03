@@ -97,6 +97,7 @@ def capabilities() -> dict[str, Any]:
             "structured_errors": True,
             "capability_discovery": True,
             "dry_run": True,
+            "write_review_required": True,
             "jsonl_transport": True,
         },
         "schemas": {
