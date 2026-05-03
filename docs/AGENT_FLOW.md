@@ -18,7 +18,7 @@ The first ingest command is a preview. Review the redaction status, extracted si
 
 ## JSONL tool-server flow
 
-Start write-capable calls with dry-run when the runtime does not already have durable-memory approval. For `akbp.ingest`, the dry-run response returns the same redacted preview fields as the CLI preview:
+Start write-capable calls with dry-run when the runtime does not already have durable-memory approval. Treat `review_required` and `apply_instruction` from dry-run responses as the runtime boundary before applying writes. For `akbp.ingest`, the dry-run response returns the same redacted preview fields as the CLI preview:
 
 ```json
 {"id":"1","method":"akbp.ingest","path":"./my-kb","dry_run":true,"params":{"file":"notes.md","claim":"Database migrations ship in small verified batches.","claim_type":"decision"}}

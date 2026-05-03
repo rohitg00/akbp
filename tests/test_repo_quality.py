@@ -170,6 +170,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("akbp ingest --dry-run", text)
         self.assertIn("redaction status", text)
         self.assertIn("would-write paths", text)
+        self.assertIn("review_required", text)
+        self.assertIn("apply_instruction", text)
 
     def test_adapter_docs_start_ingest_with_dry_run(self):
         for rel in [
