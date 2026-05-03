@@ -69,6 +69,12 @@ Integration style:
 
 ## Cursor
 
+Reference adapter:
+
+```text
+adapters/cursor/
+```
+
 Integration style:
 
 - Cursor rules

@@ -148,6 +148,7 @@ akbp/
     openclaw/
     codex/
     claude-code/
+    cursor/
   cli/
   tool-server/
   benchmarks/
