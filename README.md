@@ -149,6 +149,7 @@ akbp/
     codex/
     claude-code/
     cursor/
+    gemini-cli/
   cli/
   tool-server/
   benchmarks/

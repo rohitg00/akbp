@@ -98,6 +98,12 @@ Integration style:
 
 ## Gemini CLI
 
+Reference adapter:
+
+```text
+adapters/gemini-cli/
+```
+
 Integration style:
 
 - agent instruction file

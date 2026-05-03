@@ -1,0 +1,41 @@
+# Gemini CLI Adapter
+
+This adapter shows how a command-line coding agent can use AKBP for durable project knowledge without replacing repository instructions, chat summaries, or local CLI state.
+
+Use it when the agent can read workspace files, run local commands, or call the AKBP JSONL tool server.
+
+## Startup flow
+
+1. Discover `akbp.json` in the repository root or parent directories.
+2. Call `akbp.capabilities` before assuming method names, schemas, or write behavior.
+3. Call `akbp.context` with the current task before planning commands or edits.
+4. Cite retrieved claims when they affect code changes, release decisions, or user-facing recommendations.
+
+## Write flow
+
+Start durable writes with dry-run. Render `review_required` and `apply_instruction` before applying.
+
+```json
+{"id":"gemini-cli-crystallize-preview","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+```
+
+Apply only after approval or trusted local policy:
+
+```json
+{"id":"gemini-cli-crystallize-approved","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
+```
+
+For imported notes, specs, command summaries, or review artifacts, begin with ingest dry-run:
+
+```json
+{"id":"gemini-cli-ingest-preview","method":"akbp.ingest","path":".","dry_run":true,"params":{"file":"docs/command-note.md","title":"Command note","claim":"The repository validates releases with make validate.","claim_type":"workflow"}}
+```
+
+## CLI fallback
+
+```bash
+akbp --path . context "current coding task" --limit 8
+akbp --path . crystallize session-summary.md
+```
+
+Follow `docs/AGENT_FLOW.md`: retrieve context first, preview source imports, crystallize session knowledge with dry-run preview before apply, refresh the index after approved writes, and cite claims when prior knowledge affects work.

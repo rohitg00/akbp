@@ -188,6 +188,8 @@ class RepoQualityTest(unittest.TestCase):
             "adapters/claude-code/session-end.md",
             "adapters/cursor/README.md",
             "adapters/cursor/session-end.md",
+            "adapters/gemini-cli/README.md",
+            "adapters/gemini-cli/session-end.md",
         ]:
             text = (ROOT / rel).read_text(encoding="utf-8")
             self.assertIn("ingest dry-run", text, rel)
@@ -211,6 +213,9 @@ class RepoQualityTest(unittest.TestCase):
             "adapters/cursor/README.md",
             "adapters/cursor/instructions.md",
             "adapters/cursor/privacy.md",
+            "adapters/gemini-cli/README.md",
+            "adapters/gemini-cli/instructions.md",
+            "adapters/gemini-cli/privacy.md",
             "docs/ADAPTERS.md",
         ]:
             text = (ROOT / rel).read_text(encoding="utf-8")
@@ -311,6 +316,7 @@ class RepoQualityTest(unittest.TestCase):
             "codex/",
             "claude-code/",
             "cursor/",
+            "gemini-cli/",
         ]:
             self.assertIn(adapter, readme)
 
