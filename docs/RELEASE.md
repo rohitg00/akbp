@@ -60,7 +60,7 @@ python3 cli/akbp.py --path examples/end-to-end-agent-flow query "database migrat
 python3 cli/akbp.py --path examples/end-to-end-agent-flow context "prepare migration release"
 ```
 
-Run the JSONL tool server examples from `docs/TOOL_CONTRACT.md`, starting write-capable examples with request-level `dry_run: true` before applying writes. Confirm write dry-runs surface `review_required` and `apply_instruction`, and do not apply them until approval or trusted local policy exists.
+Run the JSONL tool server examples from `docs/TOOL_CONTRACT.md`, starting write-capable examples with request-level `dry_run: true` before applying writes. Confirm write dry-runs surface `review_required` and `apply_instruction`; non-dry-run writes without `approved:true` return `approval_required`; and writes are not applied until approval or trusted local policy exists.
 
 ## Artifact sanity checks
 

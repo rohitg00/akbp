@@ -210,6 +210,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("make validate", release_notes)
         self.assertIn("make benchmark-score", release_notes)
         self.assertIn("ingest dry-run preview responses", release_notes)
+        self.assertIn("approval-gated non-dry-run writes", release_notes)
+        self.assertIn("approved:true", release_notes)
         for fixture in [
             "preference recall",
             "supersession",
@@ -227,6 +229,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("dry-run previews", changelog)
         self.assertIn("import safety", changelog)
         self.assertIn("review-gated writes", changelog)
+        self.assertIn("approval-gated non-dry-run writes", changelog)
 
     def test_docs_use_current_context_method_name(self):
         for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:
@@ -277,6 +280,8 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
         self.assertIn("review_required", text)
         self.assertIn("apply_instruction", text)
+        self.assertIn("approved:true", text)
+        self.assertIn("approval_required", text)
         self.assertIn("explicit maintainer approval", text)
 
     def test_readme_and_release_docs_use_current_layout(self):
