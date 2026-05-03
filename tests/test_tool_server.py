@@ -122,6 +122,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("snippet", defs["search_result_row"]["required"])
         self.assertIn("event", defs["audit_event"]["required"])
         self.assertIn("confidence", defs["exported_claim"]["required"])
+        self.assertIn("text", defs["claim_result"]["required"])
+        self.assertIn("locator", defs["source_result"]["required"])
+        self.assertIn("relation", defs["relation_result"]["required"])
         invalid_request = defs["invalid_request_details"]
         invalid_params = defs["invalid_params_details"]
         unknown_method = defs["unknown_method_details"]
@@ -296,6 +299,34 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[1]["result"]["results"])
             assert_matches_required_schema(self, lines[1]["result"]["results"][0], schema_def("search_result_row"))
 
+
+
+    def test_write_apply_response_shapes(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            old = json.loads(run_cli("--path", str(kb), "remember", "Old claim", "--evidence", "old.md").stdout)["id"]
+            claim_a = json.loads(run_cli("--path", str(kb), "remember", "A claim", "--evidence", "a.md").stdout)["id"]
+            claim_b = json.loads(run_cli("--path", str(kb), "remember", "B claim", "--evidence", "b.md").stdout)["id"]
+            requests = "\n".join([
+                json.dumps({"id": "remember", "path": str(kb), "method": "akbp.remember", "approved": True, "params": {"text": "Remember result shape", "type": "fact", "evidence": ["doc.md"]}}),
+                json.dumps({"id": "source", "path": str(kb), "method": "akbp.source.add", "approved": True, "params": {"locator": "doc.md", "type": "file", "title": "Doc"}}),
+                json.dumps({"id": "supersede", "path": str(kb), "method": "akbp.supersede", "approved": True, "params": {"old_claim_id": old, "text": "New claim", "type": "decision", "evidence": ["new.md"]}}),
+                json.dumps({"id": "contradict", "path": str(kb), "method": "akbp.contradict", "approved": True, "params": {"source_claim_id": claim_a, "target_claim_id": claim_b, "evidence": ["review.md"]}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertEqual(len(lines), 4)
+            for line in lines:
+                self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, lines[0]["result"], schema_def("claim_result"))
+            assert_matches_required_schema(self, lines[1]["result"], schema_def("source_result"))
+            assert_matches_required_schema(self, lines[2]["result"], schema_def("claim_result"))
+            assert_matches_required_schema(self, lines[3]["result"], schema_def("relation_result"))
+            self.assertEqual(lines[0]["result"]["type"], "fact")
+            self.assertEqual(lines[1]["result"]["locator"], "doc.md")
+            self.assertIn(old, lines[2]["result"]["supersedes"])
+            self.assertEqual(lines[3]["result"]["relation"], "contradicts")
 
     def test_audit_cite_and_export_response_shapes(self):
         with tempfile.TemporaryDirectory() as d:

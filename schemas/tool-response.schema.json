@@ -878,6 +878,165 @@
           "minLength": 1
         }
       }
+    },
+    "claim_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "text",
+        "type",
+        "status",
+        "confidence",
+        "evidence",
+        "entities",
+        "scope",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "source_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "type",
+        "locator",
+        "title",
+        "immutable",
+        "scope",
+        "created_at",
+        "metadata"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "immutable": {
+          "type": "boolean"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "relation_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "source",
+        "relation",
+        "target",
+        "confidence",
+        "evidence",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     }
   }
 }
