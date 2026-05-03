@@ -95,4 +95,9 @@ Initial scenarios:
 - `preference-recall`: recall a durable preference with citation.
 - `supersession`: prefer a newer claim while preserving the superseded claim.
 - `contradiction`: retrieve conflicting claims and ask for resolution.
+- `correction-resolution`: apply newer corrections while preserving old conflicting knowledge until explicit resolution.
+- `import-safety`: validate imported JSONL objects and redaction before durable writes.
+- `multi-agent-handoff`: retrieve cited prior-agent context before continuing adapter work.
+- `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes.
 - `secret-safety`: redact or reject secret-like values before durable writes.
+- `session-crystallization`: retrieve workflow claims from structured coding-agent sessions with citations.

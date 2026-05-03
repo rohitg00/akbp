@@ -15,7 +15,7 @@ Release candidate scope:
 - Defines a local-first knowledge base layout with `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, source records, and audit history.
 - Ships a dependency-free Python reference CLI and JSONL local tool server.
 - Adds conformance checks through Level 3: file convention, structured claims, retrieval/context packs, and lifecycle relations.
-- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, secret-safety, and end-to-end agent flow.
+- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, review-gated writes, secret-safety, and end-to-end agent flow.
 
 ## Protocol surface
 
@@ -112,6 +112,7 @@ Included benchmark fixtures:
 - correction resolution
 - import safety
 - multi-agent handoff
+- review-gated writes
 - secret safety
 - session crystallization
 

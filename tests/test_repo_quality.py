@@ -216,6 +216,7 @@ class RepoQualityTest(unittest.TestCase):
             "correction resolution",
             "import safety",
             "multi-agent handoff",
+            "review-gated writes",
             "secret safety",
             "session crystallization",
         ]:
@@ -224,6 +225,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("claim-text redaction", changelog)
         self.assertIn("dry-run previews", changelog)
         self.assertIn("import safety", changelog)
+        self.assertIn("review-gated writes", changelog)
 
     def test_docs_use_current_context_method_name(self):
         for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:
