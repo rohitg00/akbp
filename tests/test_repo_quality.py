@@ -256,6 +256,13 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("make validate", release_doc)
         self.assertIn("make validate", ci)
 
+    def test_readme_documents_tool_write_approval_gate(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("dry_run:true", readme)
+        self.assertIn("approved:true", readme)
+        self.assertIn("approval_required", readme)
+        self.assertIn("review-gated", readme)
+
     def test_readme_lists_tracked_adapter_directories(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for adapter in [

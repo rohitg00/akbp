@@ -185,3 +185,10 @@ The repo includes a dependency-free JSONL tool server for local agent integratio
 ```bash
 echo '{"id":"1","method":"akbp.status","path":"."}' | python3 tool-server/akbp_tool_server.py
 ```
+
+Write-capable tool calls are review-gated. Start with request-level `dry_run:true`; apply only after approval with request-level `approved:true`. Non-approved writes return a structured `approval_required` error instead of mutating the knowledge base.
+
+```bash
+echo '{"id":"2","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths"}}' | python3 tool-server/akbp_tool_server.py
+echo '{"id":"2-apply","method":"akbp.remember","path":".","approved":true,"params":{"text":"Agents need rollback paths"}}' | python3 tool-server/akbp_tool_server.py
+```
