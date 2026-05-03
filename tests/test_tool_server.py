@@ -15,6 +15,21 @@ def run_cli(*args):
 
 
 class ToolServerTest(unittest.TestCase):
+
+    def test_response_schema_documents_write_review_shapes(self):
+        schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+        defs = schema["$defs"]
+        approval = defs["approval_required_details"]
+        dry_run = defs["dry_run_review_result"]
+        self.assertEqual(approval["properties"]["dry_run"], {"const": False})
+        self.assertEqual(approval["properties"]["review_required"], {"const": True})
+        self.assertIn("apply_instruction", approval["required"])
+        self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
+        self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
+        self.assertIn("apply_instruction", dry_run["required"])
+        details = schema["properties"]["error"]["anyOf"][1]["properties"]["details"]
+        self.assertIn({"$ref": "#/$defs/approval_required_details"}, details["anyOf"])
+
     def test_status_context_and_capabilities_methods(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

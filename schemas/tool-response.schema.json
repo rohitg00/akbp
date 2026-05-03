@@ -4,27 +4,48 @@
   "title": "AKBP Tool Response",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "ok", "result", "error"],
+  "required": [
+    "id",
+    "ok",
+    "result",
+    "error"
+  ],
   "properties": {
     "id": {
       "description": "Request identifier copied from the matching request when available.",
-      "type": ["string", "number", "null"]
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
     },
     "ok": {
       "type": "boolean"
     },
     "result": {
       "description": "Method-specific response payload when ok is true, otherwise null.",
-      "type": ["object", "array", "string", "number", "boolean", "null"]
+      "type": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
     },
     "error": {
       "description": "Structured error object when ok is false, otherwise null.",
       "anyOf": [
-        {"type": "null"},
+        {
+          "type": "null"
+        },
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["code", "message"],
+          "required": [
+            "code",
+            "message"
+          ],
           "properties": {
             "code": {
               "type": "string",
@@ -34,11 +55,89 @@
               "type": "string"
             },
             "details": {
-              "type": ["object", "array", "string", "number", "boolean", "null"]
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/approval_required_details"
+                },
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "array"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           }
         }
       ]
+    }
+  },
+  "$defs": {
+    "approval_required_details": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "method",
+        "dry_run",
+        "review_required",
+        "apply_instruction"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "pattern": "^akbp\\."
+        },
+        "dry_run": {
+          "const": false
+        },
+        "review_required": {
+          "const": true
+        },
+        "apply_instruction": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "dry_run_review_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "dry_run",
+        "review_required",
+        "apply_instruction"
+      ],
+      "properties": {
+        "dry_run": {
+          "const": true
+        },
+        "review_required": {
+          "const": true
+        },
+        "apply_instruction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "would_write": {
+          "type": [
+            "boolean",
+            "array",
+            "string"
+          ]
+        }
+      }
     }
   }
 }
