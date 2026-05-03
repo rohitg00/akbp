@@ -106,7 +106,11 @@ def capabilities() -> dict[str, Any]:
             "methods": METHODS_SCHEMA,
         },
         "methods": {
-            name: {**meta, **({"params_schema": ref} if (ref := method_schema_ref(name)) else {})}
+            name: {
+                **meta,
+                "review_required": bool(meta.get("write")),
+                **({"params_schema": ref} if (ref := method_schema_ref(name)) else {}),
+            }
             for name, meta in METHODS.items()
         },
         "examples": [

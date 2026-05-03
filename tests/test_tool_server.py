@@ -37,6 +37,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
+            self.assertTrue(lines[0]["result"]["methods"]["akbp.remember"]["review_required"])
+            self.assertFalse(lines[0]["result"]["methods"]["akbp.query"]["review_required"])
             examples = lines[0]["result"]["examples"]
             crystallize_examples = [item for item in examples if item["method"] == "akbp.crystallize_session"]
             self.assertTrue(crystallize_examples)
