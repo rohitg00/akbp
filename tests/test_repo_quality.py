@@ -181,6 +181,19 @@ class RepoQualityTest(unittest.TestCase):
             text = (ROOT / rel).read_text(encoding="utf-8")
             self.assertIn("ingest dry-run", text, rel)
 
+    def test_adapter_docs_surface_review_metadata(self):
+        for rel in [
+            "adapters/coding-agent-template/README.md",
+            "adapters/coding-agent-template/instructions.md",
+            "adapters/editor-coding-agent/README.md",
+            "adapters/terminal-coding-agent/README.md",
+            "adapters/example-coding-agent/README.md",
+            "docs/ADAPTERS.md",
+        ]:
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertIn("review_required", text, rel)
+            self.assertIn("apply_instruction", text, rel)
+
     def test_release_docs_match_package_version(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")

@@ -26,7 +26,7 @@ Use direct claims when there is no transcript or summary to crystallize:
 {"id":"example-write","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"The project validates releases with make validate","type":"workflow","evidence":["Makefile"]}}
 ```
 
-Apply only after review or explicit approval.
+Apply only after review or explicit approval. If the response includes `review_required`, surface `apply_instruction` before sending the non-dry-run request.
 
 ## Recommended AKBP loop
 
