@@ -60,6 +60,15 @@
                   "$ref": "#/$defs/approval_required_details"
                 },
                 {
+                  "$ref": "#/$defs/unknown_method_details"
+                },
+                {
+                  "$ref": "#/$defs/invalid_params_details"
+                },
+                {
+                  "$ref": "#/$defs/invalid_request_details"
+                },
+                {
                   "type": "object"
                 },
                 {
@@ -136,6 +145,78 @@
             "array",
             "string"
           ]
+        }
+      }
+    },
+    "invalid_request_details": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "errors",
+        "schema"
+      ],
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "invalid_params_details": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "params_schema"
+      ],
+      "properties": {
+        "params_schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unknown": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type_errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "unknown_method_details": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "available_methods"
+      ],
+      "properties": {
+        "available_methods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

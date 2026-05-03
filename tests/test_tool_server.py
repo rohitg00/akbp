@@ -69,6 +69,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(lines[3]["error"]["code"], "invalid_request")
         self.assertEqual(lines[4]["error"]["code"], "invalid_params")
         self.assertEqual(lines[5]["error"]["code"], "invalid_json")
+        assert_matches_required_schema(self, lines[2]["error"]["details"], schema_def("unknown_method_details"))
+        assert_matches_required_schema(self, lines[3]["error"]["details"], schema_def("invalid_request_details"))
+        assert_matches_required_schema(self, lines[4]["error"]["details"], schema_def("invalid_params_details"))
 
     def test_response_schema_documents_write_review_shapes(self):
         schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
@@ -81,8 +84,21 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", dry_run["required"])
+        invalid_request = defs["invalid_request_details"]
+        invalid_params = defs["invalid_params_details"]
+        unknown_method = defs["unknown_method_details"]
+        self.assertIn("errors", invalid_request["required"])
+        self.assertIn("schema", invalid_request["required"])
+        self.assertIn("params_schema", invalid_params["required"])
+        self.assertIn("available_methods", unknown_method["required"])
         details = schema["properties"]["error"]["anyOf"][1]["properties"]["details"]
-        self.assertIn({"$ref": "#/$defs/approval_required_details"}, details["anyOf"])
+        for ref in [
+            "#/$defs/approval_required_details",
+            "#/$defs/invalid_request_details",
+            "#/$defs/invalid_params_details",
+            "#/$defs/unknown_method_details",
+        ]:
+            self.assertIn({"$ref": ref}, details["anyOf"])
 
     def test_capabilities_method_schema_refs_match_schema_defs(self):
         method_schema = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
