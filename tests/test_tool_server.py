@@ -14,6 +14,25 @@ def run_cli(*args):
     return subprocess.run([sys.executable, str(CLI), *args], text=True, capture_output=True, check=True)
 
 
+def schema_def(name):
+    schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+    return schema["$defs"][name]
+
+
+def assert_matches_required_schema(testcase, payload, schema):
+    for field in schema["required"]:
+        testcase.assertIn(field, payload)
+    for field, spec in schema["properties"].items():
+        if field not in payload:
+            continue
+        if "const" in spec:
+            testcase.assertEqual(payload[field], spec["const"])
+        if spec.get("type") == "string":
+            testcase.assertIsInstance(payload[field], str)
+            if spec.get("minLength"):
+                testcase.assertGreaterEqual(len(payload[field]), spec["minLength"])
+
+
 class ToolServerTest(unittest.TestCase):
 
     def test_response_schema_documents_write_review_shapes(self):
@@ -121,15 +140,19 @@ class ToolServerTest(unittest.TestCase):
             proc = subprocess.run([sys.executable, str(SERVER)], input="\n".join(requests) + "\n", text=True, capture_output=True, check=True)
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
             self.assertEqual(len(lines), len(requests))
+            dry_run_schema = schema_def("dry_run_review_result")
+            approval_schema = schema_def("approval_required_details")
             for dry, rejected in zip(lines[0::2], lines[1::2]):
                 with self.subTest(request=dry["id"]):
                     self.assertTrue(dry["ok"])
+                    assert_matches_required_schema(self, dry["result"], dry_run_schema)
                     self.assertTrue(dry["result"]["dry_run"])
                     self.assertTrue(dry["result"]["review_required"])
                     self.assertIn("approval", dry["result"]["apply_instruction"])
                 with self.subTest(request=rejected["id"]):
                     self.assertFalse(rejected["ok"])
                     self.assertEqual(rejected["error"]["code"], "approval_required")
+                    assert_matches_required_schema(self, rejected["error"]["details"], approval_schema)
                     self.assertTrue(rejected["error"]["details"]["review_required"])
                     self.assertIn("approved:true", rejected["error"]["message"])
                     self.assertIn("approved:true", rejected["error"]["details"]["apply_instruction"])
