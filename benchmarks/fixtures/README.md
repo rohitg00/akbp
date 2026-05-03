@@ -30,3 +30,4 @@ The scenario file includes:
 - `import-safety`: validate JSONL import objects for redaction or rejection before durable writes.
 - `session-crystallization`: retrieve workflow claims from a structured coding-agent session with citations.
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.
+- `review-gated-writes`: require agents to honor dry-run review metadata before applying durable writes.

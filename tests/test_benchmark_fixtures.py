@@ -30,6 +30,15 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertNotIn("sk-proj-", text)
         self.assertNotIn("xoxb-", text)
 
+    def test_review_gated_writes_fixture_covers_review_metadata(self):
+        path = FIXTURES / "review-gated-writes" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        text = json.dumps(data)
+        self.assertIn("review_required", text)
+        self.assertIn("apply_instruction", text)
+        self.assertIn("approval", text)
+        self.assertIn("claim_agents_must_not_apply_without_review", data["expected"]["must_retrieve"])
+
     def test_benchmark_runner_passes(self):
         runner = ROOT / "benchmarks" / "run_benchmarks.py"
         proc = subprocess.run([sys.executable, str(runner), "--akbp"], text=True, capture_output=True, check=True)

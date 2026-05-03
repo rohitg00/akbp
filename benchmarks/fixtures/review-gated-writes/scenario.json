@@ -1,0 +1,78 @@
+{
+  "id": "review-gated-writes-001",
+  "task": "Ensure agents treat dry-run review metadata as a write boundary before committing durable knowledge.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_tool_contract_review",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract write safety section"
+      },
+      {
+        "id": "source_adapter_review_guidance",
+        "type": "file",
+        "locator": "docs/ADAPTERS.md",
+        "title": "Adapter review metadata guidance"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_dry_run_returns_review_metadata",
+        "text": "Dry-run write responses include review_required and apply_instruction so clients can render proposed durable-memory writes for review.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_tool_contract_review"],
+        "entities": ["dry-run", "review_required", "apply_instruction", "tool-server"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_agents_must_not_apply_without_review",
+        "text": "Agents should not repeat a write request without dry_run until review metadata has been shown and approval or trusted local policy permits applying it.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_tool_contract_review", "source_adapter_review_guidance"],
+        "entities": ["approval", "write-safety", "adapter", "dry-run"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_read_only_methods_skip_review_gate",
+        "text": "Read-only methods such as query, context, search, audit, cite, export, conformance, and status do not require write-review gating.",
+        "type": "fact",
+        "status": "stable",
+        "confidence": 0.85,
+        "evidence": ["source_tool_contract_review"],
+        "entities": ["read-only", "query", "search", "context"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_review_metadata_supports_write_gate",
+        "source": "claim_dry_run_returns_review_metadata",
+        "target": "claim_agents_must_not_apply_without_review",
+        "relation": "supports",
+        "evidence": ["source_tool_contract_review"]
+      }
+    ]
+  },
+  "query": "What should an adapter do with review_required and apply_instruction before applying a memory write?",
+  "expected": {
+    "must_retrieve": [
+      "claim_dry_run_returns_review_metadata",
+      "claim_agents_must_not_apply_without_review"
+    ],
+    "must_cite": [
+      "source_tool_contract_review",
+      "source_adapter_review_guidance"
+    ],
+    "answer_should_include": [
+      "review_required",
+      "apply_instruction",
+      "approval",
+      "dry_run"
+    ]
+  }
+}
