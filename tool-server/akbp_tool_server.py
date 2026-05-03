@@ -201,12 +201,36 @@ def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
     return sorted(name for name in params if name not in allowed)
 
 
+STRING_PARAMS = {
+    "query",
+    "task",
+    "text",
+    "type",
+    "locator",
+    "title",
+    "file",
+    "claim",
+    "claim_type",
+    "old_claim_id",
+    "source_claim_id",
+    "target_claim_id",
+    "transcript",
+    "level",
+    "claim_id",
+}
+
+
 def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    for name in sorted(STRING_PARAMS.intersection(params)):
+        if not isinstance(params.get(name), str):
+            errors.append(f"{name} must be a string")
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "limit" in params and (not isinstance(params.get("limit"), int) or isinstance(params.get("limit"), bool)):
         errors.append("limit must be an integer")
+    if "confidence" in params and (not isinstance(params.get("confidence"), (int, float)) or isinstance(params.get("confidence"), bool)):
+        errors.append("confidence must be a number")
     if "incremental" in params and not isinstance(params.get("incremental"), bool):
         errors.append("incremental must be a boolean")
     if "evidence" in params and not isinstance(params.get("evidence"), list):

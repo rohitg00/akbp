@@ -191,6 +191,8 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "bad-param-dry", "method": "akbp.remember", "params": {"text": "x", "dry_run": "yes"}}),
             json.dumps({"id": "bad-limit", "method": "akbp.search", "params": {"query": "release", "limit": "5"}}),
             json.dumps({"id": "bad-apply", "method": "akbp.crystallize_session", "params": {"transcript": "session.md", "apply": "true"}}),
+            json.dumps({"id": "bad-query", "method": "akbp.search", "params": {"query": 123}}),
+            json.dumps({"id": "bad-confidence", "method": "akbp.ingest", "params": {"file": "notes.md", "confidence": "high"}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -207,6 +209,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("dry_run must be a boolean", lines[3]["error"]["details"]["errors"])
         self.assertIn("limit must be an integer", lines[4]["error"]["details"]["errors"])
         self.assertIn("apply must be a boolean", lines[5]["error"]["details"]["errors"])
+        self.assertIn("query must be a string", lines[6]["error"]["details"]["errors"])
+        self.assertIn("confidence must be a number", lines[7]["error"]["details"]["errors"])
 
 
 if __name__ == "__main__":
