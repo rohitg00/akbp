@@ -145,6 +145,7 @@ akbp/
     example-coding-agent/
     terminal-coding-agent/
     editor-coding-agent/
+    openclaw/
   cli/
   tool-server/
   benchmarks/

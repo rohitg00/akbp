@@ -18,6 +18,12 @@ A complete runtime-neutral example adapter is available at:
 adapters/example-coding-agent/
 ```
 
+A public-safe OpenClaw workspace adapter is available at:
+
+```text
+adapters/openclaw/
+```
+
 Use the template before creating runtime-specific adapters. Use the example to confirm the minimum complete file shape. Both define startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
 
 ## Required adapter files
@@ -58,6 +64,12 @@ Integration style:
 - project-local `.akbp/` discovery
 
 ## OpenClaw
+
+Reference adapter:
+
+```text
+adapters/openclaw/
+```
 
 Integration style:
 
