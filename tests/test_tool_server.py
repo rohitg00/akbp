@@ -33,7 +33,42 @@ def assert_matches_required_schema(testcase, payload, schema):
                 testcase.assertGreaterEqual(len(payload[field]), spec["minLength"])
 
 
+def assert_response_envelope(testcase, payload):
+    testcase.assertEqual(set(payload), {"id", "ok", "result", "error"})
+    testcase.assertIsInstance(payload["ok"], bool)
+    if payload["ok"]:
+        testcase.assertIsNone(payload["error"])
+    else:
+        testcase.assertIsNone(payload["result"])
+        testcase.assertIsInstance(payload["error"], dict)
+        testcase.assertIn("code", payload["error"])
+        testcase.assertIn("message", payload["error"])
+        testcase.assertIsInstance(payload["error"]["code"], str)
+        testcase.assertIsInstance(payload["error"]["message"], str)
+
+
 class ToolServerTest(unittest.TestCase):
+
+    def test_all_server_outputs_use_response_envelope(self):
+        requests = "\n".join([
+            json.dumps({"id": "caps", "method": "akbp.capabilities"}),
+            json.dumps({"id": "status", "method": "akbp.status"}),
+            json.dumps({"id": "bad", "method": "akbp.missing"}),
+            json.dumps({"method": "akbp.status"}),
+            json.dumps({"id": "bad-params", "method": "akbp.search", "params": {"query": 123}}),
+            "not-json",
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 6)
+        for line in lines:
+            with self.subTest(response=line):
+                assert_response_envelope(self, line)
+        self.assertEqual(lines[0]["error"], None)
+        self.assertEqual(lines[2]["error"]["code"], "unknown_method")
+        self.assertEqual(lines[3]["error"]["code"], "invalid_request")
+        self.assertEqual(lines[4]["error"]["code"], "invalid_params")
+        self.assertEqual(lines[5]["error"]["code"], "invalid_json")
 
     def test_response_schema_documents_write_review_shapes(self):
         schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
