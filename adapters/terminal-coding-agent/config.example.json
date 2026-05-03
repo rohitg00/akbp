@@ -1,9 +1,14 @@
 {
   "adapter": "terminal-coding-agent",
   "akbp": {
-    "root_discovery": ["akbp.json", ".akbp/config.json"],
+    "root_discovery": [
+      "akbp.json",
+      ".akbp/config.json"
+    ],
     "preferred_transport": "jsonl-tool-server",
-    "server_command": ["akbp-tool-server"],
+    "server_command": [
+      "akbp-tool-server"
+    ],
     "cli_command": "akbp",
     "startup": {
       "context_limit": 8,
@@ -11,7 +16,16 @@
     },
     "writes": {
       "dry_run_first": true,
-      "require_approval_for_scope": ["team", "public"]
+      "require_approval_for_scope": [
+        "team",
+        "public"
+      ]
+    },
+    "write_policy": {
+      "default_scope": "project",
+      "dry_run_first": true,
+      "require_review_metadata": true,
+      "apply_requires_approved": true
     }
   }
 }

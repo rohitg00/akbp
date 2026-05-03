@@ -36,3 +36,17 @@ For imported notes, specs, or review artifacts, begin with ingest dry-run:
 Copy the relevant parts of `instructions.md`, `session-start.md`, and `session-end.md` into editor rules or project instructions. Keep durable records in AKBP artifacts, not private editor-only storage.
 
 Follow `docs/AGENT_FLOW.md`: retrieve context first, preview source imports, crystallize session knowledge with dry-run preview before apply, refresh the index after approved writes, and cite claims when prior knowledge affects work.
+
+## Approval-gated write safety
+
+Every adapter must use the same durable write boundary:
+
+- call `akbp.capabilities` before assuming methods or schemas
+- call `akbp.context` before planning substantial work
+- start source imports with ingest dry-run
+- preview session memory with `akbp.crystallize_session` and request-level `dry_run:true`
+- surface `review_required` and `apply_instruction` before applying writes
+- apply only with request-level `approved:true` after approval or trusted local policy
+- Do not store secrets, tokens, cookies, auth headers, private DMs, or raw logs with credentials
+
+Follow `docs/AGENT_FLOW.md` for the complete loop.

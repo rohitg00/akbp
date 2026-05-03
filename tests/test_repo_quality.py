@@ -222,6 +222,40 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn("review_required", text, rel)
             self.assertIn("apply_instruction", text, rel)
 
+    def test_all_adapter_configs_require_approval_gated_writes(self):
+        adapters_root = ROOT / "adapters"
+        adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
+        for adapter in adapters:
+            rel = str(adapter.relative_to(ROOT))
+            config = json.loads((adapter / "config.example.json").read_text(encoding="utf-8"))
+            policy = config.get("akbp", {}).get("write_policy", {})
+            self.assertIs(policy.get("dry_run_first"), True, rel)
+            self.assertIs(policy.get("require_review_metadata"), True, rel)
+            self.assertIs(policy.get("apply_requires_approved"), True, rel)
+            self.assertEqual(policy.get("default_scope"), "project", rel)
+
+    def test_all_adapter_docs_describe_approval_gated_write_flow(self):
+        adapters_root = ROOT / "adapters"
+        adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
+        for adapter in adapters:
+            rel = str(adapter.relative_to(ROOT))
+            combined = "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in sorted(adapter.glob("*.md"))
+            )
+            for required in [
+                "akbp.capabilities",
+                "akbp.context",
+                "akbp.crystallize_session",
+                "dry_run",
+                "review_required",
+                "apply_instruction",
+                "approved:true",
+                "ingest dry-run",
+                "Do not store",
+            ]:
+                self.assertIn(required, combined, f"{rel} missing {required}")
+
     def test_release_docs_match_package_version(self):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         release_doc = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
