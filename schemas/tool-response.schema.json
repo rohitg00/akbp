@@ -505,7 +505,7 @@
         "items": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/context_item"
           }
         },
         "warnings": {
@@ -538,7 +538,7 @@
         "results": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/search_result_row"
           }
         }
       }
@@ -665,7 +665,7 @@
         "events": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/audit_event"
           }
         },
         "count": {
@@ -701,7 +701,7 @@
         "claims": {
           "type": "array",
           "items": {
-            "type": "object"
+            "$ref": "#/$defs/exported_claim"
           }
         },
         "sources": {
@@ -721,6 +721,161 @@
           "items": {
             "type": "object"
           }
+        }
+      }
+    },
+    "context_item": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "type",
+        "summary",
+        "score",
+        "citations",
+        "freshness"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "freshness": {
+          "type": "string"
+        }
+      }
+    },
+    "search_result_row": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "id",
+        "path",
+        "snippet",
+        "rank"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snippet": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "number"
+        }
+      }
+    },
+    "audit_event": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "event",
+        "created_at",
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    },
+    "exported_claim": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "text",
+        "type",
+        "status",
+        "confidence",
+        "evidence",
+        "entities",
+        "scope",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

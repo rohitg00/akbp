@@ -118,6 +118,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("claim_id", defs["cite_result"]["required"])
         self.assertIn("events", defs["audit_result"]["required"])
         self.assertIn("claims", defs["export_result"]["required"])
+        self.assertIn("summary", defs["context_item"]["required"])
+        self.assertIn("snippet", defs["search_result_row"]["required"])
+        self.assertIn("event", defs["audit_event"]["required"])
+        self.assertIn("confidence", defs["exported_claim"]["required"])
         invalid_request = defs["invalid_request_details"]
         invalid_params = defs["invalid_params_details"]
         unknown_method = defs["unknown_method_details"]
@@ -199,6 +203,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[2]["id"], "2")
             assert_matches_required_schema(self, lines[2]["result"], schema_def("context_result"))
             self.assertTrue(lines[2]["result"]["items"])
+            assert_matches_required_schema(self, lines[2]["result"]["items"][0], schema_def("context_item"))
 
     def test_write_methods_and_dry_run(self):
         with tempfile.TemporaryDirectory() as d:
@@ -289,6 +294,7 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[1]["result"], schema_def("search_result"))
             self.assertEqual(lines[1]["result"]["backend"], "sqlite_fts5")
             self.assertTrue(lines[1]["result"]["results"])
+            assert_matches_required_schema(self, lines[1]["result"]["results"][0], schema_def("search_result_row"))
 
 
     def test_audit_cite_and_export_response_shapes(self):
@@ -311,7 +317,10 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"], schema_def("export_result"))
             self.assertEqual(lines[0]["result"]["claim_id"], claim)
             self.assertGreaterEqual(lines[1]["result"]["count"], 2)
+            self.assertTrue(lines[1]["result"]["events"])
+            assert_matches_required_schema(self, lines[1]["result"]["events"][0], schema_def("audit_event"))
             self.assertTrue(lines[2]["result"]["claims"])
+            assert_matches_required_schema(self, lines[2]["result"]["claims"][0], schema_def("exported_claim"))
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:
