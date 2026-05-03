@@ -188,6 +188,9 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "shape", "method": "akbp.search", "params": "not an object"}),
             json.dumps({"id": "unknown", "method": "akbp.search", "params": {"query": "release", "surprise": True}}),
             json.dumps({"id": "missing", "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": ""}}),
+            json.dumps({"id": "bad-param-dry", "method": "akbp.remember", "params": {"text": "x", "dry_run": "yes"}}),
+            json.dumps({"id": "bad-limit", "method": "akbp.search", "params": {"query": "release", "limit": "5"}}),
+            json.dumps({"id": "bad-apply", "method": "akbp.crystallize_session", "params": {"transcript": "session.md", "apply": "true"}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -200,6 +203,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(lines[2]["error"]["code"], "invalid_params")
         self.assertEqual(lines[2]["error"]["details"]["missing"], ["transcript"])
         self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.crystallize_session.params"))
+        self.assertEqual(lines[3]["error"]["code"], "invalid_params")
+        self.assertIn("dry_run must be a boolean", lines[3]["error"]["details"]["errors"])
+        self.assertIn("limit must be an integer", lines[4]["error"]["details"]["errors"])
+        self.assertIn("apply must be a boolean", lines[5]["error"]["details"]["errors"])
 
 
 if __name__ == "__main__":

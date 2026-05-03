@@ -201,6 +201,23 @@ def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
     return sorted(name for name in params if name not in allowed)
 
 
+def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
+        errors.append("dry_run must be a boolean")
+    if "limit" in params and (not isinstance(params.get("limit"), int) or isinstance(params.get("limit"), bool)):
+        errors.append("limit must be an integer")
+    if "incremental" in params and not isinstance(params.get("incremental"), bool):
+        errors.append("incremental must be a boolean")
+    if "evidence" in params and not isinstance(params.get("evidence"), list):
+        errors.append("evidence must be an array")
+    if "entity" in params and not isinstance(params.get("entity"), list):
+        errors.append("entity must be an array")
+    if method == "akbp.crystallize_session" and "apply" in params and not isinstance(params.get("apply"), bool):
+        errors.append("apply must be a boolean")
+    return errors
+
+
 def handle(req: dict[str, Any]) -> dict[str, Any]:
     request_id = req.get("id")
     shape_errors = request_shape_errors(req)
@@ -226,6 +243,15 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             "invalid_params",
             f"unknown params for {method}: {', '.join(unknown)}",
             details={"unknown": unknown, "allowed": METHODS[method]["params"], "params_schema": method_schema_ref(method)},
+        )
+
+    type_errors = param_type_errors(method, params)
+    if type_errors:
+        return error_response(
+            request_id,
+            "invalid_params",
+            f"invalid parameter types for {method}",
+            details={"errors": type_errors, "params_schema": method_schema_ref(method)},
         )
 
     missing = missing_required_params(method, params)
