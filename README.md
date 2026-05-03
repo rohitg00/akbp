@@ -169,6 +169,7 @@ Draft protocol with a small installable reference CLI, conformance checks, inges
 - `examples/level-1/` shows structured claims with evidence.
 - `examples/level-3/` shows lifecycle relations with concrete JSONL records.
 - `examples/end-to-end-agent-flow/` shows ingest, remember, index, search, context, and cite flow.
+- `examples/tool-server-approval-flow/` shows dry-run, `approval_required`, and approved JSONL write flow.
 
 Validate them with:
 

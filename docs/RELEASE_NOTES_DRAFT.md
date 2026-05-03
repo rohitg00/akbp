@@ -96,6 +96,7 @@ Included examples:
 - `examples/level-1/`
 - `examples/level-3/`
 - `examples/end-to-end-agent-flow/`
+- `examples/tool-server-approval-flow/`
 - `examples/coding-agent/`
 - `examples/research/`
 - `examples/personal/`

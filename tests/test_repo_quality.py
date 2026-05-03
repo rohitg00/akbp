@@ -265,6 +265,20 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("approved:true", readme)
         self.assertIn("approval_required", readme)
         self.assertIn("review-gated", readme)
+        self.assertIn("examples/tool-server-approval-flow/", readme)
+
+    def test_tool_server_approval_example_is_complete(self):
+        text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("dry_run:true", text)
+        self.assertIn("review_required", text)
+        self.assertIn("apply_instruction", text)
+        self.assertIn("approval_required", text)
+        self.assertIn("approved:true", text)
+        self.assertIn("claims/claims.jsonl", text)
+        release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        self.assertIn("examples/tool-server-approval-flow/", release_notes)
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        self.assertIn("JSONL tool-server approval flow", changelog)
 
     def test_readme_lists_tracked_adapter_directories(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

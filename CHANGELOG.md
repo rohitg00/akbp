@@ -13,7 +13,7 @@
 - Add safe local file ingest with common credential redaction, source records, imported wiki pages, lightweight signal extraction, optional claim creation, claim-text redaction, and dry-run previews.
 - Add conservative transcript crystallization for decisions, actions, blockers, preferences, questions, and touched files with citations, duplicate skipping, preview-first CLI flow, and JSONL tool-server access.
 - Add benchmark fixtures and runner for preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, review-gated writes, secret-safety, and real AKBP retrieval checks.
-- Add examples for Level 0, Level 1, Level 3 lifecycle records, coding-agent flow, research/personal templates, and end-to-end agent workflow.
+- Add examples for Level 0, Level 1, Level 3 lifecycle records, coding-agent flow, research/personal templates, end-to-end agent workflow, and JSONL tool-server approval flow.
 - Add adapter templates and docs for runtime-neutral coding-agent startup, retrieval, write, ingest, index, and citation loops.
 - Add install, schema, benchmark, tool contract, agent flow, release readiness, and release notes draft documentation.
 
