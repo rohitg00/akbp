@@ -61,7 +61,12 @@
           "method",
           "review_required",
           "apply_instruction"
-        ]
+        ],
+        "expected_error_values": {
+          "method": "akbp.remember",
+          "dry_run": false,
+          "review_required": true
+        }
       },
       {
         "id": "source-unapproved",
@@ -77,7 +82,12 @@
           "method",
           "review_required",
           "apply_instruction"
-        ]
+        ],
+        "expected_error_values": {
+          "method": "akbp.source.add",
+          "dry_run": false,
+          "review_required": true
+        }
       },
       {
         "id": "supersede-unapproved",
@@ -96,7 +106,12 @@
           "method",
           "review_required",
           "apply_instruction"
-        ]
+        ],
+        "expected_error_values": {
+          "method": "akbp.supersede",
+          "dry_run": false,
+          "review_required": true
+        }
       },
       {
         "id": "contradict-unapproved",
@@ -114,7 +129,12 @@
           "method",
           "review_required",
           "apply_instruction"
-        ]
+        ],
+        "expected_error_values": {
+          "method": "akbp.contradict",
+          "dry_run": false,
+          "review_required": true
+        }
       }
     ]
   },

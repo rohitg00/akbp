@@ -84,6 +84,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
             self.assertEqual(request["expected_error_code"], "approval_required")
             self.assertIn("review_required", request["expected_error_fields"])
             self.assertIn("apply_instruction", request["expected_error_fields"])
+            self.assertEqual(request["expected_error_values"]["method"], request["method"])
+            self.assertEqual(request["expected_error_values"]["dry_run"], False)
+            self.assertEqual(request["expected_error_values"]["review_required"], True)
 
     def test_adapter_write_safety_fixture_covers_approval_policy(self):
         path = FIXTURES / "adapter-write-safety" / "scenario.json"

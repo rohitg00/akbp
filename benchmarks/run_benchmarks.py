@@ -168,10 +168,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
             error = output.get("error") if isinstance(output.get("error"), dict) else {}
             details = error.get("details") if isinstance(error.get("details"), dict) else {}
             missing = [field for field in request.get("expected_error_fields", []) or [] if field not in details]
+            mismatched = {key: {"expected": value, "actual": details.get(key)} for key, value in (request.get("expected_error_values", {}) or {}).items() if details.get(key) != value}
             checks.append({
                 "name": "akbp_tool_rejection_shape",
-                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing,
-                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "code": error.get("code")},
+                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched,
+                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "code": error.get("code")},
             })
             continue
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
