@@ -542,6 +542,40 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_import_check(args: argparse.Namespace) -> int:
+    source = Path(args.file).resolve()
+    if not source.exists() or not source.is_file():
+        print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
+        return 1
+    accepted: list[dict[str, str]] = []
+    rejected: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+    for line_number, line in enumerate(source.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError as exc:
+            errors.append({"line": line_number, "error": exc.msg})
+            continue
+        item_id = str(item.get("id") or f"line-{line_number}") if isinstance(item, dict) else f"line-{line_number}"
+        kind = str(item.get("kind") or item.get("type") or "object") if isinstance(item, dict) else "object"
+        safe = redact_text(json.dumps(item, sort_keys=True, ensure_ascii=False))
+        if safe != json.dumps(item, sort_keys=True, ensure_ascii=False):
+            rejected.append({"id": item_id, "kind": kind, "line": line_number, "reason": "secret_like_value_redacted"})
+        else:
+            accepted.append({"id": item_id, "kind": kind, "line": line_number})
+    print(json.dumps({
+        "ok": not errors,
+        "file": str(source),
+        "checked": len(accepted) + len(rejected),
+        "accepted": accepted,
+        "rejected": rejected,
+        "errors": errors,
+    }, indent=2, ensure_ascii=False))
+    return 0 if not errors else 1
+
+
 
 
 def unique_keep_order(items: Iterable[str], limit: int = 20) -> list[str]:
@@ -1232,6 +1266,10 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--entity", action="append")
     s.add_argument("--dry-run", action="store_true", help="preview redacted import writes without changing the knowledge base")
     s.set_defaults(func=cmd_ingest)
+
+    s = sub.add_parser("import-check")
+    s.add_argument("file")
+    s.set_defaults(func=cmd_import_check)
 
     s = sub.add_parser("crystallize")
     s.add_argument("transcript")

@@ -208,6 +208,24 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertNotIn("token=", claims[0]["text"])
 
 
+    def test_import_check_rejects_secret_like_jsonl_objects(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            export = Path(d) / "session-export.jsonl"
+            rows = [
+                {"kind": "claim", "id": "claim_safe", "text": "Deployment failed after a redacted example token appeared."},
+                {"kind": "claim", "id": "claim_unsafe", "text": "Deployment failed after token=sk-example123456789 appeared."},
+            ]
+            export.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+
+            out = run_cli("--path", str(kb), "import-check", str(export))
+            data = json.loads(out.stdout)
+            self.assertTrue(data["ok"])
+            self.assertEqual(data["checked"], 2)
+            self.assertEqual([item["id"] for item in data["accepted"]], ["claim_safe"])
+            self.assertEqual([item["id"] for item in data["rejected"]], ["claim_unsafe"])
+            self.assertNotIn("sk-example123456789", out.stdout)
+
     def test_ingest_dry_run_previews_redacted_writes_without_creating_kb(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

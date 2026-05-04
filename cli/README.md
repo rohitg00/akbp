@@ -45,6 +45,8 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 `akbp ingest notes.md` imports a local file into `wiki/imports/`, records a source in `raw/sources/sources.jsonl`, extracts lightweight signals from headings and decision-like lines, and redacts common token/key patterns from the imported page. Use `--claim` to create one evidence-backed claim while importing; claim text is redacted with the same safety filter before durable write. Use `akbp ingest notes.md --dry-run` to preview source, page, claim ids, signals, redaction status, and would-write paths without changing the knowledge base.
 
+`akbp import-check export.jsonl` validates imported JSONL objects before durable writes. It reports accepted ids and rejected ids without echoing secret-like raw values, so agents can review exports before using `ingest` or `remember`.
+
 ## Crystallize
 
 `akbp crystallize transcript.md` previews extracted decisions, actions, blockers, preferences, questions, and file references without writing durable artifacts.
