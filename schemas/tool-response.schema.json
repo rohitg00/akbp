@@ -535,7 +535,7 @@
     },
     "context_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "query",
         "generated_at",
@@ -566,7 +566,7 @@
     },
     "search_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "query",
         "backend",
@@ -775,7 +775,7 @@
     },
     "context_item": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "type",
@@ -812,7 +812,7 @@
     },
     "search_result_row": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "type",
         "id",

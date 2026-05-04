@@ -227,15 +227,15 @@ Errors are structured:
 The response schema also names common result and error detail shapes used by adapters:
 
 - `#/$defs/capabilities_result`: the closed capability discovery result with protocol, feature flags, schema URLs, methods, and examples.
-- `#/$defs/context_result`: an `akbp.context` result with query, generated timestamp, context items, and warnings.
-- `#/$defs/search_result`: an `akbp.search` result with query, backend, optional FTS query, and result rows.
+- `#/$defs/context_result`: a closed `akbp.context` result with query, generated timestamp, context items, and warnings.
+- `#/$defs/search_result`: a closed `akbp.search` result with query, backend, optional FTS query, and result rows.
 - `#/$defs/status_result`: a closed `akbp.status` result with path, object counts, and initialization flags.
 - `#/$defs/index_result`: a closed approved `akbp.index` result with database path, row counts, indexed/skipped/removed counts, and incremental mode.
 - `#/$defs/cite_result`: a closed `akbp.cite` result with claim id, text, evidence list, and status.
 - `#/$defs/audit_result`: a closed `akbp.audit` result with audit events and count.
 - `#/$defs/export_result`: a closed `akbp.export` result with version, timestamp, card, claims, sources, entities, and relations.
-- `#/$defs/context_item`: the nested item shape returned by `akbp.context`.
-- `#/$defs/search_result_row`: the nested result-row shape returned by `akbp.search`.
+- `#/$defs/context_item`: the closed nested item shape returned by `akbp.context`.
+- `#/$defs/search_result_row`: the closed nested result-row shape returned by `akbp.search`.
 - `#/$defs/audit_event`: the nested event shape returned by `akbp.audit`.
 - `#/$defs/exported_claim`: the nested claim shape returned by `akbp.export`.
 - `#/$defs/claim_result`: the claim shape returned by approved `akbp.remember` and `akbp.supersede`.
