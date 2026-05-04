@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import subprocess
 import sys
@@ -6,6 +7,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "benchmarks" / "fixtures"
+RUNNER = ROOT / "benchmarks" / "run_benchmarks.py"
+
+_spec = importlib.util.spec_from_file_location("akbp_benchmark_runner", RUNNER)
+assert _spec and _spec.loader
+benchmark_runner = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(benchmark_runner)
 
 
 class BenchmarkFixtureTest(unittest.TestCase):
@@ -21,7 +28,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
                 self.assertIn("query", data)
                 self.assertIn("expected", data)
                 setup = data["setup"]
-                self.assertTrue(setup.get("sources") or setup.get("proposed_claims") or setup.get("import_objects"))
+                self.assertTrue(setup.get("sources") or setup.get("proposed_claims") or setup.get("import_objects") or setup.get("tool_server_requests"))
 
     def test_secret_safety_fixture_has_no_real_secret(self):
         path = FIXTURES / "secret-safety" / "scenario.json"
@@ -88,6 +95,36 @@ class BenchmarkFixtureTest(unittest.TestCase):
             self.assertEqual(request["expected_error_values"]["dry_run"], False)
             self.assertEqual(request["expected_error_values"]["review_required"], True)
 
+    def test_runner_rejects_undocumented_expected_value_fields(self):
+        data = {
+            "id": "bad-tool-contract",
+            "task": "Reject incomplete tool-server expected value contracts.",
+            "setup": {
+                "tool_server_requests": [
+                    {
+                        "id": "bad-request",
+                        "method": "akbp.remember",
+                        "params": {"text": "x"},
+                        "expected_result_fields": ["dry_run"],
+                        "expected_result_values": {"review_required": True},
+                    },
+                    {
+                        "id": "bad-error",
+                        "method": "akbp.remember",
+                        "params": {"text": "x"},
+                        "expected_error_code": "approval_required",
+                        "expected_error_fields": ["method"],
+                        "expected_error_values": {"dry_run": False},
+                    },
+                ]
+            },
+            "query": "x",
+            "expected": {},
+        }
+        issues = benchmark_runner.check_scenario(data)
+        self.assertIn("tool request bad-request expected_result_values field review_required must also be listed in expected_result_fields", issues)
+        self.assertIn("tool request bad-error expected_error_values field dry_run must also be listed in expected_error_fields", issues)
+
     def test_adapter_write_safety_fixture_covers_approval_policy(self):
         path = FIXTURES / "adapter-write-safety" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -105,8 +142,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("claim_adapter_docs_require_review_boundary", data["expected"]["must_retrieve"])
 
     def test_benchmark_runner_passes(self):
-        runner = ROOT / "benchmarks" / "run_benchmarks.py"
-        proc = subprocess.run([sys.executable, str(runner), "--akbp"], text=True, capture_output=True, check=True)
+        proc = subprocess.run([sys.executable, str(RUNNER), "--akbp"], text=True, capture_output=True, check=True)
         report = json.loads(proc.stdout)
         self.assertTrue(report["ok"])
         self.assertEqual(report["mode"], "akbp-score")
