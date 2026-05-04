@@ -233,6 +233,23 @@
         }
       }
     },
+    "akbp.import_apply.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
     "akbp.index.params": {
       "type": "object",
       "additionalProperties": false,
@@ -368,6 +385,9 @@
         },
         "akbp.import_check": {
           "$ref": "#/$defs/akbp.import_check.params"
+        },
+        "akbp.import_apply": {
+          "$ref": "#/$defs/akbp.import_apply.params"
         },
         "akbp.supersede": {
           "$ref": "#/$defs/akbp.supersede.params"

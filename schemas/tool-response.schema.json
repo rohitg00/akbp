@@ -588,6 +588,55 @@
         }
       }
     },
+    "import_apply_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "file",
+        "dry_run",
+        "applied",
+        "checked",
+        "accepted_count",
+        "rejected_count",
+        "error_count",
+        "would_write",
+        "skipped_existing"
+      ],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "file": { "type": "string", "minLength": 1 },
+        "dry_run": { "type": "boolean" },
+        "applied": { "type": "boolean" },
+        "checked": { "type": "integer", "minimum": 0 },
+        "accepted_count": { "type": "integer", "minimum": 0 },
+        "rejected_count": { "type": "integer", "minimum": 0 },
+        "error_count": { "type": "integer", "minimum": 0 },
+        "would_write": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sources", "claims"],
+          "properties": {
+            "sources": { "type": "array", "items": { "type": "string" } },
+            "claims": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "skipped_existing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sources", "claims"],
+          "properties": {
+            "sources": { "type": "array", "items": { "type": "string" } },
+            "claims": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "accepted": { "type": "array", "items": { "$ref": "#/$defs/import_check_item" } },
+        "rejected": { "type": "array", "items": { "$ref": "#/$defs/import_check_item" } },
+        "errors": { "type": "array", "items": { "$ref": "#/$defs/import_check_error" } },
+        "review_required": { "type": "boolean" },
+        "apply_instruction": { "type": "string" }
+      }
+    },
     "crystallize_session_result": {
       "type": "object",
       "additionalProperties": false,

@@ -267,6 +267,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
             self.assertIn("akbp.ingest", lines[0]["result"]["methods"])
             self.assertIn("akbp.import_check", lines[0]["result"]["methods"])
+            self.assertIn("akbp.import_apply", lines[0]["result"]["methods"])
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
@@ -277,7 +278,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(crystallize_examples)
             self.assertTrue(crystallize_examples[0]["dry_run"])
             self.assertTrue(crystallize_examples[0]["params"]["apply"])
-            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.import_check", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
+            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.import_check", "akbp.import_apply", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
                 self.assertTrue(lines[0]["result"]["methods"][method]["params_schema"].endswith(f"#/$defs/{method}.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
@@ -499,6 +500,36 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(strict_line["result"]["fail_on_rejected"])
             self.assertEqual(strict_line["result"]["rejected_count"], 1)
             self.assertNotIn("sk-example123456789", strict_proc.stdout)
+
+    def test_import_apply_method_previews_and_applies_after_approval(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            export = Path(d) / "safe-export.jsonl"
+            export.write_text(
+                json.dumps({"kind": "source", "id": "source_tool_import", "type": "transcript", "locator": "imports/tool.md", "title": "Tool import"}) + "\n" +
+                json.dumps({"kind": "claim", "id": "claim_tool_import", "text": "JSONL tool import apply writes reviewed objects.", "type": "workflow", "status": "working", "confidence": 0.8, "evidence": ["source_tool_import"], "scope": "project"}) + "\n",
+                encoding="utf-8",
+            )
+            requests = "\n".join([
+                json.dumps({"id": "preview", "path": str(kb), "method": "akbp.import_apply", "dry_run": True, "params": {"file": str(export)}}),
+                json.dumps({"id": "blocked", "path": str(kb), "method": "akbp.import_apply", "params": {"file": str(export)}}),
+                json.dumps({"id": "apply", "path": str(kb), "method": "akbp.import_apply", "approved": True, "params": {"file": str(export)}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertTrue(lines[0]["ok"])
+            assert_matches_required_schema(self, lines[0]["result"], schema_def("import_apply_result"))
+            self.assertTrue(lines[0]["result"]["dry_run"])
+            self.assertFalse(lines[0]["result"]["applied"])
+            self.assertEqual(lines[0]["result"]["would_write"]["claims"], ["claim_tool_import"])
+            self.assertFalse(lines[1]["ok"])
+            self.assertEqual(lines[1]["error"]["code"], "approval_required")
+            self.assertTrue(lines[2]["ok"])
+            assert_matches_required_schema(self, lines[2]["result"], schema_def("import_apply_result"))
+            self.assertTrue(lines[2]["result"]["applied"])
+            claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+            self.assertIn("claim_tool_import", {claim["id"] for claim in claims})
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:

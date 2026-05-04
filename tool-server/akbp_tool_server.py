@@ -35,6 +35,7 @@ WRITE_METHODS = {
     "akbp.remember",
     "akbp.source.add",
     "akbp.ingest",
+    "akbp.import_apply",
     "akbp.index",
     "akbp.supersede",
     "akbp.contradict",
@@ -56,6 +57,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence", "dry_run"]},
     "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity", "dry_run"]},
     "akbp.import_check": {"write": False, "params": ["file", "fail_on_rejected"]},
+    "akbp.import_apply": {"write": True, "params": ["file", "dry_run"]},
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
@@ -70,6 +72,7 @@ REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "akbp.source.add": ("locator",),
     "akbp.ingest": ("file",),
     "akbp.import_check": ("file",),
+    "akbp.import_apply": ("file",),
     "akbp.supersede": ("old_claim_id", "text"),
     "akbp.contradict": ("source_claim_id", "target_claim_id"),
     "akbp.crystallize_session": ("transcript",),
@@ -124,6 +127,7 @@ def capabilities() -> dict[str, Any]:
             {"id": "safe-write-apply-1", "method": "akbp.remember", "path": ".", "approved": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
             {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl", "fail_on_rejected": True}},
+            {"id": "import-apply-1", "method": "akbp.import_apply", "path": ".", "dry_run": True, "params": {"file": "export.jsonl"}},
             {"id": "crystallize-1", "method": "akbp.crystallize_session", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
         ],
     }
@@ -144,6 +148,7 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.source.add": ["source", "add", params.get("locator", ""), "--type", params.get("type", "file")],
         "akbp.ingest": ["ingest", params.get("file", ""), "--type", params.get("type", "file")],
         "akbp.import_check": ["import-check", params.get("file", "")],
+        "akbp.import_apply": ["import-apply", params.get("file", "")],
         "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
         "akbp.crystallize_session": ["crystallize", params.get("transcript", "")],
@@ -314,6 +319,16 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             result.setdefault("apply_instruction", "Repeat the same request without dry_run only after reviewing redaction status, extracted signals, claim ids, would_write paths, and approval or trusted local policy.")
         return {"id": request_id, "ok": True, "result": result, "error": None}
 
+    if dry_run and method == "akbp.import_apply":
+        code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
+        if code != 0:
+            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+        result = parse_payload(stdout)
+        if isinstance(result, dict):
+            result.setdefault("review_required", True)
+            result.setdefault("apply_instruction", "Repeat the same request with approved:true only after reviewing import-check output and dry-run would_write ids.")
+        return {"id": request_id, "ok": True, "result": result, "error": None}
+
     if dry_run and method in WRITE_METHODS:
         return {
             "id": request_id,
@@ -343,6 +358,8 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             },
         )
 
+    if method == "akbp.import_apply":
+        argv = [*argv, "--approved"]
     code, stdout, stderr = run_cli(path, argv)
     if method == "akbp.import_check" and stdout.strip():
         return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}

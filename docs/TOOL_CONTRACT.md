@@ -164,6 +164,7 @@ Supported methods in the first server slice:
 - `akbp.source.add`
 - `akbp.ingest`
 - `akbp.import_check`
+- `akbp.import_apply`
 - `akbp.supersede`
 - `akbp.contradict`
 - `akbp.crystallize_session`
@@ -194,6 +195,7 @@ Request and response envelopes are specified in:
 - `akbp.source.add`
 - `akbp.ingest`
 - `akbp.import_check`
+- `akbp.import_apply`
 - `akbp.supersede`
 - `akbp.contradict`
 - `akbp.crystallize_session`
@@ -248,6 +250,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/ingest_dry_run_result`: a closed `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/ingest_result`: a closed approved `akbp.ingest` result with source id, imported page path, extracted signals, created claim ids, and redaction status.
 - `#/$defs/import_check_result`: a closed `akbp.import_check` result with checked, accepted, rejected, and error counts, strict-fail mode status, accepted object ids, rejected object ids, and parse errors without raw secret echo.
+- `#/$defs/import_apply_result`: a closed `akbp.import_apply` result with dry-run/apply status, accepted counts, rejected counts, would-write ids, and skipped-existing ids.
 - `#/$defs/crystallize_session_result`: a closed approved session crystallization result with `session_id`, extracted closed `summary`, output page, source id, created claims, and skipped claims.
 - `#/$defs/approval_required_details`: a closed `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/invalid_request_details`: closed request-envelope validation details with `errors` and `schema`.
