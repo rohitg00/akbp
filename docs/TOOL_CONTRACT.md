@@ -245,13 +245,13 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/dry_run_review_result`: a generic dry-run write result with `dry_run:true`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/ingest_dry_run_result`: an `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/crystallize_session_result`: an approved or previewed session crystallization result with `session_id`, extracted `summary`, output page, source id, created claims, and skipped claims.
-- `#/$defs/approval_required_details`: an `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
-- `#/$defs/invalid_request_details`: request-envelope validation details with `errors` and `schema`.
-- `#/$defs/invalid_json_details`: invalid JSON line details with parse `errors` and the request-envelope `schema`, without echoing the raw input line.
-- `#/$defs/cli_error_details`: CLI execution failure details with `method`, `exit_code`, and captured `stdout`.
-- `#/$defs/internal_error_details`: defensive server-boundary failure details with sanitized `errors`.
-- `#/$defs/invalid_params_details`: parameter validation details with `params_schema` plus missing, unknown, allowed, or type-error metadata when relevant.
-- `#/$defs/unknown_method_details`: unknown-method details with the advertised `available_methods` list.
+- `#/$defs/approval_required_details`: a closed `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
+- `#/$defs/invalid_request_details`: closed request-envelope validation details with `errors` and `schema`.
+- `#/$defs/invalid_json_details`: closed invalid JSON line details with parse `errors` and the request-envelope `schema`, without echoing the raw input line.
+- `#/$defs/cli_error_details`: closed CLI execution failure details with `method`, `exit_code`, and captured `stdout`.
+- `#/$defs/internal_error_details`: closed defensive server-boundary failure details with sanitized `errors`.
+- `#/$defs/invalid_params_details`: closed parameter validation details with `params_schema` plus missing, unknown, allowed, or type-error metadata when relevant.
+- `#/$defs/unknown_method_details`: closed unknown-method details with the advertised `available_methods` list.
 
 Adapters should treat the write-review shapes as control-flow contracts. They are not advisory prose. A dry-run result must be rendered for review, and an `approval_required` error must stop the apply path until the caller repeats the request with `approved:true` after approval or trusted local policy.
 

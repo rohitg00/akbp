@@ -138,6 +138,16 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("exit_code", cli_error["required"])
         self.assertIn("stdout", cli_error["required"])
         self.assertIn("errors", internal_error["required"])
+        for details_schema in [
+            approval,
+            cli_error,
+            internal_error,
+            invalid_request,
+            invalid_json,
+            invalid_params,
+            unknown_method,
+        ]:
+            self.assertFalse(details_schema["additionalProperties"])
         self.assertIn("errors", invalid_request["required"])
         self.assertIn("schema", invalid_request["required"])
         self.assertIn("errors", invalid_json["required"])

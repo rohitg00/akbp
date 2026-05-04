@@ -105,7 +105,7 @@
   "$defs": {
     "approval_required_details": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "method",
         "dry_run",
@@ -159,7 +159,7 @@
     },
     "invalid_request_details": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "errors",
         "schema"
@@ -179,7 +179,7 @@
     },
     "invalid_params_details": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "params_schema"
       ],
@@ -216,7 +216,7 @@
     },
     "unknown_method_details": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "available_methods"
       ],
@@ -1092,7 +1092,7 @@
     },
     "invalid_json_details": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "errors",
         "schema"
@@ -1112,7 +1112,7 @@
     },
     "cli_error_details": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "method",
         "exit_code",
