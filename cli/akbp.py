@@ -542,12 +542,9 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_import_check(args: argparse.Namespace) -> int:
-    source = Path(args.file).resolve()
-    if not source.exists() or not source.is_file():
-        print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
-        return 1
-    accepted: list[dict[str, str]] = []
+
+def import_jsonl_objects(source: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    accepted: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
     for line_number, line in enumerate(source.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
@@ -560,11 +557,66 @@ def cmd_import_check(args: argparse.Namespace) -> int:
             continue
         item_id = str(item.get("id") or f"line-{line_number}") if isinstance(item, dict) else f"line-{line_number}"
         kind = str(item.get("kind") or item.get("type") or "object") if isinstance(item, dict) else "object"
-        safe = redact_text(json.dumps(item, sort_keys=True, ensure_ascii=False))
-        if safe != json.dumps(item, sort_keys=True, ensure_ascii=False):
+        raw = json.dumps(item, sort_keys=True, ensure_ascii=False)
+        safe = redact_text(raw)
+        if safe != raw:
             rejected.append({"id": item_id, "kind": kind, "line": line_number, "reason": "secret_like_value_redacted"})
         else:
-            accepted.append({"id": item_id, "kind": kind, "line": line_number})
+            accepted.append({"id": item_id, "kind": kind, "line": line_number, "object": item})
+    return accepted, rejected, errors
+
+
+def public_import_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{"id": item["id"], "kind": item["kind"], "line": item["line"], **({"reason": item["reason"]} if "reason" in item else {})} for item in items]
+
+
+def normalize_import_object(item: dict[str, Any]) -> tuple[str | None, dict[str, Any] | None, str | None]:
+    if not isinstance(item, dict):
+        return None, None, "object must be a JSON object"
+    kind = str(item.get("kind") or item.get("type") or "")
+    if kind == "source":
+        source = {
+            "id": str(item.get("id") or stable_id("source", item.get("type", "file"), item.get("locator", ""))),
+            "type": str(item.get("type") or "file"),
+            "locator": str(item.get("locator") or item.get("id") or ""),
+            "title": item.get("title"),
+            "hash": item.get("hash"),
+            "immutable": bool(item.get("immutable", True)),
+            "scope": str(item.get("scope") or "project"),
+            "created_at": str(item.get("created_at") or now_iso()),
+            "metadata": item.get("metadata") if isinstance(item.get("metadata"), dict) else {},
+        }
+        if not source["locator"]:
+            return kind, None, "source locator is required"
+        return kind, source, None
+    if kind == "claim":
+        claim = {
+            "id": str(item.get("id") or stable_id("claim", item.get("text", ""), item.get("type", "observation"), item.get("scope", "project"))),
+            "text": str(item.get("text") or ""),
+            "type": str(item.get("type") or "observation"),
+            "status": str(item.get("status") or "working"),
+            "confidence": item.get("confidence", 0.5),
+            "evidence": item.get("evidence") if isinstance(item.get("evidence"), list) else [],
+            "entities": item.get("entities") if isinstance(item.get("entities"), list) else [],
+            "supersedes": item.get("supersedes") if isinstance(item.get("supersedes"), list) else [],
+            "superseded_by": item.get("superseded_by"),
+            "scope": str(item.get("scope") or "project"),
+            "created_at": str(item.get("created_at") or now_iso()),
+            "updated_at": str(item.get("updated_at") or now_iso()),
+            "last_confirmed_at": item.get("last_confirmed_at"),
+        }
+        errors = validate_claim_shape(claim)
+        if errors:
+            return kind, None, "; ".join(errors)
+        return kind, claim, None
+    return kind or "object", None, "unsupported import kind"
+
+def cmd_import_check(args: argparse.Namespace) -> int:
+    source = Path(args.file).resolve()
+    if not source.exists() or not source.is_file():
+        print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
+        return 1
+    accepted, rejected, errors = import_jsonl_objects(source)
     failed = bool(errors) or (bool(rejected) and bool(getattr(args, "fail_on_rejected", False)))
     print(json.dumps({
         "ok": not failed,
@@ -574,13 +626,89 @@ def cmd_import_check(args: argparse.Namespace) -> int:
         "rejected_count": len(rejected),
         "error_count": len(errors),
         "fail_on_rejected": bool(getattr(args, "fail_on_rejected", False)),
-        "accepted": accepted,
-        "rejected": rejected,
+        "accepted": public_import_items(accepted),
+        "rejected": public_import_items(rejected),
         "errors": errors,
     }, indent=2, ensure_ascii=False))
     return 1 if failed else 0
 
 
+
+
+def cmd_import_apply(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    ensure_dirs(base)
+    source = Path(args.file).resolve()
+    if not source.exists() or not source.is_file():
+        print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
+        return 1
+    accepted, rejected, errors = import_jsonl_objects(source)
+    normalized: list[tuple[str, dict[str, Any]]] = []
+    for item in accepted:
+        kind, record, error = normalize_import_object(item["object"])
+        if error or record is None or kind is None:
+            rejected.append({"id": item["id"], "kind": kind or item["kind"], "line": item["line"], "reason": error or "invalid_import_object"})
+            continue
+        normalized.append((kind, record))
+    if errors or rejected:
+        result = {
+            "ok": False,
+            "file": str(source),
+            "dry_run": bool(args.dry_run),
+            "applied": False,
+            "checked": len(accepted) + len(rejected),
+            "accepted_count": len(normalized),
+            "rejected_count": len(rejected),
+            "error_count": len(errors),
+            "accepted": [{"id": record["id"], "kind": kind} for kind, record in normalized],
+            "rejected": public_import_items(rejected),
+            "errors": errors,
+        }
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 1
+    sources = [record for kind, record in normalized if kind == "source"]
+    claims = [record for kind, record in normalized if kind == "claim"]
+    source_existing = {item.get("id") for item in load_sources(base)}
+    claim_existing = {item.get("id") for item in load_claims(base)}
+    source_new = [item for item in sources if item.get("id") not in source_existing]
+    claim_new = [item for item in claims if item.get("id") not in claim_existing]
+    result = {
+        "ok": True,
+        "file": str(source),
+        "dry_run": bool(args.dry_run),
+        "applied": False,
+        "checked": len(accepted),
+        "accepted_count": len(normalized),
+        "rejected_count": 0,
+        "error_count": 0,
+        "would_write": {
+            "sources": [item["id"] for item in source_new],
+            "claims": [item["id"] for item in claim_new],
+        },
+        "skipped_existing": {
+            "sources": [item["id"] for item in sources if item.get("id") in source_existing],
+            "claims": [item["id"] for item in claims if item.get("id") in claim_existing],
+        },
+    }
+    if args.dry_run:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
+    if not args.approved:
+        result["ok"] = False
+        result["review_required"] = True
+        result["apply_instruction"] = "Repeat with --approved only after reviewing import-check output and dry-run would_write ids."
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 1
+    for item in source_new:
+        append_jsonl(base / "raw" / "sources" / "sources.jsonl", item)
+    for item in claim_new:
+        append_jsonl(base / "claims" / "claims.jsonl", item)
+    add_log(base, "import apply", f"- Sources: {len(source_new)}\n- Claims: {len(claim_new)}\n")
+    audit(base, "import_apply", {"file": str(source), "sources": [item["id"] for item in source_new], "claims": [item["id"] for item in claim_new]})
+    auto_index_if_present(base)
+    result["applied"] = True
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 0
 
 
 def unique_keep_order(items: Iterable[str], limit: int = 20) -> list[str]:
@@ -1276,6 +1404,12 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("file")
     s.add_argument("--fail-on-rejected", action="store_true", help="exit non-zero when any object is rejected for safety")
     s.set_defaults(func=cmd_import_check)
+
+    s = sub.add_parser("import-apply")
+    s.add_argument("file")
+    s.add_argument("--dry-run", action="store_true", help="preview accepted source and claim records without writing")
+    s.add_argument("--approved", action="store_true", help="apply accepted source and claim records after review")
+    s.set_defaults(func=cmd_import_apply)
 
     s = sub.add_parser("crystallize")
     s.add_argument("transcript")

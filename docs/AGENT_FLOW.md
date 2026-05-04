@@ -50,6 +50,7 @@ After review or approval, apply the same crystallization and refresh the index:
 
 - Run write methods with `dry_run: true` when an agent is unsure.
 - Check JSONL exports with `akbp import-check export.jsonl` before turning them into durable claims or sources. Use `--fail-on-rejected` for CI or adapter gates that must stop on any rejected object.
+- Preview accepted source and claim imports with `akbp import-apply export.jsonl --dry-run`; apply with `--approved` only after reviewing the dry-run output.
 - Start source imports with `akbp ingest --dry-run` or JSONL `akbp.ingest` plus request-level `dry_run:true`, then apply only after review with request-level `approved:true`.
 - Ingest redacts common token and key patterns before writing imported pages and optional claims.
 - Claims should cite source IDs, not uncited memory.

@@ -238,6 +238,37 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(strict_data["rejected_count"], 1)
             self.assertNotIn("sk-example123456789", strict.stdout)
 
+    def test_import_apply_requires_review_and_writes_accepted_objects(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            export = Path(d) / "safe-export.jsonl"
+            rows = [
+                {"kind": "source", "id": "source_imported_safe", "type": "transcript", "locator": "imports/safe.md", "title": "Safe import"},
+                {"kind": "claim", "id": "claim_imported_safe", "text": "Imported JSONL apply writes accepted claims only.", "type": "workflow", "status": "working", "confidence": 0.7, "evidence": ["source_imported_safe"], "scope": "project"},
+            ]
+            export.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+
+            dry = json.loads(run_cli("--path", str(kb), "import-apply", str(export), "--dry-run").stdout)
+            self.assertTrue(dry["ok"])
+            self.assertFalse(dry["applied"])
+            self.assertEqual(dry["would_write"]["sources"], ["source_imported_safe"])
+            self.assertEqual(dry["would_write"]["claims"], ["claim_imported_safe"])
+            self.assertFalse((kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").strip())
+
+            blocked = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-apply", str(export)], text=True, capture_output=True)
+            self.assertEqual(blocked.returncode, 1)
+            blocked_data = json.loads(blocked.stdout)
+            self.assertTrue(blocked_data["review_required"])
+
+            applied = json.loads(run_cli("--path", str(kb), "import-apply", str(export), "--approved").stdout)
+            self.assertTrue(applied["ok"])
+            self.assertTrue(applied["applied"])
+            claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+            sources = [json.loads(line) for line in (kb / "raw" / "sources" / "sources.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertIn("claim_imported_safe", {claim["id"] for claim in claims})
+            self.assertIn("source_imported_safe", {source["id"] for source in sources})
+
     def test_ingest_dry_run_previews_redacted_writes_without_creating_kb(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
