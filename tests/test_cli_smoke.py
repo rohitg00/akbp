@@ -53,6 +53,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             out = run_cli("--path", str(kb), "index")
             indexed = json.loads(out.stdout)
             self.assertGreaterEqual(indexed["rows"], 1)
+            self.assertGreaterEqual(len(indexed["indexed_keys"]), 1)
             out = run_cli("--path", str(kb), "search", "Bun")
             searched = json.loads(out.stdout)
             self.assertEqual(searched["backend"], "sqlite_fts5")
@@ -97,6 +98,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             indexed_again = json.loads(out.stdout)
             self.assertGreaterEqual(indexed_again["skipped"], 1)
             self.assertTrue(indexed_again["incremental"])
+            self.assertGreaterEqual(len(indexed_again["skipped_keys"]), 1)
+            self.assertEqual(indexed_again["removed_keys"], [])
 
             out = run_cli("--path", str(kb), "context", "continue Bun npm migration")
             pack = json.loads(out.stdout)

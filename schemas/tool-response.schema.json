@@ -641,7 +641,10 @@
         "indexed",
         "skipped",
         "removed",
-        "incremental"
+        "incremental",
+        "indexed_keys",
+        "skipped_keys",
+        "removed_keys"
       ],
       "properties": {
         "ok": {
@@ -669,6 +672,24 @@
         },
         "incremental": {
           "type": "boolean"
+        },
+        "indexed_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "removed_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

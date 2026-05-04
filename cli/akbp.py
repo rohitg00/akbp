@@ -875,6 +875,9 @@ def index_base(base: Path, *, incremental: bool) -> dict[str, Any]:
     docs = index_documents(base)
     con = sqlite3.connect(db_path)
     rows = indexed = skipped = removed = 0
+    indexed_keys: list[str] = []
+    skipped_keys: list[str] = []
+    removed_keys: list[str] = []
     try:
         ensure_search_tables(con)
         if not incremental:
@@ -887,10 +890,12 @@ def index_base(base: Path, *, incremental: bool) -> dict[str, Any]:
                 con.execute("DELETE FROM search_index WHERE rowid = ?", (meta["rowid"],))
                 con.execute("DELETE FROM search_meta WHERE doc_key = ?", (doc_key,))
                 removed += 1
+                removed_keys.append(doc_key)
         for doc in docs:
             old = existing.get(doc["doc_key"])
             if incremental and old and old["digest"] == doc["digest"]:
                 skipped += 1
+                skipped_keys.append(doc["doc_key"])
                 continue
             if old:
                 con.execute("DELETE FROM search_index WHERE rowid = ?", (old["rowid"],))
@@ -900,11 +905,23 @@ def index_base(base: Path, *, incremental: bool) -> dict[str, Any]:
                 (doc["doc_key"], doc["kind"], doc["object_id"], doc["path"], doc["digest"], cur.lastrowid),
             )
             indexed += 1
+            indexed_keys.append(doc["doc_key"])
         rows = len(docs)
         con.commit()
     finally:
         con.close()
-    return {"ok": True, "db": str(db_path), "rows": rows, "indexed": indexed, "skipped": skipped, "removed": removed, "incremental": incremental}
+    return {
+        "ok": True,
+        "db": str(db_path),
+        "rows": rows,
+        "indexed": indexed,
+        "skipped": skipped,
+        "removed": removed,
+        "incremental": incremental,
+        "indexed_keys": indexed_keys,
+        "skipped_keys": skipped_keys,
+        "removed_keys": removed_keys,
+    }
 
 
 def auto_index_if_present(base: Path) -> dict[str, Any] | None:

@@ -250,3 +250,5 @@ Reason: protocol adoption matters more than UI polish. Let Obsidian, GitHub, edi
 The reference CLI can build `.akbp/state.db` with SQLite FTS5. This is engine-owned state, not a portable protocol artifact. Portable knowledge remains in markdown, JSONL claims, sources, entities, and relations.
 
 The search query layer intentionally accepts only a small safe subset: plain tokens, quoted phrases, `AND`/`OR`/`NOT`, and trailing `*` prefix matching on simple word tokens. Other punctuation is sanitized before it reaches SQLite FTS5.
+
+Incremental indexing reports both counts and affected document keys: `indexed_keys`, `skipped_keys`, and `removed_keys`. This gives adapters enough observability to explain what changed without parsing SQLite state directly.
