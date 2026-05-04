@@ -6,7 +6,7 @@
 
 - Add Agent Knowledge Base Protocol draft with portable artifacts for wiki pages, claims, entities, relations, sources, audit events, context packs, and knowledge base cards.
 - Add dependency-free Python reference CLI with init, remember, query, context, ingest, crystallize, source, cite, supersede, contradict, index, search, export, audit, lint, conformance, and status commands.
-- Add JSONL local tool server with capability discovery, structured errors, schema-backed invalid JSON handling, method schema references for every supported method, dry-run write safety, approval-gated non-dry-run writes, ingest preview responses, and query/context/write/index/search/crystallize methods.
+- Add JSONL local tool server with capability discovery, structured errors, schema-backed invalid JSON handling, schema-backed CLI execution failure details, method schema references for every supported method, dry-run write safety, approval-gated non-dry-run writes, ingest preview responses, and query/context/write/index/search/crystallize methods.
 - Add JSON schemas for core AKBP records, context packs, tool request/response envelopes, and tool method parameters.
 - Add conformance checks through Level 3, covering file convention, structured claims/evidence, retrieval/context packs, and lifecycle relations.
 - Add SQLite FTS5 local search with incremental indexing, stale entry cleanup, safe query sanitization, and automatic index refresh after write commands when state exists.

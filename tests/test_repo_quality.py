@@ -345,9 +345,13 @@ class RepoQualityTest(unittest.TestCase):
         response_schema = (ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8")
         self.assertIn("invalid JSON errors", release_notes)
         self.assertIn("do not echo raw input", release_notes)
+        self.assertIn("CLI execution failure details", release_notes)
         self.assertIn("schema-backed invalid JSON", changelog)
+        self.assertIn("CLI execution failure details", changelog)
         self.assertIn("#/$defs/invalid_json_details", tool_contract)
+        self.assertIn("#/$defs/cli_error_details", tool_contract)
         self.assertIn("invalid_json_details", response_schema)
+        self.assertIn("cli_error_details", response_schema)
 
     def test_tool_server_approval_example_is_complete(self):
         text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")

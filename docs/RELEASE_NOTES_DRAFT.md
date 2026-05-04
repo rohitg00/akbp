@@ -86,7 +86,7 @@ The local tool server currently supports:
 - `akbp.contradict`
 - `akbp.crystallize_session`
 
-It includes capability discovery, schema references for every supported method, structured errors, schema-backed invalid JSON errors that do not echo raw input, dry-run write support, `review_required` metadata, `apply_instruction` guidance, approval-gated non-dry-run writes with `approved:true`, ingest dry-run preview responses, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
+It includes capability discovery, schema references for every supported method, structured errors, schema-backed invalid JSON errors that do not echo raw input, schema-backed CLI execution failure details, dry-run write support, `review_required` metadata, `apply_instruction` guidance, approval-gated non-dry-run writes with `approved:true`, ingest dry-run preview responses, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
 
 ## Examples and benchmarks
 
