@@ -674,7 +674,7 @@
     },
     "cite_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "claim_id",
         "text",
@@ -704,7 +704,7 @@
     },
     "audit_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "events",
         "count"
@@ -724,7 +724,7 @@
     },
     "export_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "akbp_version",
         "exported_at",
@@ -744,7 +744,8 @@
           "minLength": 1
         },
         "card": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         },
         "claims": {
           "type": "array",

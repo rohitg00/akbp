@@ -231,9 +231,9 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/search_result`: an `akbp.search` result with query, backend, optional FTS query, and result rows.
 - `#/$defs/status_result`: a closed `akbp.status` result with path, object counts, and initialization flags.
 - `#/$defs/index_result`: a closed approved `akbp.index` result with database path, row counts, indexed/skipped/removed counts, and incremental mode.
-- `#/$defs/cite_result`: an `akbp.cite` result with claim id, text, evidence list, and status.
-- `#/$defs/audit_result`: an `akbp.audit` result with audit events and count.
-- `#/$defs/export_result`: an `akbp.export` result with version, timestamp, card, claims, sources, entities, and relations.
+- `#/$defs/cite_result`: a closed `akbp.cite` result with claim id, text, evidence list, and status.
+- `#/$defs/audit_result`: a closed `akbp.audit` result with audit events and count.
+- `#/$defs/export_result`: a closed `akbp.export` result with version, timestamp, card, claims, sources, entities, and relations.
 - `#/$defs/context_item`: the nested item shape returned by `akbp.context`.
 - `#/$defs/search_result_row`: the nested result-row shape returned by `akbp.search`.
 - `#/$defs/audit_event`: the nested event shape returned by `akbp.audit`.
