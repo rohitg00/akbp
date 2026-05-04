@@ -88,6 +88,29 @@ class ToolServerTest(unittest.TestCase):
         assert_matches_required_schema(self, lines[5]["error"]["details"], schema_def("invalid_json_details"))
         self.assertIn("tool-request.schema.json", lines[5]["error"]["details"]["schema"])
 
+    def test_response_schema_has_only_documented_flexible_pockets(self):
+        schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+        allowed = {
+            "$defs.capabilities_result.properties.examples.items.properties.params.additionalProperties",
+            "$defs.export_result.properties.card.additionalProperties",
+            "$defs.audit_event.properties.data.additionalProperties",
+            "$defs.source_result.properties.metadata.additionalProperties",
+        }
+        found = set()
+
+        def walk(value, path):
+            if isinstance(value, dict):
+                if value.get("additionalProperties") is True:
+                    found.add(".".join(path + ["additionalProperties"]))
+                for key, child in value.items():
+                    walk(child, path + [key])
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    walk(child, path + [str(index)])
+
+        walk(schema, [])
+        self.assertEqual(found, allowed)
+
     def test_response_schema_documents_write_review_shapes(self):
         schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
         defs = schema["$defs"]
