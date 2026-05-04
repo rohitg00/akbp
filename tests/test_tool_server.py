@@ -109,6 +109,10 @@ class ToolServerTest(unittest.TestCase):
         for field in ["session_id", "summary", "page", "source_id", "created_claims", "skipped_claims"]:
             self.assertIn(field, crystallize["required"])
         capabilities = defs["capabilities_result"]
+        self.assertFalse(capabilities["additionalProperties"])
+        self.assertFalse(capabilities["properties"]["features"]["additionalProperties"])
+        self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
+        self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
         self.assertIn("methods", capabilities["required"])
         self.assertEqual(capabilities["properties"]["protocol"], {"const": "akbp-jsonl-tool-server"})

@@ -245,7 +245,7 @@
     },
     "capabilities_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "protocol",
         "version",
@@ -264,7 +264,7 @@
         },
         "features": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "required": [
             "structured_errors",
             "capability_discovery",
@@ -321,7 +321,7 @@
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "additionalProperties": true,
+            "additionalProperties": false,
             "required": [
               "write",
               "params",
@@ -351,7 +351,32 @@
         "examples": {
           "type": "array",
           "items": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "method": {
+                "type": "string",
+                "pattern": "^akbp\\."
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "dry_run": {
+                "type": "boolean"
+              },
+              "approved": {
+                "type": "boolean"
+              },
+              "params": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
           }
         }
       }

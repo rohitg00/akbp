@@ -226,7 +226,7 @@ Errors are structured:
 
 The response schema also names common result and error detail shapes used by adapters:
 
-- `#/$defs/capabilities_result`: the capability discovery result with protocol, feature flags, schema URLs, methods, and examples.
+- `#/$defs/capabilities_result`: the closed capability discovery result with protocol, feature flags, schema URLs, methods, and examples.
 - `#/$defs/context_result`: an `akbp.context` result with query, generated timestamp, context items, and warnings.
 - `#/$defs/search_result`: an `akbp.search` result with query, backend, optional FTS query, and result rows.
 - `#/$defs/status_result`: an `akbp.status` result with path, object counts, and initialization flags.
