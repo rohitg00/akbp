@@ -1,0 +1,122 @@
+{
+  "id": "write-preview-crystallize-schema-001",
+  "task": "Verify import previews and approved session crystallization return schema-backed JSONL results.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_crystallize_contract",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract ingest and crystallize response shapes"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_ingest_preview_is_schema_backed",
+        "text": "Ingest dry-run previews return schema-backed redaction status, extracted signals, planned claim ids, write paths, and review metadata.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_crystallize_contract"
+        ],
+        "entities": [
+          "ingest",
+          "dry_run",
+          "schema-backed",
+          "review_required"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_crystallize_apply_is_schema_backed",
+        "text": "Approved session crystallization returns a schema-backed session id, summary, page, source id, created claims, and skipped claims.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_crystallize_contract"
+        ],
+        "entities": [
+          "crystallize_session",
+          "approved:true",
+          "schema-backed"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "ingest-preview",
+        "method": "akbp.ingest",
+        "approved": false,
+        "params": {
+          "file": "docs/TOOL_CONTRACT.md",
+          "claim": "Ingest previews should be schema-backed before apply.",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "dry_run",
+          "source_id",
+          "page",
+          "signals",
+          "created_claims",
+          "redacted",
+          "would_write",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": true,
+          "review_required": true
+        },
+        "expected_result_schema": "#/$defs/ingest_dry_run_result"
+      },
+      {
+        "id": "crystallize-apply",
+        "method": "akbp.crystallize_session",
+        "approved": true,
+        "params": {
+          "transcript": "examples/coding-agent/structured-session-transcript.md",
+          "apply": true
+        },
+        "expected_result_fields": [
+          "session_id",
+          "apply",
+          "summary",
+          "page",
+          "source_id",
+          "created_claims",
+          "skipped_claims"
+        ],
+        "expected_result_values": {
+          "apply": true
+        },
+        "expected_result_schema": "#/$defs/crystallize_session_result"
+      }
+    ]
+  },
+  "query": "Which write preview and crystallization flows return schema-backed results?",
+  "expected": {
+    "must_retrieve": [
+      "claim_ingest_preview_is_schema_backed",
+      "claim_crystallize_apply_is_schema_backed"
+    ],
+    "must_cite": [
+      "source_crystallize_contract"
+    ],
+    "answer_should_include": [
+      "ingest",
+      "crystallize",
+      "schema-backed"
+    ],
+    "must_apply_tool_methods": [
+      "akbp.crystallize_session"
+    ],
+    "must_dry_run_tool_methods": [
+      "akbp.ingest"
+    ]
+  }
+}

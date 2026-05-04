@@ -100,6 +100,7 @@ Initial scenarios:
 - `multi-agent-handoff`: retrieve cited prior-agent context before continuing adapter work.
 - `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes, with real dry-run JSONL outputs.
 - `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval.
+- `write-preview-crystallize-schema`: verify ingest dry-run previews and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved write methods return inspectable claim, source, or relation records.
 - `unapproved-write-rejection`: verify non-dry-run writes without `approved:true` return structured `approval_required` errors.
 - `secret-safety`: redact or reject secret-like values before durable writes.
