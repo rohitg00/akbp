@@ -30,6 +30,11 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertNotIn("sk-proj-", text)
         self.assertNotIn("xoxb-", text)
 
+    def test_fixture_readme_lists_every_scenario_directory(self):
+        readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
+        for path in sorted(FIXTURES.glob("*/scenario.json")):
+            self.assertIn(f"`{path.parent.name}`", readme)
+
     def test_review_gated_writes_fixture_covers_review_metadata(self):
         path = FIXTURES / "review-gated-writes" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
