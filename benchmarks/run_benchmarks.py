@@ -191,10 +191,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
             details = error.get("details") if isinstance(error.get("details"), dict) else {}
             missing = [field for field in request.get("expected_error_fields", []) or [] if field not in details]
             mismatched = {key: {"expected": value, "actual": details.get(key)} for key, value in (request.get("expected_error_values", {}) or {}).items() if details.get(key) != value}
+            schema_issues = schema_shape_issues(details, schema_def(request["expected_error_schema"])) if request.get("expected_error_schema") else []
             checks.append({
                 "name": "akbp_tool_rejection_shape",
-                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched,
-                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "code": error.get("code")},
+                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched and not schema_issues,
+                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "schema_issues": schema_issues, "schema": request.get("expected_error_schema"), "code": error.get("code")},
             })
             continue
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
@@ -389,6 +390,11 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
                 schema_def(request["expected_result_schema"])
             except (KeyError, ValueError) as exc:
                 issues.append(f"tool request {request.get('id')} has invalid expected_result_schema: {exc}")
+        if request.get("expected_error_schema"):
+            try:
+                schema_def(request["expected_error_schema"])
+            except (KeyError, ValueError) as exc:
+                issues.append(f"tool request {request.get('id')} has invalid expected_error_schema: {exc}")
         for field in (request.get("expected_result_values", {}) or {}):
             if field not in (request.get("expected_result_fields", []) or []):
                 issues.append(f"tool request {request.get('id')} expected_result_values field {field} must also be listed in expected_result_fields")

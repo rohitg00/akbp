@@ -58,6 +58,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         })
         for request in data["setup"]["tool_server_requests"]:
             self.assertTrue(request["params"]["dry_run"])
+            self.assertEqual(request["expected_result_schema"], "#/$defs/dry_run_review_result")
             self.assertEqual(request["expected_result_values"]["review_required"], True)
             self.assertIn("apply_instruction", request["expected_result_fields"])
 
@@ -93,11 +94,34 @@ class BenchmarkFixtureTest(unittest.TestCase):
         for request in data["setup"]["tool_server_requests"]:
             self.assertFalse(request["approved"])
             self.assertEqual(request["expected_error_code"], "approval_required")
+            self.assertEqual(request["expected_error_schema"], "#/$defs/approval_required_details")
             self.assertIn("review_required", request["expected_error_fields"])
             self.assertIn("apply_instruction", request["expected_error_fields"])
             self.assertEqual(request["expected_error_values"]["method"], request["method"])
             self.assertEqual(request["expected_error_values"]["dry_run"], False)
             self.assertEqual(request["expected_error_values"]["review_required"], True)
+
+    def test_runner_validates_expected_error_schema_refs(self):
+        data = {
+            "id": "bad-error-schema-ref",
+            "task": "Reject fixture error schema refs that do not map to response schema defs.",
+            "setup": {
+                "tool_server_requests": [
+                    {
+                        "id": "bad-error",
+                        "method": "akbp.remember",
+                        "params": {"text": "x"},
+                        "expected_error_code": "approval_required",
+                        "expected_error_fields": ["method"],
+                        "expected_error_schema": "#/$defs/not_real",
+                    }
+                ]
+            },
+            "query": "x",
+            "expected": {},
+        }
+        issues = benchmark_runner.check_scenario(data)
+        self.assertTrue(any("invalid expected_error_schema" in issue for issue in issues))
 
     def test_runner_validates_expected_result_schema_refs(self):
         data = {

@@ -106,7 +106,8 @@
           "dry_run": true,
           "would_write": true,
           "review_required": true
-        }
+        },
+        "expected_result_schema": "#/$defs/dry_run_review_result"
       },
       {
         "id": "source-dry-run",
@@ -130,7 +131,8 @@
           "dry_run": true,
           "would_write": true,
           "review_required": true
-        }
+        },
+        "expected_result_schema": "#/$defs/dry_run_review_result"
       },
       {
         "id": "supersede-dry-run",
@@ -157,7 +159,8 @@
           "dry_run": true,
           "would_write": true,
           "review_required": true
-        }
+        },
+        "expected_result_schema": "#/$defs/dry_run_review_result"
       },
       {
         "id": "contradict-dry-run",
@@ -183,7 +186,8 @@
           "dry_run": true,
           "would_write": true,
           "review_required": true
-        }
+        },
+        "expected_result_schema": "#/$defs/dry_run_review_result"
       }
     ]
   },
