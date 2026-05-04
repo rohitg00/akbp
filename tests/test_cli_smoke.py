@@ -225,9 +225,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(data["accepted_count"], 1)
             self.assertEqual(data["rejected_count"], 1)
             self.assertEqual(data["error_count"], 0)
+            self.assertFalse(data["fail_on_rejected"])
             self.assertEqual([item["id"] for item in data["accepted"]], ["claim_safe"])
             self.assertEqual([item["id"] for item in data["rejected"]], ["claim_unsafe"])
             self.assertNotIn("sk-example123456789", out.stdout)
+
+            strict = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-check", str(export), "--fail-on-rejected"], text=True, capture_output=True)
+            self.assertEqual(strict.returncode, 1)
+            strict_data = json.loads(strict.stdout)
+            self.assertFalse(strict_data["ok"])
+            self.assertTrue(strict_data["fail_on_rejected"])
+            self.assertEqual(strict_data["rejected_count"], 1)
+            self.assertNotIn("sk-example123456789", strict.stdout)
 
     def test_ingest_dry_run_previews_redacted_writes_without_creating_kb(self):
         with tempfile.TemporaryDirectory() as d:

@@ -59,6 +59,7 @@
           "accepted_count",
           "rejected_count",
           "error_count",
+          "fail_on_rejected",
           "accepted",
           "rejected",
           "errors"
@@ -68,7 +69,8 @@
           "checked": 3,
           "accepted_count": 1,
           "rejected_count": 2,
-          "error_count": 0
+          "error_count": 0,
+          "fail_on_rejected": false
         },
         "expected_result_schema": "#/$defs/import_check_result"
       }

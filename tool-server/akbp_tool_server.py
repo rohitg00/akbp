@@ -55,7 +55,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.cite": {"write": False, "params": ["claim_id"]},
     "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence", "dry_run"]},
     "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity", "dry_run"]},
-    "akbp.import_check": {"write": False, "params": ["file"]},
+    "akbp.import_check": {"write": False, "params": ["file", "fail_on_rejected"]},
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
@@ -123,7 +123,7 @@ def capabilities() -> dict[str, Any]:
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "safe-write-apply-1", "method": "akbp.remember", "path": ".", "approved": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
-            {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl"}},
+            {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl", "fail_on_rejected": True}},
             {"id": "crystallize-1", "method": "akbp.crystallize_session", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
         ],
     }
@@ -161,6 +161,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         argv.extend(["--title", str(params["title"])])
     if method == "akbp.crystallize_session" and params.get("apply"):
         argv.append("--apply")
+    if method == "akbp.import_check" and params.get("fail_on_rejected"):
+        argv.append("--fail-on-rejected")
     if method == "akbp.ingest":
         if params.get("claim"):
             argv.extend(["--claim", str(params["claim"])])
@@ -245,6 +247,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("confidence must be a number")
     if "incremental" in params and not isinstance(params.get("incremental"), bool):
         errors.append("incremental must be a boolean")
+    if "fail_on_rejected" in params and not isinstance(params.get("fail_on_rejected"), bool):
+        errors.append("fail_on_rejected must be a boolean")
     if "evidence" in params and not isinstance(params.get("evidence"), list):
         errors.append("evidence must be an array")
     if "entity" in params and not isinstance(params.get("entity"), list):
@@ -340,6 +344,8 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         )
 
     code, stdout, stderr = run_cli(path, argv)
+    if method == "akbp.import_check" and stdout.strip():
+        return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
     if code != 0:
         return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
     return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}

@@ -480,9 +480,25 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(line["result"]["accepted_count"], 1)
             self.assertEqual(line["result"]["rejected_count"], 1)
             self.assertEqual(line["result"]["error_count"], 0)
+            self.assertFalse(line["result"]["fail_on_rejected"])
             self.assertEqual([item["id"] for item in line["result"]["accepted"]], ["claim_safe"])
             self.assertEqual([item["id"] for item in line["result"]["rejected"]], ["claim_unsafe"])
             self.assertNotIn("sk-example123456789", proc.stdout)
+
+            strict_request = json.dumps({
+                "id": "import-check-strict",
+                "path": str(kb),
+                "method": "akbp.import_check",
+                "params": {"file": str(export), "fail_on_rejected": True},
+            }) + "\n"
+            strict_proc = subprocess.run([sys.executable, str(SERVER)], input=strict_request, text=True, capture_output=True, check=True)
+            strict_line = json.loads(strict_proc.stdout)
+            self.assertTrue(strict_line["ok"])
+            assert_matches_required_schema(self, strict_line["result"], schema_def("import_check_result"))
+            self.assertFalse(strict_line["result"]["ok"])
+            self.assertTrue(strict_line["result"]["fail_on_rejected"])
+            self.assertEqual(strict_line["result"]["rejected_count"], 1)
+            self.assertNotIn("sk-example123456789", strict_proc.stdout)
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:

@@ -226,6 +226,10 @@
         "file": {
           "type": "string",
           "minLength": 1
+        },
+        "fail_on_rejected": {
+          "type": "boolean",
+          "default": false
         }
       }
     },

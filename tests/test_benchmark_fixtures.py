@@ -59,6 +59,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_values"]["checked"], 3)
         self.assertEqual(request["expected_result_values"]["accepted_count"], 1)
         self.assertEqual(request["expected_result_values"]["rejected_count"], 2)
+        self.assertEqual(request["expected_result_values"]["fail_on_rejected"], False)
         export_path = ROOT / request["params"]["file"]
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))

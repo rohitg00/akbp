@@ -565,18 +565,20 @@ def cmd_import_check(args: argparse.Namespace) -> int:
             rejected.append({"id": item_id, "kind": kind, "line": line_number, "reason": "secret_like_value_redacted"})
         else:
             accepted.append({"id": item_id, "kind": kind, "line": line_number})
+    failed = bool(errors) or (bool(rejected) and bool(getattr(args, "fail_on_rejected", False)))
     print(json.dumps({
-        "ok": not errors,
+        "ok": not failed,
         "file": str(source),
         "checked": len(accepted) + len(rejected),
         "accepted_count": len(accepted),
         "rejected_count": len(rejected),
         "error_count": len(errors),
+        "fail_on_rejected": bool(getattr(args, "fail_on_rejected", False)),
         "accepted": accepted,
         "rejected": rejected,
         "errors": errors,
     }, indent=2, ensure_ascii=False))
-    return 0 if not errors else 1
+    return 1 if failed else 0
 
 
 
@@ -1272,6 +1274,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("import-check")
     s.add_argument("file")
+    s.add_argument("--fail-on-rejected", action="store_true", help="exit non-zero when any object is rejected for safety")
     s.set_defaults(func=cmd_import_check)
 
     s = sub.add_parser("crystallize")

@@ -536,6 +536,7 @@
         "accepted_count",
         "rejected_count",
         "error_count",
+        "fail_on_rejected",
         "accepted",
         "rejected",
         "errors"
@@ -563,6 +564,9 @@
         "error_count": {
           "type": "integer",
           "minimum": 0
+        },
+        "fail_on_rejected": {
+          "type": "boolean"
         },
         "accepted": {
           "type": "array",
