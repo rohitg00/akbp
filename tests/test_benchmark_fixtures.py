@@ -48,10 +48,14 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "import-safety" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         requests = data["setup"]["tool_server_requests"]
-        self.assertEqual(len(requests), 1)
-        request = requests[0]
+        self.assertEqual(len(requests), 2)
+        by_id = {request["id"]: request for request in requests}
+        request = by_id["import-check"]
+        strict = by_id["import-check-strict"]
         self.assertEqual(request["method"], "akbp.import_check")
+        self.assertEqual(strict["method"], "akbp.import_check")
         self.assertEqual(request["expected_result_schema"], "#/$defs/import_check_result")
+        self.assertEqual(strict["expected_result_schema"], "#/$defs/import_check_result")
         self.assertIn("accepted", request["expected_result_fields"])
         self.assertIn("accepted_count", request["expected_result_fields"])
         self.assertIn("rejected", request["expected_result_fields"])
@@ -60,6 +64,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_values"]["accepted_count"], 1)
         self.assertEqual(request["expected_result_values"]["rejected_count"], 2)
         self.assertEqual(request["expected_result_values"]["fail_on_rejected"], False)
+        self.assertEqual(strict["expected_result_values"]["ok"], False)
+        self.assertEqual(strict["expected_result_values"]["fail_on_rejected"], True)
         export_path = ROOT / request["params"]["file"]
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))

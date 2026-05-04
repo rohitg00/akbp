@@ -73,6 +73,36 @@
           "fail_on_rejected": false
         },
         "expected_result_schema": "#/$defs/import_check_result"
+      },
+      {
+        "id": "import-check-strict",
+        "method": "akbp.import_check",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-safety/session-export.jsonl",
+          "fail_on_rejected": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "fail_on_rejected",
+          "accepted",
+          "rejected",
+          "errors"
+        ],
+        "expected_result_values": {
+          "ok": false,
+          "checked": 3,
+          "accepted_count": 1,
+          "rejected_count": 2,
+          "error_count": 0,
+          "fail_on_rejected": true
+        },
+        "expected_result_schema": "#/$defs/import_check_result"
       }
     ]
   },
