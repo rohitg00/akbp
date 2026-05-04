@@ -593,7 +593,7 @@
     },
     "status_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "path",
         "claims",
@@ -633,7 +633,7 @@
     },
     "index_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "ok",
         "db",
