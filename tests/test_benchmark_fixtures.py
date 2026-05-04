@@ -38,6 +38,47 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("apply_instruction", text)
         self.assertIn("approval", text)
         self.assertIn("claim_agents_must_not_apply_without_review", data["expected"]["must_retrieve"])
+        self.assertEqual(set(data["expected"]["must_dry_run_tool_methods"]), {
+            "akbp.remember",
+            "akbp.source.add",
+            "akbp.supersede",
+            "akbp.contradict",
+        })
+        for request in data["setup"]["tool_server_requests"]:
+            self.assertTrue(request["params"]["dry_run"])
+            self.assertEqual(request["expected_result_values"]["review_required"], True)
+            self.assertIn("apply_instruction", request["expected_result_fields"])
+
+    def test_approved_write_apply_fixture_covers_all_write_shapes(self):
+        path = FIXTURES / "approved-write-apply" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(set(data["expected"]["must_apply_tool_methods"]), {
+            "akbp.remember",
+            "akbp.source.add",
+            "akbp.supersede",
+            "akbp.contradict",
+        })
+        by_method = {request["method"]: request for request in data["setup"]["tool_server_requests"]}
+        self.assertIn("text", by_method["akbp.remember"]["expected_result_fields"])
+        self.assertIn("locator", by_method["akbp.source.add"]["expected_result_fields"])
+        self.assertIn("supersedes", by_method["akbp.supersede"]["expected_result_fields"])
+        self.assertIn("relation", by_method["akbp.contradict"]["expected_result_fields"])
+        self.assertTrue(all(request["approved"] for request in data["setup"]["tool_server_requests"]))
+
+    def test_unapproved_write_rejection_fixture_covers_all_write_errors(self):
+        path = FIXTURES / "unapproved-write-rejection" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(set(data["expected"]["must_reject_tool_methods"]), {
+            "akbp.remember",
+            "akbp.source.add",
+            "akbp.supersede",
+            "akbp.contradict",
+        })
+        for request in data["setup"]["tool_server_requests"]:
+            self.assertFalse(request["approved"])
+            self.assertEqual(request["expected_error_code"], "approval_required")
+            self.assertIn("review_required", request["expected_error_fields"])
+            self.assertIn("apply_instruction", request["expected_error_fields"])
 
     def test_adapter_write_safety_fixture_covers_approval_policy(self):
         path = FIXTURES / "adapter-write-safety" / "scenario.json"
@@ -65,6 +106,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(all("score" in item for item in report["results"]))
         scored = [item for item in report["results"] if "akbp" in item["score"] and not item["score"]["akbp"].get("skipped")]
         self.assertTrue(scored)
+        by_id = {item["id"]: item for item in report["results"]}
+        approved_checks = by_id["approved-write-apply-001"]["score"]["akbp"]["checks"]
+        rejected_checks = by_id["unapproved-write-rejection-001"]["score"]["akbp"]["checks"]
+        dry_run_checks = by_id["review-gated-writes-001"]["score"]["akbp"]["checks"]
+        self.assertTrue(any(check["name"] == "akbp_tool_apply_response_shape" and check["ok"] for check in approved_checks))
+        self.assertTrue(any(check["name"] == "akbp_tool_rejection_shape" and check["ok"] for check in rejected_checks))
+        self.assertTrue(any(check["name"] == "akbp_tool_apply_response_shape" and check["ok"] for check in dry_run_checks))
 
 
 if __name__ == "__main__":
