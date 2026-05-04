@@ -75,6 +75,9 @@
                   "$ref": "#/$defs/cli_error_details"
                 },
                 {
+                  "$ref": "#/$defs/internal_error_details"
+                },
+                {
                   "type": "object"
                 },
                 {
@@ -1125,6 +1128,21 @@
         },
         "stdout": {
           "type": "string"
+        }
+      }
+    },
+    "internal_error_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "errors"
+      ],
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

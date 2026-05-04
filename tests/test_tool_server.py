@@ -132,10 +132,12 @@ class ToolServerTest(unittest.TestCase):
         invalid_json = defs["invalid_json_details"]
         invalid_params = defs["invalid_params_details"]
         cli_error = defs["cli_error_details"]
+        internal_error = defs["internal_error_details"]
         unknown_method = defs["unknown_method_details"]
         self.assertIn("method", cli_error["required"])
         self.assertIn("exit_code", cli_error["required"])
         self.assertIn("stdout", cli_error["required"])
+        self.assertIn("errors", internal_error["required"])
         self.assertIn("errors", invalid_request["required"])
         self.assertIn("schema", invalid_request["required"])
         self.assertIn("errors", invalid_json["required"])
@@ -148,6 +150,7 @@ class ToolServerTest(unittest.TestCase):
             "#/$defs/invalid_request_details",
             "#/$defs/invalid_json_details",
             "#/$defs/cli_error_details",
+            "#/$defs/internal_error_details",
             "#/$defs/invalid_params_details",
             "#/$defs/unknown_method_details",
         ]:

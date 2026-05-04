@@ -362,7 +362,7 @@ def main() -> int:
                 details={"errors": [str(exc)], "schema": REQUEST_SCHEMA},
             )
         except Exception as exc:  # pragma: no cover - defensive server boundary
-            res = error_response(request_id, "internal_error", str(exc))
+            res = error_response(request_id, "internal_error", "internal server error", details={"errors": [str(exc)]})
         print(json.dumps(res, ensure_ascii=False), flush=True)
     return 0
 

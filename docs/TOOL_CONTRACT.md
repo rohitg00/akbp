@@ -249,6 +249,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/invalid_request_details`: request-envelope validation details with `errors` and `schema`.
 - `#/$defs/invalid_json_details`: invalid JSON line details with parse `errors` and the request-envelope `schema`, without echoing the raw input line.
 - `#/$defs/cli_error_details`: CLI execution failure details with `method`, `exit_code`, and captured `stdout`.
+- `#/$defs/internal_error_details`: defensive server-boundary failure details with sanitized `errors`.
 - `#/$defs/invalid_params_details`: parameter validation details with `params_schema` plus missing, unknown, allowed, or type-error metadata when relevant.
 - `#/$defs/unknown_method_details`: unknown-method details with the advertised `available_methods` list.
 
