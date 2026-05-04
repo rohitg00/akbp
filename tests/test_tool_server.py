@@ -104,8 +104,11 @@ class ToolServerTest(unittest.TestCase):
         for field in ["method", "path", "argv", "apply_instruction"]:
             self.assertIn(field, dry_run["required"])
         crystallize = defs["crystallize_session_result"]
+        self.assertFalse(ingest_dry_run["additionalProperties"])
         for field in ["source_id", "page", "signals", "created_claims", "redacted", "would_write"]:
             self.assertIn(field, ingest_dry_run["required"])
+        self.assertFalse(crystallize["additionalProperties"])
+        self.assertFalse(crystallize["properties"]["summary"]["additionalProperties"])
         for field in ["session_id", "summary", "page", "source_id", "created_claims", "skipped_claims"]:
             self.assertIn(field, crystallize["required"])
         capabilities = defs["capabilities_result"]
