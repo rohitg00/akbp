@@ -131,11 +131,15 @@
     },
     "dry_run_review_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "dry_run",
         "review_required",
-        "apply_instruction"
+        "apply_instruction",
+        "method",
+        "path",
+        "argv",
+        "would_write"
       ],
       "properties": {
         "dry_run": {
@@ -149,11 +153,21 @@
           "minLength": 1
         },
         "would_write": {
-          "type": [
-            "boolean",
-            "array",
-            "string"
-          ]
+          "const": true
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^akbp\\."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "argv": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

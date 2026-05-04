@@ -242,7 +242,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/source_result`: the source record returned by approved `akbp.source.add` and nested in `akbp.export`.
 - `#/$defs/entity_result`: the entity record nested in `akbp.export`.
 - `#/$defs/relation_result`: the relation record returned by approved `akbp.contradict` and nested in `akbp.export`.
-- `#/$defs/dry_run_review_result`: a generic dry-run write result with `dry_run:true`, `review_required:true`, and `apply_instruction`.
+- `#/$defs/dry_run_review_result`: a closed generic dry-run write result with `dry_run:true`, `would_write:true`, `method`, `path`, `argv`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/ingest_dry_run_result`: an `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/crystallize_session_result`: an approved or previewed session crystallization result with `session_id`, extracted `summary`, output page, source id, created claims, and skipped claims.
 - `#/$defs/approval_required_details`: a closed `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.

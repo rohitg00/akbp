@@ -97,9 +97,12 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(approval["properties"]["dry_run"], {"const": False})
         self.assertEqual(approval["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", approval["required"])
+        self.assertFalse(dry_run["additionalProperties"])
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
-        self.assertIn("apply_instruction", dry_run["required"])
+        self.assertEqual(dry_run["properties"]["would_write"], {"const": True})
+        for field in ["method", "path", "argv", "apply_instruction"]:
+            self.assertIn(field, dry_run["required"])
         crystallize = defs["crystallize_session_result"]
         for field in ["source_id", "page", "signals", "created_claims", "redacted", "would_write"]:
             self.assertIn(field, ingest_dry_run["required"])
@@ -288,11 +291,13 @@ class ToolServerTest(unittest.TestCase):
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
             self.assertEqual(len(lines), len(requests))
             dry_run_schema = schema_def("dry_run_review_result")
+            ingest_dry_run_schema = schema_def("ingest_dry_run_result")
             approval_schema = schema_def("approval_required_details")
             for dry, rejected in zip(lines[0::2], lines[1::2]):
                 with self.subTest(request=dry["id"]):
                     self.assertTrue(dry["ok"])
-                    assert_matches_required_schema(self, dry["result"], dry_run_schema)
+                    expected_schema = ingest_dry_run_schema if dry["id"] == "dry-akbp.ingest" else dry_run_schema
+                    assert_matches_required_schema(self, dry["result"], expected_schema)
                     self.assertTrue(dry["result"]["dry_run"])
                     self.assertTrue(dry["result"]["review_required"])
                     self.assertIn("approval", dry["result"]["apply_instruction"])
