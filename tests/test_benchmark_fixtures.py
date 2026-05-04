@@ -174,6 +174,25 @@ class BenchmarkFixtureTest(unittest.TestCase):
         issues = benchmark_runner.check_scenario(data)
         self.assertTrue(any("invalid expected_result_schema" in issue for issue in issues))
 
+    def test_runner_schema_shape_checks_nested_items(self):
+        payload = {
+            "query": "schema",
+            "generated_at": "2026-01-01T00:00:00Z",
+            "items": [
+                {
+                    "id": "claim_1",
+                    "type": "claim",
+                    "text": "Nested schema checks should reject extra fields.",
+                    "score": 1.0,
+                    "evidence": [],
+                    "extra": "not allowed",
+                }
+            ],
+            "warnings": [],
+        }
+        issues = benchmark_runner.schema_shape_issues(payload, benchmark_runner.schema_def("#/$defs/context_result"))
+        self.assertIn("$.items[0] unexpected field extra", issues)
+
     def test_runner_rejects_undocumented_expected_value_fields(self):
         data = {
             "id": "bad-tool-contract",

@@ -71,25 +71,65 @@ def run_cli(kb: Path, *args: str) -> dict[str, Any]:
     return json.loads(proc.stdout) if proc.stdout.strip().startswith(("{", "[")) else {"stdout": proc.stdout}
 
 
+def response_schema() -> dict[str, Any]:
+    return json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+
+
 def schema_def(schema_ref: str) -> dict[str, Any]:
-    schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+    schema = response_schema()
     prefix = "#/$defs/"
     if not schema_ref.startswith(prefix):
         raise ValueError(f"unsupported schema ref: {schema_ref}")
     return schema["$defs"][schema_ref[len(prefix):]]
 
 
-def schema_shape_issues(payload: dict[str, Any], schema: dict[str, Any]) -> list[str]:
+def resolve_schema_ref(schema: dict[str, Any], schema_ref: str) -> dict[str, Any]:
+    prefix = "#/$defs/"
+    if not schema_ref.startswith(prefix):
+        raise ValueError(f"unsupported schema ref: {schema_ref}")
+    return schema["$defs"][schema_ref[len(prefix):]]
+
+
+def schema_shape_issues(payload: Any, definition: dict[str, Any], *, path: str = "$", root_schema: dict[str, Any] | None = None) -> list[str]:
+    root = root_schema or response_schema()
+    if "$ref" in definition:
+        definition = resolve_schema_ref(root, definition["$ref"])
     issues: list[str] = []
-    required = schema.get("required", []) or []
-    for field in required:
-        if field not in payload:
-            issues.append(f"missing required field {field}")
-    allowed = set(schema.get("properties", {}))
-    if schema.get("additionalProperties") is False:
-        for field in payload:
-            if field not in allowed:
-                issues.append(f"unexpected field {field}")
+    expected_type = definition.get("type")
+    if expected_type == "object":
+        if not isinstance(payload, dict):
+            return [f"{path} expected object"]
+        required = definition.get("required", []) or []
+        for field in required:
+            if field not in payload:
+                issues.append(f"{path} missing required field {field}")
+        properties = definition.get("properties", {}) or {}
+        if definition.get("additionalProperties") is False:
+            for field in payload:
+                if field not in properties:
+                    issues.append(f"{path} unexpected field {field}")
+        for field, child_schema in properties.items():
+            if field in payload:
+                issues.extend(schema_shape_issues(payload[field], child_schema, path=f"{path}.{field}", root_schema=root))
+    elif expected_type == "array":
+        if not isinstance(payload, list):
+            return [f"{path} expected array"]
+        item_schema = definition.get("items")
+        if item_schema:
+            for index, item in enumerate(payload):
+                issues.extend(schema_shape_issues(item, item_schema, path=f"{path}[{index}]", root_schema=root))
+    elif expected_type == "string" and not isinstance(payload, str):
+        issues.append(f"{path} expected string")
+    elif expected_type == "boolean" and not isinstance(payload, bool):
+        issues.append(f"{path} expected boolean")
+    elif expected_type == "number" and not isinstance(payload, (int, float)):
+        issues.append(f"{path} expected number")
+    elif expected_type == "integer" and not isinstance(payload, int):
+        issues.append(f"{path} expected integer")
+    if "const" in definition and payload != definition["const"]:
+        issues.append(f"{path} expected const {definition['const']!r}")
+    if "enum" in definition and payload not in definition["enum"]:
+        issues.append(f"{path} expected one of {definition['enum']!r}")
     return issues
 
 
