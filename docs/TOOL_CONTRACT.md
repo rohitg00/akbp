@@ -293,10 +293,11 @@ Importing a local file through the JSONL server should also start with dry-run w
 
 For `akbp.ingest`, dry-run executes the CLI preview and returns redacted import metadata instead of only argv: `source_id`, page path, extracted signals, claim ids, redaction status, and `would_write` paths. It also includes `review_required:true` and an `apply_instruction` focused on reviewing redaction and planned writes. It does not create source, claim, page, log, audit, or index files.
 
-Agents can also manage the local search index and query it:
+Agents can also manage the local search index and query it. Search supports conservative SQLite FTS5 syntax: plain terms default to OR, quoted phrases are preserved, `AND`/`OR`/`NOT` are accepted, punctuation is sanitized, and trailing `*` enables safe prefix matches for simple word tokens.
 
 ```json
 {"id":"3","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}
 {"id":"4","method":"akbp.search","path":".","params":{"query":"rollback release","limit":5}}
+{"id":"5","method":"akbp.search","path":".","params":{"query":"migrat* AND rollback","limit":5}}
 ```
 
