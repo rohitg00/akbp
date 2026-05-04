@@ -47,11 +47,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         data = json.loads(path.read_text(encoding="utf-8"))
         by_method = {request["method"]: request for request in data["setup"]["tool_server_requests"]}
         expected = {
+            "akbp.capabilities": "#/$defs/capabilities_result",
             "akbp.status": "#/$defs/status_result",
             "akbp.context": "#/$defs/context_result",
             "akbp.search": "#/$defs/search_result",
             "akbp.cite": "#/$defs/cite_result",
             "akbp.export": "#/$defs/export_result",
+            "akbp.audit": "#/$defs/audit_result",
         }
         self.assertEqual(set(by_method), set(expected))
         for method, schema_ref in expected.items():

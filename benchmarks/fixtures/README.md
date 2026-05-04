@@ -44,6 +44,6 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `session-crystallization`: retrieve workflow claims from a structured coding-agent session with citations.
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.
 - `review-gated-writes`: require agents to honor dry-run review metadata before applying durable writes.
-- `read-method-schema`: verify read-only JSONL methods return schema-backed response shapes without write approval.
+- `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval.
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes without `approved:true` return structured `approval_required` errors.

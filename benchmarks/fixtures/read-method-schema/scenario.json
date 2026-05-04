@@ -30,6 +30,21 @@
     ],
     "tool_server_requests": [
       {
+        "id": "capabilities-read",
+        "method": "akbp.capabilities",
+        "approved": false,
+        "params": {},
+        "expected_result_fields": [
+          "protocol",
+          "version",
+          "features",
+          "schemas",
+          "methods",
+          "examples"
+        ],
+        "expected_result_schema": "#/$defs/capabilities_result"
+      },
+      {
         "id": "status-read",
         "method": "akbp.status",
         "approved": false,
@@ -106,6 +121,19 @@
           "relations"
         ],
         "expected_result_schema": "#/$defs/export_result"
+      },
+      {
+        "id": "audit-read",
+        "method": "akbp.audit",
+        "approved": false,
+        "params": {
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "events",
+          "count"
+        ],
+        "expected_result_schema": "#/$defs/audit_result"
       }
     ]
   },
