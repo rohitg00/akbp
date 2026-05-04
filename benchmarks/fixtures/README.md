@@ -40,7 +40,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `contradiction`: detect conflicting claims and require resolution.
 - `correction-resolution`: prefer a newer correction while preserving old conflicting knowledge until explicit resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
-- `import-safety`: validate JSONL import objects for redaction or rejection before durable writes.
+- `import-safety`: validate JSONL import objects and `akbp.import_check` responses for redaction or rejection before durable writes.
 - `session-crystallization`: retrieve workflow claims from a structured coding-agent session with citations.
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.
 - `review-gated-writes`: require agents to honor dry-run review metadata before applying durable writes.

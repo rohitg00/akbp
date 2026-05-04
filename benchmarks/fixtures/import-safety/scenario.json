@@ -43,6 +43,29 @@
         ],
         "scope": "project"
       }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "import-check",
+        "method": "akbp.import_check",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-safety/session-export.jsonl"
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "checked",
+          "accepted",
+          "rejected",
+          "errors"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "checked": 3
+        },
+        "expected_result_schema": "#/$defs/import_check_result"
+      }
     ]
   },
   "query": "Can I import these JSONL objects into durable memory?",

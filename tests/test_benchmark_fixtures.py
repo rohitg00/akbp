@@ -30,6 +30,21 @@ class BenchmarkFixtureTest(unittest.TestCase):
                 setup = data["setup"]
                 self.assertTrue(setup.get("sources") or setup.get("proposed_claims") or setup.get("import_objects") or setup.get("tool_server_requests"))
 
+    def test_import_safety_fixture_covers_import_check_tool(self):
+        path = FIXTURES / "import-safety" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = data["setup"]["tool_server_requests"]
+        self.assertEqual(len(requests), 1)
+        request = requests[0]
+        self.assertEqual(request["method"], "akbp.import_check")
+        self.assertEqual(request["expected_result_schema"], "#/$defs/import_check_result")
+        self.assertIn("accepted", request["expected_result_fields"])
+        self.assertIn("rejected", request["expected_result_fields"])
+        self.assertEqual(request["expected_result_values"]["checked"], 3)
+        export_path = ROOT / request["params"]["file"]
+        self.assertTrue(export_path.exists())
+        self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
+
     def test_secret_safety_fixture_has_no_real_secret(self):
         path = FIXTURES / "secret-safety" / "scenario.json"
         text = path.read_text(encoding="utf-8")
