@@ -42,6 +42,23 @@ class BenchmarkFixtureTest(unittest.TestCase):
         for path in sorted(FIXTURES.glob("*/scenario.json")):
             self.assertIn(f"`{path.parent.name}`", readme)
 
+    def test_read_method_schema_fixture_covers_read_responses(self):
+        path = FIXTURES / "read-method-schema" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        by_method = {request["method"]: request for request in data["setup"]["tool_server_requests"]}
+        expected = {
+            "akbp.status": "#/$defs/status_result",
+            "akbp.context": "#/$defs/context_result",
+            "akbp.search": "#/$defs/search_result",
+            "akbp.cite": "#/$defs/cite_result",
+            "akbp.export": "#/$defs/export_result",
+        }
+        self.assertEqual(set(by_method), set(expected))
+        for method, schema_ref in expected.items():
+            self.assertFalse(by_method[method]["approved"])
+            self.assertEqual(by_method[method]["expected_result_schema"], schema_ref)
+        self.assertIn("claim_read_methods_are_schema_backed", data["expected"]["must_retrieve"])
+
     def test_review_gated_writes_fixture_covers_review_metadata(self):
         path = FIXTURES / "review-gated-writes" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

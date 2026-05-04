@@ -160,6 +160,8 @@ def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
     write_jsonl(kb / "raw" / "sources" / "sources.jsonl", sources)
     write_jsonl(kb / "claims" / "claims.jsonl", claims)
     write_jsonl(kb / "graph" / "relations.jsonl", relations)
+    if claims or sources or relations:
+        run_cli(kb, "index")
 
 
 def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:

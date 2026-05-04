@@ -1,0 +1,126 @@
+{
+  "id": "read-method-schema-001",
+  "task": "Verify read-only JSONL methods return schema-backed response shapes that adapters can rely on without write approval.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_read_contract",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract read response shapes"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_read_methods_are_schema_backed",
+        "text": "Read-only JSONL methods return schema-backed response shapes without requiring write approval.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_read_contract"
+        ],
+        "entities": [
+          "read-only",
+          "schema-backed",
+          "JSONL"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "status-read",
+        "method": "akbp.status",
+        "approved": false,
+        "params": {},
+        "expected_result_fields": [
+          "path",
+          "claims",
+          "sources",
+          "pages",
+          "initialized",
+          "card",
+          "entrypoint"
+        ],
+        "expected_result_schema": "#/$defs/status_result"
+      },
+      {
+        "id": "context-read",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "schema-backed read methods",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "generated_at",
+          "items",
+          "warnings"
+        ],
+        "expected_result_schema": "#/$defs/context_result"
+      },
+      {
+        "id": "search-read",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "schema-backed read methods",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "results"
+        ],
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "cite-read",
+        "method": "akbp.cite",
+        "approved": false,
+        "params": {
+          "claim_id": "claim_read_methods_are_schema_backed"
+        },
+        "expected_result_fields": [
+          "claim_id",
+          "text",
+          "evidence",
+          "status"
+        ],
+        "expected_result_schema": "#/$defs/cite_result"
+      },
+      {
+        "id": "export-read",
+        "method": "akbp.export",
+        "approved": false,
+        "params": {},
+        "expected_result_fields": [
+          "akbp_version",
+          "exported_at",
+          "card",
+          "claims",
+          "sources",
+          "entities",
+          "relations"
+        ],
+        "expected_result_schema": "#/$defs/export_result"
+      }
+    ]
+  },
+  "query": "Which read-only JSONL methods return schema-backed response shapes?",
+  "expected": {
+    "must_retrieve": [
+      "claim_read_methods_are_schema_backed"
+    ],
+    "must_cite": [
+      "source_read_contract"
+    ],
+    "answer_should_include": [
+      "read-only",
+      "schema-backed",
+      "JSONL"
+    ]
+  }
+}
