@@ -1,0 +1,100 @@
+{
+  "id": "search-index-observability-001",
+  "task": "Verify prefix search and incremental index observability are available through JSONL tool calls.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_search_index_contract",
+        "type": "file",
+        "locator": "docs/ARCHITECTURE.md",
+        "title": "Search index observability contract"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_search_prefix_and_index_keys",
+        "text": "SQLite FTS search supports safe prefix queries and incremental indexing reports affected document keys.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_search_index_contract"
+        ],
+        "entities": [
+          "SQLite",
+          "FTS5",
+          "prefix",
+          "incremental indexing",
+          "indexed_keys",
+          "skipped_keys",
+          "removed_keys"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "incremental-index",
+        "method": "akbp.index",
+        "approved": true,
+        "params": {
+          "incremental": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "db",
+          "rows",
+          "indexed",
+          "skipped",
+          "removed",
+          "incremental",
+          "indexed_keys",
+          "skipped_keys",
+          "removed_keys"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "incremental": true
+        },
+        "expected_result_schema": "#/$defs/index_result"
+      },
+      {
+        "id": "prefix-search",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "pref* AND index*",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "pref* AND index*"
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      }
+    ]
+  },
+  "query": "How do prefix search and incremental indexing observability work?",
+  "expected": {
+    "must_retrieve": [
+      "claim_search_prefix_and_index_keys"
+    ],
+    "must_cite": [
+      "source_search_index_contract"
+    ],
+    "answer_should_include": [
+      "prefix",
+      "incremental indexing",
+      "document keys"
+    ],
+    "must_apply_tool_methods": [
+      "akbp.index"
+    ]
+  }
+}

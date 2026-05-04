@@ -42,6 +42,21 @@ class BenchmarkFixtureTest(unittest.TestCase):
         for path in sorted(FIXTURES.glob("*/scenario.json")):
             self.assertIn(f"`{path.parent.name}`", readme)
 
+    def test_search_index_observability_fixture_covers_prefix_and_index_keys(self):
+        path = FIXTURES / "search-index-observability" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        by_method = {request["method"]: request for request in data["setup"]["tool_server_requests"]}
+        index = by_method["akbp.index"]
+        self.assertTrue(index["approved"])
+        self.assertEqual(index["expected_result_schema"], "#/$defs/index_result")
+        self.assertIn("indexed_keys", index["expected_result_fields"])
+        self.assertIn("skipped_keys", index["expected_result_fields"])
+        self.assertIn("removed_keys", index["expected_result_fields"])
+        search = by_method["akbp.search"]
+        self.assertEqual(search["params"]["query"], "pref* AND index*")
+        self.assertEqual(search["expected_result_values"]["fts_query"], "pref* AND index*")
+        self.assertEqual(search["expected_result_schema"], "#/$defs/search_result")
+
     def test_write_preview_crystallize_fixture_covers_schema_refs(self):
         path = FIXTURES / "write-preview-crystallize-schema" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
