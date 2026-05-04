@@ -66,6 +66,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_values"]["fail_on_rejected"], False)
         self.assertEqual(strict["expected_result_values"]["ok"], False)
         self.assertEqual(strict["expected_result_values"]["fail_on_rejected"], True)
+        self.assertEqual(request["expected_result_contains"]["accepted[].id"], ["claim_imported_safe_blocker"])
+        self.assertEqual(request["expected_result_contains"]["rejected[].id"], ["source_imported_terminal_log", "claim_imported_deploy_blocker"])
+        self.assertEqual(strict["expected_result_contains"], request["expected_result_contains"])
         export_path = ROOT / request["params"]["file"]
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))

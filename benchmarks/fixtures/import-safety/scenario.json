@@ -72,7 +72,19 @@
           "error_count": 0,
           "fail_on_rejected": false
         },
-        "expected_result_schema": "#/$defs/import_check_result"
+        "expected_result_schema": "#/$defs/import_check_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "claim_imported_safe_blocker"
+          ],
+          "rejected[].id": [
+            "source_imported_terminal_log",
+            "claim_imported_deploy_blocker"
+          ],
+          "rejected[].reason": [
+            "secret_like_value_redacted"
+          ]
+        }
       },
       {
         "id": "import-check-strict",
@@ -102,7 +114,19 @@
           "error_count": 0,
           "fail_on_rejected": true
         },
-        "expected_result_schema": "#/$defs/import_check_result"
+        "expected_result_schema": "#/$defs/import_check_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "claim_imported_safe_blocker"
+          ],
+          "rejected[].id": [
+            "source_imported_terminal_log",
+            "claim_imported_deploy_blocker"
+          ],
+          "rejected[].reason": [
+            "secret_like_value_redacted"
+          ]
+        }
       }
     ]
   },
