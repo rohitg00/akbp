@@ -236,12 +236,12 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/export_result`: a closed `akbp.export` result with version, timestamp, card, claims, sources, entities, and relations.
 - `#/$defs/context_item`: the closed nested item shape returned by `akbp.context`.
 - `#/$defs/search_result_row`: the closed nested result-row shape returned by `akbp.search`.
-- `#/$defs/audit_event`: the nested event shape returned by `akbp.audit`.
-- `#/$defs/exported_claim`: the nested claim shape returned by `akbp.export`.
-- `#/$defs/claim_result`: the claim shape returned by approved `akbp.remember` and `akbp.supersede`.
-- `#/$defs/source_result`: the source record returned by approved `akbp.source.add` and nested in `akbp.export`.
-- `#/$defs/entity_result`: the entity record nested in `akbp.export`.
-- `#/$defs/relation_result`: the relation record returned by approved `akbp.contradict` and nested in `akbp.export`.
+- `#/$defs/audit_event`: the closed nested event shape returned by `akbp.audit`.
+- `#/$defs/exported_claim`: the closed nested claim shape returned by `akbp.export`.
+- `#/$defs/claim_result`: the closed claim shape returned by approved `akbp.remember` and `akbp.supersede`.
+- `#/$defs/source_result`: the closed source record returned by approved `akbp.source.add` and nested in `akbp.export`.
+- `#/$defs/entity_result`: the closed entity record nested in `akbp.export`.
+- `#/$defs/relation_result`: the closed relation record returned by approved `akbp.contradict` and nested in `akbp.export`.
 - `#/$defs/dry_run_review_result`: a closed generic dry-run write result with `dry_run:true`, `would_write:true`, `method`, `path`, `argv`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/ingest_dry_run_result`: an `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/crystallize_session_result`: an approved or previewed session crystallization result with `session_id`, extracted `summary`, output page, source id, created claims, and skipped claims.

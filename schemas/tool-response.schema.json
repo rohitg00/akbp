@@ -843,7 +843,7 @@
     },
     "audit_event": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "event",
@@ -864,13 +864,14 @@
           "minLength": 1
         },
         "data": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         }
       }
     },
     "exported_claim": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "text",
@@ -925,12 +926,30 @@
         "updated_at": {
           "type": "string",
           "minLength": 1
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "superseded_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_confirmed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
     "claim_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "text",
@@ -985,12 +1004,30 @@
         "updated_at": {
           "type": "string",
           "minLength": 1
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "superseded_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_confirmed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
     "source_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "type",
@@ -1034,13 +1071,14 @@
           "minLength": 1
         },
         "metadata": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": true
         }
       }
     },
     "relation_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "source",
@@ -1089,7 +1127,7 @@
     },
     "entity_result": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "id",
         "name",

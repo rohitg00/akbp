@@ -138,9 +138,13 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("summary", defs["context_item"]["required"])
         self.assertFalse(defs["search_result_row"]["additionalProperties"])
         self.assertIn("snippet", defs["search_result_row"]["required"])
+        for name in ["audit_event", "exported_claim", "claim_result", "source_result", "entity_result", "relation_result"]:
+            self.assertFalse(defs[name]["additionalProperties"])
         self.assertIn("event", defs["audit_event"]["required"])
         self.assertIn("confidence", defs["exported_claim"]["required"])
+        self.assertIn("superseded_by", defs["exported_claim"]["properties"])
         self.assertIn("text", defs["claim_result"]["required"])
+        self.assertIn("last_confirmed_at", defs["claim_result"]["properties"])
         self.assertIn("locator", defs["source_result"]["required"])
         self.assertIn("name", defs["entity_result"]["required"])
         self.assertIn("relation", defs["relation_result"]["required"])
