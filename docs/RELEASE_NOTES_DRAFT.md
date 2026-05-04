@@ -15,7 +15,7 @@ Release candidate scope:
 - Defines a local-first knowledge base layout with `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, source records, and audit history.
 - Ships a dependency-free Python reference CLI and JSONL local tool server.
 - Adds conformance checks through Level 3: file convention, structured claims, retrieval/context packs, and lifecycle relations.
-- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, review-gated writes, secret-safety, and end-to-end agent flow.
+- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, and end-to-end agent flow.
 
 ## Protocol surface
 
@@ -114,10 +114,12 @@ Included benchmark fixtures:
 - import safety
 - multi-agent handoff
 - review-gated writes
+- approved write apply outputs
+- unapproved write rejections
 - secret safety
 - session crystallization
 
-The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set.
+The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, and `approval_required` rejection details.
 
 ## Validation for this release candidate
 

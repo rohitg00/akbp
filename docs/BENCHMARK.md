@@ -86,9 +86,9 @@ Run real AKBP retrieval scoring with:
 make benchmark
 ```
 
-The first runner validates scenario shape, citations, relation targets, supersession links, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, and safe-secret outcomes against fixture data.
+The first runner validates scenario shape, citations, relation targets, supersession links, tool-server request ids, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, dry-run/apply/rejection coverage, and safe-secret outcomes against fixture data.
 
-`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture and checks real `akbp query` and `akbp context` retrieval against expected claim ids.
+`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, and approval-rejection response shapes.
 
 Initial scenarios:
 
@@ -98,6 +98,8 @@ Initial scenarios:
 - `correction-resolution`: apply newer corrections while preserving old conflicting knowledge until explicit resolution.
 - `import-safety`: validate imported JSONL objects and redaction before durable writes.
 - `multi-agent-handoff`: retrieve cited prior-agent context before continuing adapter work.
-- `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes.
+- `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes, with real dry-run JSONL outputs.
+- `approved-write-apply`: verify approved write methods return inspectable claim, source, or relation records.
+- `unapproved-write-rejection`: verify non-dry-run writes without `approved:true` return structured `approval_required` errors.
 - `secret-safety`: redact or reject secret-like values before durable writes.
 - `session-crystallization`: retrieve workflow claims from structured coding-agent sessions with citations.
