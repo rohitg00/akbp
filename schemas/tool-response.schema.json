@@ -72,6 +72,9 @@
                   "$ref": "#/$defs/invalid_json_details"
                 },
                 {
+                  "$ref": "#/$defs/cli_error_details"
+                },
+                {
                   "type": "object"
                 },
                 {
@@ -1101,6 +1104,27 @@
         "schema": {
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "cli_error_details": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "method",
+        "exit_code",
+        "stdout"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "pattern": "^akbp\\."
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "stdout": {
+          "type": "string"
         }
       }
     }

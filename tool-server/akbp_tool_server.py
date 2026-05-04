@@ -299,7 +299,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if dry_run and method == "akbp.ingest":
         code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
         if code != 0:
-            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"exit_code": code, "stdout": stdout})
+            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
         result = parse_payload(stdout)
         if isinstance(result, dict):
             result.setdefault("review_required", True)
@@ -337,7 +337,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
 
     code, stdout, stderr = run_cli(path, argv)
     if code != 0:
-        return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"exit_code": code, "stdout": stdout})
+        return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
     return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
 
 
