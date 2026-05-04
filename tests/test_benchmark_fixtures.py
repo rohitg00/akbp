@@ -51,8 +51,12 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["method"], "akbp.import_check")
         self.assertEqual(request["expected_result_schema"], "#/$defs/import_check_result")
         self.assertIn("accepted", request["expected_result_fields"])
+        self.assertIn("accepted_count", request["expected_result_fields"])
         self.assertIn("rejected", request["expected_result_fields"])
+        self.assertIn("rejected_count", request["expected_result_fields"])
         self.assertEqual(request["expected_result_values"]["checked"], 3)
+        self.assertEqual(request["expected_result_values"]["accepted_count"], 1)
+        self.assertEqual(request["expected_result_values"]["rejected_count"], 2)
         export_path = ROOT / request["params"]["file"]
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))

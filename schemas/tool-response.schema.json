@@ -533,6 +533,9 @@
         "ok",
         "file",
         "checked",
+        "accepted_count",
+        "rejected_count",
+        "error_count",
         "accepted",
         "rejected",
         "errors"
@@ -546,6 +549,18 @@
           "minLength": 1
         },
         "checked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "accepted_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejected_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error_count": {
           "type": "integer",
           "minimum": 0
         },

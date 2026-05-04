@@ -56,13 +56,19 @@
           "ok",
           "file",
           "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
           "accepted",
           "rejected",
           "errors"
         ],
         "expected_result_values": {
           "ok": true,
-          "checked": 3
+          "checked": 3,
+          "accepted_count": 1,
+          "rejected_count": 2,
+          "error_count": 0
         },
         "expected_result_schema": "#/$defs/import_check_result"
       }
