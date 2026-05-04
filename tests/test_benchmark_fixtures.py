@@ -61,11 +61,15 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "write-preview-crystallize-schema" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         by_method = {request["method"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(by_method["akbp.ingest"]["expected_result_schema"], "#/$defs/ingest_dry_run_result")
-        self.assertTrue(by_method["akbp.ingest"]["params"]["dry_run"])
-        self.assertEqual(by_method["akbp.crystallize_session"]["expected_result_schema"], "#/$defs/crystallize_session_result")
-        self.assertTrue(by_method["akbp.crystallize_session"]["approved"])
+        by_id = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        self.assertEqual(by_id["ingest-preview"]["expected_result_schema"], "#/$defs/ingest_dry_run_result")
+        self.assertTrue(by_id["ingest-preview"]["params"]["dry_run"])
+        self.assertEqual(by_id["ingest-apply"]["expected_result_schema"], "#/$defs/ingest_result")
+        self.assertTrue(by_id["ingest-apply"]["approved"])
+        self.assertEqual(by_id["crystallize-apply"]["expected_result_schema"], "#/$defs/crystallize_session_result")
+        self.assertTrue(by_id["crystallize-apply"]["approved"])
         self.assertIn("claim_ingest_preview_is_schema_backed", data["expected"]["must_retrieve"])
+        self.assertIn("claim_ingest_apply_is_schema_backed", data["expected"]["must_retrieve"])
         self.assertIn("claim_crystallize_apply_is_schema_backed", data["expected"]["must_retrieve"])
 
     def test_read_method_schema_fixture_covers_read_responses(self):

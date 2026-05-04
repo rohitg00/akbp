@@ -1,6 +1,6 @@
 {
   "id": "write-preview-crystallize-schema-001",
-  "task": "Verify import previews and approved session crystallization return schema-backed JSONL results.",
+  "task": "Verify import previews, approved ingest, and approved session crystallization return schema-backed JSONL results.",
   "setup": {
     "sources": [
       {
@@ -25,6 +25,23 @@
           "dry_run",
           "schema-backed",
           "review_required"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_ingest_apply_is_schema_backed",
+        "text": "Approved ingest returns a schema-backed source id, imported page, extracted signals, created claim ids, and redaction status.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_crystallize_contract"
+        ],
+        "entities": [
+          "ingest",
+          "approved:true",
+          "schema-backed",
+          "redacted"
         ],
         "scope": "project"
       },
@@ -75,6 +92,28 @@
         "expected_result_schema": "#/$defs/ingest_dry_run_result"
       },
       {
+        "id": "ingest-apply",
+        "method": "akbp.ingest",
+        "approved": true,
+        "params": {
+          "file": "docs/TOOL_CONTRACT.md",
+          "claim": "Approved ingest should be schema-backed after review.",
+          "claim_type": "workflow"
+        },
+        "expected_result_fields": [
+          "ok",
+          "source_id",
+          "page",
+          "signals",
+          "created_claims",
+          "redacted"
+        ],
+        "expected_result_values": {
+          "ok": true
+        },
+        "expected_result_schema": "#/$defs/ingest_result"
+      },
+      {
         "id": "crystallize-apply",
         "method": "akbp.crystallize_session",
         "approved": true,
@@ -102,6 +141,7 @@
   "expected": {
     "must_retrieve": [
       "claim_ingest_preview_is_schema_backed",
+      "claim_ingest_apply_is_schema_backed",
       "claim_crystallize_apply_is_schema_backed"
     ],
     "must_cite": [
@@ -113,6 +153,7 @@
       "schema-backed"
     ],
     "must_apply_tool_methods": [
+      "akbp.ingest",
       "akbp.crystallize_session"
     ],
     "must_dry_run_tool_methods": [
