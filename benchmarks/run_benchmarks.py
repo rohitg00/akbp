@@ -133,6 +133,33 @@ def schema_shape_issues(payload: Any, definition: dict[str, Any], *, path: str =
     return issues
 
 
+def nested_values(payload: Any, path: str) -> list[Any]:
+    values = [payload]
+    for part in path.split("."):
+        next_values: list[Any] = []
+        collect_list = part.endswith("[]")
+        key = part[:-2] if collect_list else part
+        for value in values:
+            if isinstance(value, dict) and key in value:
+                child = value[key]
+                if collect_list and isinstance(child, list):
+                    next_values.extend(child)
+                else:
+                    next_values.append(child)
+        values = next_values
+    return values
+
+
+def missing_nested_contains(payload: Any, expected: dict[str, list[Any]]) -> dict[str, list[Any]]:
+    missing: dict[str, list[Any]] = {}
+    for path, required_values in expected.items():
+        found = nested_values(payload, path)
+        absent = [value for value in required_values if value not in found]
+        if absent:
+            missing[path] = absent
+    return missing
+
+
 def run_tool_server(requests: list[dict[str, Any]], kb: Path) -> list[dict[str, Any]]:
     envelopes = []
     for request in requests:
@@ -259,10 +286,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
         missing = [field for field in request.get("expected_result_fields", []) or [] if field not in result]
         mismatched = {key: {"expected": value, "actual": result.get(key)} for key, value in (request.get("expected_result_values", {}) or {}).items() if result.get(key) != value}
         schema_issues = schema_shape_issues(result, schema_def(request["expected_result_schema"])) if request.get("expected_result_schema") else []
+        missing_contains = missing_nested_contains(result, request.get("expected_result_contains", {}) or {})
         checks.append({
             "name": "akbp_tool_apply_response_shape",
-            "ok": bool(output.get("ok")) and not missing and not mismatched and not schema_issues,
-            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "schema_issues": schema_issues, "schema": request.get("expected_result_schema")},
+            "ok": bool(output.get("ok")) and not missing and not mismatched and not schema_issues and not missing_contains,
+            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "missing_contains": missing_contains, "schema_issues": schema_issues, "schema": request.get("expected_result_schema")},
         })
     return {
         "ok": all(check["ok"] for check in checks),
@@ -413,8 +441,8 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
         if "sk-proj-" in raw or "xoxb-" in raw:
             issues.append("secret-safety fixture must not contain realistic secret prefixes")
 
-    if not source_ids and not setup.get("proposed_claims") and not setup.get("import_objects") and not setup.get("tool_server_requests"):
-        issues.append("setup must include sources, proposed_claims, import_objects, or tool_server_requests")
+    if not source_ids and not entity_ids and not setup.get("proposed_claims") and not setup.get("import_objects") and not setup.get("tool_server_requests"):
+        issues.append("setup must include sources, entities, proposed_claims, import_objects, or tool_server_requests")
 
     import_ids = ids(setup.get("import_objects", []) or [])
     if len(import_ids) != len(setup.get("import_objects", []) or []):

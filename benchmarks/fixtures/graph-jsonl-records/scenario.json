@@ -75,7 +75,22 @@
           "entities",
           "relations"
         ],
-        "expected_result_schema": "#/$defs/export_result"
+        "expected_result_schema": "#/$defs/export_result",
+        "expected_result_contains": {
+          "claims[].id": [
+            "claim_graph_records_export"
+          ],
+          "sources[].id": [
+            "source_graph_contract"
+          ],
+          "entities[].id": [
+            "entity_akbp_protocol",
+            "entity_jsonl_tool_server"
+          ],
+          "relations[].id": [
+            "relation_protocol_uses_tool_server"
+          ]
+        }
       }
     ]
   },

@@ -40,6 +40,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
         request = setup["tool_server_requests"][0]
         self.assertEqual(request["method"], "akbp.export")
         self.assertEqual(request["expected_result_schema"], "#/$defs/export_result")
+        self.assertEqual(request["expected_result_contains"]["entities[].id"], ["entity_akbp_protocol", "entity_jsonl_tool_server"])
+        self.assertEqual(request["expected_result_contains"]["relations[].id"], ["relation_protocol_uses_tool_server"])
         self.assertIn("claim_graph_records_export", data["expected"]["must_retrieve"])
 
     def test_import_safety_fixture_covers_import_check_tool(self):
@@ -223,6 +225,17 @@ class BenchmarkFixtureTest(unittest.TestCase):
         }
         issues = benchmark_runner.check_scenario(data)
         self.assertTrue(any("invalid expected_result_schema" in issue for issue in issues))
+
+    def test_runner_checks_nested_expected_contains(self):
+        payload = {
+            "entities": [{"id": "entity_one"}, {"id": "entity_two"}],
+            "relations": [{"id": "relation_one"}],
+        }
+        self.assertEqual(benchmark_runner.missing_nested_contains(payload, {"entities[].id": ["entity_one"]}), {})
+        self.assertEqual(
+            benchmark_runner.missing_nested_contains(payload, {"relations[].id": ["missing_relation"]}),
+            {"relations[].id": ["missing_relation"]},
+        )
 
     def test_runner_schema_shape_checks_nested_items(self):
         payload = {
