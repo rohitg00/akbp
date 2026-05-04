@@ -65,7 +65,8 @@
           "evidence",
           "created_at",
           "updated_at"
-        ]
+        ],
+        "expected_result_schema": "#/$defs/claim_result"
       },
       {
         "id": "source-apply",
@@ -85,7 +86,8 @@
           "scope",
           "created_at",
           "metadata"
-        ]
+        ],
+        "expected_result_schema": "#/$defs/source_result"
       },
       {
         "id": "supersede-apply",
@@ -109,7 +111,8 @@
           "supersedes",
           "created_at",
           "updated_at"
-        ]
+        ],
+        "expected_result_schema": "#/$defs/claim_result"
       },
       {
         "id": "contradict-apply",
@@ -131,7 +134,8 @@
           "evidence",
           "created_at",
           "updated_at"
-        ]
+        ],
+        "expected_result_schema": "#/$defs/relation_result"
       }
     ]
   },

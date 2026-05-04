@@ -72,9 +72,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         })
         by_method = {request["method"]: request for request in data["setup"]["tool_server_requests"]}
         self.assertIn("text", by_method["akbp.remember"]["expected_result_fields"])
+        self.assertEqual(by_method["akbp.remember"]["expected_result_schema"], "#/$defs/claim_result")
         self.assertIn("locator", by_method["akbp.source.add"]["expected_result_fields"])
+        self.assertEqual(by_method["akbp.source.add"]["expected_result_schema"], "#/$defs/source_result")
         self.assertIn("supersedes", by_method["akbp.supersede"]["expected_result_fields"])
+        self.assertEqual(by_method["akbp.supersede"]["expected_result_schema"], "#/$defs/claim_result")
         self.assertIn("relation", by_method["akbp.contradict"]["expected_result_fields"])
+        self.assertEqual(by_method["akbp.contradict"]["expected_result_schema"], "#/$defs/relation_result")
         self.assertTrue(all(request["approved"] for request in data["setup"]["tool_server_requests"]))
 
     def test_unapproved_write_rejection_fixture_covers_all_write_errors(self):
@@ -94,6 +98,27 @@ class BenchmarkFixtureTest(unittest.TestCase):
             self.assertEqual(request["expected_error_values"]["method"], request["method"])
             self.assertEqual(request["expected_error_values"]["dry_run"], False)
             self.assertEqual(request["expected_error_values"]["review_required"], True)
+
+    def test_runner_validates_expected_result_schema_refs(self):
+        data = {
+            "id": "bad-schema-ref",
+            "task": "Reject fixture schema refs that do not map to response schema defs.",
+            "setup": {
+                "tool_server_requests": [
+                    {
+                        "id": "bad-request",
+                        "method": "akbp.remember",
+                        "params": {"text": "x"},
+                        "expected_result_fields": ["id"],
+                        "expected_result_schema": "#/$defs/not_real",
+                    }
+                ]
+            },
+            "query": "x",
+            "expected": {},
+        }
+        issues = benchmark_runner.check_scenario(data)
+        self.assertTrue(any("invalid expected_result_schema" in issue for issue in issues))
 
     def test_runner_rejects_undocumented_expected_value_fields(self):
         data = {

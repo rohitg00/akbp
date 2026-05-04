@@ -24,6 +24,7 @@ The scenario file includes:
 
 - `expected_result_fields`: fields that must exist in successful `result` payloads
 - `expected_result_values`: exact values that must match in successful `result` payloads
+- `expected_result_schema`: optional `#/$defs/...` response schema reference used to reject missing required fields or unexpected top-level fields
 - `expected_error_code`: structured error code expected for rejected requests
 - `expected_error_fields`: fields that must exist in structured `error.details`
 - `expected_error_values`: exact values that must match in structured `error.details`

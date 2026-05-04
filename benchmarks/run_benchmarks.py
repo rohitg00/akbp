@@ -71,6 +71,28 @@ def run_cli(kb: Path, *args: str) -> dict[str, Any]:
     return json.loads(proc.stdout) if proc.stdout.strip().startswith(("{", "[")) else {"stdout": proc.stdout}
 
 
+def schema_def(schema_ref: str) -> dict[str, Any]:
+    schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+    prefix = "#/$defs/"
+    if not schema_ref.startswith(prefix):
+        raise ValueError(f"unsupported schema ref: {schema_ref}")
+    return schema["$defs"][schema_ref[len(prefix):]]
+
+
+def schema_shape_issues(payload: dict[str, Any], schema: dict[str, Any]) -> list[str]:
+    issues: list[str] = []
+    required = schema.get("required", []) or []
+    for field in required:
+        if field not in payload:
+            issues.append(f"missing required field {field}")
+    allowed = set(schema.get("properties", {}))
+    if schema.get("additionalProperties") is False:
+        for field in payload:
+            if field not in allowed:
+                issues.append(f"unexpected field {field}")
+    return issues
+
+
 def run_tool_server(requests: list[dict[str, Any]], kb: Path) -> list[dict[str, Any]]:
     envelopes = []
     for request in requests:
@@ -178,10 +200,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
         missing = [field for field in request.get("expected_result_fields", []) or [] if field not in result]
         mismatched = {key: {"expected": value, "actual": result.get(key)} for key, value in (request.get("expected_result_values", {}) or {}).items() if result.get(key) != value}
+        schema_issues = schema_shape_issues(result, schema_def(request["expected_result_schema"])) if request.get("expected_result_schema") else []
         checks.append({
             "name": "akbp_tool_apply_response_shape",
-            "ok": bool(output.get("ok")) and not missing and not mismatched,
-            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched},
+            "ok": bool(output.get("ok")) and not missing and not mismatched and not schema_issues,
+            "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "schema_issues": schema_issues, "schema": request.get("expected_result_schema")},
         })
     return {
         "ok": all(check["ok"] for check in checks),
@@ -361,6 +384,11 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for request in tool_requests:
         if not request.get("expected_result_fields") and not request.get("expected_error_code"):
             issues.append(f"tool request {request.get('id')} must declare expected_result_fields or expected_error_code")
+        if request.get("expected_result_schema"):
+            try:
+                schema_def(request["expected_result_schema"])
+            except (KeyError, ValueError) as exc:
+                issues.append(f"tool request {request.get('id')} has invalid expected_result_schema: {exc}")
         for field in (request.get("expected_result_values", {}) or {}):
             if field not in (request.get("expected_result_fields", []) or []):
                 issues.append(f"tool request {request.get('id')} expected_result_values field {field} must also be listed in expected_result_fields")
