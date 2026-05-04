@@ -216,6 +216,19 @@
         }
       }
     },
+    "akbp.import_check.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "akbp.index.params": {
       "type": "object",
       "additionalProperties": false,
@@ -348,6 +361,9 @@
         },
         "akbp.ingest": {
           "$ref": "#/$defs/akbp.ingest.params"
+        },
+        "akbp.import_check": {
+          "$ref": "#/$defs/akbp.import_check.params"
         },
         "akbp.supersede": {
           "$ref": "#/$defs/akbp.supersede.params"

@@ -41,6 +41,7 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.remember.params",
             "akbp.source.add.params",
             "akbp.ingest.params",
+            "akbp.import_check.params",
             "akbp.supersede.params",
             "akbp.contradict.params",
             "akbp.crystallize_session.params",

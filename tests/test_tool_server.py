@@ -266,6 +266,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
             self.assertIn("akbp.ingest", lines[0]["result"]["methods"])
+            self.assertIn("akbp.import_check", lines[0]["result"]["methods"])
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
@@ -276,7 +277,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(crystallize_examples)
             self.assertTrue(crystallize_examples[0]["dry_run"])
             self.assertTrue(crystallize_examples[0]["params"]["apply"])
-            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
+            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.import_check", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
                 self.assertTrue(lines[0]["result"]["methods"][method]["params_schema"].endswith(f"#/$defs/{method}.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
@@ -456,6 +457,29 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"]["sources"][0], schema_def("source_result"))
             self.assertTrue(lines[2]["result"]["relations"])
             assert_matches_required_schema(self, lines[2]["result"]["relations"][0], schema_def("relation_result"))
+
+    def test_import_check_method_validates_jsonl_without_echoing_secret(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            export = Path(d) / "export.jsonl"
+            export.write_text(
+                json.dumps({"kind": "claim", "id": "claim_safe", "text": "Safe imported claim."}) + "\n" +
+                json.dumps({"kind": "claim", "id": "claim_unsafe", "text": "Copied token=sk-example123456789 into output."}) + "\n",
+                encoding="utf-8",
+            )
+            request = json.dumps({
+                "id": "import-check",
+                "path": str(kb),
+                "method": "akbp.import_check",
+                "params": {"file": str(export)},
+            }) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("import_check_result"))
+            self.assertEqual([item["id"] for item in line["result"]["accepted"]], ["claim_safe"])
+            self.assertEqual([item["id"] for item in line["result"]["rejected"]], ["claim_unsafe"])
+            self.assertNotIn("sk-example123456789", proc.stdout)
 
     def test_ingest_method_imports_file(self):
         with tempfile.TemporaryDirectory() as d:

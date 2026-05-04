@@ -481,6 +481,94 @@
         }
       }
     },
+    "import_check_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "line"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "import_check_error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "line",
+        "error"
+      ],
+      "properties": {
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "error": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "import_check_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "file",
+        "checked",
+        "accepted",
+        "rejected",
+        "errors"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "accepted": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/import_check_item"
+          }
+        },
+        "rejected": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/import_check_item"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/import_check_error"
+          }
+        }
+      }
+    },
     "crystallize_session_result": {
       "type": "object",
       "additionalProperties": false,
