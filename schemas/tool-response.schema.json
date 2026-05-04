@@ -69,6 +69,9 @@
                   "$ref": "#/$defs/invalid_request_details"
                 },
                 {
+                  "$ref": "#/$defs/invalid_json_details"
+                },
+                {
                   "type": "object"
                 },
                 {
@@ -1078,6 +1081,26 @@
         },
         "updated_at": {
           "type": "string"
+        }
+      }
+    },
+    "invalid_json_details": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "errors",
+        "schema"
+      ],
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

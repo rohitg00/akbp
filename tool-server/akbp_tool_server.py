@@ -355,7 +355,12 @@ def main() -> int:
             request_id = req.get("id")
             res = handle(req)
         except json.JSONDecodeError as exc:
-            res = error_response(None, "invalid_json", str(exc))
+            res = error_response(
+                None,
+                "invalid_json",
+                "line is not valid JSON",
+                details={"errors": [str(exc)], "schema": REQUEST_SCHEMA},
+            )
         except Exception as exc:  # pragma: no cover - defensive server boundary
             res = error_response(request_id, "internal_error", str(exc))
         print(json.dumps(res, ensure_ascii=False), flush=True)

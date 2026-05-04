@@ -247,6 +247,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/crystallize_session_result`: an approved or previewed session crystallization result with `session_id`, extracted `summary`, output page, source id, created claims, and skipped claims.
 - `#/$defs/approval_required_details`: an `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/invalid_request_details`: request-envelope validation details with `errors` and `schema`.
+- `#/$defs/invalid_json_details`: invalid JSON line details with parse `errors` and the request-envelope `schema`, without echoing the raw input line.
 - `#/$defs/invalid_params_details`: parameter validation details with `params_schema` plus missing, unknown, allowed, or type-error metadata when relevant.
 - `#/$defs/unknown_method_details`: unknown-method details with the advertised `available_methods` list.
 
