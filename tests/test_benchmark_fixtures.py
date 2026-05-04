@@ -28,7 +28,19 @@ class BenchmarkFixtureTest(unittest.TestCase):
                 self.assertIn("query", data)
                 self.assertIn("expected", data)
                 setup = data["setup"]
-                self.assertTrue(setup.get("sources") or setup.get("proposed_claims") or setup.get("import_objects") or setup.get("tool_server_requests"))
+                self.assertTrue(setup.get("sources") or setup.get("entities") or setup.get("proposed_claims") or setup.get("import_objects") or setup.get("tool_server_requests"))
+
+    def test_graph_jsonl_records_fixture_covers_entities_and_relations(self):
+        path = FIXTURES / "graph-jsonl-records" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        setup = data["setup"]
+        self.assertEqual(len(setup["entities"]), 2)
+        self.assertEqual(setup["relations"][0]["source"], "entity_akbp_protocol")
+        self.assertEqual(setup["relations"][0]["target"], "entity_jsonl_tool_server")
+        request = setup["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.export")
+        self.assertEqual(request["expected_result_schema"], "#/$defs/export_result")
+        self.assertIn("claim_graph_records_export", data["expected"]["must_retrieve"])
 
     def test_import_safety_fixture_covers_import_check_tool(self):
         path = FIXTURES / "import-safety" / "scenario.json"

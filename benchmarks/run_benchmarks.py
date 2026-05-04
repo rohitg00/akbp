@@ -187,6 +187,18 @@ def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
             "updated_at": claim.get("updated_at", "2026-01-01T00:00:00Z"),
             "last_confirmed_at": claim.get("last_confirmed_at"),
         })
+    entities = []
+    for entity in setup.get("entities", []) or []:
+        entities.append({
+            "id": entity["id"],
+            "name": entity["name"],
+            "type": entity.get("type", "concept"),
+            "aliases": entity.get("aliases", []),
+            "description": entity.get("description"),
+            "page": entity.get("page"),
+            "created_at": entity.get("created_at", "2026-01-01T00:00:00Z"),
+            "updated_at": entity.get("updated_at", "2026-01-01T00:00:00Z"),
+        })
     relations = []
     for relation in setup.get("relations", []) or []:
         relations.append({
@@ -194,13 +206,16 @@ def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
             "source": relation["source"],
             "target": relation["target"],
             "relation": relation.get("relation", "related_to"),
+            "confidence": relation.get("confidence", 0.5),
             "evidence": relation.get("evidence", []),
             "created_at": relation.get("created_at", "2026-01-01T00:00:00Z"),
+            "updated_at": relation.get("updated_at", "2026-01-01T00:00:00Z"),
         })
     write_jsonl(kb / "raw" / "sources" / "sources.jsonl", sources)
     write_jsonl(kb / "claims" / "claims.jsonl", claims)
+    write_jsonl(kb / "graph" / "entities.jsonl", entities)
     write_jsonl(kb / "graph" / "relations.jsonl", relations)
-    if claims or sources or relations:
+    if claims or sources or entities or relations:
         run_cli(kb, "index")
 
 
@@ -357,6 +372,8 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
 
     source_ids = ids(setup.get("sources", []) or [])
     claim_ids = ids(setup.get("claims", []) or [])
+    entity_ids = ids(setup.get("entities", []) or [])
+    graph_node_ids = claim_ids | entity_ids
     relation_ids = ids(setup.get("relations", []) or [])
 
     for claim in setup.get("claims", []) or []:
@@ -371,10 +388,10 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
                 issues.append(f"claim {claim.get('id')} supersedes missing claim {old_claim}")
 
     for relation in setup.get("relations", []) or []:
-        if relation.get("source") not in claim_ids:
-            issues.append(f"relation {relation.get('id')} has missing source claim")
-        if relation.get("target") not in claim_ids:
-            issues.append(f"relation {relation.get('id')} has missing target claim")
+        if relation.get("source") not in graph_node_ids:
+            issues.append(f"relation {relation.get('id')} has missing source graph node")
+        if relation.get("target") not in graph_node_ids:
+            issues.append(f"relation {relation.get('id')} has missing target graph node")
         for evidence in relation.get("evidence", []) or []:
             if evidence not in source_ids:
                 issues.append(f"relation {relation.get('id')} cites missing source {evidence}")
@@ -443,6 +460,8 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
         for field in (request.get("expected_error_values", {}) or {}):
             if field not in (request.get("expected_error_fields", []) or []):
                 issues.append(f"tool request {request.get('id')} expected_error_values field {field} must also be listed in expected_error_fields")
+    if len(entity_ids) != len(setup.get("entities", []) or []):
+        issues.append("entities must have unique ids")
     if len(relation_ids) != len(setup.get("relations", []) or []):
         issues.append("relations must have unique ids")
     return issues

@@ -1,0 +1,96 @@
+{
+  "id": "graph-jsonl-records-001",
+  "task": "Verify benchmark fixtures can populate real JSONL entities and relations that survive export with schema-backed shapes.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_graph_contract",
+        "type": "file",
+        "locator": "docs/SCHEMAS.md",
+        "title": "Graph JSONL schema contract"
+      }
+    ],
+    "entities": [
+      {
+        "id": "entity_akbp_protocol",
+        "name": "Agent Knowledge Base Protocol",
+        "type": "concept",
+        "aliases": [
+          "AKBP"
+        ],
+        "description": "Portable JSONL and markdown knowledge layer for agents.",
+        "page": "AKBP.md"
+      },
+      {
+        "id": "entity_jsonl_tool_server",
+        "name": "JSONL tool server",
+        "type": "tool",
+        "aliases": [
+          "local tool server"
+        ],
+        "description": "Line-delimited tool interface for reading and maintaining AKBP knowledge.",
+        "page": "docs/TOOL_CONTRACT.md"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_graph_records_export",
+        "text": "Benchmark fixtures can materialize real JSONL entity and relation records for export and retrieval tests.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_graph_contract"
+        ],
+        "entities": [
+          "entity_akbp_protocol",
+          "entity_jsonl_tool_server"
+        ],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_protocol_uses_tool_server",
+        "source": "entity_akbp_protocol",
+        "target": "entity_jsonl_tool_server",
+        "relation": "uses",
+        "evidence": [
+          "source_graph_contract"
+        ]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "export-graph-records",
+        "method": "akbp.export",
+        "approved": false,
+        "params": {},
+        "expected_result_fields": [
+          "akbp_version",
+          "exported_at",
+          "card",
+          "claims",
+          "sources",
+          "entities",
+          "relations"
+        ],
+        "expected_result_schema": "#/$defs/export_result"
+      }
+    ]
+  },
+  "query": "Can benchmarks use real JSONL graph records for retrieval and export?",
+  "expected": {
+    "must_retrieve": [
+      "claim_graph_records_export"
+    ],
+    "must_cite": [
+      "source_graph_contract"
+    ],
+    "answer_should_include": [
+      "JSONL",
+      "entities",
+      "relations"
+    ]
+  }
+}
