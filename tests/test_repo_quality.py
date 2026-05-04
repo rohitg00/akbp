@@ -338,6 +338,17 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("review-gated", readme)
         self.assertIn("examples/tool-server-approval-flow/", readme)
 
+    def test_release_notes_track_structured_tool_errors(self):
+        release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        tool_contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        response_schema = (ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8")
+        self.assertIn("invalid JSON errors", release_notes)
+        self.assertIn("do not echo raw input", release_notes)
+        self.assertIn("schema-backed invalid JSON", changelog)
+        self.assertIn("#/$defs/invalid_json_details", tool_contract)
+        self.assertIn("invalid_json_details", response_schema)
+
     def test_tool_server_approval_example_is_complete(self):
         text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")
         self.assertIn("dry_run:true", text)
