@@ -361,6 +361,12 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for request in tool_requests:
         if not request.get("expected_result_fields") and not request.get("expected_error_code"):
             issues.append(f"tool request {request.get('id')} must declare expected_result_fields or expected_error_code")
+        for field in (request.get("expected_result_values", {}) or {}):
+            if field not in (request.get("expected_result_fields", []) or []):
+                issues.append(f"tool request {request.get('id')} expected_result_values field {field} must also be listed in expected_result_fields")
+        for field in (request.get("expected_error_values", {}) or {}):
+            if field not in (request.get("expected_error_fields", []) or []):
+                issues.append(f"tool request {request.get('id')} expected_error_values field {field} must also be listed in expected_error_fields")
     if len(relation_ids) != len(setup.get("relations", []) or []):
         issues.append("relations must have unique ids")
     return issues

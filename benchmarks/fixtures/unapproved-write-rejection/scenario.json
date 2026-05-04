@@ -60,6 +60,7 @@
         "expected_error_fields": [
           "method",
           "review_required",
+          "dry_run",
           "apply_instruction"
         ],
         "expected_error_values": {
@@ -81,6 +82,7 @@
         "expected_error_fields": [
           "method",
           "review_required",
+          "dry_run",
           "apply_instruction"
         ],
         "expected_error_values": {
@@ -105,6 +107,7 @@
         "expected_error_fields": [
           "method",
           "review_required",
+          "dry_run",
           "apply_instruction"
         ],
         "expected_error_values": {
@@ -128,6 +131,7 @@
         "expected_error_fields": [
           "method",
           "review_required",
+          "dry_run",
           "apply_instruction"
         ],
         "expected_error_values": {
