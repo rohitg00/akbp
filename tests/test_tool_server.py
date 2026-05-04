@@ -126,10 +126,14 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(dry_run["properties"]["would_write"], {"const": True})
         for field in ["method", "path", "argv", "apply_instruction"]:
             self.assertIn(field, dry_run["required"])
+        ingest_apply = defs["ingest_result"]
         crystallize = defs["crystallize_session_result"]
         self.assertFalse(ingest_dry_run["additionalProperties"])
         for field in ["source_id", "page", "signals", "created_claims", "redacted", "would_write"]:
             self.assertIn(field, ingest_dry_run["required"])
+        self.assertFalse(ingest_apply["additionalProperties"])
+        for field in ["ok", "source_id", "page", "signals", "created_claims", "redacted"]:
+            self.assertIn(field, ingest_apply["required"])
         self.assertFalse(crystallize["additionalProperties"])
         self.assertFalse(crystallize["properties"]["summary"]["additionalProperties"])
         for field in ["session_id", "summary", "page", "source_id", "created_claims", "skipped_claims"]:
@@ -474,6 +478,7 @@ class ToolServerTest(unittest.TestCase):
             line = json.loads(proc.stdout)
             self.assertTrue(line["ok"])
             self.assertTrue(line["result"]["redacted"])
+            assert_matches_required_schema(self, line["result"], schema_def("ingest_result"))
             page = kb / line["result"]["page"]
             self.assertIn("[REDACTED]", page.read_text(encoding="utf-8"))
             claims = [json.loads(row) for row in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]

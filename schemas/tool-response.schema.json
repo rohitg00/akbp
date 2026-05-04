@@ -441,6 +441,46 @@
         }
       }
     },
+    "ingest_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "source_id",
+        "page",
+        "signals",
+        "created_claims",
+        "redacted"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "redacted": {
+          "type": "boolean"
+        }
+      }
+    },
     "crystallize_session_result": {
       "type": "object",
       "additionalProperties": false,
