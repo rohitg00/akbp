@@ -666,6 +666,9 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "bad-entity-item", "method": "akbp.ingest", "params": {"file": "notes.md", "entity": ["agent", False]}}),
             json.dumps({"id": "bad-limit-range", "method": "akbp.search", "params": {"query": "release", "limit": 0}}),
             json.dumps({"id": "bad-confidence-range", "method": "akbp.ingest", "params": {"file": "notes.md", "confidence": 1.5}}),
+            json.dumps({"id": "bad-claim-type", "method": "akbp.remember", "params": {"text": "x", "type": "unknown"}}),
+            json.dumps({"id": "bad-source-type", "method": "akbp.source.add", "params": {"locator": "notes.md", "type": "binary"}}),
+            json.dumps({"id": "bad-ingest-claim-type", "method": "akbp.ingest", "params": {"file": "notes.md", "claim_type": "blocker"}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -691,6 +694,11 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("entity items must be strings", lines[9]["error"]["details"]["type_errors"])
         self.assertIn("limit must be between 1 and 100", lines[10]["error"]["details"]["type_errors"])
         self.assertIn("confidence must be between 0 and 1", lines[11]["error"]["details"]["type_errors"])
+        self.assertIn("type must be one of:", lines[12]["error"]["details"]["type_errors"][0])
+        self.assertIn("warning", lines[12]["error"]["details"]["type_errors"][0])
+        self.assertIn("type must be one of:", lines[13]["error"]["details"]["type_errors"][0])
+        self.assertIn("transcript", lines[13]["error"]["details"]["type_errors"][0])
+        self.assertIn("claim_type must be one of:", lines[14]["error"]["details"]["type_errors"][0])
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 

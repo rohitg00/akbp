@@ -70,13 +70,13 @@
         "type": {
           "type": "string",
           "enum": [
-            "observation",
+            "fact",
             "decision",
             "preference",
             "workflow",
-            "fact",
+            "observation",
             "question",
-            "blocker"
+            "warning"
           ],
           "default": "observation"
         },
@@ -105,7 +105,20 @@
         },
         "type": {
           "type": "string",
-          "default": "file"
+          "default": "file",
+          "enum": [
+            "file",
+            "url",
+            "transcript",
+            "message",
+            "commit",
+            "issue",
+            "screenshot",
+            "pdf",
+            "audio",
+            "video",
+            "folder"
+          ]
         },
         "title": {
           "type": "string"
@@ -137,7 +150,16 @@
         },
         "type": {
           "type": "string",
-          "default": "observation"
+          "default": "observation",
+          "enum": [
+            "fact",
+            "decision",
+            "preference",
+            "workflow",
+            "observation",
+            "question",
+            "warning"
+          ]
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -189,7 +211,20 @@
         },
         "type": {
           "type": "string",
-          "default": "file"
+          "default": "file",
+          "enum": [
+            "file",
+            "url",
+            "transcript",
+            "message",
+            "commit",
+            "issue",
+            "screenshot",
+            "pdf",
+            "audio",
+            "video",
+            "folder"
+          ]
         },
         "title": {
           "type": "string"
@@ -199,7 +234,16 @@
         },
         "claim_type": {
           "type": "string",
-          "default": "observation"
+          "default": "observation",
+          "enum": [
+            "fact",
+            "decision",
+            "preference",
+            "workflow",
+            "observation",
+            "question",
+            "warning"
+          ]
         },
         "confidence": {
           "type": "number",

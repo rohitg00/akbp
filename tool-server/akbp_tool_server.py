@@ -224,6 +224,9 @@ def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
     return sorted(name for name in params if name not in allowed)
 
 
+CLAIM_TYPES = {"fact", "decision", "preference", "workflow", "observation", "question", "warning"}
+SOURCE_TYPES = {"file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"}
+
 STRING_PARAMS = {
     "query",
     "task",
@@ -248,6 +251,12 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
     for name in sorted(STRING_PARAMS.intersection(params)):
         if not isinstance(params.get(name), str):
             errors.append(f"{name} must be a string")
+    if "type" in params and method in {"akbp.remember", "akbp.supersede"} and params.get("type") not in CLAIM_TYPES:
+        errors.append("type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
+    if "type" in params and method in {"akbp.source.add", "akbp.ingest"} and params.get("type") not in SOURCE_TYPES:
+        errors.append("type must be one of: " + ", ".join(sorted(SOURCE_TYPES)))
+    if "claim_type" in params and method == "akbp.ingest" and params.get("claim_type") not in CLAIM_TYPES:
+        errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "limit" in params:

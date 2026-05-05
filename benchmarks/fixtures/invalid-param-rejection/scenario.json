@@ -196,6 +196,66 @@
             "confidence must be between 0 and 1"
           ]
         }
+      },
+      {
+        "id": "remember-type-enum-error",
+        "method": "akbp.remember",
+        "approved": false,
+        "params": {
+          "text": "Invalid type should be rejected",
+          "type": "unknown"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "type must be one of: decision, fact, observation, preference, question, warning, workflow"
+          ]
+        }
+      },
+      {
+        "id": "source-type-enum-error",
+        "method": "akbp.source.add",
+        "approved": false,
+        "params": {
+          "locator": "notes.md",
+          "type": "binary"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "type must be one of: audio, commit, file, folder, issue, message, pdf, screenshot, transcript, url, video"
+          ]
+        }
+      },
+      {
+        "id": "ingest-claim-type-enum-error",
+        "method": "akbp.ingest",
+        "approved": false,
+        "params": {
+          "file": "docs/TOOL_CONTRACT.md",
+          "claim_type": "blocker"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "claim_type must be one of: decision, fact, observation, preference, question, warning, workflow"
+          ]
+        }
       }
     ]
   },
