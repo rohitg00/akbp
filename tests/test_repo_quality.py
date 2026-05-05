@@ -53,6 +53,19 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(name, defs)
 
+    def test_tool_method_enums_match_record_schemas(self):
+        claim_schema = json.loads((ROOT / "schemas" / "claim.schema.json").read_text(encoding="utf-8"))
+        source_schema = json.loads((ROOT / "schemas" / "source.schema.json").read_text(encoding="utf-8"))
+        method_schema = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        defs = method_schema["$defs"]
+        claim_types = claim_schema["properties"]["type"]["enum"]
+        source_types = source_schema["properties"]["type"]["enum"]
+        self.assertEqual(defs["akbp.remember.params"]["properties"]["type"]["enum"], claim_types)
+        self.assertEqual(defs["akbp.supersede.params"]["properties"]["type"]["enum"], claim_types)
+        self.assertEqual(defs["akbp.ingest.params"]["properties"]["claim_type"]["enum"], claim_types)
+        self.assertEqual(defs["akbp.source.add.params"]["properties"]["type"]["enum"], source_types)
+        self.assertEqual(defs["akbp.ingest.params"]["properties"]["type"]["enum"], source_types)
+
     def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
         self.assertGreaterEqual(len(markdown), 10)
