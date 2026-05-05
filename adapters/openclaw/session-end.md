@@ -10,14 +10,15 @@ Use this checklist when a session produces durable knowledge.
 {"id":"openclaw-crystallize-preview","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
-4. Review `review_required`, `apply_instruction`, planned claims, planned sources, and redaction status.
-5. Apply only after approval:
+4. For JSONL exports, run `akbp.import_check`, then preview `akbp.import_apply` with `dry_run:true`.
+5. Review `review_required`, `apply_instruction`, planned claims, planned sources, import `would_write` ids, and redaction status.
+6. Apply only after approval:
 
 ```json
 {"id":"openclaw-crystallize-approved","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
-6. Refresh local search after approved writes:
+7. Refresh local search after approved writes:
 
 ```json
 {"id":"openclaw-index-approved","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}

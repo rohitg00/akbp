@@ -10,14 +10,15 @@ Use this checklist when a CLI-driven task creates durable knowledge.
 {"id":"gemini-cli-crystallize-preview","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
-4. Review planned claims, planned sources, redaction status, `review_required`, and `apply_instruction`.
-5. Apply only after approval:
+4. For JSONL exports, run `akbp.import_check`, then preview `akbp.import_apply` with `dry_run:true`.
+5. Review planned claims, planned sources, import `would_write` ids, redaction status, `review_required`, and `apply_instruction`.
+6. Apply only after approval:
 
 ```json
 {"id":"gemini-cli-crystallize-approved","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
-6. Refresh local search after approved writes:
+7. Refresh local search after approved writes:
 
 ```json
 {"id":"gemini-cli-index-approved","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}

@@ -188,6 +188,25 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("review_required", text)
         self.assertIn("apply_instruction", text)
 
+    def test_adapter_docs_cover_reviewed_jsonl_imports(self):
+        adapters_root = ROOT / "adapters"
+        adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
+        for adapter in adapters:
+            markdown_text = "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in sorted(adapter.glob("*.md"))
+            )
+            self.assertIn("akbp.import_check", markdown_text, str(adapter.relative_to(ROOT)))
+            self.assertIn("akbp.import_apply", markdown_text, str(adapter.relative_to(ROOT)))
+            self.assertIn("approved:true", markdown_text, str(adapter.relative_to(ROOT)))
+
+    def test_tool_server_approval_example_covers_import_apply(self):
+        text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("akbp.import_check", text)
+        self.assertIn("akbp.import_apply", text)
+        self.assertIn("result.would_write.sources", text)
+        self.assertIn("approved", text)
+
     def test_adapter_docs_start_ingest_with_dry_run(self):
         for rel in [
             "adapters/coding-agent-template/README.md",

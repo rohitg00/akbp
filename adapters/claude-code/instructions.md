@@ -15,6 +15,8 @@ Use AKBP as the durable knowledge layer for project decisions, preferences, bloc
 - Keep durable memory project-scoped by default.
 - Do not store secrets, tokens, cookies, private DMs, auth headers, or raw logs with credentials.
 - Start write-capable JSONL calls with request-level `dry_run:true`.
+- Validate external JSONL exports with `akbp.import_check` before applying them.
+- Preview accepted JSONL imports with `akbp.import_apply` and `dry_run:true`; apply only after review with request-level `approved:true`.
 - Surface `review_required` and `apply_instruction` before applying.
 - Apply writes only with request-level `approved:true` after user approval or trusted local policy.
 

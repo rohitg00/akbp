@@ -96,6 +96,42 @@ Expected behavior:
 - `ok:true`
 - the claim is appended to `claims/claims.jsonl`
 
+
+## Import a reviewed JSONL export
+
+Validate exports before applying them:
+
+```bash
+cat > "$TMP_KB/export.jsonl" <<'JSONL'
+{"kind":"source","id":"source_import_reviewed","type":"transcript","locator":"imports/reviewed.md","title":"Reviewed import"}
+{"kind":"claim","id":"claim_import_reviewed","text":"Reviewed JSONL imports require a dry-run preview before apply.","type":"workflow","status":"working","confidence":0.8,"evidence":["source_import_reviewed"]}
+JSONL
+
+printf '%s\n' '{"id":"import-check","method":"akbp.import_check","path":"'"$TMP_KB"'","params":{"file":"'"$TMP_KB"'/export.jsonl"}}' \
+  | python3 tool-server/akbp_tool_server.py
+```
+
+Preview the accepted source and claim records:
+
+```bash
+printf '%s\n' '{"id":"import-preview","method":"akbp.import_apply","path":"'"$TMP_KB"'","dry_run":true,"params":{"file":"'"$TMP_KB"'/export.jsonl"}}' \
+  | python3 tool-server/akbp_tool_server.py
+```
+
+Expected behavior:
+
+- `ok:true`
+- `result.dry_run:true`
+- `result.applied:false`
+- `result.would_write.sources` and `result.would_write.claims` list the reviewed ids
+
+Apply only after review:
+
+```bash
+printf '%s\n' '{"id":"import-approved","method":"akbp.import_apply","path":"'"$TMP_KB"'","approved":true,"params":{"file":"'"$TMP_KB"'/export.jsonl"}}' \
+  | python3 tool-server/akbp_tool_server.py
+```
+
 ## Refresh search after approved writes
 
 Indexing mutates local state, so it is also approval-gated:

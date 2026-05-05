@@ -14,6 +14,8 @@ Use AKBP as the project-local durable knowledge layer when working from a termin
 - Cite retrieved claims when they influence implementation decisions.
 - Keep command output, stack traces, and logs out of durable memory unless they explain a durable decision.
 - Use `dry_run` for proposed writes unless durable memory writes are already approved.
+- Validate external JSONL exports with `akbp.import_check` before applying them.
+- Preview accepted JSONL imports with `akbp.import_apply` and `dry_run:true`; apply only after review with request-level `approved:true`.
 - Refresh the search index after meaningful writes when the runtime does not do it automatically.
 
 ## Shutdown
