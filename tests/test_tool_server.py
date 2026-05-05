@@ -675,11 +675,13 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(lines[2]["error"]["details"]["missing"], ["transcript"])
         self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.crystallize_session.params"))
         self.assertEqual(lines[3]["error"]["code"], "invalid_params")
-        self.assertIn("dry_run must be a boolean", lines[3]["error"]["details"]["errors"])
-        self.assertIn("limit must be an integer", lines[4]["error"]["details"]["errors"])
-        self.assertIn("apply must be a boolean", lines[5]["error"]["details"]["errors"])
-        self.assertIn("query must be a string", lines[6]["error"]["details"]["errors"])
-        self.assertIn("confidence must be a number", lines[7]["error"]["details"]["errors"])
+        self.assertIn("dry_run must be a boolean", lines[3]["error"]["details"]["type_errors"])
+        self.assertIn("limit must be an integer", lines[4]["error"]["details"]["type_errors"])
+        self.assertIn("apply must be a boolean", lines[5]["error"]["details"]["type_errors"])
+        self.assertIn("query must be a string", lines[6]["error"]["details"]["type_errors"])
+        self.assertIn("confidence must be a number", lines[7]["error"]["details"]["type_errors"])
+        for line in lines[3:]:
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
 
 if __name__ == "__main__":

@@ -300,7 +300,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             request_id,
             "invalid_params",
             f"invalid parameter types for {method}",
-            details={"errors": type_errors, "params_schema": method_schema_ref(method)},
+            details={"type_errors": type_errors, "params_schema": method_schema_ref(method)},
         )
 
     missing = missing_required_params(method, params)
