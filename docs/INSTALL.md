@@ -47,7 +47,13 @@ TMP=$(mktemp -d)
 python3 -m pip install . --target "$TMP/pkg"
 PYTHONPATH="$TMP/pkg" python3 -m akbp --path "$TMP/kb" init
 PYTHONPATH="$TMP/pkg" python3 -c "import akbp, akbp_tool_server; print('ok')"
+printf '%s\n' \
+  '{"id":"caps","method":"akbp.capabilities"}' \
+  '{"id":"bad","method":"akbp.search","params":{"query":"release","limit":0}}' \
+  | PYTHONPATH="$TMP/pkg" python3 -m akbp_tool_server
 ```
+
+The installed tool-server smoke test should show advertised method-schema features, include `akbp.import_apply` in capabilities, and return schema-backed `invalid_params` details for the bad request.
 
 ## Build a source distribution and wheel
 

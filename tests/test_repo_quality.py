@@ -388,6 +388,9 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("make validate", install_doc)
         self.assertIn("make validate", release_doc)
         self.assertIn("make validate", ci)
+        self.assertIn("python3 -m akbp_tool_server", install_doc)
+        self.assertIn("akbp.import_apply", install_doc)
+        self.assertIn("schema-backed `invalid_params`", install_doc)
 
     def test_readme_documents_tool_write_approval_gate(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -415,6 +418,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("invalid_json_details", response_schema)
         self.assertIn("cli_error_details", response_schema)
         self.assertIn("internal_error_details", response_schema)
+        self.assertIn("installed JSONL tool-server smoke coverage", changelog)
+        self.assertIn("installed JSONL tool-server entrypoint", release_notes)
 
     def test_tool_contract_search_matches_current_reference_params(self):
         contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")

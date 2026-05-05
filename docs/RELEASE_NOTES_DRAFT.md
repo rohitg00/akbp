@@ -125,7 +125,7 @@ Included benchmark fixtures:
 - secret safety
 - session crystallization
 
-The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, import-apply failure/skipped-existing result shapes, `invalid_params` rejection details for type, array-item, range, and enum checks, and `approval_required` rejection details.
+The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, import-apply failure/skipped-existing result shapes, `invalid_params` rejection details for type, array-item, range, and enum checks, and `approval_required` rejection details. The install smoke flow now exercises the installed JSONL tool-server entrypoint, including capability discovery and schema-backed invalid-param output.
 
 ## Validation for this release candidate
 

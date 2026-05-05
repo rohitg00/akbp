@@ -15,7 +15,7 @@
 - Add benchmark fixtures and runner for preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, invalid parameter rejections, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, real AKBP retrieval checks, and JSONL tool-server response checks.
 - Add examples for Level 0, Level 1, Level 3 lifecycle records, coding-agent flow, research/personal templates, end-to-end agent workflow, and JSONL tool-server approval flow.
 - Add adapter templates and docs for runtime-neutral coding-agent startup, retrieval, write, ingest, index, and citation loops.
-- Add install, schema, benchmark, tool contract, agent flow, release readiness, and release notes draft documentation.
+- Add install, schema, benchmark, tool contract, agent flow, release readiness, and release notes draft documentation, including installed JSONL tool-server smoke coverage.
 
 ### Validation
 
