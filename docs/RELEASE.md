@@ -116,7 +116,7 @@ Before tagging:
 - `make smoke`
 - `make benchmark-score`
 - `make benchmark`
-- `make install-smoke`
+- `make install-smoke`, including installed JSONL tool-server capability and `invalid_params` checks
 
 ## Known limitations
 
