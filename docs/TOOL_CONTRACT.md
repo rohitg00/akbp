@@ -19,28 +19,32 @@ Input:
 ```json
 {
   "query": "string",
-  "limit": 10,
-  "modes": ["bm25", "vector", "graph"],
-  "scope": "default"
+  "limit": 10
 }
 ```
+
+Current backend: `sqlite_fts5`. Vector and graph retrieval are protocol roadmap items, not accepted `akbp.search` parameters in the reference tool server yet.
 
 Output:
 
 ```json
 {
+  "query": "rollback release",
+  "backend": "sqlite_fts5",
+  "fts_query": "\"rollback\" \"release\"",
   "results": [
     {
-      "id": "claim_...",
       "type": "claim",
-      "title": "string",
-      "summary": "string",
-      "score": 0.91,
-      "citations": []
+      "id": "claim_...",
+      "path": "claims/claims.jsonl",
+      "snippet": "Agents need rollback paths",
+      "rank": -0.42
     }
   ]
 }
 ```
+
+Schema: `#/$defs/search_result`.
 
 ### akbp.context
 

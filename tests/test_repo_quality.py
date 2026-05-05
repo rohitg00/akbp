@@ -395,6 +395,18 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("cli_error_details", response_schema)
         self.assertIn("internal_error_details", response_schema)
 
+    def test_tool_contract_search_matches_current_reference_params(self):
+        contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        methods = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        search_props = methods["$defs"]["akbp.search.params"]["properties"]
+        self.assertIn('"query": "string"', contract)
+        self.assertIn('"limit": 10', contract)
+        self.assertIn("Current backend: `sqlite_fts5`", contract)
+        self.assertIn("#/$defs/search_result", contract)
+        self.assertNotIn('"modes": ["bm25", "vector", "graph"]', contract)
+        self.assertNotIn('"scope": "default"', contract)
+        self.assertEqual(set(search_props), {"query", "limit"})
+
     def test_tool_server_approval_example_is_complete(self):
         text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")
         self.assertIn("dry_run:true", text)
