@@ -224,8 +224,14 @@ def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
     return sorted(name for name in params if name not in allowed)
 
 
-CLAIM_TYPES = {"fact", "decision", "preference", "workflow", "observation", "question", "warning"}
-SOURCE_TYPES = {"file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"}
+def schema_enum(schema_name: str, property_name: str) -> set[str]:
+    schema_path = ROOT / "schemas" / schema_name
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    return set(schema["properties"][property_name]["enum"])
+
+
+CLAIM_TYPES = schema_enum("claim.schema.json", "type")
+SOURCE_TYPES = schema_enum("source.schema.json", "type")
 
 STRING_PARAMS = {
     "query",
