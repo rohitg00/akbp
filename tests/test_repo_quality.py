@@ -313,6 +313,7 @@ class RepoQualityTest(unittest.TestCase):
             "import apply flow",
             "import apply malformed JSONL",
             "import apply skipped existing records",
+            "invalid parameter rejections",
             "multi-agent handoff",
             "review-gated writes",
             "secret safety",
@@ -326,6 +327,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("import apply success/failure/skipped-record flows", changelog)
         self.assertIn("review-gated writes", changelog)
         self.assertIn("approval-gated non-dry-run writes", changelog)
+        self.assertIn("schema-backed invalid parameter errors", changelog)
+        self.assertIn("invalid parameter rejections", changelog)
 
     def test_docs_use_current_context_method_name(self):
         for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:

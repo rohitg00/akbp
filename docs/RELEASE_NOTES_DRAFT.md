@@ -15,7 +15,7 @@ Release candidate scope:
 - Defines a local-first knowledge base layout with `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, source records, and audit history.
 - Ships a dependency-free Python reference CLI and JSONL local tool server.
 - Adds conformance checks through Level 3: file convention, structured claims, retrieval/context packs, and lifecycle relations.
-- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, and end-to-end agent flow.
+- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, invalid parameter rejections, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, and end-to-end agent flow.
 
 ## Protocol surface
 
@@ -88,7 +88,7 @@ The local tool server currently supports:
 - `akbp.contradict`
 - `akbp.crystallize_session`
 
-It includes capability discovery, schema references for every supported method, advertised parameter-schema enforcement features, structured errors, schema-backed invalid JSON errors that do not echo raw input, schema-backed CLI and internal failure details, dry-run write support, `review_required` metadata, `apply_instruction` guidance, approval-gated non-dry-run writes with `approved:true`, ingest dry-run preview responses, approved ingest result responses, schema-backed JSONL import checks with accepted, rejected, and error counts plus strict failure gates, review-gated JSONL import apply for source and claim records through the CLI and JSONL server, schema-backed import-apply failure shapes for rejected and malformed JSONL exports, skipped-existing reporting for duplicate imports, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
+It includes capability discovery, schema references for every supported method, advertised parameter-schema enforcement features, structured errors, schema-backed invalid JSON errors that do not echo raw input, schema-backed invalid parameter errors for unknown, missing, and wrong-typed params, schema-backed CLI and internal failure details, dry-run write support, `review_required` metadata, `apply_instruction` guidance, approval-gated non-dry-run writes with `approved:true`, ingest dry-run preview responses, approved ingest result responses, schema-backed JSONL import checks with accepted, rejected, and error counts plus strict failure gates, review-gated JSONL import apply for source and claim records through the CLI and JSONL server, schema-backed import-apply failure shapes for rejected and malformed JSONL exports, skipped-existing reporting for duplicate imports, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
 
 ## Examples and benchmarks
 
@@ -117,6 +117,7 @@ Included benchmark fixtures:
 - import apply flow
 - import apply malformed JSONL
 - import apply skipped existing records
+- invalid parameter rejections
 - multi-agent handoff
 - review-gated writes
 - approved write apply outputs
@@ -124,7 +125,7 @@ Included benchmark fixtures:
 - secret safety
 - session crystallization
 
-The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, import-apply failure/skipped-existing result shapes, and `approval_required` rejection details.
+The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, import-apply failure/skipped-existing result shapes, `invalid_params` rejection details, and `approval_required` rejection details.
 
 ## Validation for this release candidate
 
