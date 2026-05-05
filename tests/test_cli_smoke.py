@@ -238,6 +238,25 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(strict_data["rejected_count"], 1)
             self.assertNotIn("sk-example123456789", strict.stdout)
 
+    def test_import_apply_failure_shape_includes_review_fields(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            export = Path(d) / "unsafe-export.jsonl"
+            export.write_text(
+                json.dumps({"kind": "claim", "id": "claim_unsafe", "text": "token=sk-example123456789", "type": "workflow", "status": "working", "confidence": 0.7, "evidence": []}) + "\n",
+                encoding="utf-8",
+            )
+            run_cli("--path", str(kb), "init")
+            proc = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-apply", str(export), "--dry-run"], text=True, capture_output=True)
+            self.assertEqual(proc.returncode, 1)
+            data = json.loads(proc.stdout)
+            self.assertFalse(data["ok"])
+            self.assertFalse(data["applied"])
+            self.assertEqual(data["would_write"], {"sources": [], "claims": []})
+            self.assertEqual(data["skipped_existing"], {"sources": [], "claims": []})
+            self.assertEqual(data["rejected_count"], 1)
+            self.assertNotIn("sk-example123456789", proc.stdout)
+
     def test_import_apply_requires_review_and_writes_accepted_objects(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

@@ -321,7 +321,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
 
     if dry_run and method == "akbp.import_apply":
         code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
-        if code != 0:
+        if code != 0 and not stdout.strip():
             return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
         result = parse_payload(stdout)
         if isinstance(result, dict):
@@ -361,7 +361,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if method == "akbp.import_apply":
         argv = [*argv, "--approved"]
     code, stdout, stderr = run_cli(path, argv)
-    if method == "akbp.import_check" and stdout.strip():
+    if method in {"akbp.import_check", "akbp.import_apply"} and stdout.strip():
         return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
     if code != 0:
         return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})

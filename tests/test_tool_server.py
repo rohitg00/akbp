@@ -501,6 +501,24 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(strict_line["result"]["rejected_count"], 1)
             self.assertNotIn("sk-example123456789", strict_proc.stdout)
 
+    def test_import_apply_failure_result_matches_schema(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            export = Path(d) / "unsafe-export.jsonl"
+            export.write_text(
+                json.dumps({"kind": "claim", "id": "claim_tool_unsafe", "text": "token=sk-example123456789", "type": "workflow", "status": "working", "confidence": 0.7, "evidence": []}) + "\n",
+                encoding="utf-8",
+            )
+            request = json.dumps({"id": "bad-import", "path": str(kb), "method": "akbp.import_apply", "dry_run": True, "params": {"file": str(export)}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertFalse(line["result"]["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("import_apply_result"))
+            self.assertEqual(line["result"]["would_write"], {"sources": [], "claims": []})
+            self.assertNotIn("sk-example123456789", proc.stdout)
+
     def test_import_apply_method_previews_and_applies_after_approval(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

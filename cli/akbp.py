@@ -660,6 +660,14 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             "accepted_count": len(normalized),
             "rejected_count": len(rejected),
             "error_count": len(errors),
+            "would_write": {
+                "sources": [],
+                "claims": [],
+            },
+            "skipped_existing": {
+                "sources": [],
+                "claims": [],
+            },
             "accepted": [{"id": record["id"], "kind": kind} for kind, record in normalized],
             "rejected": public_import_items(rejected),
             "errors": errors,
