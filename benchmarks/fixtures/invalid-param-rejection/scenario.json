@@ -156,6 +156,46 @@
             "entity items must be strings"
           ]
         }
+      },
+      {
+        "id": "search-limit-range-error",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "release",
+          "limit": 0
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "limit must be between 1 and 100"
+          ]
+        }
+      },
+      {
+        "id": "ingest-confidence-range-error",
+        "method": "akbp.ingest",
+        "approved": false,
+        "params": {
+          "file": "docs/TOOL_CONTRACT.md",
+          "confidence": 1.5
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "confidence must be between 0 and 1"
+          ]
+        }
       }
     ]
   },

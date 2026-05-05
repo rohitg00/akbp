@@ -250,10 +250,18 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
             errors.append(f"{name} must be a string")
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
-    if "limit" in params and (not isinstance(params.get("limit"), int) or isinstance(params.get("limit"), bool)):
-        errors.append("limit must be an integer")
-    if "confidence" in params and (not isinstance(params.get("confidence"), (int, float)) or isinstance(params.get("confidence"), bool)):
-        errors.append("confidence must be a number")
+    if "limit" in params:
+        limit = params.get("limit")
+        if not isinstance(limit, int) or isinstance(limit, bool):
+            errors.append("limit must be an integer")
+        elif limit < 1 or limit > 100:
+            errors.append("limit must be between 1 and 100")
+    if "confidence" in params:
+        confidence = params.get("confidence")
+        if not isinstance(confidence, (int, float)) or isinstance(confidence, bool):
+            errors.append("confidence must be a number")
+        elif confidence < 0 or confidence > 1:
+            errors.append("confidence must be between 0 and 1")
     if "incremental" in params and not isinstance(params.get("incremental"), bool):
         errors.append("incremental must be a boolean")
     if "fail_on_rejected" in params and not isinstance(params.get("fail_on_rejected"), bool):

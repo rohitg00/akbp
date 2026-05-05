@@ -97,7 +97,7 @@ Initial scenarios:
 - `contradiction`: retrieve conflicting claims and ask for resolution.
 - `correction-resolution`: apply newer corrections while preserving old conflicting knowledge until explicit resolution.
 - `import-safety`: validate imported JSONL objects, schema-backed normal and strict `akbp.import_check` output, and rejected `akbp.import_apply` preview result shapes before durable writes.
-- `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, missing, wrong-typed, and wrong item-typed method parameters before CLI execution.
+- `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, missing, wrong-typed, wrong item-typed, and out-of-range method parameters before CLI execution.
 - `import-apply-flow`: validate schema-backed `akbp.import_apply` dry-run previews and approval-gated apply results before durable writes.
 - `import-apply-malformed`: validate schema-backed `akbp.import_apply` failure results for malformed JSONL before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.
