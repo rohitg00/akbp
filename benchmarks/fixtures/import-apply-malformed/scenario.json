@@ -1,0 +1,58 @@
+{
+  "id": "import-apply-malformed-001",
+  "task": "Verify JSONL import apply returns a schema-backed failure shape for malformed JSONL before durable writes.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "import-apply-malformed-preview",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-apply-malformed/malformed-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "accepted",
+          "rejected",
+          "errors"
+        ],
+        "expected_result_values": {
+          "ok": false,
+          "dry_run": true,
+          "applied": false,
+          "checked": 1,
+          "accepted_count": 1,
+          "rejected_count": 0,
+          "error_count": 1
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "claim_import_apply_good"
+          ],
+          "errors[].line": [
+            2
+          ]
+        }
+      }
+    ]
+  },
+  "query": "What should import apply do when a JSONL export is malformed?",
+  "expected": {
+    "answer_should_include": [
+      "malformed",
+      "JSONL",
+      "import"
+    ]
+  }
+}

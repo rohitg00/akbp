@@ -44,6 +44,19 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_contains"]["relations[].id"], ["relation_protocol_uses_tool_server"])
         self.assertIn("claim_graph_records_export", data["expected"]["must_retrieve"])
 
+    def test_import_apply_malformed_fixture_covers_failure_shape(self):
+        path = FIXTURES / "import-apply-malformed" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.import_apply")
+        self.assertEqual(request["expected_result_schema"], "#/$defs/import_apply_result")
+        self.assertEqual(request["expected_result_values"]["ok"], False)
+        self.assertEqual(request["expected_result_values"]["error_count"], 1)
+        self.assertIn("errors[].line", request["expected_result_contains"])
+        export_path = ROOT / request["params"]["file"]
+        self.assertTrue(export_path.exists())
+        self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
+
     def test_import_apply_skipped_existing_fixture_covers_duplicate_reporting(self):
         path = FIXTURES / "import-apply-skipped-existing" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

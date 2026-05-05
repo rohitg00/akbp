@@ -1,0 +1,2 @@
+{"kind":"claim","id":"claim_import_apply_good","text":"Malformed JSONL import apply should stop before durable writes.","type":"workflow","status":"working","confidence":0.7,"evidence":[],"scope":"project"}
+{"kind":"claim","id":"claim_import_apply_bad","text":"missing close brace"
