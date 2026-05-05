@@ -40,7 +40,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `contradiction`: detect conflicting claims and require resolution.
 - `correction-resolution`: prefer a newer correction while preserving old conflicting knowledge until explicit resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
-- `import-safety`: validate JSONL import objects and normal plus strict `akbp.import_check` responses, including accepted/rejected nested ids, for redaction or rejection before durable writes.
+- `import-safety`: validate JSONL import objects, normal plus strict `akbp.import_check` responses, and rejected `akbp.import_apply` preview result shapes before durable writes.
 - `import-apply-flow`: validate JSONL `akbp.import_apply` dry-run and approved apply responses before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.
 - `graph-jsonl-records`: populate real JSONL entities and relations and validate schema-backed export.

@@ -127,6 +127,52 @@
             "secret_like_value_redacted"
           ]
         }
+      },
+      {
+        "id": "import-apply-rejected-preview",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-safety/session-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "accepted",
+          "rejected",
+          "errors"
+        ],
+        "expected_result_values": {
+          "ok": false,
+          "dry_run": true,
+          "applied": false,
+          "checked": 3,
+          "accepted_count": 1,
+          "rejected_count": 2,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "claim_imported_safe_blocker"
+          ],
+          "rejected[].id": [
+            "source_imported_terminal_log",
+            "claim_imported_deploy_blocker"
+          ],
+          "rejected[].reason": [
+            "secret_like_value_redacted"
+          ]
+        }
       }
     ]
   },

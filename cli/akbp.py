@@ -643,13 +643,13 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
         return 1
     accepted, rejected, errors = import_jsonl_objects(source)
-    normalized: list[tuple[str, dict[str, Any]]] = []
+    normalized: list[tuple[str, dict[str, Any], int]] = []
     for item in accepted:
         kind, record, error = normalize_import_object(item["object"])
         if error or record is None or kind is None:
             rejected.append({"id": item["id"], "kind": kind or item["kind"], "line": item["line"], "reason": error or "invalid_import_object"})
             continue
-        normalized.append((kind, record))
+        normalized.append((kind, record, item["line"]))
     if errors or rejected:
         result = {
             "ok": False,
@@ -668,14 +668,17 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
                 "sources": [],
                 "claims": [],
             },
-            "accepted": [{"id": record["id"], "kind": kind} for kind, record in normalized],
+            "accepted": [
+                {"id": record["id"], "kind": kind, "line": line}
+                for kind, record, line in normalized
+            ],
             "rejected": public_import_items(rejected),
             "errors": errors,
         }
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 1
-    sources = [record for kind, record in normalized if kind == "source"]
-    claims = [record for kind, record in normalized if kind == "claim"]
+    sources = [record for kind, record, _line in normalized if kind == "source"]
+    claims = [record for kind, record, _line in normalized if kind == "claim"]
     source_existing = {item.get("id") for item in load_sources(base)}
     claim_existing = {item.get("id") for item in load_claims(base)}
     source_new = [item for item in sources if item.get("id") not in source_existing]

@@ -96,7 +96,7 @@ Initial scenarios:
 - `supersession`: prefer a newer claim while preserving the superseded claim.
 - `contradiction`: retrieve conflicting claims and ask for resolution.
 - `correction-resolution`: apply newer corrections while preserving old conflicting knowledge until explicit resolution.
-- `import-safety`: validate imported JSONL objects plus schema-backed normal and strict `akbp.import_check` output, including accepted/rejected nested ids, before durable writes.
+- `import-safety`: validate imported JSONL objects, schema-backed normal and strict `akbp.import_check` output, and rejected `akbp.import_apply` preview result shapes before durable writes.
 - `import-apply-flow`: validate schema-backed `akbp.import_apply` dry-run previews and approval-gated apply results before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.
 - `graph-jsonl-records`: populate real JSONL entities and relations and validate schema-backed export.
