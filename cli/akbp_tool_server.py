@@ -11,9 +11,12 @@ import contextlib
 import io
 import json
 import sys
+from pathlib import Path
 from typing import Any
 
 import akbp
+
+ROOT = Path(__file__).resolve().parents[1]
 
 SCHEMA_BASE = "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas"
 REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
@@ -31,6 +34,7 @@ WRITE_METHODS = {
     "akbp.remember",
     "akbp.source.add",
     "akbp.ingest",
+    "akbp.import_apply",
     "akbp.index",
     "akbp.supersede",
     "akbp.contradict",
@@ -51,6 +55,8 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.cite": {"write": False, "params": ["claim_id"]},
     "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence", "dry_run"]},
     "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity", "dry_run"]},
+    "akbp.import_check": {"write": False, "params": ["file", "fail_on_rejected"]},
+    "akbp.import_apply": {"write": True, "params": ["file", "dry_run"]},
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
@@ -64,6 +70,8 @@ REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "akbp.cite": ("claim_id",),
     "akbp.source.add": ("locator",),
     "akbp.ingest": ("file",),
+    "akbp.import_check": ("file",),
+    "akbp.import_apply": ("file",),
     "akbp.supersede": ("old_claim_id", "text"),
     "akbp.contradict": ("source_claim_id", "target_claim_id"),
     "akbp.crystallize_session": ("transcript",),
@@ -96,6 +104,10 @@ def capabilities() -> dict[str, Any]:
             "write_review_required": True,
             "write_apply_requires_approval": True,
             "jsonl_transport": True,
+            "method_param_schemas": True,
+            "unknown_param_rejection": True,
+            "required_param_validation": True,
+            "approval_required_errors": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -117,6 +129,8 @@ def capabilities() -> dict[str, Any]:
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "safe-write-apply-1", "method": "akbp.remember", "path": ".", "approved": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
+            {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl", "fail_on_rejected": True}},
+            {"id": "import-apply-1", "method": "akbp.import_apply", "path": ".", "dry_run": True, "params": {"file": "export.jsonl"}},
             {"id": "crystallize-1", "method": "akbp.crystallize_session", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
         ],
     }
@@ -136,6 +150,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.cite": ["cite", params.get("claim_id", "")],
         "akbp.source.add": ["source", "add", params.get("locator", ""), "--type", params.get("type", "file")],
         "akbp.ingest": ["ingest", params.get("file", ""), "--type", params.get("type", "file")],
+        "akbp.import_check": ["import-check", params.get("file", "")],
+        "akbp.import_apply": ["import-apply", params.get("file", "")],
         "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
         "akbp.crystallize_session": ["crystallize", params.get("transcript", "")],
@@ -153,6 +169,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         argv.extend(["--title", str(params["title"])])
     if method == "akbp.crystallize_session" and params.get("apply"):
         argv.append("--apply")
+    if method == "akbp.import_check" and params.get("fail_on_rejected"):
+        argv.append("--fail-on-rejected")
     if method == "akbp.ingest":
         if params.get("claim"):
             argv.extend(["--claim", str(params["claim"])])
@@ -205,6 +223,17 @@ def unknown_params(method: str, params: dict[str, Any]) -> list[str]:
     return sorted(name for name in params if name not in allowed)
 
 
+def schema_enum(schema_name: str, property_name: str, fallback: set[str]) -> set[str]:
+    schema_path = ROOT / "schemas" / schema_name
+    if schema_path.exists():
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        return set(schema["properties"][property_name]["enum"])
+    return fallback
+
+
+CLAIM_TYPES = schema_enum("claim.schema.json", "type", {"fact", "decision", "preference", "workflow", "observation", "question", "warning"})
+SOURCE_TYPES = schema_enum("source.schema.json", "type", {"file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"})
+
 STRING_PARAMS = {
     "query",
     "task",
@@ -229,18 +258,42 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
     for name in sorted(STRING_PARAMS.intersection(params)):
         if not isinstance(params.get(name), str):
             errors.append(f"{name} must be a string")
+    if "type" in params and method in {"akbp.remember", "akbp.supersede"} and params.get("type") not in CLAIM_TYPES:
+        errors.append("type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
+    if "type" in params and method in {"akbp.source.add", "akbp.ingest"} and params.get("type") not in SOURCE_TYPES:
+        errors.append("type must be one of: " + ", ".join(sorted(SOURCE_TYPES)))
+    if "claim_type" in params and method == "akbp.ingest" and params.get("claim_type") not in CLAIM_TYPES:
+        errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
-    if "limit" in params and (not isinstance(params.get("limit"), int) or isinstance(params.get("limit"), bool)):
-        errors.append("limit must be an integer")
-    if "confidence" in params and (not isinstance(params.get("confidence"), (int, float)) or isinstance(params.get("confidence"), bool)):
-        errors.append("confidence must be a number")
+    if "limit" in params:
+        limit = params.get("limit")
+        if not isinstance(limit, int) or isinstance(limit, bool):
+            errors.append("limit must be an integer")
+        elif limit < 1 or limit > 100:
+            errors.append("limit must be between 1 and 100")
+    if "confidence" in params:
+        confidence = params.get("confidence")
+        if not isinstance(confidence, (int, float)) or isinstance(confidence, bool):
+            errors.append("confidence must be a number")
+        elif confidence < 0 or confidence > 1:
+            errors.append("confidence must be between 0 and 1")
     if "incremental" in params and not isinstance(params.get("incremental"), bool):
         errors.append("incremental must be a boolean")
-    if "evidence" in params and not isinstance(params.get("evidence"), list):
-        errors.append("evidence must be an array")
-    if "entity" in params and not isinstance(params.get("entity"), list):
-        errors.append("entity must be an array")
+    if "fail_on_rejected" in params and not isinstance(params.get("fail_on_rejected"), bool):
+        errors.append("fail_on_rejected must be a boolean")
+    if "evidence" in params:
+        evidence = params.get("evidence")
+        if not isinstance(evidence, list):
+            errors.append("evidence must be an array")
+        elif any(not isinstance(item, str) for item in evidence):
+            errors.append("evidence items must be strings")
+    if "entity" in params:
+        entity = params.get("entity")
+        if not isinstance(entity, list):
+            errors.append("entity must be an array")
+        elif any(not isinstance(item, str) for item in entity):
+            errors.append("entity items must be strings")
     if method == "akbp.crystallize_session" and "apply" in params and not isinstance(params.get("apply"), bool):
         errors.append("apply must be a boolean")
     return errors
@@ -256,13 +309,13 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     path = str(req.get("path", "."))
     params = req.get("params", {}) or {}
 
-    if not isinstance(params, dict):
-        return error_response(request_id, "invalid_params", "params must be an object")
-    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
     if method == "akbp.capabilities":
         return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
+    if not isinstance(params, dict):
+        return error_response(request_id, "invalid_params", "params must be an object", details={"params_schema": method_schema_ref(method), "type_errors": ["params must be an object"]})
+    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
 
     unknown = unknown_params(method, params)
     if unknown:
@@ -279,7 +332,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             request_id,
             "invalid_params",
             f"invalid parameter types for {method}",
-            details={"errors": type_errors, "params_schema": method_schema_ref(method)},
+            details={"type_errors": type_errors, "params_schema": method_schema_ref(method)},
         )
 
     missing = missing_required_params(method, params)
@@ -300,6 +353,16 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         if isinstance(result, dict):
             result.setdefault("review_required", True)
             result.setdefault("apply_instruction", "Repeat the same request without dry_run only after reviewing redaction status, extracted signals, claim ids, would_write paths, and approval or trusted local policy.")
+        return {"id": request_id, "ok": True, "result": result, "error": None}
+
+    if dry_run and method == "akbp.import_apply":
+        code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
+        if code != 0 and not stdout.strip():
+            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+        result = parse_payload(stdout)
+        if isinstance(result, dict):
+            result.setdefault("review_required", True)
+            result.setdefault("apply_instruction", "Repeat the same request with approved:true only after reviewing import-check output and dry-run would_write ids.")
         return {"id": request_id, "ok": True, "result": result, "error": None}
 
     if dry_run and method in WRITE_METHODS:
@@ -331,7 +394,11 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             },
         )
 
+    if method == "akbp.import_apply":
+        argv = [*argv, "--approved"]
     code, stdout, stderr = run_cli(path, argv)
+    if method in {"akbp.import_check", "akbp.import_apply"} and stdout.strip():
+        return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
     if code != 0:
         return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
     return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
