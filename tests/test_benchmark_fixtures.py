@@ -44,6 +44,21 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_contains"]["relations[].id"], ["relation_protocol_uses_tool_server"])
         self.assertIn("claim_graph_records_export", data["expected"]["must_retrieve"])
 
+    def test_import_apply_skipped_existing_fixture_covers_duplicate_reporting(self):
+        path = FIXTURES / "import-apply-skipped-existing" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = data["setup"]["tool_server_requests"]
+        self.assertEqual(len(requests), 2)
+        for request in requests:
+            self.assertEqual(request["method"], "akbp.import_apply")
+            self.assertEqual(request["expected_result_schema"], "#/$defs/import_apply_result")
+            self.assertIn("skipped_existing.sources[]", request["expected_result_contains"])
+            self.assertIn("skipped_existing.claims[]", request["expected_result_contains"])
+        self.assertEqual(requests[0]["expected_result_contains"]["skipped_existing.sources[]"], ["source_import_apply_existing"])
+        export_path = ROOT / requests[0]["params"]["file"]
+        self.assertTrue(export_path.exists())
+        self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
+
     def test_import_apply_flow_fixture_covers_tool_apply(self):
         path = FIXTURES / "import-apply-flow" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

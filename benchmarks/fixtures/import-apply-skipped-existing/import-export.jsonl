@@ -1,0 +1,2 @@
+{"kind":"source","id":"source_import_apply_existing","type":"transcript","locator":"imports/existing.md","title":"Existing import source"}
+{"kind":"claim","id":"claim_import_apply_existing","text":"Import apply should skip source and claim records already present in the knowledge base.","type":"workflow","status":"working","confidence":0.8,"evidence":["source_import_apply_existing"],"scope":"project"}

@@ -1,0 +1,120 @@
+{
+  "id": "import-apply-skipped-existing-001",
+  "task": "Verify JSONL import apply reports existing records as skipped instead of rewriting them.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_import_apply_existing",
+        "type": "transcript",
+        "locator": "imports/existing.md",
+        "title": "Existing import source"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_import_apply_existing",
+        "text": "Import apply should skip source and claim records already present in the knowledge base.",
+        "type": "workflow",
+        "status": "working",
+        "confidence": 0.8,
+        "evidence": [
+          "source_import_apply_existing"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "import-apply-preview-existing",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-apply-skipped-existing/import-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": true,
+          "applied": false,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "skipped_existing.sources[]": [
+            "source_import_apply_existing"
+          ],
+          "skipped_existing.claims[]": [
+            "claim_import_apply_existing"
+          ]
+        }
+      },
+      {
+        "id": "import-apply-approved-existing",
+        "method": "akbp.import_apply",
+        "approved": true,
+        "params": {
+          "file": "benchmarks/fixtures/import-apply-skipped-existing/import-export.jsonl"
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": false,
+          "applied": true,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "skipped_existing.sources[]": [
+            "source_import_apply_existing"
+          ],
+          "skipped_existing.claims[]": [
+            "claim_import_apply_existing"
+          ]
+        }
+      }
+    ]
+  },
+  "query": "How should import apply handle JSONL records that already exist?",
+  "expected": {
+    "must_retrieve": [
+      "claim_import_apply_existing"
+    ],
+    "must_cite": [
+      "source_import_apply_existing"
+    ],
+    "answer_should_include": [
+      "skip",
+      "existing",
+      "import"
+    ]
+  }
+}
