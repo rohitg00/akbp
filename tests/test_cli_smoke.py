@@ -269,6 +269,19 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("claim_imported_safe", {claim["id"] for claim in claims})
             self.assertIn("source_imported_safe", {source["id"] for source in sources})
 
+            duplicate_dry = json.loads(run_cli("--path", str(kb), "import-apply", str(export), "--dry-run").stdout)
+            self.assertEqual(duplicate_dry["would_write"], {"sources": [], "claims": []})
+            self.assertEqual(duplicate_dry["skipped_existing"]["sources"], ["source_imported_safe"])
+            self.assertEqual(duplicate_dry["skipped_existing"]["claims"], ["claim_imported_safe"])
+
+            duplicate_apply = json.loads(run_cli("--path", str(kb), "import-apply", str(export), "--approved").stdout)
+            self.assertTrue(duplicate_apply["ok"])
+            self.assertEqual(duplicate_apply["would_write"], {"sources": [], "claims": []})
+            claims_after_duplicate = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
+            sources_after_duplicate = [json.loads(line) for line in (kb / "raw" / "sources" / "sources.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual([claim["id"] for claim in claims_after_duplicate].count("claim_imported_safe"), 1)
+            self.assertEqual([source["id"] for source in sources_after_duplicate].count("source_imported_safe"), 1)
+
     def test_ingest_dry_run_previews_redacted_writes_without_creating_kb(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
