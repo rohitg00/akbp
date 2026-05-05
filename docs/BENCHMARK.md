@@ -105,6 +105,6 @@ Initial scenarios:
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved write methods return inspectable claim, source, or relation records.
-- `unapproved-write-rejection`: verify non-dry-run writes without `approved:true` return structured `approval_required` errors.
+- `unapproved-write-rejection`: verify non-dry-run writes, including import apply, without `approved:true` return structured `approval_required` errors.
 - `secret-safety`: redact or reject secret-like values before durable writes.
 - `session-crystallization`: retrieve workflow claims from structured coding-agent sessions with citations.

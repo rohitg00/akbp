@@ -143,6 +143,27 @@
           "review_required": true
         },
         "expected_error_schema": "#/$defs/approval_required_details"
+      },
+      {
+        "id": "import-apply-unapproved",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-apply-flow/import-export.jsonl"
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "dry_run",
+          "apply_instruction"
+        ],
+        "expected_error_values": {
+          "method": "akbp.import_apply",
+          "dry_run": false,
+          "review_required": true
+        },
+        "expected_error_schema": "#/$defs/approval_required_details"
       }
     ]
   },
@@ -163,7 +184,8 @@
       "akbp.remember",
       "akbp.source.add",
       "akbp.supersede",
-      "akbp.contradict"
+      "akbp.contradict",
+      "akbp.import_apply"
     ]
   }
 }

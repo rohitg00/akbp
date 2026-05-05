@@ -200,6 +200,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
             "akbp.source.add",
             "akbp.supersede",
             "akbp.contradict",
+            "akbp.import_apply",
         })
         for request in data["setup"]["tool_server_requests"]:
             self.assertFalse(request["approved"])
