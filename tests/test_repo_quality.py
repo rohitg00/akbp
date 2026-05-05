@@ -310,6 +310,9 @@ class RepoQualityTest(unittest.TestCase):
             "contradiction",
             "correction resolution",
             "import safety",
+            "import apply flow",
+            "import apply malformed JSONL",
+            "import apply skipped existing records",
             "multi-agent handoff",
             "review-gated writes",
             "secret safety",
@@ -320,6 +323,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("claim-text redaction", changelog)
         self.assertIn("dry-run previews", changelog)
         self.assertIn("import safety", changelog)
+        self.assertIn("import apply success/failure/skipped-record flows", changelog)
         self.assertIn("review-gated writes", changelog)
         self.assertIn("approval-gated non-dry-run writes", changelog)
 
