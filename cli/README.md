@@ -49,6 +49,14 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 `akbp import-apply export.jsonl --dry-run` previews accepted source and claim records that would be written. Apply with `akbp import-apply export.jsonl --approved` only after reviewing `import-check` and the dry-run output. Rejected, malformed, or unsupported objects block the apply path.
 
+Import apply review checklist:
+
+- Run `akbp import-check export.jsonl --fail-on-rejected` when automation must stop on any rejected object.
+- Confirm `accepted_count`, `rejected_count`, and `error_count` before applying.
+- Review `would_write.sources` and `would_write.claims` from the dry-run output.
+- Do not apply when rejected objects, parse errors, unsupported kinds, or secret-like values appear.
+- Treat `--approved` as the durable write boundary, not as a validation shortcut.
+
 ## Crystallize
 
 `akbp crystallize transcript.md` previews extracted decisions, actions, blockers, preferences, questions, and file references without writing durable artifacts.

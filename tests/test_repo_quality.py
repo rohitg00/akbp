@@ -329,6 +329,21 @@ class RepoQualityTest(unittest.TestCase):
             self.assertNotIn("akbp.get_context", text, rel)
             self.assertIn("akbp.context", text, rel)
 
+    def test_import_apply_docs_include_review_checklist(self):
+        cli_readme = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
+        agent_flow = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")
+        tool_contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        for text in [cli_readme, agent_flow, tool_contract]:
+            self.assertIn("accepted_count", text)
+            self.assertIn("rejected_count", text)
+            self.assertIn("error_count", text)
+            self.assertIn("would_write.sources", text)
+            self.assertIn("would_write.claims", text)
+        self.assertIn("--fail-on-rejected", cli_readme)
+        self.assertIn("secret-like values", cli_readme)
+        self.assertIn("malformed JSONL", agent_flow)
+        self.assertIn("approved:true", tool_contract)
+
     def test_cli_readme_documents_crystallize_preview(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
         self.assertIn("akbp crystallize transcript.md` previews", text)
