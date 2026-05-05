@@ -94,12 +94,14 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 4)
+        self.assertEqual(len(requests), 6)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
         self.assertIn("type_errors[]", requests["search-type-error"]["expected_error_contains"])
         self.assertIn("limit must be an integer", requests["search-type-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("evidence items must be strings", requests["remember-evidence-item-type-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("entity items must be strings", requests["ingest-entity-item-type-error"]["expected_error_contains"]["type_errors[]"])
 
     def test_import_safety_fixture_covers_import_check_tool(self):
         path = FIXTURES / "import-safety" / "scenario.json"

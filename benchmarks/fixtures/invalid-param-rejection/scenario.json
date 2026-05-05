@@ -110,6 +110,52 @@
             "limit must be an integer"
           ]
         }
+      },
+      {
+        "id": "remember-evidence-item-type-error",
+        "method": "akbp.remember",
+        "approved": false,
+        "params": {
+          "text": "Record a cited claim",
+          "evidence": [
+            "source_invalid_param_contract",
+            42
+          ]
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "evidence items must be strings"
+          ]
+        }
+      },
+      {
+        "id": "ingest-entity-item-type-error",
+        "method": "akbp.ingest",
+        "approved": false,
+        "params": {
+          "file": "docs/TOOL_CONTRACT.md",
+          "entity": [
+            "JSONL",
+            false
+          ]
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "entity items must be strings"
+          ]
+        }
       }
     ]
   },

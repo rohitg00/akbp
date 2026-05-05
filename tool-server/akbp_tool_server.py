@@ -258,10 +258,18 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("incremental must be a boolean")
     if "fail_on_rejected" in params and not isinstance(params.get("fail_on_rejected"), bool):
         errors.append("fail_on_rejected must be a boolean")
-    if "evidence" in params and not isinstance(params.get("evidence"), list):
-        errors.append("evidence must be an array")
-    if "entity" in params and not isinstance(params.get("entity"), list):
-        errors.append("entity must be an array")
+    if "evidence" in params:
+        evidence = params.get("evidence")
+        if not isinstance(evidence, list):
+            errors.append("evidence must be an array")
+        elif any(not isinstance(item, str) for item in evidence):
+            errors.append("evidence items must be strings")
+    if "entity" in params:
+        entity = params.get("entity")
+        if not isinstance(entity, list):
+            errors.append("entity must be an array")
+        elif any(not isinstance(item, str) for item in entity):
+            errors.append("entity items must be strings")
     if method == "akbp.crystallize_session" and "apply" in params and not isinstance(params.get("apply"), bool):
         errors.append("apply must be a boolean")
     return errors
