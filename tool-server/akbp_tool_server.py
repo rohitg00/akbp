@@ -105,6 +105,10 @@ def capabilities() -> dict[str, Any]:
             "write_review_required": True,
             "write_apply_requires_approval": True,
             "jsonl_transport": True,
+            "method_param_schemas": True,
+            "unknown_param_rejection": True,
+            "required_param_validation": True,
+            "approval_required_errors": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,

@@ -271,7 +271,11 @@
             "dry_run",
             "write_review_required",
             "write_apply_requires_approval",
-            "jsonl_transport"
+            "jsonl_transport",
+            "method_param_schemas",
+            "unknown_param_rejection",
+            "required_param_validation",
+            "approval_required_errors"
           ],
           "properties": {
             "structured_errors": {
@@ -290,6 +294,18 @@
               "const": true
             },
             "jsonl_transport": {
+              "const": true
+            },
+            "method_param_schemas": {
+              "const": true
+            },
+            "unknown_param_rejection": {
+              "const": true
+            },
+            "required_param_validation": {
+              "const": true
+            },
+            "approval_required_errors": {
               "const": true
             }
           }

@@ -181,7 +181,7 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
-`akbp.capabilities` returns these schema URLs under `result.schemas`, and returns each method's `params_schema` reference when a method-specific contract exists.
+`akbp.capabilities` returns these schema URLs under `result.schemas`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, and structured approval-required errors.
 
 `tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method, including:
 
