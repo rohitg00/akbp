@@ -487,7 +487,7 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for method in expected.get("must_reject_tool_methods", []) or []:
         if method not in rejected_methods:
             issues.append(f"expected must_reject_tool_methods missing rejection request for {method}")
-    dry_run_methods = {request.get("method") for request in tool_requests if request.get("params", {}).get("dry_run") is True}
+    dry_run_methods = {request.get("method") for request in tool_requests if isinstance(request.get("params"), dict) and request.get("params", {}).get("dry_run") is True}
     for method in expected.get("must_dry_run_tool_methods", []) or []:
         if method not in dry_run_methods:
             issues.append(f"expected must_dry_run_tool_methods missing dry-run request for {method}")

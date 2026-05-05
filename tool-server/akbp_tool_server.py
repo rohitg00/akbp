@@ -277,13 +277,13 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     path = str(req.get("path", "."))
     params = req.get("params", {}) or {}
 
-    if not isinstance(params, dict):
-        return error_response(request_id, "invalid_params", "params must be an object")
-    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
     if method == "akbp.capabilities":
         return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
+    if not isinstance(params, dict):
+        return error_response(request_id, "invalid_params", "params must be an object", details={"params_schema": method_schema_ref(method), "type_errors": ["params must be an object"]})
+    dry_run = bool(req.get("dry_run") or params.get("dry_run"))
 
     unknown = unknown_params(method, params)
     if unknown:

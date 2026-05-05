@@ -94,7 +94,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 3)
+        self.assertEqual(len(requests), 4)
+        self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
         self.assertIn("type_errors[]", requests["search-type-error"]["expected_error_contains"])

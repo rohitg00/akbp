@@ -30,6 +30,23 @@
     ],
     "tool_server_requests": [
       {
+        "id": "search-params-not-object",
+        "method": "akbp.search",
+        "approved": false,
+        "params": "not an object",
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "params must be an object"
+          ]
+        }
+      },
+      {
         "id": "search-unknown-param",
         "method": "akbp.search",
         "approved": false,

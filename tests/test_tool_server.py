@@ -667,6 +667,9 @@ class ToolServerTest(unittest.TestCase):
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
         self.assertEqual(lines[0]["error"]["code"], "invalid_params")
         self.assertEqual(lines[0]["error"]["message"], "params must be an object")
+        self.assertTrue(lines[0]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.search.params"))
+        self.assertIn("params must be an object", lines[0]["error"]["details"]["type_errors"])
+        assert_matches_required_schema(self, lines[0]["error"]["details"], schema_def("invalid_params_details"))
         self.assertEqual(lines[1]["error"]["code"], "invalid_params")
         self.assertEqual(lines[1]["error"]["details"]["unknown"], ["surprise"])
         self.assertIn("query", lines[1]["error"]["details"]["allowed"])
