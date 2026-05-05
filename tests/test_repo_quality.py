@@ -328,6 +328,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("review-gated writes", changelog)
         self.assertIn("approval-gated non-dry-run writes", changelog)
         self.assertIn("schema-backed invalid parameter errors", changelog)
+        self.assertIn("array-item", changelog)
+        self.assertIn("range checks", changelog)
         self.assertIn("invalid parameter rejections", changelog)
 
     def test_docs_use_current_context_method_name(self):
