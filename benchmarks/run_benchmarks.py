@@ -297,10 +297,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
             missing = [field for field in request.get("expected_error_fields", []) or [] if field not in details]
             mismatched = {key: {"expected": value, "actual": details.get(key)} for key, value in (request.get("expected_error_values", {}) or {}).items() if details.get(key) != value}
             schema_issues = schema_shape_issues(details, schema_def(request["expected_error_schema"])) if request.get("expected_error_schema") else []
+            missing_contains = missing_nested_contains(details, request.get("expected_error_contains", {}) or {})
             checks.append({
                 "name": "akbp_tool_rejection_shape",
-                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched and not schema_issues,
-                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "schema_issues": schema_issues, "schema": request.get("expected_error_schema"), "code": error.get("code")},
+                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched and not schema_issues and not missing_contains,
+                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "missing_contains": missing_contains, "schema_issues": schema_issues, "schema": request.get("expected_error_schema"), "code": error.get("code")},
             })
             continue
         result = output.get("result") if isinstance(output.get("result"), dict) else {}

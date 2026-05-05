@@ -90,6 +90,16 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
 
+    def test_invalid_param_rejection_fixture_covers_param_error_shapes(self):
+        path = FIXTURES / "invalid-param-rejection" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        self.assertEqual(len(requests), 3)
+        self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
+        self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
+        self.assertIn("type_errors[]", requests["search-type-error"]["expected_error_contains"])
+        self.assertIn("limit must be an integer", requests["search-type-error"]["expected_error_contains"]["type_errors[]"])
+
     def test_import_safety_fixture_covers_import_check_tool(self):
         path = FIXTURES / "import-safety" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

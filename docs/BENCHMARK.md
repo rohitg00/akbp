@@ -88,7 +88,7 @@ make benchmark
 
 The first runner validates scenario shape, citations, relation targets, supersession links, tool-server request ids, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, dry-run/apply/rejection coverage, and safe-secret outcomes against fixture data.
 
-`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, approval-rejection response shapes, plus optional `expected_result_schema` and `expected_error_schema` conformance against `schemas/tool-response.schema.json` defs. Requests can also use `expected_result_contains` with paths like `entities[].id` to assert nested exported record ids. Escape literal dots in object keys with `\\.`, for example `methods.akbp\\.search.params_schema`.
+`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, approval-rejection response shapes, plus optional `expected_result_schema` and `expected_error_schema` conformance against `schemas/tool-response.schema.json` defs. Requests can also use `expected_result_contains` and `expected_error_contains` with paths like `entities[].id` or `type_errors[]` to assert nested result or error-detail values. Escape literal dots in object keys with `\\.`, for example `methods.akbp\\.search.params_schema`.
 
 Initial scenarios:
 
@@ -97,6 +97,7 @@ Initial scenarios:
 - `contradiction`: retrieve conflicting claims and ask for resolution.
 - `correction-resolution`: apply newer corrections while preserving old conflicting knowledge until explicit resolution.
 - `import-safety`: validate imported JSONL objects, schema-backed normal and strict `akbp.import_check` output, and rejected `akbp.import_apply` preview result shapes before durable writes.
+- `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, missing, and wrong-typed method parameters before CLI execution.
 - `import-apply-flow`: validate schema-backed `akbp.import_apply` dry-run previews and approval-gated apply results before durable writes.
 - `import-apply-malformed`: validate schema-backed `akbp.import_apply` failure results for malformed JSONL before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.

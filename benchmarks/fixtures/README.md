@@ -29,6 +29,7 @@ The scenario file includes:
 - `expected_error_schema`: optional `#/$defs/...` error-details schema reference used to reject missing required fields or unexpected fields in `error.details`
 - `expected_error_fields`: fields that must exist in structured `error.details`
 - `expected_error_values`: exact values that must match in structured `error.details`
+- `expected_error_contains`: nested-path contains checks for structured `error.details`, including arrays such as `allowed[]` and `type_errors[]`
 
 Any field checked in `expected_result_values` or `expected_error_values` must also be listed in the corresponding field list, so fixtures document the complete contract they validate.
 
@@ -41,6 +42,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `correction-resolution`: prefer a newer correction while preserving old conflicting knowledge until explicit resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
 - `import-safety`: validate JSONL import objects, normal plus strict `akbp.import_check` responses, and rejected `akbp.import_apply` preview result shapes before durable writes.
+- `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, missing, and wrong-typed method parameters before CLI execution.
 - `import-apply-flow`: validate JSONL `akbp.import_apply` dry-run and approved apply responses before durable writes.
 - `import-apply-malformed`: validate import apply returns schema-backed failure results for malformed JSONL before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.

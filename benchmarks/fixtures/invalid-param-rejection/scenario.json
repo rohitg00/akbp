@@ -1,0 +1,113 @@
+{
+  "id": "invalid-param-rejection-001",
+  "task": "Verify JSONL tool-server parameter validation rejects unknown, missing, and wrong-typed params before CLI execution.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_invalid_param_contract",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract invalid parameter details"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_invalid_params_are_schema_backed",
+        "text": "JSONL tool-server parameter validation returns schema-backed invalid_params details before executing CLI commands.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_invalid_param_contract"
+        ],
+        "entities": [
+          "invalid_params",
+          "schema-backed",
+          "JSONL"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "search-unknown-param",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "release",
+          "surprise": true
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "unknown",
+          "allowed",
+          "params_schema"
+        ],
+        "expected_error_values": {
+          "unknown": [
+            "surprise"
+          ]
+        },
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "allowed[]": [
+            "query",
+            "limit"
+          ]
+        }
+      },
+      {
+        "id": "crystallize-missing-param",
+        "method": "akbp.crystallize_session",
+        "approved": false,
+        "dry_run": true,
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_values": {
+          "missing": [
+            "transcript"
+          ]
+        },
+        "expected_error_schema": "#/$defs/invalid_params_details"
+      },
+      {
+        "id": "search-type-error",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "release",
+          "limit": "5"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "limit must be an integer"
+          ]
+        }
+      }
+    ]
+  },
+  "query": "How does the JSONL server reject invalid method params?",
+  "expected": {
+    "must_retrieve": [
+      "claim_invalid_params_are_schema_backed"
+    ],
+    "must_cite": [
+      "source_invalid_param_contract"
+    ],
+    "answer_should_include": [
+      "invalid_params",
+      "schema-backed",
+      "JSONL"
+    ]
+  }
+}
