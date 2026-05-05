@@ -97,6 +97,7 @@ Initial scenarios:
 - `contradiction`: retrieve conflicting claims and ask for resolution.
 - `correction-resolution`: apply newer corrections while preserving old conflicting knowledge until explicit resolution.
 - `import-safety`: validate imported JSONL objects plus schema-backed normal and strict `akbp.import_check` output, including accepted/rejected nested ids, before durable writes.
+- `import-apply-flow`: validate schema-backed `akbp.import_apply` dry-run previews and approval-gated apply results before durable writes.
 - `graph-jsonl-records`: populate real JSONL entities and relations and validate schema-backed export.
 - `multi-agent-handoff`: retrieve cited prior-agent context before continuing adapter work.
 - `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes, with real dry-run JSONL outputs.

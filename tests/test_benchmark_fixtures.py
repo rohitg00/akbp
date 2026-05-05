@@ -44,6 +44,24 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_contains"]["relations[].id"], ["relation_protocol_uses_tool_server"])
         self.assertIn("claim_graph_records_export", data["expected"]["must_retrieve"])
 
+    def test_import_apply_flow_fixture_covers_tool_apply(self):
+        path = FIXTURES / "import-apply-flow" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = data["setup"]["tool_server_requests"]
+        by_id = {request["id"]: request for request in requests}
+        preview = by_id["import-apply-preview"]
+        approved = by_id["import-apply-approved"]
+        self.assertEqual(preview["method"], "akbp.import_apply")
+        self.assertTrue(preview["params"]["dry_run"])
+        self.assertFalse(preview["approved"])
+        self.assertEqual(preview["expected_result_schema"], "#/$defs/import_apply_result")
+        self.assertTrue(approved["approved"])
+        self.assertEqual(approved["expected_result_values"]["applied"], True)
+        self.assertEqual(preview["expected_result_contains"]["would_write.claims[]"], ["claim_import_apply_fixture"])
+        export_path = ROOT / preview["params"]["file"]
+        self.assertTrue(export_path.exists())
+        self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
+
     def test_import_safety_fixture_covers_import_check_tool(self):
         path = FIXTURES / "import-safety" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

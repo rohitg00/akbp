@@ -1,0 +1,2 @@
+{"kind":"source","id":"source_import_apply_fixture","type":"transcript","locator":"imports/import-apply-fixture.md","title":"Import apply fixture"}
+{"kind":"claim","id":"claim_import_apply_fixture","text":"JSONL import apply writes accepted source and claim records only after dry-run review and approval.","type":"workflow","status":"working","confidence":0.8,"evidence":["source_import_apply_fixture"],"scope":"project"}

@@ -1,0 +1,93 @@
+{
+  "id": "import-apply-flow-001",
+  "task": "Verify JSONL import apply previews accepted source and claim records before approval-gated writes.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "import-apply-preview",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/import-apply-flow/import-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": true,
+          "applied": false,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "would_write.sources[]": [
+            "source_import_apply_fixture"
+          ],
+          "would_write.claims[]": [
+            "claim_import_apply_fixture"
+          ]
+        }
+      },
+      {
+        "id": "import-apply-approved",
+        "method": "akbp.import_apply",
+        "approved": true,
+        "params": {
+          "file": "benchmarks/fixtures/import-apply-flow/import-export.jsonl"
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": false,
+          "applied": true,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "would_write.sources[]": [
+            "source_import_apply_fixture"
+          ],
+          "would_write.claims[]": [
+            "claim_import_apply_fixture"
+          ]
+        }
+      }
+    ]
+  },
+  "query": "Can import apply write accepted JSONL source and claim records after review?",
+  "expected": {
+    "answer_should_include": [
+      "import",
+      "apply",
+      "approval"
+    ]
+  }
+}
