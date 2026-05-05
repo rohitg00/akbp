@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "cli" / "akbp.py"
 SERVER = ROOT / "tool-server" / "akbp_tool_server.py"
+INSTALLED_SERVER = ROOT / "cli" / "akbp_tool_server.py"
 
 
 def run_cli(*args):
@@ -245,6 +246,18 @@ class ToolServerTest(unittest.TestCase):
                 params = set(meta["params"])
                 schema_params = set(defs[def_name].get("properties", {}))
                 self.assertEqual(params, schema_params, method)
+
+    def test_installed_server_capabilities_match_reference_server(self):
+        request = json.dumps({"id": "caps", "method": "akbp.capabilities"}) + "\n"
+        reference = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+        installed = subprocess.run([sys.executable, str(INSTALLED_SERVER)], input=request, text=True, capture_output=True, check=True)
+        reference_result = json.loads(reference.stdout)["result"]
+        installed_result = json.loads(installed.stdout)["result"]
+        self.assertEqual(installed_result["features"], reference_result["features"])
+        self.assertEqual(set(installed_result["methods"]), set(reference_result["methods"]))
+        self.assertIn("akbp.import_apply", installed_result["methods"])
+        self.assertTrue(installed_result["features"]["method_param_schemas"])
+        self.assertTrue(installed_result["features"]["approval_required_errors"])
 
     def test_status_context_and_capabilities_methods(self):
         with tempfile.TemporaryDirectory() as d:
