@@ -88,7 +88,7 @@ make benchmark
 
 The first runner validates scenario shape, citations, relation targets, supersession links, tool-server request ids, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, dry-run/apply/rejection coverage, and safe-secret outcomes against fixture data.
 
-`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, approval-rejection response shapes, plus optional `expected_result_schema` and `expected_error_schema` conformance against `schemas/tool-response.schema.json` defs. Requests can also use `expected_result_contains` with paths like `entities[].id` to assert nested exported record ids.
+`make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, approval-rejection response shapes, plus optional `expected_result_schema` and `expected_error_schema` conformance against `schemas/tool-response.schema.json` defs. Requests can also use `expected_result_contains` with paths like `entities[].id` to assert nested exported record ids. Escape literal dots in object keys with `\\.`, for example `methods.akbp\\.search.params_schema`.
 
 Initial scenarios:
 
@@ -103,7 +103,7 @@ Initial scenarios:
 - `graph-jsonl-records`: populate real JSONL entities and relations and validate schema-backed export.
 - `multi-agent-handoff`: retrieve cited prior-agent context before continuing adapter work.
 - `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes, with real dry-run JSONL outputs.
-- `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval.
+- `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval, including advertised enforcement flags and method schema references.
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved write methods return inspectable claim, source, or relation records.

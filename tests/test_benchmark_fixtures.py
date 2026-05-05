@@ -187,6 +187,19 @@ class BenchmarkFixtureTest(unittest.TestCase):
             self.assertEqual(by_method[method]["expected_result_schema"], schema_ref)
         self.assertIn("claim_read_methods_are_schema_backed", data["expected"]["must_retrieve"])
 
+    def test_read_method_schema_fixture_covers_capability_enforcement_flags(self):
+        path = FIXTURES / "read-method-schema" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        capabilities = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(capabilities["id"], "capabilities-read")
+        contains = capabilities["expected_result_contains"]
+        self.assertEqual(contains["features.method_param_schemas"], [True])
+        self.assertEqual(contains["features.unknown_param_rejection"], [True])
+        self.assertEqual(contains["features.required_param_validation"], [True])
+        self.assertEqual(contains["features.approval_required_errors"], [True])
+        self.assertIn("methods.akbp\\.search.params_schema", contains)
+        self.assertIn("methods.akbp\\.import_apply.params_schema", contains)
+
     def test_review_gated_writes_fixture_covers_review_metadata(self):
         path = FIXTURES / "review-gated-writes" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

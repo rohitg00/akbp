@@ -42,7 +42,27 @@
           "methods",
           "examples"
         ],
-        "expected_result_schema": "#/$defs/capabilities_result"
+        "expected_result_schema": "#/$defs/capabilities_result",
+        "expected_result_contains": {
+          "features.method_param_schemas": [
+            true
+          ],
+          "features.unknown_param_rejection": [
+            true
+          ],
+          "features.required_param_validation": [
+            true
+          ],
+          "features.approval_required_errors": [
+            true
+          ],
+          "methods.akbp\\.search.params_schema": [
+            "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json#/$defs/akbp.search.params"
+          ],
+          "methods.akbp\\.import_apply.params_schema": [
+            "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json#/$defs/akbp.import_apply.params"
+          ]
+        }
       },
       {
         "id": "status-read",

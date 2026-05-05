@@ -133,9 +133,30 @@ def schema_shape_issues(payload: Any, definition: dict[str, Any], *, path: str =
     return issues
 
 
+def split_nested_path(path: str) -> list[str]:
+    parts: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for char in path:
+        if escaped:
+            current.append(char)
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif char == ".":
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(char)
+    if escaped:
+        current.append("\\")
+    parts.append("".join(current))
+    return parts
+
+
 def nested_values(payload: Any, path: str) -> list[Any]:
     values = [payload]
-    for part in path.split("."):
+    for part in split_nested_path(path):
         next_values: list[Any] = []
         collect_list = part.endswith("[]")
         key = part[:-2] if collect_list else part
