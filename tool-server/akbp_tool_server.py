@@ -115,6 +115,15 @@ def capabilities() -> dict[str, Any]:
             "response": RESPONSE_SCHEMA,
             "methods": METHODS_SCHEMA,
         },
+        "runtime": {
+            "transport": "jsonl-stdio",
+            "default_path": ".",
+            "max_request_bytes": 1048576,
+            "hash_algorithms": ["sha256"],
+            "supports_dry_run": True,
+            "write_policy": "review-gated",
+            "approval_field": "approved",
+        },
         "methods": {
             name: {
                 **meta,
