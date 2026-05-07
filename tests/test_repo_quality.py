@@ -177,6 +177,7 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.remember",
             "akbp.conformance",
             "akbp.export",
+            "akbp.export_check",
             "akbp.audit",
             "akbp.cite",
             "akbp.source.add",

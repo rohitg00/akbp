@@ -955,6 +955,42 @@
         }
       }
     },
+    "export_check_issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 },
+        "expected": { "type": ["integer", "string", "null"] },
+        "actual": { "type": ["integer", "string", "null"] }
+      }
+    },
+    "export_check_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "file", "checked_at", "manifest_format", "counts", "issues"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "file": { "type": "string", "minLength": 1 },
+        "checked_at": { "type": "string", "minLength": 1 },
+        "manifest_format": { "type": ["string", "null"] },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["claims", "sources", "entities", "relations"],
+          "properties": {
+            "claims": { "type": "integer", "minimum": 0 },
+            "sources": { "type": "integer", "minimum": 0 },
+            "entities": { "type": "integer", "minimum": 0 },
+            "relations": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "issues": { "type": "array", "items": { "$ref": "#/$defs/export_check_issue" } }
+      }
+    },
     "export_result": {
       "type": "object",
       "additionalProperties": false,
