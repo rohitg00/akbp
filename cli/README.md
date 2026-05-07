@@ -89,6 +89,8 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 `akbp source add` records immutable source material before claims cite it. For local files, the CLI records a SHA-256 hash when the file exists.
 
+`akbp source verify --fail-on-issue` re-checks recorded file sources against their stored hashes and separates verified, changed, missing, and unchecked evidence.
+
 ## Export
 
 `akbp export` emits a portable JSON bundle containing the card, claims, sources, entities, relations, and a self-describing manifest. The manifest records artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata. It is intentionally separate from local indexes or engine-owned state.

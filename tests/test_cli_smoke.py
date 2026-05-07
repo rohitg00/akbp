@@ -24,6 +24,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             card = json.loads((kb / "akbp.json").read_text(encoding="utf-8"))
             self.assertEqual(card["schema_version"], "0.1-draft")
             self.assertIn("claims", card["artifacts"])
+            (kb / "README.md").write_text("# Readme\n", encoding="utf-8")
 
             out = run_cli("--path", str(kb), "source", "add", "README.md", "--type", "file", "--title", "Readme")
             source = json.loads(out.stdout)
@@ -116,6 +117,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(exported["manifest"]["counts"]["sources"], len(exported["sources"]))
             self.assertTrue(exported["manifest"]["safety"]["excludes_indexes"])
             self.assertEqual(exported["manifest"]["verification"]["hash_algorithm"], "sha256")
+
+            out = run_cli("--path", str(kb), "source", "verify", "--fail-on-issue")
+            source_verify = json.loads(out.stdout)
+            self.assertTrue(source_verify["ok"])
+            self.assertEqual(source_verify["counts"]["verified"], 1)
+            (kb / "README.md").write_text("changed", encoding="utf-8")
+            changed_verify = json.loads(run_cli("--path", str(kb), "source", "verify").stdout)
+            self.assertFalse(changed_verify["ok"])
+            self.assertEqual(changed_verify["counts"]["changed"], 1)
 
             out = run_cli("--path", str(kb), "audit", "--limit", "10")
             audit = json.loads(out.stdout)
