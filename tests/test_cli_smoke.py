@@ -243,6 +243,37 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(strict_data["rejected_count"], 1)
             self.assertNotIn("sk-example123456789", strict.stdout)
 
+
+    def test_import_rejects_unknown_source_evidence_ids(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            export = Path(d) / "dangling-evidence.jsonl"
+            export.write_text(json.dumps({
+                "kind": "claim",
+                "id": "claim_dangling_evidence",
+                "text": "Claims imported from JSONL should cite known source records.",
+                "type": "workflow",
+                "status": "working",
+                "confidence": 0.7,
+                "evidence": ["source_missing"],
+                "scope": "project",
+            }) + "\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+
+            checked = json.loads(run_cli("--path", str(kb), "import-check", str(export)).stdout)
+            self.assertTrue(checked["ok"])
+            self.assertEqual(checked["accepted_count"], 0)
+            self.assertEqual(checked["rejected_count"], 1)
+            self.assertIn("unknown evidence source id", checked["rejected"][0]["reason"])
+
+            proc = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-apply", str(export), "--dry-run"], text=True, capture_output=True)
+            self.assertEqual(proc.returncode, 1)
+            applied = json.loads(proc.stdout)
+            self.assertFalse(applied["ok"])
+            self.assertEqual(applied["accepted_count"], 0)
+            self.assertEqual(applied["rejected_count"], 1)
+            self.assertIn("unknown evidence source id", applied["rejected"][0]["reason"])
+
     def test_import_apply_failure_shape_includes_review_fields(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

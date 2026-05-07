@@ -611,22 +611,55 @@ def normalize_import_object(item: dict[str, Any]) -> tuple[str | None, dict[str,
         return kind, claim, None
     return kind or "object", None, "unsupported import kind"
 
+
+def import_reference_rejections(base: Path, normalized: list[tuple[str, dict[str, Any], int]]) -> list[dict[str, Any]]:
+    known_source_ids = {source.get("id") for source in load_sources(base) if source.get("id")}
+    known_source_ids.update(record.get("id") for kind, record, _line in normalized if kind == "source")
+    rejected: list[dict[str, Any]] = []
+    for kind, record, line in normalized:
+        if kind != "claim":
+            continue
+        for evidence in record.get("evidence") or []:
+            if isinstance(evidence, str) and evidence.startswith("source_") and evidence not in known_source_ids:
+                rejected.append({
+                    "id": record.get("id", f"line-{line}"),
+                    "kind": kind,
+                    "line": line,
+                    "reason": f"unknown evidence source id: {evidence}",
+                })
+                break
+    return rejected
+
 def cmd_import_check(args: argparse.Namespace) -> int:
     source = Path(args.file).resolve()
     if not source.exists() or not source.is_file():
         print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
         return 1
     accepted, rejected, errors = import_jsonl_objects(source)
+    checked_count = len(accepted) + len(rejected)
+    normalized: list[tuple[str, dict[str, Any], int]] = []
+    accepted_by_line = {item["line"]: item for item in accepted}
+    for item in accepted:
+        kind, record, error = normalize_import_object(item["object"])
+        if error or record is None or kind is None:
+            rejected.append({"id": item["id"], "kind": kind or item["kind"], "line": item["line"], "reason": error or "invalid_import_object"})
+            accepted_by_line.pop(item["line"], None)
+            continue
+        normalized.append((kind, record, item["line"]))
+    for item in import_reference_rejections(root(args.path), normalized):
+        rejected.append(item)
+        accepted_by_line.pop(item["line"], None)
+    accepted_public = public_import_items(list(accepted_by_line.values()))
     failed = bool(errors) or (bool(rejected) and bool(getattr(args, "fail_on_rejected", False)))
     print(json.dumps({
         "ok": not failed,
         "file": str(source),
-        "checked": len(accepted) + len(rejected),
-        "accepted_count": len(accepted),
+        "checked": checked_count,
+        "accepted_count": len(accepted_public),
         "rejected_count": len(rejected),
         "error_count": len(errors),
         "fail_on_rejected": bool(getattr(args, "fail_on_rejected", False)),
-        "accepted": public_import_items(accepted),
+        "accepted": accepted_public,
         "rejected": public_import_items(rejected),
         "errors": errors,
     }, indent=2, ensure_ascii=False))
@@ -643,6 +676,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
         return 1
     accepted, rejected, errors = import_jsonl_objects(source)
+    checked_count = len(accepted) + len(rejected)
     normalized: list[tuple[str, dict[str, Any], int]] = []
     for item in accepted:
         kind, record, error = normalize_import_object(item["object"])
@@ -650,13 +684,16 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             rejected.append({"id": item["id"], "kind": kind or item["kind"], "line": item["line"], "reason": error or "invalid_import_object"})
             continue
         normalized.append((kind, record, item["line"]))
+    rejected.extend(import_reference_rejections(base, normalized))
+    rejected_lines = {item["line"] for item in rejected}
+    normalized = [item for item in normalized if item[2] not in rejected_lines]
     if errors or rejected:
         result = {
             "ok": False,
             "file": str(source),
             "dry_run": bool(args.dry_run),
             "applied": False,
-            "checked": len(accepted) + len(rejected),
+            "checked": checked_count,
             "accepted_count": len(normalized),
             "rejected_count": len(rejected),
             "error_count": len(errors),
@@ -688,7 +725,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         "file": str(source),
         "dry_run": bool(args.dry_run),
         "applied": False,
-        "checked": len(accepted),
+        "checked": checked_count,
         "accepted_count": len(normalized),
         "rejected_count": 0,
         "error_count": 0,
