@@ -91,7 +91,7 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 ## Export
 
-`akbp export` emits a portable JSON bundle containing the card, claims, sources, entities, and relations. It is intentionally separate from local indexes or engine-owned state.
+`akbp export` emits a portable JSON bundle containing the card, claims, sources, entities, relations, and a self-describing manifest. The manifest records artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata. It is intentionally separate from local indexes or engine-owned state.
 
 ## Contradictions
 

@@ -965,7 +965,8 @@
         "claims",
         "sources",
         "entities",
-        "relations"
+        "relations",
+        "manifest"
       ],
       "properties": {
         "akbp_version": {
@@ -1003,6 +1004,9 @@
           "items": {
             "$ref": "#/$defs/relation_result"
           }
+        },
+        "manifest": {
+          "$ref": "#/$defs/export_manifest"
         }
       }
     },
@@ -1071,6 +1075,58 @@
         },
         "rank": {
           "type": "number"
+        }
+      }
+    },
+
+    "export_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "format_version", "created_at", "producer", "artifact_paths", "artifact_hashes", "counts", "safety", "verification"],
+      "properties": {
+        "format": { "type": "string", "const": "akbp-portable-bundle" },
+        "format_version": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "minLength": 1 },
+        "producer": { "type": "string", "minLength": 1 },
+        "artifact_paths": {
+          "type": "object",
+          "required": ["card", "claims", "sources", "entities", "relations"],
+          "additionalProperties": { "type": "string" }
+        },
+        "artifact_hashes": {
+          "type": "object",
+          "required": ["card", "claims", "sources", "entities", "relations"],
+          "additionalProperties": { "type": ["string", "null"] }
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["claims", "sources", "entities", "relations"],
+          "properties": {
+            "claims": { "type": "integer", "minimum": 0 },
+            "sources": { "type": "integer", "minimum": 0 },
+            "entities": { "type": "integer", "minimum": 0 },
+            "relations": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["excludes_local_state", "excludes_indexes", "secret_redaction_required"],
+          "properties": {
+            "excludes_local_state": { "type": "boolean" },
+            "excludes_indexes": { "type": "boolean" },
+            "secret_redaction_required": { "type": "boolean" }
+          }
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hash_algorithm", "status"],
+          "properties": {
+            "hash_algorithm": { "type": "string", "const": "sha256" },
+            "status": { "type": "string", "minLength": 1 }
+          }
         }
       }
     },

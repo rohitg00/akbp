@@ -142,7 +142,7 @@ Return recent audit events.
 
 ## `akbp.export`
 
-Return a portable bundle of protocol artifacts: card, claims, sources, entities, and relations. Local indexes and engine-owned state are excluded.
+Return a portable bundle of protocol artifacts: card, claims, sources, entities, and relations. Local indexes and engine-owned state are excluded. The result includes a `manifest` with artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata so another agent can inspect the bundle before accepting it.
 
 ## `akbp.audit`
 

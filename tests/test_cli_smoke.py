@@ -111,6 +111,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             exported = json.loads(out.stdout)
             self.assertTrue(exported["claims"])
             self.assertTrue(exported["sources"])
+            self.assertEqual(exported["manifest"]["format"], "akbp-portable-bundle")
+            self.assertEqual(exported["manifest"]["counts"]["claims"], len(exported["claims"]))
+            self.assertEqual(exported["manifest"]["counts"]["sources"], len(exported["sources"]))
+            self.assertTrue(exported["manifest"]["safety"]["excludes_indexes"])
+            self.assertEqual(exported["manifest"]["verification"]["hash_algorithm"], "sha256")
 
             out = run_cli("--path", str(kb), "audit", "--limit", "10")
             audit = json.loads(out.stdout)

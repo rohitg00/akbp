@@ -1183,6 +1183,43 @@ def cmd_search(args: argparse.Namespace) -> int:
     return 0
 
 
+
+def export_manifest(base: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    artifact_paths = {
+        "card": "akbp.json",
+        "claims": "claims/claims.jsonl",
+        "sources": "raw/sources/sources.jsonl",
+        "entities": "graph/entities.jsonl",
+        "relations": "graph/relations.jsonl",
+    }
+    artifact_hashes: dict[str, str | None] = {}
+    for name, rel in artifact_paths.items():
+        artifact_hashes[name] = file_hash(base / rel)
+    counts = {
+        "claims": len(payload.get("claims") or []),
+        "sources": len(payload.get("sources") or []),
+        "entities": len(payload.get("entities") or []),
+        "relations": len(payload.get("relations") or []),
+    }
+    return {
+        "format": "akbp-portable-bundle",
+        "format_version": "0.1",
+        "created_at": payload["exported_at"],
+        "producer": "akbp-cli",
+        "artifact_paths": artifact_paths,
+        "artifact_hashes": artifact_hashes,
+        "counts": counts,
+        "safety": {
+            "excludes_local_state": True,
+            "excludes_indexes": True,
+            "secret_redaction_required": True,
+        },
+        "verification": {
+            "hash_algorithm": "sha256",
+            "status": "self_describing",
+        },
+    }
+
 def cmd_export(args: argparse.Namespace) -> int:
     base = root(args.path)
     payload = {
@@ -1194,6 +1231,7 @@ def cmd_export(args: argparse.Namespace) -> int:
         "entities": read_jsonl(base / "graph" / "entities.jsonl"),
         "relations": read_jsonl(base / "graph" / "relations.jsonl"),
     }
+    payload["manifest"] = export_manifest(base, payload)
     text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     if args.output:
         Path(args.output).write_text(text, encoding="utf-8")
