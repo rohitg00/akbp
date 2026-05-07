@@ -229,10 +229,21 @@ def validate_claim_shape(claim: dict[str, Any]) -> list[str]:
     return errors
 
 def audit(base: Path, event: str, data: dict[str, Any]) -> None:
+    created_at = now_iso()
+    write_events = {"remember", "ingest", "import_apply", "crystallize", "source_add", "contradict", "supersede", "init", "index"}
+    operation = {
+        "name": event,
+        "actor": "akbp-cli",
+        "mode": "write" if event in write_events else "read",
+        "outcome": "ok",
+        "approval_required": event in {"import_apply"},
+        "redaction_checked": event in {"ingest", "import_apply"},
+    }
     append_jsonl(base / ".akbp" / "audit.log.jsonl", {
-        "id": stable_id("audit", event, now_iso(), json.dumps(data, sort_keys=True)),
+        "id": stable_id("audit", event, created_at, json.dumps(data, sort_keys=True)),
         "event": event,
-        "created_at": now_iso(),
+        "created_at": created_at,
+        "operation": operation,
         "data": data,
     })
 

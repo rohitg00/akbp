@@ -120,6 +120,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             out = run_cli("--path", str(kb), "audit", "--limit", "10")
             audit = json.loads(out.stdout)
             self.assertGreaterEqual(audit["count"], 1)
+            remember_events = [event for event in audit["events"] if event["event"] == "remember"]
+            self.assertTrue(remember_events)
+            self.assertEqual(remember_events[-1]["operation"]["actor"], "akbp-cli")
+            self.assertEqual(remember_events[-1]["operation"]["mode"], "write")
+            self.assertEqual(remember_events[-1]["operation"]["outcome"], "ok")
 
             out = run_cli("--path", str(kb), "status")
             status = json.loads(out.stdout)

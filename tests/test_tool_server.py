@@ -175,6 +175,7 @@ class ToolServerTest(unittest.TestCase):
         for name in ["audit_event", "exported_claim", "claim_result", "source_result", "entity_result", "relation_result"]:
             self.assertFalse(defs[name]["additionalProperties"])
         self.assertIn("event", defs["audit_event"]["required"])
+        self.assertIn("operation", defs["audit_event"]["required"])
         self.assertIn("confidence", defs["exported_claim"]["required"])
         self.assertIn("superseded_by", defs["exported_claim"]["properties"])
         self.assertIn("text", defs["claim_result"]["required"])
