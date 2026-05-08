@@ -205,6 +205,18 @@ class BenchmarkFixtureTest(unittest.TestCase):
             self.assertEqual(by_method[method]["expected_result_schema"], schema_ref)
         self.assertIn("claim_read_methods_are_schema_backed", data["expected"]["must_retrieve"])
 
+
+    def test_capability_negotiation_fixture_covers_method_policy(self):
+        path = FIXTURES / "capability-negotiation" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.capabilities")
+        self.assertEqual(request["expected_result_schema"], "#/$defs/capabilities_result")
+        expected = request["expected_result_contains"]
+        self.assertIn("features.method_param_schemas", expected)
+        self.assertIn("methods.akbp\\.remember.review_required", expected)
+        self.assertIn("methods.akbp\\.remember.params[]", expected)
+
     def test_read_method_schema_fixture_covers_capability_enforcement_flags(self):
         path = FIXTURES / "read-method-schema" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

@@ -1,0 +1,32 @@
+{
+  "id": "capability-negotiation-001",
+  "task": "Verify that an agent runtime can discover AKBP JSONL tool-server features, schemas, and write-review policy before calling methods.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "caps",
+        "method": "akbp.capabilities",
+        "params": {},
+        "expected_result_schema": "#/$defs/capabilities_result",
+        "expected_result_fields": ["protocol", "features", "schemas", "methods"],
+        "expected_result_values": {
+          "protocol": "akbp-jsonl-tool-server"
+        },
+        "expected_result_contains": {
+          "features.method_param_schemas": [true],
+          "features.structured_errors": [true],
+          "features.write_review_required": [true],
+          "schemas.methods": ["https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json"],
+          "methods.akbp\\.search.write": [false],
+          "methods.akbp\\.remember.write": [true],
+          "methods.akbp\\.remember.review_required": [true],
+          "methods.akbp\\.remember.params[]": ["text", "dry_run"]
+        }
+      }
+    ]
+  },
+  "query": "tool capability negotiation",
+  "expected": {
+    "answer_should_include": ["akbp.capabilities", "method_param_schemas", "write_review_required"]
+  }
+}
