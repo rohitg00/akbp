@@ -61,3 +61,7 @@ After review or approval, apply the same crystallization and refresh the index:
 ## Runnable example
 
 See `examples/end-to-end-agent-flow/` for a compact knowledge base containing source records, one evidence-backed claim, entities, a relation, audit history, and wiki pages.
+
+## Source intake playbook
+
+See `examples/source-intake/README.md` for a review-first flow that turns files, transcripts, and JSONL exchanges into durable AKBP sources and claims.

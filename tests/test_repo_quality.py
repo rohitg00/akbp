@@ -67,6 +67,21 @@ class RepoQualityTest(unittest.TestCase):
         self.assertEqual(defs["akbp.ingest.params"]["properties"]["type"]["enum"], source_types)
 
 
+    def test_source_intake_example_documents_review_first_flow(self):
+        text = (ROOT / "examples" / "source-intake" / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "Record source material before making durable claims",
+            "source add",
+            "crystallize",
+            "import-check",
+            "import-apply",
+            "--dry-run",
+            "--approved",
+            "secret-like value",
+            "unknown `source_...` evidence id",
+        ]:
+            self.assertIn(required, text)
+
     def test_portable_bundle_example_documents_review_flow(self):
         text = (ROOT / "examples" / "portable-bundle" / "README.md").read_text(encoding="utf-8")
         for required in [
