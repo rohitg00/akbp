@@ -668,6 +668,17 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(adapter, readme)
 
+    def test_public_launch_checklist_documents_market_readiness_gates(self):
+        checklist = (ROOT / "docs" / "PUBLIC_LAUNCH_CHECKLIST.md").read_text(encoding="utf-8")
+        release = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("PUBLIC_LAUNCH_CHECKLIST.md", release)
+        self.assertIn("PUBLIC_LAUNCH_CHECKLIST.md", readme)
+        for text in ["Positioning gate", "Engineering gate", "Security and privacy gate", "Demo gate", "Launch copy guardrails"]:
+            self.assertIn(text, checklist)
+        for text in ["make validate", "make build", "GitHub CI", "alpha", "avoid comparing AKBP as a full replacement"]:
+            self.assertIn(text, checklist)
+
     def test_security_model_documents_trust_boundaries(self):
         root = ROOT
         security = (root / "SECURITY.md").read_text(encoding="utf-8")
