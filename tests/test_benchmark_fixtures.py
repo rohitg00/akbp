@@ -186,6 +186,21 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("claim_ingest_apply_is_schema_backed", data["expected"]["must_retrieve"])
         self.assertIn("claim_crystallize_apply_is_schema_backed", data["expected"]["must_retrieve"])
 
+
+    def test_retrieval_citation_bundle_fixture_covers_context_and_cite(self):
+        path = FIXTURES / "retrieval-citation-bundle" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        context = requests["context-release-rollback"]
+        cite = requests["cite-release-rollback"]
+        self.assertEqual(context["method"], "akbp.context")
+        self.assertEqual(context["expected_result_schema"], "#/$defs/context_result")
+        self.assertEqual(context["expected_result_contains"]["items[].id"], ["claim_release_needs_rollback_owner"])
+        self.assertEqual(cite["method"], "akbp.cite")
+        self.assertEqual(cite["expected_result_schema"], "#/$defs/cite_result")
+        self.assertEqual(cite["expected_result_contains"]["evidence[]"], ["source_release_risk_note", "source_operator_review"])
+        self.assertEqual(data["expected"]["must_cite"], ["source_release_risk_note", "source_operator_review"])
+
     def test_read_method_schema_fixture_covers_read_responses(self):
         path = FIXTURES / "read-method-schema" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

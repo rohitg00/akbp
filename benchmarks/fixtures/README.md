@@ -51,6 +51,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.
 - `review-gated-writes`: require agents to honor dry-run review metadata before applying durable writes.
 - `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval, including advertised enforcement flags and method schema references.
+- `retrieval-citation-bundle`: verify context retrieval and citation lookup return the same evidence-backed claim through JSONL tool calls.
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
