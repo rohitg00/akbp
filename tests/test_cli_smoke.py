@@ -262,6 +262,23 @@ class AkbpCliSmokeTest(unittest.TestCase):
             claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
             self.assertEqual(claims[0]["evidence"], [data["source_id"]])
 
+    def test_ingest_redacts_secret_like_title(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("# Safe note\n\nDecision: keep titles clean.\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            title = "Incident token=sk-example-title-secret"
+            result = run_cli("--path", str(kb), "ingest", str(note), "--title", title)
+            payload = json.loads(result.stdout)
+            self.assertTrue(payload["ok"])
+            sources = (kb / "raw" / "sources" / "sources.jsonl").read_text(encoding="utf-8")
+            page = (kb / payload["page"]).read_text(encoding="utf-8")
+            self.assertNotIn("sk-example-title-secret", sources)
+            self.assertNotIn("sk-example-title-secret", page)
+            self.assertIn("[REDACTED]", sources)
+            self.assertIn("[REDACTED]", page)
+
     def test_ingest_redacts_optional_claim_text(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
