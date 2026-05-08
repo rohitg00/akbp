@@ -1,4 +1,4 @@
-.PHONY: test guard smoke install-smoke benchmark-score benchmark validate build clean
+.PHONY: test guard smoke install-smoke demo benchmark-score benchmark validate build clean
 
 test:
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -24,6 +24,9 @@ install-smoke:
 	PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp --help >/dev/null; \
 	printf '%s\n' '{"id":"caps","method":"akbp.capabilities"}' '{"id":"bad","method":"akbp.search","params":{"query":"release","limit":0}}' | PYTHONPATH=$$TMP/pkg python3 -m akbp_tool_server | python3 -c "import json,sys; rows=[json.loads(line) for line in sys.stdin if line.strip()]; assert rows[0]['result']['features']['method_param_schemas']; assert 'akbp.import_apply' in rows[0]['result']['methods']; assert rows[1]['error']['code'] == 'invalid_params'; assert 'limit must be between 1 and 100' in rows[1]['error']['details']['type_errors']; print('tool server module install ok')"; \
 	printf '%s\n' '{"id":"caps","method":"akbp.capabilities"}' | PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp-tool-server | python3 -c "import json,sys; row=json.loads(sys.stdin.readline()); assert row['result']['features']['method_param_schemas']; assert 'akbp.import_apply' in row['result']['methods']; print('tool server console install ok')"
+
+demo:
+	./examples/quickstart-demo/run.sh
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score

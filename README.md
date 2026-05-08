@@ -83,7 +83,7 @@ python3 -m pip install .
 akbp --path ./my-kb init
 ```
 
-See `docs/INSTALL.md` for install, build, and smoke-test instructions. See `docs/RELEASE.md` and `docs/RELEASE_NOTES_DRAFT.md` for release readiness, validation, and announcement prep.
+Run `make demo` or see `examples/quickstart-demo/` for the one-command happy path. See `docs/INSTALL.md` for install, build, and smoke-test instructions. See `docs/RELEASE.md` and `docs/RELEASE_NOTES_DRAFT.md` for release readiness, validation, and announcement prep.
 
 ## Quickstart
 
@@ -194,7 +194,7 @@ Current alpha-ready pieces:
 - Retrieval and tool-server benchmark fixtures for citations, capability negotiation, unsupported methods, write approval, and import/apply flow.
 - Install smoke coverage for installed `akbp` and `akbp-tool-server` console scripts.
 
-Still draft: schema compatibility, extraction quality, adapter ecosystem coverage, and release versioning. Do not treat the current protocol as a stable 1.0 contract yet.
+Still draft: schema compatibility, extraction quality, adapter ecosystem coverage, release versioning, and broader production battle testing. Do not treat the current protocol as a stable 1.0 contract yet.
 
 ## Examples
 
@@ -202,6 +202,7 @@ Still draft: schema compatibility, extraction quality, adapter ecosystem coverag
 - `examples/level-1/` shows structured claims with evidence.
 - `examples/level-3/` shows lifecycle relations with concrete JSONL records.
 - `examples/end-to-end-agent-flow/` shows ingest, remember, index, search, context, and cite flow.
+- `examples/quickstart-demo/` shows the one-command public-alpha demo path with expected success markers.
 - `examples/tool-server-approval-flow/` shows dry-run, `approval_required`, and approved JSONL write flow.
 - `examples/portable-bundle/` shows export review, import check, and approval before apply.
 - `examples/source-intake/` shows review-first source intake before durable claims.

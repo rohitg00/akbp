@@ -33,6 +33,22 @@ class AkbpCliSmokeTest(unittest.TestCase):
             finally:
                 cwd_file.unlink(missing_ok=True)
 
+
+    def test_quickstart_demo_script_passes(self):
+        demo_dir = ROOT / "examples" / "quickstart-demo"
+        with tempfile.TemporaryDirectory() as tmp:
+            kb = Path(tmp) / "demo-kb"
+            result = subprocess.run(
+                [str(demo_dir / "run.sh"), str(kb)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn("AKBP quickstart demo passed", result.stdout)
+            self.assertTrue((kb / "export.json").is_file())
+            self.assertTrue((kb / ".akbp" / "state.db").is_file())
+
     def test_init_remember_query_lint(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
