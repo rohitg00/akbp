@@ -280,6 +280,7 @@ class RepoQualityTest(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         text = (ROOT / "docs" / "OBSIDIAN.md").read_text(encoding="utf-8")
         self.assertIn("docs/OBSIDIAN.md", readme)
+        self.assertIn("examples/obsidian-vault/", text)
         for required in [
             "Obsidian is for humans",
             "AKBP is for agents",

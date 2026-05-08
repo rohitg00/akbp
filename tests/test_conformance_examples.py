@@ -46,6 +46,17 @@ class ConformanceExampleTest(unittest.TestCase):
         results = json.loads(out.stdout)["results"]
         self.assertTrue(results)
 
+
+    def test_obsidian_vault_example_passes_level_two_retrieval(self):
+        example = ROOT / "examples" / "obsidian-vault"
+        out = run_cli("--path", str(example), "conformance", "--level", "2")
+        data = json.loads(out.stdout)
+        self.assertTrue(data["ok"])
+        self.assertTrue(data["levels"]["2"]["ok"])
+        out = run_cli("--path", str(example), "query", "agent memory contract obsidian vault")
+        results = json.loads(out.stdout)["results"]
+        self.assertTrue(any(result.get("id") == "claim_obsidian_needs_memory_contract" for result in results))
+
     def test_coding_agent_structured_transcript_crystallizes(self):
         transcript = ROOT / "examples" / "coding-agent" / "structured-session-transcript.md"
         out = run_cli("--path", str(ROOT / "examples" / "level-0"), "crystallize", str(transcript))
