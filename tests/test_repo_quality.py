@@ -232,6 +232,21 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn("dry-run", text, str(adapter.relative_to(ROOT)))
 
 
+    def test_adapter_author_quickstart_covers_integration_contract(self):
+        text = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp.capabilities",
+            "akbp.context",
+            "akbp.search",
+            "dry_run",
+            "approved:true",
+            "akbp.crystallize_session",
+            "akbp.source.verify",
+            "error.code",
+            "make validate",
+        ]:
+            self.assertIn(required, text)
+
     def test_adapter_review_checklist_covers_runtime_safety(self):
         text = (ROOT / "docs" / "ADAPTER_REVIEW_CHECKLIST.md").read_text(encoding="utf-8")
         for required in [

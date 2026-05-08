@@ -24,7 +24,7 @@ A public-safe OpenClaw workspace adapter is available at:
 adapters/openclaw/
 ```
 
-Use the template before creating runtime-specific adapters. Use the example to confirm the minimum complete file shape. Both define startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
+Use `docs/ADAPTER_AUTHOR_QUICKSTART.md` before creating runtime-specific adapters. Use the template before creating runtime-specific adapters. Use the example to confirm the minimum complete file shape. Both define startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
 
 ## Required adapter files
 
@@ -114,6 +114,7 @@ Integration style:
 
 Use this checklist before opening a pull request:
 
+- Read `docs/ADAPTER_AUTHOR_QUICKSTART.md`.
 - Start from `adapters/coding-agent-template/` unless the target environment is not a coding agent.
 - Keep runtime-specific setup in adapter docs, not in the protocol spec.
 - Point the startup and shutdown loop to `docs/AGENT_FLOW.md`.
