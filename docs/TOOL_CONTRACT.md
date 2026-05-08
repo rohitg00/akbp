@@ -211,8 +211,6 @@ Supported methods in the first server slice:
 - `akbp.crystallize_session`
 - `akbp.session.start`
 - `akbp.session.end`
-- `akbp.session.start`
-- `akbp.session.end`
 
 The CLI also has local-only commands such as `akbp lint`; those are not JSONL server methods unless listed above.
 
