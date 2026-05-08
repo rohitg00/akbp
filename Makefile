@@ -20,7 +20,10 @@ install-smoke:
 	python3 -m pip install . --target $$TMP/pkg >/tmp/akbp-install-smoke.log; \
 	PYTHONPATH=$$TMP/pkg python3 -m akbp --path $$TMP/kb init; \
 	PYTHONPATH=$$TMP/pkg python3 -c "import akbp, akbp_tool_server; print('install ok')"; \
-	printf '%s\n' '{"id":"caps","method":"akbp.capabilities"}' '{"id":"bad","method":"akbp.search","params":{"query":"release","limit":0}}' | PYTHONPATH=$$TMP/pkg python3 -m akbp_tool_server | python3 -c "import json,sys; rows=[json.loads(line) for line in sys.stdin if line.strip()]; assert rows[0]['result']['features']['method_param_schemas']; assert 'akbp.import_apply' in rows[0]['result']['methods']; assert rows[1]['error']['code'] == 'invalid_params'; assert 'limit must be between 1 and 100' in rows[1]['error']['details']['type_errors']; print('tool server install ok')"
+	PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp --path $$TMP/kb-cli init; \
+	PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp --help >/dev/null; \
+	printf '%s\n' '{"id":"caps","method":"akbp.capabilities"}' '{"id":"bad","method":"akbp.search","params":{"query":"release","limit":0}}' | PYTHONPATH=$$TMP/pkg python3 -m akbp_tool_server | python3 -c "import json,sys; rows=[json.loads(line) for line in sys.stdin if line.strip()]; assert rows[0]['result']['features']['method_param_schemas']; assert 'akbp.import_apply' in rows[0]['result']['methods']; assert rows[1]['error']['code'] == 'invalid_params'; assert 'limit must be between 1 and 100' in rows[1]['error']['details']['type_errors']; print('tool server module install ok')"; \
+	printf '%s\n' '{"id":"caps","method":"akbp.capabilities"}' | PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp-tool-server | python3 -c "import json,sys; row=json.loads(sys.stdin.readline()); assert row['result']['features']['method_param_schemas']; assert 'akbp.import_apply' in row['result']['methods']; print('tool server console install ok')"
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score
