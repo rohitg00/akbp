@@ -74,6 +74,8 @@ The repo includes small conformance fixtures under `examples/level-0/`, `example
 
 Benchmark scenario fixtures live under `benchmarks/fixtures/`.
 
+For authoring rules and review criteria, see `docs/BENCHMARK_FIXTURE_AUTHORING.md`.
+
 Run deterministic fixture scoring with:
 
 ```bash
