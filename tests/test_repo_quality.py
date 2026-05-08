@@ -125,6 +125,41 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+
+    def test_quickstart_demo_documents_public_alpha_path(self):
+        readme = (ROOT / "examples" / "quickstart-demo" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "quickstart-demo" / "run.sh").read_text(encoding="utf-8")
+        note = (ROOT / "examples" / "quickstart-demo" / "session-note.md").read_text(encoding="utf-8")
+        for required in [
+            "AKBP quickstart demo",
+            "source verify --fail-on-issue",
+            "export-check",
+            "conformance --level 3",
+            "AKBP quickstart demo passed",
+            "docs/TROUBLESHOOTING.md",
+            "make demo",
+        ]:
+            self.assertIn(required, readme + script)
+        self.assertIn("small, weekly, and evidence-backed", note)
+
+    def test_makefile_exposes_demo_target(self):
+        text = (ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("demo:", text)
+        self.assertIn("examples/quickstart-demo/run.sh", text)
+
+    def test_troubleshooting_covers_common_dx_failures(self):
+        text = (ROOT / "docs" / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp command is not found",
+            "akbp-tool-server",
+            "approval_required",
+            "source verify",
+            "export-check",
+            "Search returns no results",
+            "make validate",
+        ]:
+            self.assertIn(required, text)
+
     def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
         self.assertGreaterEqual(len(markdown), 10)
