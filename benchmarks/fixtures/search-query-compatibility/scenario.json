@@ -1,0 +1,78 @@
+{
+  "id": "search-query-compatibility-001",
+  "task": "Validate SQLite FTS query compatibility for phrase, version, hyphenated, and slash-separated search terms.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_search_query_compat",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract search compatibility"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_search_query_compat",
+        "text": "Python 3.12 and Node-22 compatible agents should use the JSONL tool-server contract for retrieval/search interop.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_search_query_compat"],
+        "entities": ["Python 3.12", "Node-22", "JSONL", "tool-server", "retrieval/search"],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "index-for-search-compat",
+        "method": "akbp.index",
+        "approved": true,
+        "params": {"incremental": true},
+        "expected_result_fields": ["ok", "db", "rows", "indexed", "skipped", "removed", "incremental", "indexed_keys", "skipped_keys", "removed_keys"],
+        "expected_result_values": {"ok": true, "incremental": true},
+        "expected_result_schema": "#/$defs/index_result"
+      },
+      {
+        "id": "phrase-version-hyphen-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "\"Python 3.12\" AND Node-22 AND JSONL",
+          "limit": 5
+        },
+        "expected_result_fields": ["query", "backend", "fts_query", "results"],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "\"Python 3 12\" AND \"Node-22\" AND \"JSONL\""
+        },
+        "expected_result_contains": {
+          "results[].id": ["claim_search_query_compat"]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "slash-and-prefix-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "retrieval/search AND tool*",
+          "limit": 5
+        },
+        "expected_result_fields": ["query", "backend", "fts_query", "results"],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "\"retrieval/search\" AND tool*"
+        },
+        "expected_result_contains": {
+          "results[].id": ["claim_search_query_compat"]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      }
+    ]
+  },
+  "query": "How should Python 3.12 and Node-22 agents search JSONL tool-server knowledge?",
+  "expected": {
+    "must_retrieve": ["claim_search_query_compat"],
+    "must_cite": ["source_search_query_compat"],
+    "answer_should_include": ["Python 3.12", "Node-22", "JSONL", "tool-server", "retrieval/search"],
+    "must_apply_tool_methods": ["akbp.index"]
+  }
+}
