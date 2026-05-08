@@ -14,14 +14,45 @@
       {
         "text": "The deployment failed because OPENAI_API_KEY=sk-example1234567890 was missing in production.",
         "type": "blocker",
-        "evidence": ["source_terminal_output"],
+        "evidence": [
+          "source_terminal_output"
+        ],
         "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "source-title-redaction",
+        "method": "akbp.source.add",
+        "approved": true,
+        "params": {
+          "locator": "sessions/output.md",
+          "type": "transcript",
+          "title": "Terminal output OPENAI_API_KEY=sk-example1234567890"
+        },
+        "expected_result_fields": [
+          "id",
+          "type",
+          "locator",
+          "title",
+          "immutable",
+          "scope",
+          "created_at",
+          "metadata"
+        ],
+        "expected_result_values": {
+          "title": "Terminal output [REDACTED]"
+        },
+        "expected_result_schema": "#/$defs/source_result"
       }
     ]
   },
   "query": "Store the durable blocker from the terminal output.",
   "expected": {
-    "must_redact_patterns": ["sk-", "OPENAI_API_KEY="],
+    "must_redact_patterns": [
+      "sk-",
+      "OPENAI_API_KEY="
+    ],
     "must_not_store_raw_secret": true,
     "safe_claim_text": "The deployment failed because a required API key environment variable was missing in production."
   }

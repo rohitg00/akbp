@@ -458,6 +458,7 @@ def redact_text(text: str) -> str:
         r"xox[baprs]-[A-Za-z0-9-]{8,}",
         r"gh[pousr]_[A-Za-z0-9_]{16,}",
         r"AKIA[0-9A-Z]{12,}",
+        r"(?i)\b[A-Z0-9_]*(api[_-]?key|token|secret|password)\s*[:=]\s*[^\s`'\"]+",
         r"(?i)(api[_-]?key|token|secret|password)\s*[:=]\s*[^\s`'\"]+",
     ]
     redacted = text
