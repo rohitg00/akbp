@@ -432,6 +432,9 @@
         "akbp.source.add": {
           "$ref": "#/$defs/akbp.source.add.params"
         },
+        "akbp.source.verify": {
+          "$ref": "#/$defs/akbp.source.verify.params"
+        },
         "akbp.ingest": {
           "$ref": "#/$defs/akbp.ingest.params"
         },

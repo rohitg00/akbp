@@ -1281,7 +1281,10 @@ def resolve_source_file(base: Path, locator: str) -> Path:
     candidate = Path(locator)
     if candidate.is_absolute():
         return candidate
-    return (base / locator).resolve()
+    base_candidate = (base / locator).resolve()
+    if base_candidate.exists():
+        return base_candidate
+    return candidate.resolve()
 
 
 def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
