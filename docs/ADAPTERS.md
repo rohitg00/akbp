@@ -120,6 +120,7 @@ Use this checklist before opening a pull request:
 - Point the startup and shutdown loop to `docs/AGENT_FLOW.md`.
 - Use public-safe runtime names and avoid private workspace paths, tokens, screenshots, cookies, logs, or user-specific config.
 - Include `README.md`, `instructions.md`, `config.example.json`, `session-start.md`, `session-end.md`, and `privacy.md` when the runtime supports those concepts.
+- In `config.example.json`, include an explicit `akbp.lifecycle` mapping for `akbp.session.start` and `akbp.session.end`, with shutdown apply mode requiring approval.
 - Show both read flow and write flow: retrieve context first, write cited durable records after work, then validate or index when useful.
 - Prefer `dry_run` examples for write-capable tool-server calls.
 - Treat `review_required` and `apply_instruction` as UI/runtime obligations, not optional metadata.

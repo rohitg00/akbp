@@ -27,7 +27,7 @@ Keep examples public-safe. Do not include local usernames, private paths, tokens
 
 ## 2. Discover capabilities before calling methods
 
-An adapter should call `akbp.capabilities` at startup and cache the response for the session.
+An adapter should call `akbp.capabilities` at startup and cache the response for the session. Adapter config examples expose a `lifecycle` block that maps runtime hooks to `akbp.session.start` and `akbp.session.end`; keep that mapping explicit so users can audit what writes may happen at shutdown.
 
 JSONL request:
 

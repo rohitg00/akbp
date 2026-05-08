@@ -413,6 +413,18 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn("review_required", text, rel)
             self.assertIn("apply_instruction", text, rel)
 
+    def test_all_adapter_configs_define_lifecycle_hooks(self):
+        adapters_root = ROOT / "adapters"
+        adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
+        for adapter in adapters:
+            rel = str(adapter.relative_to(ROOT))
+            config = json.loads((adapter / "config.example.json").read_text(encoding="utf-8"))
+            lifecycle = config.get("akbp", {}).get("lifecycle", {})
+            self.assertEqual(lifecycle.get("session_start_method"), "akbp.session.start", rel)
+            self.assertEqual(lifecycle.get("session_end_method"), "akbp.session.end", rel)
+            self.assertTrue(lifecycle.get("session_end_dry_run_first"), rel)
+            self.assertTrue(lifecycle.get("session_end_apply_requires_approved"), rel)
+
     def test_all_adapter_configs_require_approval_gated_writes(self):
         adapters_root = ROOT / "adapters"
         adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
