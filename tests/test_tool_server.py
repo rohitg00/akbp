@@ -479,6 +479,23 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[2]["result"]["relations"])
             assert_matches_required_schema(self, lines[2]["result"]["relations"][0], schema_def("relation_result"))
 
+
+    def test_export_check_method_validates_bundle_manifest(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            run_cli("--path", str(kb), "source", "add", "AKBP.md", "--title", "AKBP doc")
+            run_cli("--path", str(kb), "remember", "AKBP exports have checkable manifests", "--evidence", "AKBP.md")
+            bundle = Path(d) / "bundle.json"
+            bundle.write_text(run_cli("--path", str(kb), "export").stdout, encoding="utf-8")
+            request = json.dumps({"id": "export-check", "path": str(kb), "method": "akbp.export_check", "params": {"file": str(bundle), "fail_on_issues": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("export_check_result"))
+            self.assertTrue(line["result"]["ok"])
+            self.assertEqual(line["result"]["issues"], [])
+
     def test_import_check_method_validates_jsonl_without_echoing_secret(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

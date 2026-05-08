@@ -1240,6 +1240,88 @@ def cmd_export(args: argparse.Namespace) -> int:
     return 0
 
 
+
+def is_sha256_hex(value: Any) -> bool:
+    return isinstance(value, str) and bool(re.fullmatch(r"[0-9a-f]{64}", value))
+
+
+def check_export_bundle_file(bundle_path: Path) -> dict[str, Any]:
+    issues: list[dict[str, Any]] = []
+    try:
+        raw = bundle_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError as exc:
+        return {
+            "ok": False,
+            "file": str(bundle_path),
+            "checked_at": now_iso(),
+            "issues": [{"code": "file_unreadable", "message": str(exc)}],
+            "counts": {"claims": 0, "sources": 0, "entities": 0, "relations": 0},
+        }
+    if redact_text(raw) != raw:
+        issues.append({"code": "secret_like_value", "message": "bundle contains a secret-like value"})
+    try:
+        bundle = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "ok": False,
+            "file": str(bundle_path),
+            "checked_at": now_iso(),
+            "issues": [*issues, {"code": "invalid_json", "message": exc.msg, "line": exc.lineno, "column": exc.colno}],
+            "counts": {"claims": 0, "sources": 0, "entities": 0, "relations": 0},
+        }
+    if not isinstance(bundle, dict):
+        issues.append({"code": "invalid_bundle", "message": "export bundle must be a JSON object"})
+        bundle = {}
+    for name in ["claims", "sources", "entities", "relations"]:
+        if not isinstance(bundle.get(name), list):
+            issues.append({"code": "invalid_collection", "message": f"{name} must be an array"})
+    counts = {name: len(bundle.get(name)) if isinstance(bundle.get(name), list) else 0 for name in ["claims", "sources", "entities", "relations"]}
+    manifest = bundle.get("manifest")
+    manifest_format = None
+    if not isinstance(manifest, dict):
+        issues.append({"code": "missing_manifest", "message": "bundle manifest is required"})
+        manifest = {}
+    else:
+        manifest_format = manifest.get("format")
+        if manifest.get("format") != "akbp-portable-bundle":
+            issues.append({"code": "invalid_manifest_format", "message": "manifest format must be akbp-portable-bundle"})
+        manifest_counts = manifest.get("counts")
+        if not isinstance(manifest_counts, dict):
+            issues.append({"code": "missing_manifest_counts", "message": "manifest counts are required"})
+        else:
+            for name, count in counts.items():
+                if manifest_counts.get(name) != count:
+                    issues.append({"code": "count_mismatch", "message": f"manifest count for {name} does not match bundle", "expected": count, "actual": manifest_counts.get(name)})
+        hashes = manifest.get("artifact_hashes")
+        if not isinstance(hashes, dict):
+            issues.append({"code": "missing_artifact_hashes", "message": "manifest artifact_hashes are required"})
+        else:
+            for name in ["card", "claims", "sources", "entities", "relations"]:
+                value = hashes.get(name)
+                if value is not None and not is_sha256_hex(value):
+                    issues.append({"code": "invalid_artifact_hash", "message": f"artifact hash for {name} must be a SHA-256 hex string or null"})
+        safety = manifest.get("safety")
+        if not isinstance(safety, dict):
+            issues.append({"code": "missing_safety", "message": "manifest safety flags are required"})
+        else:
+            for flag in ["excludes_local_state", "excludes_indexes", "secret_redaction_required"]:
+                if safety.get(flag) is not True:
+                    issues.append({"code": "unsafe_manifest", "message": f"manifest safety flag {flag} must be true"})
+    return {
+        "ok": not issues,
+        "file": str(bundle_path),
+        "checked_at": now_iso(),
+        "manifest_format": manifest_format,
+        "counts": counts,
+        "issues": issues,
+    }
+
+
+def cmd_export_check(args: argparse.Namespace) -> int:
+    result = check_export_bundle_file(Path(args.file).resolve())
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 1 if args.fail_on_issues and result["issues"] else 0
+
 def cmd_audit(args: argparse.Namespace) -> int:
     base = root(args.path)
     events = read_jsonl(base / ".akbp" / "audit.log.jsonl")
@@ -1398,6 +1480,11 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("export")
     s.add_argument("--output")
     s.set_defaults(func=cmd_export)
+
+    s = sub.add_parser("export-check")
+    s.add_argument("file")
+    s.add_argument("--fail-on-issues", action="store_true")
+    s.set_defaults(func=cmd_export_check)
 
     s = sub.add_parser("audit")
     s.add_argument("--limit", type=int, default=20)

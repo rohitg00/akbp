@@ -93,6 +93,8 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 `akbp export` emits a portable JSON bundle containing the card, claims, sources, entities, relations, and a self-describing manifest. The manifest records artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata. It is intentionally separate from local indexes or engine-owned state.
 
+`akbp export-check bundle.json --fail-on-issues` validates a bundle before another agent trusts it. It checks JSON shape, manifest presence, object counts, artifact hash format, safety flags, and secret-like values.
+
 ## Contradictions
 
 `akbp contradict` records a typed relation between two claims and marks both active claims as `contested`. This keeps conflict information explicit instead of silently overwriting old knowledge.
