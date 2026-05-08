@@ -33,7 +33,8 @@
       "properties": {
         "query": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "limit": {
           "$ref": "#/$defs/limit"
@@ -49,7 +50,8 @@
       "properties": {
         "task": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 8192
         },
         "limit": {
           "$ref": "#/$defs/limit"
@@ -65,7 +67,8 @@
       "properties": {
         "text": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 65536
         },
         "type": {
           "type": "string",
@@ -78,7 +81,8 @@
             "question",
             "warning"
           ],
-          "default": "observation"
+          "default": "observation",
+          "maxLength": 64
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -101,7 +105,8 @@
       "properties": {
         "locator": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "type": {
           "type": "string",
@@ -118,10 +123,12 @@
             "audio",
             "video",
             "folder"
-          ]
+          ],
+          "maxLength": 64
         },
         "title": {
-          "type": "string"
+          "type": "string",
+          "maxLength": 512
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -142,11 +149,13 @@
       "properties": {
         "old_claim_id": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 512
         },
         "text": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 65536
         },
         "type": {
           "type": "string",
@@ -159,7 +168,8 @@
             "observation",
             "question",
             "warning"
-          ]
+          ],
+          "maxLength": 64
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -183,11 +193,13 @@
       "properties": {
         "source_claim_id": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 512
         },
         "target_claim_id": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 512
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -202,8 +214,15 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "source_id": { "type": "string", "minLength": 1 },
-        "fail_on_issue": { "type": "boolean", "default": false }
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "fail_on_issue": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "akbp.ingest.params": {
@@ -215,7 +234,8 @@
       "properties": {
         "file": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "type": {
           "type": "string",
@@ -232,13 +252,16 @@
             "audio",
             "video",
             "folder"
-          ]
+          ],
+          "maxLength": 64
         },
         "title": {
-          "type": "string"
+          "type": "string",
+          "maxLength": 512
         },
         "claim": {
-          "type": "string"
+          "type": "string",
+          "maxLength": 65536
         },
         "claim_type": {
           "type": "string",
@@ -251,7 +274,8 @@
             "observation",
             "question",
             "warning"
-          ]
+          ],
+          "maxLength": 64
         },
         "confidence": {
           "type": "number",
@@ -271,10 +295,19 @@
     "akbp.export_check.params": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "properties": {
-        "file": { "type": "string", "minLength": 1 },
-        "fail_on_issues": { "type": "boolean", "default": false }
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "fail_on_issues": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "akbp.import_check.params": {
@@ -286,7 +319,8 @@
       "properties": {
         "file": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "fail_on_rejected": {
           "type": "boolean",
@@ -303,7 +337,8 @@
       "properties": {
         "file": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "dry_run": {
           "type": "boolean",
@@ -334,7 +369,8 @@
       "properties": {
         "query": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "limit": {
           "$ref": "#/$defs/limit"
@@ -363,7 +399,8 @@
             "2",
             "3"
           ],
-          "default": "0"
+          "default": "0",
+          "maxLength": 16
         }
       }
     },
@@ -390,7 +427,8 @@
       "properties": {
         "claim_id": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 512
         }
       }
     },
@@ -403,7 +441,8 @@
       "properties": {
         "transcript": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 65536
         },
         "apply": {
           "type": "boolean",
@@ -421,11 +460,13 @@
       "properties": {
         "task": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 8192
         },
         "query": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 4096
         },
         "limit": {
           "$ref": "#/$defs/limit"
@@ -441,7 +482,8 @@
       "properties": {
         "transcript": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 65536
         },
         "apply": {
           "type": "boolean",

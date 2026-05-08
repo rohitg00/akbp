@@ -822,6 +822,15 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(line["error"]["code"], "unknown_method")
         self.assertIn("available_methods", line["error"]["details"])
 
+    def test_oversized_string_params_are_structured_before_cli(self):
+        with tempfile.TemporaryDirectory() as d:
+            req = {"id": "too-long-query", "method": "akbp.search", "path": d, "params": {"query": "x" * 4097}}
+            proc = subprocess.run([sys.executable, str(SERVER)], input=json.dumps(req) + "\n", text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertFalse(lines[0]["ok"])
+            self.assertEqual(lines[0]["error"]["code"], "invalid_params")
+            self.assertIn("query must be at most 4096 characters", lines[0]["error"]["details"]["type_errors"])
+
     def test_invalid_params_are_structured_before_cli(self):
         requests = "\n".join([
             json.dumps({"id": "shape", "method": "akbp.search", "params": "not an object"}),
