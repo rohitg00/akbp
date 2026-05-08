@@ -101,6 +101,17 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
 
+
+    def test_unknown_method_rejection_fixture_covers_available_methods(self):
+        path = FIXTURES / "unknown-method-rejection" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.not_supported")
+        self.assertEqual(request["expected_error_code"], "unknown_method")
+        self.assertEqual(request["expected_error_schema"], "#/$defs/unknown_method_details")
+        self.assertIn("available_methods[]", request["expected_error_contains"])
+        self.assertIn("akbp.capabilities", request["expected_error_contains"]["available_methods[]"])
+
     def test_invalid_param_rejection_fixture_covers_param_error_shapes(self):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
