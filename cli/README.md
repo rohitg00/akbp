@@ -45,7 +45,7 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 `akbp ingest notes.md` imports a local file into `wiki/imports/`, records a source in `raw/sources/sources.jsonl`, extracts lightweight signals from headings and decision-like lines, and redacts common token/key patterns from the imported page. Use `--claim` to create one evidence-backed claim while importing; claim text is redacted with the same safety filter before durable write. Use `akbp ingest notes.md --dry-run` to preview source, page, claim ids, signals, redaction status, and would-write paths without changing the knowledge base.
 
-`akbp import-check export.jsonl` validates imported JSONL objects before durable writes. It reports accepted ids and rejected ids without echoing secret-like raw values, so agents can review exports before using `ingest`, `remember`, or `import-apply`. Add `--fail-on-rejected` in automation when any rejected object should fail the gate.
+`akbp import-check export.jsonl` validates imported JSONL objects before durable writes. It reports accepted ids and rejected ids without echoing secret-like raw values, rejects claims that cite unknown `source_...` evidence ids, and lets agents review exports before using `ingest`, `remember`, or `import-apply`. Add `--fail-on-rejected` in automation when any rejected object should fail the gate.
 
 `akbp import-apply export.jsonl --dry-run` previews accepted source and claim records that would be written. Apply with `akbp import-apply export.jsonl --approved` only after reviewing `import-check` and the dry-run output. Rejected, malformed, or unsupported objects block the apply path.
 
@@ -89,9 +89,13 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 `akbp source add` records immutable source material before claims cite it. For local files, the CLI records a SHA-256 hash when the file exists.
 
+`akbp source verify --fail-on-issue` re-checks recorded file sources against their stored hashes and separates verified, changed, missing, and unchecked evidence.
+
 ## Export
 
 `akbp export` emits a portable JSON bundle containing the card, claims, sources, entities, relations, and a self-describing manifest. The manifest records artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata. It is intentionally separate from local indexes or engine-owned state.
+
+`akbp export-check bundle.json --fail-on-issues` validates a bundle before another agent trusts it. It checks JSON shape, manifest presence, object counts, artifact hash format, safety flags, and secret-like values.
 
 ## Contradictions
 

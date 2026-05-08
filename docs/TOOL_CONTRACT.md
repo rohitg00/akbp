@@ -144,6 +144,14 @@ Return recent audit events.
 
 Return a portable bundle of protocol artifacts: card, claims, sources, entities, and relations. Local indexes and engine-owned state are excluded. The result includes a `manifest` with artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata so another agent can inspect the bundle before accepting it.
 
+## `akbp.source.verify`
+
+Re-check recorded file sources against their stored SHA-256 hashes. The result separates verified, changed, missing, and unchecked sources so agents can catch evidence drift before relying on old claims.
+
+## `akbp.export_check`
+
+Validate a portable export bundle before another agent trusts it. The check verifies JSON shape, manifest presence, object counts, artifact hash format, safety flags, and secret-like values. Use `fail_on_issues:true` in automation when any issue should stop the workflow.
+
 ## `akbp.audit`
 
 Return recent audit events, optionally filtered by event type.
@@ -163,9 +171,11 @@ Supported methods in the first server slice:
 - `akbp.remember`
 - `akbp.conformance`
 - `akbp.export`
+- `akbp.export_check`
 - `akbp.audit`
 - `akbp.cite`
 - `akbp.source.add`
+- `akbp.source.verify`
 - `akbp.ingest`
 - `akbp.import_check`
 - `akbp.import_apply`
@@ -181,7 +191,7 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
-`akbp.capabilities` returns these schema URLs under `result.schemas`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, and structured approval-required errors.
+`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, and structured approval-required errors. Runtime policy includes JSONL stdio transport, default path behavior, request-size guidance, supported hash algorithms, dry-run support, review-gated writes, and the approval field name.
 
 `tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method, including:
 
@@ -197,6 +207,7 @@ Request and response envelopes are specified in:
 - `akbp.audit`
 - `akbp.cite`
 - `akbp.source.add`
+- `akbp.source.verify`
 - `akbp.ingest`
 - `akbp.import_check`
 - `akbp.import_apply`
@@ -253,7 +264,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/dry_run_review_result`: a closed generic dry-run write result with `dry_run:true`, `would_write:true`, `method`, `path`, `argv`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/ingest_dry_run_result`: a closed `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/ingest_result`: a closed approved `akbp.ingest` result with source id, imported page path, extracted signals, created claim ids, and redaction status.
-- `#/$defs/import_check_result`: a closed `akbp.import_check` result with checked, accepted, rejected, and error counts, strict-fail mode status, accepted object ids, rejected object ids, and parse errors without raw secret echo.
+- `#/$defs/import_check_result`: a closed `akbp.import_check` result with checked, accepted, rejected, and error counts, strict-fail mode status, accepted object ids, rejected object ids, unknown source-evidence rejection, and parse errors without raw secret echo.
 - `#/$defs/import_apply_result`: a closed `akbp.import_apply` result with dry-run/apply status, accepted counts, rejected counts, would-write ids, and skipped-existing ids. Review `accepted_count`, `rejected_count`, `error_count`, `would_write.sources`, and `would_write.claims` before repeating the request with `approved:true`.
 - `#/$defs/crystallize_session_result`: a closed approved session crystallization result with `session_id`, extracted closed `summary`, output page, source id, created claims, and skipped claims.
 - `#/$defs/approval_required_details`: a closed `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.

@@ -251,6 +251,7 @@
         "version",
         "features",
         "schemas",
+        "runtime",
         "methods",
         "examples"
       ],
@@ -330,6 +331,48 @@
             "methods": {
               "type": "string",
               "minLength": 1
+            }
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "transport",
+            "default_path",
+            "max_request_bytes",
+            "hash_algorithms",
+            "supports_dry_run",
+            "write_policy",
+            "approval_field"
+          ],
+          "properties": {
+            "transport": {
+              "const": "jsonl-stdio"
+            },
+            "default_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "max_request_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "hash_algorithms": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "enum": ["sha256"]
+              }
+            },
+            "supports_dry_run": {
+              "const": true
+            },
+            "write_policy": {
+              "const": "review-gated"
+            },
+            "approval_field": {
+              "const": "approved"
             }
           }
         },
@@ -955,6 +998,42 @@
         }
       }
     },
+    "export_check_issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 },
+        "expected": { "type": ["integer", "string", "null"] },
+        "actual": { "type": ["integer", "string", "null"] }
+      }
+    },
+    "export_check_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "file", "checked_at", "manifest_format", "counts", "issues"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "file": { "type": "string", "minLength": 1 },
+        "checked_at": { "type": "string", "minLength": 1 },
+        "manifest_format": { "type": ["string", "null"] },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["claims", "sources", "entities", "relations"],
+          "properties": {
+            "claims": { "type": "integer", "minimum": 0 },
+            "sources": { "type": "integer", "minimum": 0 },
+            "entities": { "type": "integer", "minimum": 0 },
+            "relations": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "issues": { "type": "array", "items": { "$ref": "#/$defs/export_check_issue" } }
+      }
+    },
     "export_result": {
       "type": "object",
       "additionalProperties": false,
@@ -1137,6 +1216,7 @@
         "id",
         "event",
         "created_at",
+        "operation",
         "data"
       ],
       "properties": {
@@ -1151,6 +1231,40 @@
         "created_at": {
           "type": "string",
           "minLength": 1
+        },
+        "operation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "actor",
+            "mode",
+            "outcome",
+            "approval_required",
+            "redaction_checked"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "actor": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "enum": ["read", "write"]
+            },
+            "outcome": {
+              "enum": ["ok", "failed", "blocked"]
+            },
+            "approval_required": {
+              "type": "boolean"
+            },
+            "redaction_checked": {
+              "type": "boolean"
+            }
+          }
         },
         "data": {
           "type": "object",
@@ -1312,6 +1426,46 @@
             "null"
           ]
         }
+      }
+    },
+    "source_verify_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "locator"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "locator": { "type": "string" },
+        "hash": { "type": "string" },
+        "expected_hash": { "type": "string" },
+        "actual_hash": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "source_verify_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "checked_at", "source_id", "counts", "verified", "changed", "missing", "unchecked"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "checked_at": { "type": "string", "minLength": 1 },
+        "source_id": { "type": ["string", "null"] },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["checked", "verified", "changed", "missing", "unchecked"],
+          "properties": {
+            "checked": { "type": "integer", "minimum": 0 },
+            "verified": { "type": "integer", "minimum": 0 },
+            "changed": { "type": "integer", "minimum": 0 },
+            "missing": { "type": "integer", "minimum": 0 },
+            "unchecked": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "verified": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } },
+        "changed": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } },
+        "missing": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } },
+        "unchecked": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } }
       }
     },
     "source_result": {

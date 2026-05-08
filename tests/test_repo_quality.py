@@ -82,6 +82,20 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_portable_bundle_example_documents_review_flow(self):
+        text = (ROOT / "examples" / "portable-bundle" / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp-portable-bundle",
+            "excludes_local_state",
+            "excludes_indexes",
+            "import-check",
+            "import-apply",
+            "--dry-run",
+            "--approved",
+            "secret-like values",
+        ]:
+            self.assertIn(required, text)
+
     def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
         self.assertGreaterEqual(len(markdown), 10)
@@ -193,9 +207,11 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.remember",
             "akbp.conformance",
             "akbp.export",
+            "akbp.export_check",
             "akbp.audit",
             "akbp.cite",
             "akbp.source.add",
+            "akbp.source.verify",
             "akbp.ingest",
             "akbp.supersede",
             "akbp.contradict",

@@ -198,6 +198,14 @@
         }
       }
     },
+    "akbp.source.verify.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "fail_on_issue": { "type": "boolean", "default": false }
+      }
+    },
     "akbp.ingest.params": {
       "type": "object",
       "additionalProperties": false,
@@ -258,6 +266,15 @@
           "type": "boolean",
           "default": false
         }
+      }
+    },
+    "akbp.export_check.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "fail_on_issues": { "type": "boolean", "default": false }
       }
     },
     "akbp.import_check.params": {
@@ -423,6 +440,9 @@
         },
         "akbp.source.add": {
           "$ref": "#/$defs/akbp.source.add.params"
+        },
+        "akbp.source.verify": {
+          "$ref": "#/$defs/akbp.source.verify.params"
         },
         "akbp.ingest": {
           "$ref": "#/$defs/akbp.ingest.params"

@@ -175,6 +175,7 @@ class ToolServerTest(unittest.TestCase):
         for name in ["audit_event", "exported_claim", "claim_result", "source_result", "entity_result", "relation_result"]:
             self.assertFalse(defs[name]["additionalProperties"])
         self.assertIn("event", defs["audit_event"]["required"])
+        self.assertIn("operation", defs["audit_event"]["required"])
         self.assertIn("confidence", defs["exported_claim"]["required"])
         self.assertIn("superseded_by", defs["exported_claim"]["properties"])
         self.assertIn("text", defs["claim_result"]["required"])
@@ -254,6 +255,7 @@ class ToolServerTest(unittest.TestCase):
         reference_result = json.loads(reference.stdout)["result"]
         installed_result = json.loads(installed.stdout)["result"]
         self.assertEqual(installed_result["features"], reference_result["features"])
+        self.assertEqual(installed_result["runtime"], reference_result["runtime"])
         self.assertEqual(set(installed_result["methods"]), set(reference_result["methods"]))
         self.assertIn("akbp.import_apply", installed_result["methods"])
         self.assertTrue(installed_result["features"]["method_param_schemas"])
@@ -279,6 +281,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])
+            self.assertEqual(lines[0]["result"]["runtime"]["transport"], "jsonl-stdio")
+            self.assertEqual(lines[0]["result"]["runtime"]["write_policy"], "review-gated")
+            self.assertIn("sha256", lines[0]["result"]["runtime"]["hash_algorithms"])
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
@@ -478,6 +483,45 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"]["sources"][0], schema_def("source_result"))
             self.assertTrue(lines[2]["result"]["relations"])
             assert_matches_required_schema(self, lines[2]["result"]["relations"][0], schema_def("relation_result"))
+
+
+    def test_source_verify_method_reports_file_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            source = json.loads(run_cli("--path", str(kb), "source", "add", "AKBP.md", "--title", "AKBP doc").stdout)
+            requests = "\n".join([
+                json.dumps({"id": "source-ok", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"], "fail_on_issue": True}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("source_verify_result"))
+            self.assertTrue(line["result"]["ok"])
+            self.assertEqual(line["result"]["counts"]["verified"], 1)
+            (kb / "AKBP.md").write_text("changed", encoding="utf-8")
+            request = json.dumps({"id": "source-changed", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"], "fail_on_issue": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertFalse(line["result"]["ok"])
+            self.assertEqual(line["result"]["counts"]["changed"], 1)
+
+    def test_export_check_method_validates_bundle_manifest(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            run_cli("--path", str(kb), "source", "add", "AKBP.md", "--title", "AKBP doc")
+            run_cli("--path", str(kb), "remember", "AKBP exports have checkable manifests", "--evidence", "AKBP.md")
+            bundle = Path(d) / "bundle.json"
+            bundle.write_text(run_cli("--path", str(kb), "export").stdout, encoding="utf-8")
+            request = json.dumps({"id": "export-check", "path": str(kb), "method": "akbp.export_check", "params": {"file": str(bundle), "fail_on_issues": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("export_check_result"))
+            self.assertTrue(line["result"]["ok"])
+            self.assertEqual(line["result"]["issues"], [])
 
     def test_import_check_method_validates_jsonl_without_echoing_secret(self):
         with tempfile.TemporaryDirectory() as d:

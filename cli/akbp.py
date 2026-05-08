@@ -229,10 +229,21 @@ def validate_claim_shape(claim: dict[str, Any]) -> list[str]:
     return errors
 
 def audit(base: Path, event: str, data: dict[str, Any]) -> None:
+    created_at = now_iso()
+    write_events = {"remember", "ingest", "import_apply", "crystallize", "source_add", "contradict", "supersede", "init", "index"}
+    operation = {
+        "name": event,
+        "actor": "akbp-cli",
+        "mode": "write" if event in write_events else "read",
+        "outcome": "ok",
+        "approval_required": event in {"import_apply"},
+        "redaction_checked": event in {"ingest", "import_apply"},
+    }
     append_jsonl(base / ".akbp" / "audit.log.jsonl", {
-        "id": stable_id("audit", event, now_iso(), json.dumps(data, sort_keys=True)),
+        "id": stable_id("audit", event, created_at, json.dumps(data, sort_keys=True)),
         "event": event,
-        "created_at": now_iso(),
+        "created_at": created_at,
+        "operation": operation,
         "data": data,
     })
 
@@ -611,22 +622,55 @@ def normalize_import_object(item: dict[str, Any]) -> tuple[str | None, dict[str,
         return kind, claim, None
     return kind or "object", None, "unsupported import kind"
 
+
+def import_reference_rejections(base: Path, normalized: list[tuple[str, dict[str, Any], int]]) -> list[dict[str, Any]]:
+    known_source_ids = {source.get("id") for source in load_sources(base) if source.get("id")}
+    known_source_ids.update(record.get("id") for kind, record, _line in normalized if kind == "source")
+    rejected: list[dict[str, Any]] = []
+    for kind, record, line in normalized:
+        if kind != "claim":
+            continue
+        for evidence in record.get("evidence") or []:
+            if isinstance(evidence, str) and evidence.startswith("source_") and evidence not in known_source_ids:
+                rejected.append({
+                    "id": record.get("id", f"line-{line}"),
+                    "kind": kind,
+                    "line": line,
+                    "reason": f"unknown evidence source id: {evidence}",
+                })
+                break
+    return rejected
+
 def cmd_import_check(args: argparse.Namespace) -> int:
     source = Path(args.file).resolve()
     if not source.exists() or not source.is_file():
         print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
         return 1
     accepted, rejected, errors = import_jsonl_objects(source)
+    checked_count = len(accepted) + len(rejected)
+    normalized: list[tuple[str, dict[str, Any], int]] = []
+    accepted_by_line = {item["line"]: item for item in accepted}
+    for item in accepted:
+        kind, record, error = normalize_import_object(item["object"])
+        if error or record is None or kind is None:
+            rejected.append({"id": item["id"], "kind": kind or item["kind"], "line": item["line"], "reason": error or "invalid_import_object"})
+            accepted_by_line.pop(item["line"], None)
+            continue
+        normalized.append((kind, record, item["line"]))
+    for item in import_reference_rejections(root(args.path), normalized):
+        rejected.append(item)
+        accepted_by_line.pop(item["line"], None)
+    accepted_public = public_import_items(list(accepted_by_line.values()))
     failed = bool(errors) or (bool(rejected) and bool(getattr(args, "fail_on_rejected", False)))
     print(json.dumps({
         "ok": not failed,
         "file": str(source),
-        "checked": len(accepted) + len(rejected),
-        "accepted_count": len(accepted),
+        "checked": checked_count,
+        "accepted_count": len(accepted_public),
         "rejected_count": len(rejected),
         "error_count": len(errors),
         "fail_on_rejected": bool(getattr(args, "fail_on_rejected", False)),
-        "accepted": public_import_items(accepted),
+        "accepted": accepted_public,
         "rejected": public_import_items(rejected),
         "errors": errors,
     }, indent=2, ensure_ascii=False))
@@ -643,6 +687,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
         return 1
     accepted, rejected, errors = import_jsonl_objects(source)
+    checked_count = len(accepted) + len(rejected)
     normalized: list[tuple[str, dict[str, Any], int]] = []
     for item in accepted:
         kind, record, error = normalize_import_object(item["object"])
@@ -650,13 +695,16 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             rejected.append({"id": item["id"], "kind": kind or item["kind"], "line": item["line"], "reason": error or "invalid_import_object"})
             continue
         normalized.append((kind, record, item["line"]))
+    rejected.extend(import_reference_rejections(base, normalized))
+    rejected_lines = {item["line"] for item in rejected}
+    normalized = [item for item in normalized if item[2] not in rejected_lines]
     if errors or rejected:
         result = {
             "ok": False,
             "file": str(source),
             "dry_run": bool(args.dry_run),
             "applied": False,
-            "checked": len(accepted) + len(rejected),
+            "checked": checked_count,
             "accepted_count": len(normalized),
             "rejected_count": len(rejected),
             "error_count": len(errors),
@@ -688,7 +736,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         "file": str(source),
         "dry_run": bool(args.dry_run),
         "applied": False,
-        "checked": len(accepted),
+        "checked": checked_count,
         "accepted_count": len(normalized),
         "rejected_count": 0,
         "error_count": 0,
@@ -1240,6 +1288,88 @@ def cmd_export(args: argparse.Namespace) -> int:
     return 0
 
 
+
+def is_sha256_hex(value: Any) -> bool:
+    return isinstance(value, str) and bool(re.fullmatch(r"[0-9a-f]{64}", value))
+
+
+def check_export_bundle_file(bundle_path: Path) -> dict[str, Any]:
+    issues: list[dict[str, Any]] = []
+    try:
+        raw = bundle_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError as exc:
+        return {
+            "ok": False,
+            "file": str(bundle_path),
+            "checked_at": now_iso(),
+            "issues": [{"code": "file_unreadable", "message": str(exc)}],
+            "counts": {"claims": 0, "sources": 0, "entities": 0, "relations": 0},
+        }
+    if redact_text(raw) != raw:
+        issues.append({"code": "secret_like_value", "message": "bundle contains a secret-like value"})
+    try:
+        bundle = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "ok": False,
+            "file": str(bundle_path),
+            "checked_at": now_iso(),
+            "issues": [*issues, {"code": "invalid_json", "message": exc.msg, "line": exc.lineno, "column": exc.colno}],
+            "counts": {"claims": 0, "sources": 0, "entities": 0, "relations": 0},
+        }
+    if not isinstance(bundle, dict):
+        issues.append({"code": "invalid_bundle", "message": "export bundle must be a JSON object"})
+        bundle = {}
+    for name in ["claims", "sources", "entities", "relations"]:
+        if not isinstance(bundle.get(name), list):
+            issues.append({"code": "invalid_collection", "message": f"{name} must be an array"})
+    counts = {name: len(bundle.get(name)) if isinstance(bundle.get(name), list) else 0 for name in ["claims", "sources", "entities", "relations"]}
+    manifest = bundle.get("manifest")
+    manifest_format = None
+    if not isinstance(manifest, dict):
+        issues.append({"code": "missing_manifest", "message": "bundle manifest is required"})
+        manifest = {}
+    else:
+        manifest_format = manifest.get("format")
+        if manifest.get("format") != "akbp-portable-bundle":
+            issues.append({"code": "invalid_manifest_format", "message": "manifest format must be akbp-portable-bundle"})
+        manifest_counts = manifest.get("counts")
+        if not isinstance(manifest_counts, dict):
+            issues.append({"code": "missing_manifest_counts", "message": "manifest counts are required"})
+        else:
+            for name, count in counts.items():
+                if manifest_counts.get(name) != count:
+                    issues.append({"code": "count_mismatch", "message": f"manifest count for {name} does not match bundle", "expected": count, "actual": manifest_counts.get(name)})
+        hashes = manifest.get("artifact_hashes")
+        if not isinstance(hashes, dict):
+            issues.append({"code": "missing_artifact_hashes", "message": "manifest artifact_hashes are required"})
+        else:
+            for name in ["card", "claims", "sources", "entities", "relations"]:
+                value = hashes.get(name)
+                if value is not None and not is_sha256_hex(value):
+                    issues.append({"code": "invalid_artifact_hash", "message": f"artifact hash for {name} must be a SHA-256 hex string or null"})
+        safety = manifest.get("safety")
+        if not isinstance(safety, dict):
+            issues.append({"code": "missing_safety", "message": "manifest safety flags are required"})
+        else:
+            for flag in ["excludes_local_state", "excludes_indexes", "secret_redaction_required"]:
+                if safety.get(flag) is not True:
+                    issues.append({"code": "unsafe_manifest", "message": f"manifest safety flag {flag} must be true"})
+    return {
+        "ok": not issues,
+        "file": str(bundle_path),
+        "checked_at": now_iso(),
+        "manifest_format": manifest_format,
+        "counts": counts,
+        "issues": issues,
+    }
+
+
+def cmd_export_check(args: argparse.Namespace) -> int:
+    result = check_export_bundle_file(Path(args.file).resolve())
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 1 if args.fail_on_issues and result["issues"] else 0
+
 def cmd_audit(args: argparse.Namespace) -> int:
     base = root(args.path)
     events = read_jsonl(base / ".akbp" / "audit.log.jsonl")
@@ -1275,6 +1405,68 @@ def cmd_source_add(args: argparse.Namespace) -> int:
     print(json.dumps(source, indent=2, ensure_ascii=False))
     return 0
 
+
+
+def resolve_source_file(base: Path, locator: str) -> Path:
+    candidate = Path(locator)
+    if candidate.is_absolute():
+        return candidate
+    base_candidate = (base / locator).resolve()
+    if base_candidate.exists():
+        return base_candidate
+    return candidate.resolve()
+
+
+def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
+    sources = load_sources(base)
+    if source_id:
+        sources = [source for source in sources if source.get("id") == source_id]
+    verified: list[dict[str, Any]] = []
+    changed: list[dict[str, Any]] = []
+    missing: list[dict[str, Any]] = []
+    unchecked: list[dict[str, Any]] = []
+    for source in sources:
+        sid = str(source.get("id") or "")
+        stype = str(source.get("type") or "")
+        locator = str(source.get("locator") or "")
+        expected = source.get("hash")
+        if stype != "file":
+            unchecked.append({"id": sid, "type": stype, "locator": locator, "reason": "non_file_source"})
+            continue
+        if not expected:
+            unchecked.append({"id": sid, "type": stype, "locator": locator, "reason": "missing_recorded_hash"})
+            continue
+        path = resolve_source_file(base, locator)
+        actual = file_hash(path)
+        if actual is None:
+            missing.append({"id": sid, "type": stype, "locator": locator, "expected_hash": expected})
+        elif actual == expected:
+            verified.append({"id": sid, "type": stype, "locator": locator, "hash": actual})
+        else:
+            changed.append({"id": sid, "type": stype, "locator": locator, "expected_hash": expected, "actual_hash": actual})
+    return {
+        "ok": not changed and not missing,
+        "checked_at": now_iso(),
+        "source_id": source_id,
+        "counts": {
+            "checked": len(sources),
+            "verified": len(verified),
+            "changed": len(changed),
+            "missing": len(missing),
+            "unchecked": len(unchecked),
+        },
+        "verified": verified,
+        "changed": changed,
+        "missing": missing,
+        "unchecked": unchecked,
+    }
+
+
+def cmd_source_verify(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    result = verify_sources(base, args.source_id)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 1 if args.fail_on_issue and not result["ok"] else 0
 
 def cmd_cite(args: argparse.Namespace) -> int:
     base = root(args.path)
@@ -1399,6 +1591,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--output")
     s.set_defaults(func=cmd_export)
 
+    s = sub.add_parser("export-check")
+    s.add_argument("file")
+    s.add_argument("--fail-on-issues", action="store_true")
+    s.set_defaults(func=cmd_export_check)
+
     s = sub.add_parser("audit")
     s.add_argument("--limit", type=int, default=20)
     s.add_argument("--event")
@@ -1415,6 +1612,10 @@ def build_parser() -> argparse.ArgumentParser:
     s_add.add_argument("--mutable", action="store_true")
     s_add.add_argument("--scope", default="project", choices=["private", "project", "team", "public"])
     s_add.set_defaults(func=cmd_source_add)
+    s_verify = source_sub.add_parser("verify")
+    s_verify.add_argument("source_id", nargs="?")
+    s_verify.add_argument("--fail-on-issue", action="store_true")
+    s_verify.set_defaults(func=cmd_source_verify)
 
     s = sub.add_parser("cite")
     s.add_argument("claim_id")
