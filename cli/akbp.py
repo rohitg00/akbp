@@ -177,11 +177,12 @@ def source_hash_for_locator(base: Path, locator: str, source_type: str) -> str |
 
 
 def add_source_record(base: Path, locator: str, source_type: str = "file", title: str | None = None, scope: str = "project") -> dict[str, Any]:
+    safe_title = redact_text(title) if title else title
     source = {
         "id": stable_id("source", source_type, locator),
         "type": source_type,
         "locator": locator,
-        "title": title,
+        "title": safe_title,
         "hash": source_hash_for_locator(base, locator, source_type),
         "immutable": True,
         "scope": scope,
@@ -566,6 +567,17 @@ def cmd_ingest(args: argparse.Namespace) -> int:
 
 
 
+def infer_import_kind(item: dict[str, Any]) -> str:
+    explicit = item.get("kind")
+    if explicit:
+        return str(explicit)
+    if "text" in item:
+        return "claim"
+    if "locator" in item or str(item.get("id", "")).startswith("source_"):
+        return "source"
+    return str(item.get("type") or "object")
+
+
 def import_jsonl_objects(source: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     accepted: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
@@ -579,7 +591,7 @@ def import_jsonl_objects(source: Path) -> tuple[list[dict[str, Any]], list[dict[
             errors.append({"line": line_number, "error": exc.msg})
             continue
         item_id = str(item.get("id") or f"line-{line_number}") if isinstance(item, dict) else f"line-{line_number}"
-        kind = str(item.get("kind") or item.get("type") or "object") if isinstance(item, dict) else "object"
+        kind = infer_import_kind(item) if isinstance(item, dict) else "object"
         raw = json.dumps(item, sort_keys=True, ensure_ascii=False)
         safe = redact_text(raw)
         if safe != raw:
@@ -596,7 +608,7 @@ def public_import_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def normalize_import_object(item: dict[str, Any]) -> tuple[str | None, dict[str, Any] | None, str | None]:
     if not isinstance(item, dict):
         return None, None, "object must be a JSON object"
-    kind = str(item.get("kind") or item.get("type") or "")
+    kind = infer_import_kind(item)
     if kind == "source":
         source = {
             "id": str(item.get("id") or stable_id("source", item.get("type", "file"), item.get("locator", ""))),
@@ -1401,11 +1413,12 @@ def cmd_source_add(args: argparse.Namespace) -> int:
     source_hash = args.hash
     if source_hash is None and args.type == "file":
         source_hash = file_hash((base / locator).resolve()) or file_hash(Path(locator).resolve())
+    safe_title = redact_text(args.title) if args.title else args.title
     source = {
         "id": args.id or stable_id("source", args.type, locator),
         "type": args.type,
         "locator": locator,
-        "title": args.title,
+        "title": safe_title,
         "hash": source_hash,
         "immutable": not args.mutable,
         "scope": args.scope,
@@ -1414,7 +1427,7 @@ def cmd_source_add(args: argparse.Namespace) -> int:
     }
     append_jsonl(base / "raw" / "sources" / "sources.jsonl", source)
     add_log(base, "source add", f"- Source: `{source['id']}`\n- Locator: {locator}\n")
-    audit(base, "source_add", {"source_id": source["id"], "locator": locator})
+    audit(base, "source_add", {"source_id": source["id"], "locator": locator, "redacted": bool(args.title and args.title != safe_title)})
     auto_index_if_present(base)
     print(json.dumps(source, indent=2, ensure_ascii=False))
     return 0
