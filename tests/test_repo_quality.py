@@ -96,6 +96,19 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_cli_readme_documents_search_query_syntax(self):
+        text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "## Search query syntax",
+            "SQLite FTS5",
+            "rollback AND release",
+            "rollback NOT deprecated",
+            "\"release checklist\"",
+            "deploy*",
+            "fts_query",
+        ]:
+            self.assertIn(required, text)
+
     def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
         self.assertGreaterEqual(len(markdown), 10)

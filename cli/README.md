@@ -104,3 +104,19 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 ## SQLite index
 
 `akbp index` builds `.akbp/state.db` using SQLite FTS5 over claims and wiki pages. `akbp index --incremental` only rewrites changed documents and removes stale entries. After an index exists, write commands refresh it incrementally so newly remembered, ingested, superseded, contradicted, or crystallized knowledge is searchable without a manual reindex. `akbp search` sanitizes user input into a safe FTS query, preserves explicit `AND`, `OR`, and `NOT` operators when they are used safely, defaults plain terms to `OR`, uses the local index when present, and falls back to portable JSONL/markdown query otherwise.
+
+## Search query syntax
+
+`akbp search` uses the local SQLite FTS5 index when `.akbp/state.db` exists, otherwise it falls back to JSONL/Markdown scanning.
+
+Supported query forms:
+
+- `rollback` searches one term.
+- `rollback release` searches either term by default.
+- `rollback AND release` requires both terms.
+- `rollback OR release` accepts either term explicitly.
+- `rollback NOT deprecated` excludes a term.
+- `"release checklist"` searches a phrase.
+- `deploy*` searches a token prefix.
+
+The CLI returns the generated `fts_query` with every indexed search response so agents can inspect how user text was normalized before trusting results.
