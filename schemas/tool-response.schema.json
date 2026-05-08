@@ -277,7 +277,8 @@
             "unknown_param_rejection",
             "required_param_validation",
             "approval_required_errors",
-            "max_request_bytes_enforced"
+            "max_request_bytes_enforced",
+            "path_validation"
           ],
           "properties": {
             "structured_errors": {
@@ -311,6 +312,9 @@
               "const": true
             },
             "max_request_bytes_enforced": {
+              "const": true
+            },
+            "path_validation": {
               "const": true
             }
           }
@@ -348,7 +352,8 @@
             "hash_algorithms",
             "supports_dry_run",
             "write_policy",
-            "approval_field"
+            "approval_field",
+            "path_policy"
           ],
           "properties": {
             "transport": {
@@ -377,6 +382,10 @@
             },
             "approval_field": {
               "const": "approved"
+            },
+            "path_policy": {
+              "type": "string",
+              "minLength": 1
             }
           }
         },

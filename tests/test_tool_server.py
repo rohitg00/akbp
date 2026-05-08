@@ -89,6 +89,22 @@ class ToolServerTest(unittest.TestCase):
         assert_matches_required_schema(self, lines[5]["error"]["details"], schema_def("invalid_json_details"))
         self.assertIn("tool-request.schema.json", lines[5]["error"]["details"]["schema"])
 
+    def test_server_rejects_unsafe_request_paths_before_dispatch(self):
+        requests = "\n".join([
+            json.dumps({"id": "empty", "path": "", "method": "akbp.status"}),
+            json.dumps({"id": "control", "path": "kb\nother", "method": "akbp.status"}),
+            json.dumps({"id": "long", "path": "a" * 4097, "method": "akbp.status"}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 3)
+        for line in lines:
+            with self.subTest(line=line):
+                assert_response_envelope(self, line)
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["error"]["code"], "invalid_request")
+                self.assertIn("path", " ".join(line["error"]["details"]["errors"]))
+
     def test_server_rejects_oversized_request_lines_before_json_parse(self):
         request = " " * (1048576 + 1) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
@@ -271,6 +287,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["method_param_schemas"])
         self.assertTrue(installed_result["features"]["approval_required_errors"])
         self.assertTrue(installed_result["features"]["max_request_bytes_enforced"])
+        self.assertTrue(installed_result["features"]["path_validation"])
+        self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
 
     def test_status_context_and_capabilities_methods(self):
         with tempfile.TemporaryDirectory() as d:
@@ -290,6 +308,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["write_apply_requires_approval"])
             self.assertTrue(lines[0]["result"]["features"]["method_param_schemas"])
             self.assertTrue(lines[0]["result"]["features"]["max_request_bytes_enforced"])
+            self.assertTrue(lines[0]["result"]["features"]["path_validation"])
+            self.assertIn("path_policy", lines[0]["result"]["runtime"])
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])

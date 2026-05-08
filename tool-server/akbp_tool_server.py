@@ -114,6 +114,7 @@ def capabilities() -> dict[str, Any]:
             "required_param_validation": True,
             "approval_required_errors": True,
             "max_request_bytes_enforced": True,
+            "path_validation": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -128,6 +129,7 @@ def capabilities() -> dict[str, Any]:
             "supports_dry_run": True,
             "write_policy": "review-gated",
             "approval_field": "approved",
+            "path_policy": "caller-supplied local path; empty paths, oversized paths, and control characters are rejected before dispatch",
         },
         "methods": {
             name: {
@@ -227,6 +229,14 @@ def request_shape_errors(req: dict[str, Any]) -> list[str]:
         errors.append("method must be an akbp.* string")
     if "path" in req and not isinstance(req.get("path"), str):
         errors.append("path must be a string")
+    elif "path" in req:
+        path = req.get("path", "")
+        if not path.strip():
+            errors.append("path must not be empty")
+        if len(path) > 4096:
+            errors.append("path must be 4096 characters or fewer")
+        if any(char in path for char in ("\x00", "\n", "\r")):
+            errors.append("path must not contain control characters")
     if "dry_run" in req and not isinstance(req.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "approved" in req and not isinstance(req.get("approved"), bool):
