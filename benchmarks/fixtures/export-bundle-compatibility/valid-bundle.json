@@ -1,0 +1,47 @@
+{
+  "akbp_version": "0.1.0",
+  "exported_at": "2026-05-08T12:00:00Z",
+  "card": {"name": "compatibility fixture"},
+  "claims": [
+    {
+      "id": "claim_export_bundle_compatibility",
+      "text": "Export bundle compatibility checks should validate manifest counts, artifact hash shape, and safety flags before exchange.",
+      "type": "workflow",
+      "status": "stable",
+      "confidence": 0.9,
+      "evidence": ["source_export_bundle_contract"],
+      "scope": "project"
+    }
+  ],
+  "sources": [
+    {
+      "id": "source_export_bundle_contract",
+      "type": "file",
+      "locator": "docs/TOOL_CONTRACT.md",
+      "title": "Tool contract",
+      "hash": null,
+      "immutable": true,
+      "scope": "project",
+      "created_at": "2026-05-08T12:00:00Z",
+      "metadata": {}
+    }
+  ],
+  "entities": [],
+  "relations": [],
+  "manifest": {
+    "format": "akbp-portable-bundle",
+    "counts": {"claims": 1, "sources": 1, "entities": 0, "relations": 0},
+    "artifact_hashes": {
+      "card": "0000000000000000000000000000000000000000000000000000000000000000",
+      "claims": "1111111111111111111111111111111111111111111111111111111111111111",
+      "sources": "2222222222222222222222222222222222222222222222222222222222222222",
+      "entities": "3333333333333333333333333333333333333333333333333333333333333333",
+      "relations": "4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "safety": {
+      "excludes_local_state": true,
+      "excludes_indexes": true,
+      "secret_redaction_required": true
+    }
+  }
+}
