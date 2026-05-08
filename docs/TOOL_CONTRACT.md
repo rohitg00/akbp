@@ -191,7 +191,7 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
-`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, and path validation. Runtime policy includes JSONL stdio transport, default path behavior, request-size guidance, caller-supplied local path policy, supported hash algorithms, dry-run support, review-gated writes, and the approval field name.
+`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, path validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size guidance, caller-supplied local path policy, supported hash algorithms, dry-run support, review-gated writes, and the approval field name.
 
 `tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method, including:
 
@@ -261,7 +261,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/source_result`: the closed source record returned by approved `akbp.source.add` and nested in `akbp.export`.
 - `#/$defs/entity_result`: the closed entity record nested in `akbp.export`.
 - `#/$defs/relation_result`: the closed relation record returned by approved `akbp.contradict` and nested in `akbp.export`.
-- `#/$defs/dry_run_review_result`: a closed generic dry-run write result with `dry_run:true`, `would_write:true`, `method`, `path`, `argv`, `review_required:true`, and `apply_instruction`.
+- `#/$defs/dry_run_review_result`: a closed generic dry-run write result with `dry_run:true`, `would_write:true`, `method`, `path`, redacted `argv`, `redacted`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/ingest_dry_run_result`: a closed `akbp.ingest` dry-run preview with redaction status, extracted signals, planned claim ids, `would_write` paths, and review metadata.
 - `#/$defs/ingest_result`: a closed approved `akbp.ingest` result with source id, imported page path, extracted signals, created claim ids, and redaction status.
 - `#/$defs/import_check_result`: a closed `akbp.import_check` result with checked, accepted, rejected, and error counts, strict-fail mode status, accepted object ids, rejected object ids, unknown source-evidence rejection, and parse errors without raw secret echo.

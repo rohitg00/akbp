@@ -151,7 +151,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
         self.assertEqual(dry_run["properties"]["would_write"], {"const": True})
-        for field in ["method", "path", "argv", "apply_instruction"]:
+        for field in ["method", "path", "argv", "redacted", "apply_instruction"]:
             self.assertIn(field, dry_run["required"])
         ingest_apply = defs["ingest_result"]
         crystallize = defs["crystallize_session_result"]
@@ -288,6 +288,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["approval_required_errors"])
         self.assertTrue(installed_result["features"]["max_request_bytes_enforced"])
         self.assertTrue(installed_result["features"]["path_validation"])
+        self.assertTrue(installed_result["features"]["dry_run_argv_redaction"])
         self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
 
     def test_status_context_and_capabilities_methods(self):
@@ -309,6 +310,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["method_param_schemas"])
             self.assertTrue(lines[0]["result"]["features"]["max_request_bytes_enforced"])
             self.assertTrue(lines[0]["result"]["features"]["path_validation"])
+            self.assertTrue(lines[0]["result"]["features"]["dry_run_argv_redaction"])
             self.assertIn("path_policy", lines[0]["result"]["runtime"])
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
@@ -341,6 +343,21 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"], schema_def("context_result"))
             self.assertTrue(lines[2]["result"]["items"])
             assert_matches_required_schema(self, lines[2]["result"]["items"][0], schema_def("context_item"))
+
+    def test_generic_dry_run_redacts_secret_like_argv(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            secret = "token=ghp_abcdefghijklmnopqrstuvwxyz123456"
+            request = json.dumps({"id": "dry", "path": str(kb), "method": "akbp.remember", "dry_run": True, "params": {"text": f"Rotate {secret}"}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertTrue(line["result"]["redacted"])
+            self.assertNotIn(secret, json.dumps(line))
+            self.assertIn("[REDACTED]", json.dumps(line))
+            claims = kb / "claims" / "claims.jsonl"
+            self.assertNotIn(secret, claims.read_text(encoding="utf-8") if claims.exists() else "")
 
     def test_write_methods_and_dry_run(self):
         with tempfile.TemporaryDirectory() as d:
