@@ -310,6 +310,9 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         self.assertNotIn("akbp.get_context", text)
         self.assertNotIn("### akbp.archive", text)
+        methods_block = text.split("Supported methods in the first server slice:", 1)[1].split("The CLI also has local-only commands", 1)[0]
+        listed_methods = [line.strip()[3:-1] for line in methods_block.splitlines() if line.strip().startswith("- `akbp.")]
+        self.assertEqual(len(listed_methods), len(set(listed_methods)), listed_methods)
         for method in [
             "akbp.capabilities",
             "akbp.status",
