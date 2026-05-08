@@ -9,7 +9,7 @@ AKBP does not replace Obsidian. It gives agents a contract for the parts of a va
 
 ## Recommended vault layout
 
-Use an AKBP knowledge base inside a vault, or point Obsidian at an existing AKBP directory:
+Use an AKBP knowledge base inside a vault, or point Obsidian at an existing AKBP directory. A complete small example lives in `examples/obsidian-vault/`.
 
 ```text
 obsidian-vault/
