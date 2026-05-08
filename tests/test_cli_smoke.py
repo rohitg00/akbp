@@ -145,6 +145,22 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse(changed_verify["ok"])
             self.assertEqual(changed_verify["counts"]["changed"], 1)
 
+            bundle = Path(d) / "bundle.json"
+            bundle.write_text(json.dumps(exported), encoding="utf-8")
+            checked = json.loads(run_cli("--path", str(kb), "export-check", str(bundle), "--fail-on-issues").stdout)
+            self.assertTrue(checked["ok"])
+            self.assertEqual(checked["manifest_format"], "akbp-portable-bundle")
+            self.assertEqual(checked["counts"]["claims"], len(exported["claims"]))
+
+            bad_bundle = Path(d) / "bad-bundle.json"
+            bad = dict(exported)
+            bad["manifest"] = dict(exported["manifest"])
+            bad["manifest"]["counts"] = dict(exported["manifest"]["counts"])
+            bad["manifest"]["counts"]["claims"] = 999
+            bad_bundle.write_text(json.dumps(bad), encoding="utf-8")
+            bad_check = json.loads(run_cli("--path", str(kb), "export-check", str(bad_bundle)).stdout)
+            self.assertFalse(bad_check["ok"])
+            self.assertTrue(any(issue["code"] == "count_mismatch" for issue in bad_check["issues"]))
 
             out = run_cli("--path", str(kb), "audit", "--limit", "10")
             audit = json.loads(out.stdout)
