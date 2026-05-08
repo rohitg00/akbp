@@ -22,7 +22,13 @@ DEFAULT_FIXTURES = ROOT / "benchmarks" / "fixtures"
 
 def load_scenarios(fixtures: Path) -> list[tuple[Path, dict[str, Any]]]:
     scenarios: list[tuple[Path, dict[str, Any]]] = []
-    for path in sorted(fixtures.glob("*/scenario.json")):
+    if fixtures.is_file():
+        paths = [fixtures]
+    elif (fixtures / "scenario.json").exists():
+        paths = [fixtures / "scenario.json"]
+    else:
+        paths = sorted(fixtures.glob("*/scenario.json"))
+    for path in paths:
         scenarios.append((path, json.loads(path.read_text(encoding="utf-8"))))
     return scenarios
 

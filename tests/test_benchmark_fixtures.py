@@ -16,6 +16,17 @@ _spec.loader.exec_module(benchmark_runner)
 
 
 class BenchmarkFixtureTest(unittest.TestCase):
+
+    def test_runner_loads_fixture_root_or_scenario_file(self):
+        fixture_root = FIXTURES / "preference-recall"
+        scenario_file = fixture_root / "scenario.json"
+        from_root = benchmark_runner.load_scenarios(fixture_root)
+        from_file = benchmark_runner.load_scenarios(scenario_file)
+        self.assertEqual(len(from_root), 1)
+        self.assertEqual(len(from_file), 1)
+        self.assertEqual(from_root[0][1]["id"], "preference-recall-001")
+        self.assertEqual(from_file[0][1]["id"], "preference-recall-001")
+
     def test_benchmark_scenarios_are_well_formed(self):
         scenarios = sorted(FIXTURES.glob("*/scenario.json"))
         self.assertGreaterEqual(len(scenarios), 4)
