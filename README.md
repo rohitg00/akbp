@@ -265,6 +265,10 @@ Check a knowledge base:
 akbp --path ./my-kb conformance --level 3
 ```
 
+## Security model
+
+AKBP is local-first and review-gated. Write-capable JSONL tool methods require dry-run previews and explicit approval before durable writes. The reference implementation redacts common secret-like values in ingest, import/export checks, and generic dry-run previews. See [SECURITY.md](SECURITY.md) and [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md).
+
 ## What AKBP is not
 
 AKBP does not replace:

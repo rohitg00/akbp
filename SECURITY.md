@@ -12,6 +12,10 @@ Please report security issues privately to the repository owner instead of openi
 
 Do not include live secrets, tokens, private keys, cookies, production credentials, or private user data in public reports.
 
+## Security model
+
+See [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md) for trust boundaries, write-safety expectations, secret-handling expectations, portability rules, and adapter requirements.
+
 ## Security principles
 
 AKBP implementations should:
