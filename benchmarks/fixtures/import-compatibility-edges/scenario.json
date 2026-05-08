@@ -1,0 +1,105 @@
+{
+  "id": "import-compatibility-edges-001",
+  "task": "Validate import compatibility edge cases for mixed JSONL objects before durable apply.",
+  "setup": {
+    "import_objects": [
+      {
+        "kind": "source",
+        "id": "source_import_compat_edge",
+        "type": "file",
+        "locator": "imports/compat-edge.md",
+        "title": "Compatibility edge source"
+      },
+      {
+        "kind": "claim",
+        "id": "claim_import_compat_valid",
+        "text": "Import compatibility should apply accepted source and claim objects only after dry-run review and approval.",
+        "type": "workflow",
+        "status": "working",
+        "confidence": 0.8,
+        "evidence": ["source_import_compat_edge"],
+        "scope": "project"
+      },
+      {
+        "kind": "claim",
+        "id": "claim_import_compat_unknown_evidence",
+        "text": "Claims with unknown source evidence ids should be rejected before import apply.",
+        "type": "warning",
+        "status": "working",
+        "confidence": 0.6,
+        "evidence": ["source_missing_compat_edge"],
+        "scope": "project"
+      },
+      {
+        "kind": "relation",
+        "id": "relation_import_compat_unsupported",
+        "source": "claim_import_compat_valid",
+        "target": "claim_import_compat_unknown_evidence",
+        "relation": "related_to"
+      },
+      {
+        "kind": "claim",
+        "id": "claim_import_compat_bad_type",
+        "text": "Claims with unsupported type values should be rejected by shape validation.",
+        "type": "warning",
+        "status": "unsupported_status",
+        "confidence": 0.6,
+        "evidence": [],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "import-check-mixed",
+        "method": "akbp.import_check",
+        "params": {
+          "file": "benchmarks/fixtures/import-compatibility-edges/import-export.jsonl",
+          "fail_on_rejected": true
+        },
+        "expected_result_fields": ["ok", "file", "checked", "accepted_count", "rejected_count", "error_count", "fail_on_rejected", "accepted", "rejected", "errors"],
+        "expected_result_values": {
+          "ok": false,
+          "checked": 5,
+          "accepted_count": 2,
+          "rejected_count": 3,
+          "error_count": 0,
+          "fail_on_rejected": true
+        },
+        "expected_result_contains": {
+          "accepted[].id": ["source_import_compat_edge", "claim_import_compat_valid"],
+          "rejected[].id": ["claim_import_compat_unknown_evidence", "relation_import_compat_unsupported", "claim_import_compat_bad_type"],
+          "rejected[].reason": ["unknown evidence source id: source_missing_compat_edge", "unsupported import kind", "claim claim_import_compat_bad_type has invalid status"]
+        },
+        "expected_result_schema": "#/$defs/import_check_result"
+      },
+      {
+        "id": "import-apply-mixed-preview",
+        "method": "akbp.import_apply",
+        "params": {
+          "file": "benchmarks/fixtures/import-compatibility-edges/import-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": ["ok", "file", "dry_run", "applied", "checked", "accepted_count", "rejected_count", "error_count", "would_write", "skipped_existing", "accepted", "rejected", "errors"],
+        "expected_result_values": {
+          "ok": false,
+          "dry_run": true,
+          "applied": false,
+          "checked": 5,
+          "accepted_count": 2,
+          "rejected_count": 3,
+          "error_count": 0
+        },
+        "expected_result_contains": {
+          "accepted[].id": ["source_import_compat_edge", "claim_import_compat_valid"],
+          "rejected[].id": ["claim_import_compat_unknown_evidence", "relation_import_compat_unsupported", "claim_import_compat_bad_type"]
+        },
+        "expected_result_schema": "#/$defs/import_apply_result"
+      }
+    ]
+  },
+  "query": "Which imported JSONL objects are compatible and safe to apply?",
+  "expected": {
+    "must_allow_import_ids": ["source_import_compat_edge", "claim_import_compat_valid"],
+    "answer_should_include": ["import", "compatibility", "unknown evidence", "unsupported", "dry-run"]
+  }
+}
