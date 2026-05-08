@@ -668,6 +668,18 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(adapter, readme)
 
+    def test_security_model_documents_trust_boundaries(self):
+        root = ROOT
+        security = (root / "SECURITY.md").read_text(encoding="utf-8")
+        model = (root / "docs" / "SECURITY_MODEL.md").read_text(encoding="utf-8")
+        readme = (root / "README.md").read_text(encoding="utf-8")
+        self.assertIn("docs/SECURITY_MODEL.md", security)
+        self.assertIn("Security model", readme)
+        for text in ["Trust boundaries", "Write safety contract", "Secret-handling expectations", "Adapter requirements"]:
+            self.assertIn(text, model)
+        for text in ["request-size limits", "path validation", "dry-run previews", "explicit approval"]:
+            self.assertIn(text, model)
+
     def test_release_docs_require_review_gated_writes_and_approval(self):
         text = (ROOT / "docs" / "RELEASE.md").read_text(encoding="utf-8")
         self.assertIn("review_required", text)
