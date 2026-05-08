@@ -490,7 +490,8 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     safe_text = redact_text(raw_text)
     source_id = stable_id("source", args.type, str(source_path))
     page = imported_page_path(base, source_path)
-    title = args.title or source_path.stem.replace("-", " ").replace("_", " ").title()
+    raw_title = args.title or source_path.stem.replace("-", " ").replace("_", " ").title()
+    title = redact_text(raw_title)
     summary_items = heading_summary(safe_text)
     raw_claim_text = args.claim.strip() if args.claim else ""
     safe_claim_text = redact_text(raw_claim_text) if raw_claim_text else ""
@@ -516,7 +517,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         return 0
 
     ensure_dirs(base)
-    source = add_source_record(base, str(source_path), args.type, args.title or source_path.name, args.scope)
+    source = add_source_record(base, str(source_path), args.type, title, args.scope)
     body = [
         f"# Imported Source: {title}",
         "",
