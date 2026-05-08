@@ -14,6 +14,10 @@ BANNED = [
     "agentsmd",
     "GBrain",
     "gbrain",
+    "mirage",
+    "Mirage",
+    "virtual filesystem",
+    "Virtual Filesystem",
 ]
 SKIP_PARTS = {".git", "build", "dist", "__pycache__"}
 SKIP_SUFFIXES = {".pyc"}

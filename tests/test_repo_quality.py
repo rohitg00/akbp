@@ -116,6 +116,18 @@ class RepoQualityTest(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             self.assertTrue(text.startswith("# "), str(path.relative_to(ROOT)))
 
+
+    def test_public_reference_guard_blocks_external_positioning_terms(self):
+        guard = (ROOT / "tests" / "guard_public_refs.py").read_text(encoding="utf-8")
+        tokens = [
+            "mir" + "age",
+            "Mir" + "age",
+            "virtual " + "filesystem",
+            "Virtual " + "Filesystem",
+        ]
+        for token in tokens:
+            self.assertIn(token, guard)
+
     def test_no_future_schema_domain(self):
         for path in list(ROOT.rglob("*.md")) + list(ROOT.rglob("*.json")):
             if ".git" in path.parts:
