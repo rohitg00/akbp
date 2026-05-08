@@ -66,6 +66,23 @@ class RepoQualityTest(unittest.TestCase):
         self.assertEqual(defs["akbp.source.add.params"]["properties"]["type"]["enum"], source_types)
         self.assertEqual(defs["akbp.ingest.params"]["properties"]["type"]["enum"], source_types)
 
+
+    def test_tool_error_handling_example_documents_structured_failures(self):
+        text = (ROOT / "examples" / "tool-error-handling" / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "error.code",
+            "invalid_json",
+            "invalid_request",
+            "unknown_method",
+            "invalid_params",
+            "approval_required",
+            "cli_error",
+            "internal_error",
+            "dry_run",
+            "approved",
+        ]:
+            self.assertIn(required, text)
+
     def test_markdown_pages_start_with_heading_not_frontmatter(self):
         markdown = [p for p in ROOT.rglob("*.md") if ".git" not in p.parts]
         self.assertGreaterEqual(len(markdown), 10)
