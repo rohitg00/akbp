@@ -23,6 +23,7 @@ SCHEMA_BASE = "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas"
 REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
 RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
+MAX_REQUEST_BYTES = 1048576
 
 
 def method_schema_ref(method: str) -> str | None:
@@ -112,6 +113,7 @@ def capabilities() -> dict[str, Any]:
             "unknown_param_rejection": True,
             "required_param_validation": True,
             "approval_required_errors": True,
+            "max_request_bytes_enforced": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -121,7 +123,7 @@ def capabilities() -> dict[str, Any]:
         "runtime": {
             "transport": "jsonl-stdio",
             "default_path": ".",
-            "max_request_bytes": 1048576,
+            "max_request_bytes": MAX_REQUEST_BYTES,
             "hash_algorithms": ["sha256"],
             "supports_dry_run": True,
             "write_policy": "review-gated",
@@ -432,6 +434,20 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> int:
     for line in sys.stdin:
+        if len(line.encode("utf-8")) > MAX_REQUEST_BYTES:
+            print(
+                json.dumps(
+                    error_response(
+                        None,
+                        "invalid_request",
+                        "request line exceeds max_request_bytes",
+                        details={"errors": [f"request line exceeds max_request_bytes ({MAX_REQUEST_BYTES})"], "schema": REQUEST_SCHEMA},
+                    ),
+                    ensure_ascii=False,
+                ),
+                flush=True,
+            )
+            continue
         line = line.strip()
         if not line:
             continue

@@ -276,7 +276,8 @@
             "method_param_schemas",
             "unknown_param_rejection",
             "required_param_validation",
-            "approval_required_errors"
+            "approval_required_errors",
+            "max_request_bytes_enforced"
           ],
           "properties": {
             "structured_errors": {
@@ -307,6 +308,9 @@
               "const": true
             },
             "approval_required_errors": {
+              "const": true
+            },
+            "max_request_bytes_enforced": {
               "const": true
             }
           }
