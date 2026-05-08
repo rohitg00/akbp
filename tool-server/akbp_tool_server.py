@@ -24,6 +24,24 @@ REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
 RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 MAX_REQUEST_BYTES = 1048576
+PARAM_MAX_LENGTHS = {
+    "query": 4096,
+    "task": 8192,
+    "text": 65536,
+    "transcript": 65536,
+    "claim": 65536,
+    "title": 512,
+    "file": 4096,
+    "locator": 4096,
+    "source_id": 512,
+    "claim_id": 512,
+    "old_claim_id": 512,
+    "source_claim_id": 512,
+    "target_claim_id": 512,
+    "type": 64,
+    "claim_type": 64,
+    "level": 16,
+}
 
 
 def method_schema_ref(method: str) -> str | None:
@@ -119,6 +137,7 @@ def capabilities() -> dict[str, Any]:
             "approval_required_errors": True,
             "max_request_bytes_enforced": True,
             "path_validation": True,
+            "param_length_validation": True,
             "dry_run_argv_redaction": True,
         },
         "schemas": {
@@ -135,6 +154,7 @@ def capabilities() -> dict[str, Any]:
             "write_policy": "review-gated",
             "approval_field": "approved",
             "path_policy": "caller-supplied local path; empty paths, oversized paths, and control characters are rejected before dispatch",
+            "param_length_policy": "string params are capped before CLI dispatch according to method schemas",
         },
         "methods": {
             name: {
@@ -304,8 +324,13 @@ STRING_PARAMS = {
 def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     for name in sorted(STRING_PARAMS.intersection(params)):
-        if not isinstance(params.get(name), str):
+        value = params.get(name)
+        if not isinstance(value, str):
             errors.append(f"{name} must be a string")
+            continue
+        max_length = PARAM_MAX_LENGTHS.get(name)
+        if max_length is not None and len(value) > max_length:
+            errors.append(f"{name} must be at most {max_length} characters")
     if "type" in params and method in {"akbp.remember", "akbp.supersede"} and params.get("type") not in CLAIM_TYPES:
         errors.append("type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "type" in params and method in {"akbp.source.add", "akbp.ingest"} and params.get("type") not in SOURCE_TYPES:

@@ -283,6 +283,7 @@
             "approval_required_errors",
             "max_request_bytes_enforced",
             "path_validation",
+            "param_length_validation",
             "dry_run_argv_redaction"
           ],
           "properties": {
@@ -324,6 +325,9 @@
             },
             "dry_run_argv_redaction": {
               "const": true
+            },
+            "param_length_validation": {
+              "const": true
             }
           }
         },
@@ -361,7 +365,8 @@
             "supports_dry_run",
             "write_policy",
             "approval_field",
-            "path_policy"
+            "path_policy",
+            "param_length_policy"
           ],
           "properties": {
             "transport": {
@@ -379,7 +384,9 @@
               "type": "array",
               "minItems": 1,
               "items": {
-                "enum": ["sha256"]
+                "enum": [
+                  "sha256"
+                ]
               }
             },
             "supports_dry_run": {
@@ -392,6 +399,10 @@
               "const": "approved"
             },
             "path_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "param_length_policy": {
               "type": "string",
               "minLength": 1
             }
@@ -684,37 +695,103 @@
         "skipped_existing"
       ],
       "properties": {
-        "ok": { "type": "boolean" },
-        "file": { "type": "string", "minLength": 1 },
-        "dry_run": { "type": "boolean" },
-        "applied": { "type": "boolean" },
-        "checked": { "type": "integer", "minimum": 0 },
-        "accepted_count": { "type": "integer", "minimum": 0 },
-        "rejected_count": { "type": "integer", "minimum": 0 },
-        "error_count": { "type": "integer", "minimum": 0 },
+        "ok": {
+          "type": "boolean"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "applied": {
+          "type": "boolean"
+        },
+        "checked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "accepted_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejected_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error_count": {
+          "type": "integer",
+          "minimum": 0
+        },
         "would_write": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["sources", "claims"],
+          "required": [
+            "sources",
+            "claims"
+          ],
           "properties": {
-            "sources": { "type": "array", "items": { "type": "string" } },
-            "claims": { "type": "array", "items": { "type": "string" } }
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "claims": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
         "skipped_existing": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["sources", "claims"],
+          "required": [
+            "sources",
+            "claims"
+          ],
           "properties": {
-            "sources": { "type": "array", "items": { "type": "string" } },
-            "claims": { "type": "array", "items": { "type": "string" } }
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "claims": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
-        "accepted": { "type": "array", "items": { "$ref": "#/$defs/import_check_item" } },
-        "rejected": { "type": "array", "items": { "$ref": "#/$defs/import_check_item" } },
-        "errors": { "type": "array", "items": { "$ref": "#/$defs/import_check_error" } },
-        "review_required": { "type": "boolean" },
-        "apply_instruction": { "type": "string" }
+        "accepted": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/import_check_item"
+          }
+        },
+        "rejected": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/import_check_item"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/import_check_error"
+          }
+        },
+        "review_required": {
+          "type": "boolean"
+        },
+        "apply_instruction": {
+          "type": "string"
+        }
       }
     },
     "crystallize_session_result": {
@@ -792,7 +869,10 @@
           "minLength": 1
         },
         "source_id": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "created_claims": {
           "type": "array",
@@ -909,7 +989,10 @@
           "minLength": 1
         },
         "source_id": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "created_claims": {
           "type": "array",
@@ -1151,37 +1234,106 @@
     "export_check_issue": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["code", "message"],
+      "required": [
+        "code",
+        "message"
+      ],
       "properties": {
-        "code": { "type": "string", "minLength": 1 },
-        "message": { "type": "string", "minLength": 1 },
-        "line": { "type": "integer", "minimum": 1 },
-        "column": { "type": "integer", "minimum": 1 },
-        "expected": { "type": ["integer", "string", "null"] },
-        "actual": { "type": ["integer", "string", "null"] }
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ]
+        },
+        "actual": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "export_check_result": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["ok", "file", "checked_at", "manifest_format", "counts", "issues"],
+      "required": [
+        "ok",
+        "file",
+        "checked_at",
+        "manifest_format",
+        "counts",
+        "issues"
+      ],
       "properties": {
-        "ok": { "type": "boolean" },
-        "file": { "type": "string", "minLength": 1 },
-        "checked_at": { "type": "string", "minLength": 1 },
-        "manifest_format": { "type": ["string", "null"] },
+        "ok": {
+          "type": "boolean"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checked_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_format": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "counts": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["claims", "sources", "entities", "relations"],
+          "required": [
+            "claims",
+            "sources",
+            "entities",
+            "relations"
+          ],
           "properties": {
-            "claims": { "type": "integer", "minimum": 0 },
-            "sources": { "type": "integer", "minimum": 0 },
-            "entities": { "type": "integer", "minimum": 0 },
-            "relations": { "type": "integer", "minimum": 0 }
+            "claims": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sources": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "entities": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "relations": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
-        "issues": { "type": "array", "items": { "$ref": "#/$defs/export_check_issue" } }
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/export_check_issue"
+          }
+        }
       }
     },
     "export_result": {
@@ -1307,54 +1459,130 @@
         }
       }
     },
-
     "export_manifest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["format", "format_version", "created_at", "producer", "artifact_paths", "artifact_hashes", "counts", "safety", "verification"],
+      "required": [
+        "format",
+        "format_version",
+        "created_at",
+        "producer",
+        "artifact_paths",
+        "artifact_hashes",
+        "counts",
+        "safety",
+        "verification"
+      ],
       "properties": {
-        "format": { "type": "string", "const": "akbp-portable-bundle" },
-        "format_version": { "type": "string", "minLength": 1 },
-        "created_at": { "type": "string", "minLength": 1 },
-        "producer": { "type": "string", "minLength": 1 },
+        "format": {
+          "type": "string",
+          "const": "akbp-portable-bundle"
+        },
+        "format_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producer": {
+          "type": "string",
+          "minLength": 1
+        },
         "artifact_paths": {
           "type": "object",
-          "required": ["card", "claims", "sources", "entities", "relations"],
-          "additionalProperties": { "type": "string" }
+          "required": [
+            "card",
+            "claims",
+            "sources",
+            "entities",
+            "relations"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "artifact_hashes": {
           "type": "object",
-          "required": ["card", "claims", "sources", "entities", "relations"],
-          "additionalProperties": { "type": ["string", "null"] }
+          "required": [
+            "card",
+            "claims",
+            "sources",
+            "entities",
+            "relations"
+          ],
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
         },
         "counts": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["claims", "sources", "entities", "relations"],
+          "required": [
+            "claims",
+            "sources",
+            "entities",
+            "relations"
+          ],
           "properties": {
-            "claims": { "type": "integer", "minimum": 0 },
-            "sources": { "type": "integer", "minimum": 0 },
-            "entities": { "type": "integer", "minimum": 0 },
-            "relations": { "type": "integer", "minimum": 0 }
+            "claims": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sources": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "entities": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "relations": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
         "safety": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["excludes_local_state", "excludes_indexes", "secret_redaction_required"],
+          "required": [
+            "excludes_local_state",
+            "excludes_indexes",
+            "secret_redaction_required"
+          ],
           "properties": {
-            "excludes_local_state": { "type": "boolean" },
-            "excludes_indexes": { "type": "boolean" },
-            "secret_redaction_required": { "type": "boolean" }
+            "excludes_local_state": {
+              "type": "boolean"
+            },
+            "excludes_indexes": {
+              "type": "boolean"
+            },
+            "secret_redaction_required": {
+              "type": "boolean"
+            }
           }
         },
         "verification": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["hash_algorithm", "status"],
+          "required": [
+            "hash_algorithm",
+            "status"
+          ],
           "properties": {
-            "hash_algorithm": { "type": "string", "const": "sha256" },
-            "status": { "type": "string", "minLength": 1 }
+            "hash_algorithm": {
+              "type": "string",
+              "const": "sha256"
+            },
+            "status": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
       }
@@ -1403,10 +1631,17 @@
               "minLength": 1
             },
             "mode": {
-              "enum": ["read", "write"]
+              "enum": [
+                "read",
+                "write"
+              ]
             },
             "outcome": {
-              "enum": ["ok", "failed", "blocked"]
+              "enum": [
+                "ok",
+                "failed",
+                "blocked"
+              ]
             },
             "approval_required": {
               "type": "boolean"
@@ -1581,41 +1816,119 @@
     "source_verify_item": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "type", "locator"],
+      "required": [
+        "id",
+        "type",
+        "locator"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string" },
-        "locator": { "type": "string" },
-        "hash": { "type": "string" },
-        "expected_hash": { "type": "string" },
-        "actual_hash": { "type": "string" },
-        "reason": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "expected_hash": {
+          "type": "string"
+        },
+        "actual_hash": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
       }
     },
     "source_verify_result": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["ok", "checked_at", "source_id", "counts", "verified", "changed", "missing", "unchecked"],
+      "required": [
+        "ok",
+        "checked_at",
+        "source_id",
+        "counts",
+        "verified",
+        "changed",
+        "missing",
+        "unchecked"
+      ],
       "properties": {
-        "ok": { "type": "boolean" },
-        "checked_at": { "type": "string", "minLength": 1 },
-        "source_id": { "type": ["string", "null"] },
+        "ok": {
+          "type": "boolean"
+        },
+        "checked_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "counts": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["checked", "verified", "changed", "missing", "unchecked"],
+          "required": [
+            "checked",
+            "verified",
+            "changed",
+            "missing",
+            "unchecked"
+          ],
           "properties": {
-            "checked": { "type": "integer", "minimum": 0 },
-            "verified": { "type": "integer", "minimum": 0 },
-            "changed": { "type": "integer", "minimum": 0 },
-            "missing": { "type": "integer", "minimum": 0 },
-            "unchecked": { "type": "integer", "minimum": 0 }
+            "checked": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "verified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "changed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "missing": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unchecked": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
-        "verified": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } },
-        "changed": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } },
-        "missing": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } },
-        "unchecked": { "type": "array", "items": { "$ref": "#/$defs/source_verify_item" } }
+        "verified": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_verify_item"
+          }
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_verify_item"
+          }
+        },
+        "missing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_verify_item"
+          }
+        },
+        "unchecked": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_verify_item"
+          }
+        }
       }
     },
     "source_result": {
