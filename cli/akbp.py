@@ -1126,6 +1126,8 @@ def fts_term(token: str) -> str | None:
     has_prefix = token.endswith("*")
     body = token[:-1] if has_prefix else token
     cleaned = re.sub(r'[^a-zA-Z0-9_/-]+', '', body)
+    if not re.search(r'[a-zA-Z0-9_]', cleaned):
+        return None
     if has_prefix and re.fullmatch(r'[a-zA-Z0-9_]+', cleaned or ''):
         return cleaned + "*" if cleaned else None
     return '"' + cleaned.replace('"', '""') + '"' if cleaned else None
