@@ -491,6 +491,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             rerun = json.loads(out.stdout)
             self.assertTrue(rerun["skipped_claims"])
 
+
+    def test_relative_source_hash_uses_kb_path_first(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            (kb / "notes.md").write_text("source from kb path\n", encoding="utf-8")
+            out = run_cli("--path", str(kb), "source", "add", "notes.md", "--type", "file", "--title", "Notes")
+            source = json.loads(out.stdout)
+            self.assertEqual(len(source["hash"]), 64)
+
     def test_crystallize_extracts_structured_session_sections(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

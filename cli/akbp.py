@@ -164,14 +164,25 @@ def append_claim_once(base: Path, claim: dict[str, Any]) -> bool:
     return True
 
 
-def add_source_record(base: Path, locator: str, source_type: str = "file", title: str | None = None, scope: str = "project") -> dict[str, Any]:
+def source_hash_for_locator(base: Path, locator: str, source_type: str) -> str | None:
+    if source_type != "file":
+        return None
     source_path = Path(locator)
+    candidates = [source_path] if source_path.is_absolute() else [base / source_path, source_path]
+    for candidate in candidates:
+        digest = file_hash(candidate.resolve())
+        if digest:
+            return digest
+    return None
+
+
+def add_source_record(base: Path, locator: str, source_type: str = "file", title: str | None = None, scope: str = "project") -> dict[str, Any]:
     source = {
         "id": stable_id("source", source_type, locator),
         "type": source_type,
         "locator": locator,
         "title": title,
-        "hash": file_hash(source_path) if source_path.exists() else None,
+        "hash": source_hash_for_locator(base, locator, source_type),
         "immutable": True,
         "scope": scope,
         "created_at": now_iso(),
