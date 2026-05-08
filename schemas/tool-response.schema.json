@@ -1216,6 +1216,7 @@
         "id",
         "event",
         "created_at",
+        "operation",
         "data"
       ],
       "properties": {
@@ -1230,6 +1231,40 @@
         "created_at": {
           "type": "string",
           "minLength": 1
+        },
+        "operation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "actor",
+            "mode",
+            "outcome",
+            "approval_required",
+            "redaction_checked"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "actor": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode": {
+              "enum": ["read", "write"]
+            },
+            "outcome": {
+              "enum": ["ok", "failed", "blocked"]
+            },
+            "approval_required": {
+              "type": "boolean"
+            },
+            "redaction_checked": {
+              "type": "boolean"
+            }
+          }
         },
         "data": {
           "type": "object",
