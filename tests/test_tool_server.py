@@ -495,7 +495,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(line["result"]["ok"])
             self.assertEqual(line["result"]["counts"]["verified"], 1)
             (kb / "AKBP.md").write_text("changed", encoding="utf-8")
-            request = json.dumps({"id": "source-changed", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"]}}) + "\n"
+            request = json.dumps({"id": "source-changed", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"], "fail_on_issue": True}}) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
             line = json.loads(proc.stdout)
             self.assertTrue(line["ok"])
