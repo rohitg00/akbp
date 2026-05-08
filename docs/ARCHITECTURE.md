@@ -1,254 +1,193 @@
 # AKBP Architecture
 
-## System goal
+AKBP is a local-first protocol and reference implementation for durable agent knowledge. The architecture is intentionally small: portable files are the source of truth, while local indexes and tool-server envelopes make the knowledge base practical for agents.
 
-AKBP makes one durable knowledge base usable by many agents.
-
-The first target is coding-agent memory, because that is where the pain is sharpest: every Claude Code, Cursor, Codex, OpenClaw, Gemini CLI, or custom agent session starts by rediscovering project context.
-
-## High-level architecture
+## System boundary
 
 ```text
-             ┌──────────────────────────┐
-             │        AI Agents          │
-             │ Claude, Cursor, Codex,    │
-             │ OpenClaw, Gemini, tool protocol     │
-             └────────────┬─────────────┘
-                          │
-                          │ CLI / tool protocol / SDK / HTTP
-                          ▼
-┌─────────────────────────────────────────────────────┐
-│                    AKBP Engine                       │
-│                                                     │
-│  ┌───────────┐  ┌───────────┐  ┌────────────────┐  │
-│  │ Ingestion │  │ Retrieval │  │ Crystallizer   │  │
-│  └───────────┘  └───────────┘  └────────────────┘  │
-│  ┌───────────┐  ┌───────────┐  ┌────────────────┐  │
-│  │ Lifecycle │  │ Lint      │  │ Sync/Audit     │  │
-│  └───────────┘  └───────────┘  └────────────────┘  │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│                  AKBP Knowledge Base                 │
-│                                                     │
-│ raw/      immutable source material                  │
-│ wiki/     markdown pages for humans                  │
-│ claims/   atomic claims with lifecycle metadata      │
-│ graph/    entities and typed relations               │
-│ indexes/  BM25, vectors, graph snapshots             │
-│ logs/     append-only audit and operation history    │
-└─────────────────────────────────────────────────────┘
+Agent runtime / IDE / task runner
+        │
+        │ CLI commands or JSONL tool requests
+        ▼
+Reference interface layer
+  - akbp console script
+  - akbp-tool-server JSONL server
+        │
+        ▼
+Protocol operations
+  - initialize and validate a knowledge base
+  - register and verify sources
+  - ingest reviewed source material
+  - remember cited claims
+  - crystallize session transcripts
+  - retrieve search results and context packs
+  - export, check, import, and audit bundles
+        │
+        ▼
+AKBP knowledge base
+  - AKBP.md
+  - akbp.json
+  - wiki/*.md
+  - claims/claims.jsonl
+  - graph/entities.jsonl
+  - graph/relations.jsonl
+  - raw/sources/*
+  - .akbp/audit.jsonl
+        │
+        ▼
+Local runtime state
+  - .akbp/state.db SQLite FTS5 index
 ```
 
-## Storage model
+## Source of truth
 
-AKBP should use a hybrid storage model:
+Portable AKBP artifacts are the source of truth:
 
-1. Markdown for human-readable compiled knowledge.
-2. JSONL for portable claims/entities/relations/evidence.
-3. SQLite for local indexing, query speed, and transaction safety.
-4. Optional vector index for semantic search.
-5. Git for version history, rollback, branching, review, and team workflows.
+- `AKBP.md`: human entry point for agents and maintainers.
+- `akbp.json`: machine-readable Knowledge Base Card.
+- `wiki/`: compiled markdown knowledge.
+- `claims/claims.jsonl`: atomic claims with evidence, confidence, status, and lifecycle fields.
+- `graph/entities.jsonl`: entities referenced by claims and pages.
+- `graph/relations.jsonl`: typed relations and lifecycle links.
+- `raw/sources/`: optional copied source material.
+- `.akbp/audit.jsonl`: append-only operation history.
 
-This avoids the common trap of making the database the only source of truth. The durable protocol artifacts remain inspectable.
+The SQLite database is rebuildable local state. It must not become the only copy of durable knowledge.
 
-## Core modules
+## Reference implementation layers
 
-### 1. Ingestion
+### CLI layer
 
-Input:
-
-```text
-file
-folder
-URL
-PDF
-image/screenshot
-meeting transcript
-agent session transcript
-code diff
-issue thread
-```
-
-Output:
-
-```text
-source record
-candidate claims
-candidate entities
-candidate relations
-page updates
-index updates
-audit entry
-```
-
-Ingestion should classify before extraction. A book, a code session, a Slack thread, and a GitHub issue should not use the same extraction prompt.
-
-### 2. Crystallizer
-
-The crystallizer converts work into durable knowledge.
-
-For a coding-agent session it extracts:
-
-```text
-task summary
-files touched
-decisions made
-bugs discovered
-commands that mattered
-open questions
-user preferences
-project facts
-workflow changes
-```
-
-It then writes claims, updates pages, and links entities.
-
-### 3. Retrieval
-
-Retrieval should be composable:
-
-```text
-BM25: exact terms, file names, APIs, repos
-Vector: semantic similarity and vague questions
-Graph: dependencies, ownership, causal chains, supersession
-RRF: result fusion
-Evidence reranking: prefer cited, fresh, high-confidence claims
-```
-
-The agent should not receive raw search dumps. It should receive a compact context pack:
-
-```text
-relevant facts
-current decisions
-warnings/contradictions
-source citations
-freshness notes
-suggested pages to read
-```
-
-### 4. Lifecycle manager
-
-The lifecycle manager prevents memory rot.
-
-Responsibilities:
-
-```text
-confidence updates
-freshness decay
-supersession
-contradiction handling
-promotion from working to stable
-archival of low-value claims
-source invalidation
-```
-
-### 5. Linter
-
-The linter keeps the knowledge base healthy.
-
-Checks:
-
-```text
-orphan pages
-missing evidence
-broken wikilinks
-duplicate entities
-stale claims
-contradictions
-claims without page references
-pages without index entries
-secrets or sensitive values
-large pages that need splitting
-```
-
-### 6. Sync and audit
-
-AKBP must support multiple agents writing to one knowledge base.
-
-Minimum sync rules:
-
-```text
-append-only audit log
-stable object IDs
-optimistic concurrency
-last-write-wins only for non-conflicting metadata
-manual review for claim/content conflicts
-all destructive operations reversible
-```
-
-## Interfaces
-
-### CLI
+The CLI is the direct developer interface. It supports local workflows such as:
 
 ```bash
 akbp init
-akbp ingest <file|url|folder>
-akbp query "what do we know about X?"
-akbp context "continue this task"
-akbp remember "fact or observation"
-akbp crystallize <transcript.md>
+akbp source add notes.md --type file
+akbp ingest notes.md --dry-run
+akbp remember "Decision text" --evidence source_id
+akbp crystallize transcript.md --dry-run
 akbp index --incremental
-akbp search "what changed?"
-akbp lint
-akbp export
+akbp search "release checklist"
+akbp context "continue this task"
+akbp export --output bundle.json
+akbp export-check bundle.json --fail-on-issues
+akbp import-check bundle.jsonl --fail-on-rejected
+akbp conformance --level 3
 ```
 
-### tool protocol
+### JSONL tool-server layer
+
+The JSONL server is for agent runtimes. Each request is one JSON object and each response is one JSON object.
+
+Core read methods:
 
 ```text
 akbp.capabilities
 akbp.status
-akbp.query
-akbp.context
-akbp.index
 akbp.search
-akbp.remember
-akbp.conformance
-akbp.export
-akbp.audit
+akbp.context
 akbp.cite
+akbp.audit
+akbp.export
+akbp.export_check
+akbp.source.verify
+akbp.conformance
+```
+
+Core write-capable methods:
+
+```text
+akbp.remember
 akbp.source.add
 akbp.ingest
+akbp.import_apply
 akbp.supersede
 akbp.contradict
 akbp.crystallize_session
 ```
 
-### Adapter contract
+Write-capable methods use review boundaries:
 
-Each agent adapter defines:
+1. Preview with request-level `dry_run:true` when supported.
+2. Surface `review_required`, rejected objects, warnings, and `apply_instruction`.
+3. Apply only with request-level `approved:true` or an explicit trusted local policy.
+4. Record audit metadata for durable writes.
+
+### Storage layer
+
+The storage layer writes portable artifacts first and rebuildable indexes second.
+
+Rules:
+
+- Claims and graph records are append-friendly JSONL.
+- Source evidence is identified with source ids and hashes where possible.
+- Search indexes can be deleted and rebuilt from portable artifacts.
+- Export bundles include manifests and hashes.
+- Import checks reject unknown source evidence and secret-like values before apply.
+
+### Retrieval layer
+
+The current reference retrieval layer uses SQLite FTS5 for local exact/prefix search and context-pack assembly.
+
+Query handling intentionally accepts a small safe subset:
+
+- plain tokens
+- quoted phrases
+- `AND`, `OR`, `NOT`
+- trailing `*` prefix matching on simple word tokens
+
+Punctuation-only tokens are ignored before reaching SQLite FTS5.
+
+### Conformance layer
+
+Conformance levels describe what a knowledge base supports:
+
+- Level 0: file convention.
+- Level 1: structured claims and evidence.
+- Level 2: retrieval and context packs.
+- Level 3: lifecycle relations.
+
+The reference implementation validates these levels through CLI smoke tests, benchmark fixtures, and `akbp conformance`.
+
+## Adapter contract
+
+Adapters translate runtime behavior into AKBP calls. They must not create a separate durable memory format.
+
+Adapter responsibilities:
+
+- call `akbp.capabilities` before assuming methods or schemas
+- retrieve cited startup context with `akbp.context` or `akbp.search`
+- preview writes before apply
+- preserve source ids and evidence hashes
+- branch on structured `error.code`
+- exclude secrets, tokens, cookies, auth headers, private DMs, and private logs by default
+- keep durable output in AKBP artifacts
+
+See `docs/ADAPTER_AUTHOR_QUICKSTART.md` and `docs/ADAPTER_REVIEW_CHECKLIST.md`.
+
+## Build and validation architecture
+
+The public validation gate is `make validate`:
 
 ```text
-where instructions live
-how to call AKBP
-how session-start context is retrieved
-how session-end crystallization runs
-what data is private by default
-how secrets are filtered
-how conflicts are surfaced
+make guard
+make test
+make smoke
+make benchmark-score
+make benchmark
+make install-smoke
 ```
 
-## MVP architecture decision
+CI runs that gate on Python 3.9, 3.10, 3.11, and 3.12. CI also builds source and wheel distributions.
 
-For v0.1, build the reference engine as:
+## Non-goals for the reference implementation
 
-```text
-TypeScript or Python CLI
-SQLite local DB
-Markdown + JSONL protocol artifacts
-tool-server implementation wrapper
-No hosted backend
-No UI
-```
+The reference implementation does not require:
 
-Reason: protocol adoption matters more than UI polish. Let Obsidian, GitHub, editors, and existing agent UIs be the interface.
+- a hosted backend
+- a proprietary database
+- a web UI
+- runtime-specific private storage
+- network access for core local flows
 
-## Local search index
-
-The reference CLI can build `.akbp/state.db` with SQLite FTS5. This is engine-owned state, not a portable protocol artifact. Portable knowledge remains in markdown, JSONL claims, sources, entities, and relations.
-
-The search query layer intentionally accepts only a small safe subset: plain tokens, quoted phrases, `AND`/`OR`/`NOT`, and trailing `*` prefix matching on simple word tokens. Other punctuation is sanitized before it reaches SQLite FTS5.
-
-Incremental indexing reports both counts and affected document keys: `indexed_keys`, `skipped_keys`, and `removed_keys`. This gives adapters enough observability to explain what changed without parsing SQLite state directly.
+Those can exist around AKBP, but the protocol must remain inspectable, portable, and usable from a local repository.
