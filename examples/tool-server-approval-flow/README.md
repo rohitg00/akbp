@@ -43,6 +43,7 @@ The response matches the `#/$defs/dry_run_review_result` shape from `schemas/too
     "dry_run": true,
     "method": "akbp.remember",
     "would_write": true,
+    "redacted": false,
     "review_required": true,
     "apply_instruction": "Repeat the same request without dry_run only after user approval or trusted local policy."
   },

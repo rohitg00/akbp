@@ -114,6 +114,7 @@ def capabilities() -> dict[str, Any]:
             "approval_required_errors": True,
             "max_request_bytes_enforced": True,
             "path_validation": True,
+            "dry_run_argv_redaction": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -205,6 +206,11 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         if params.get("confidence") is not None:
             argv.extend(["--confidence", str(params["confidence"])])
     return argv
+
+
+def redact_argv(argv: list[str]) -> tuple[list[str], bool]:
+    redacted = [akbp.redact_text(arg) for arg in argv]
+    return redacted, redacted != argv
 
 
 def parse_payload(stdout: str) -> Any:
@@ -405,6 +411,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         return {"id": request_id, "ok": True, "result": result, "error": None}
 
     if dry_run and method in WRITE_METHODS:
+        safe_argv, redacted = redact_argv(argv)
         return {
             "id": request_id,
             "ok": True,
@@ -412,7 +419,8 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
                 "dry_run": True,
                 "method": method,
                 "path": path,
-                "argv": argv,
+                "argv": safe_argv,
+                "redacted": redacted,
                 "would_write": True,
                 "review_required": True,
                 "apply_instruction": "Repeat the same request without dry_run only after user approval or trusted local policy.",

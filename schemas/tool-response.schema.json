@@ -139,6 +139,7 @@
         "method",
         "path",
         "argv",
+        "redacted",
         "would_write"
       ],
       "properties": {
@@ -168,6 +169,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "redacted": {
+          "type": "boolean"
         }
       }
     },
@@ -278,7 +282,8 @@
             "required_param_validation",
             "approval_required_errors",
             "max_request_bytes_enforced",
-            "path_validation"
+            "path_validation",
+            "dry_run_argv_redaction"
           ],
           "properties": {
             "structured_errors": {
@@ -315,6 +320,9 @@
               "const": true
             },
             "path_validation": {
+              "const": true
+            },
+            "dry_run_argv_redaction": {
               "const": true
             }
           }
