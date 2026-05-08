@@ -489,6 +489,22 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("enum checks", changelog)
         self.assertIn("invalid parameter rejections", changelog)
 
+    def test_architecture_documents_current_reference_contract(self):
+        text = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp-tool-server JSONL server",
+            "claims/claims.jsonl",
+            ".akbp/audit.jsonl",
+            ".akbp/state.db SQLite FTS5 index",
+            "akbp.capabilities",
+            "akbp.crystallize_session",
+            "dry_run:true",
+            "approved:true",
+            "make validate",
+            "Python 3.9, 3.10, 3.11, and 3.12",
+        ]:
+            self.assertIn(required, text)
+
     def test_docs_use_current_context_method_name(self):
         for rel in ["docs/ARCHITECTURE.md", "docs/BUILD_PLAN.md", "docs/TOOL_CONTRACT.md"]:
             text = (ROOT / rel).read_text(encoding="utf-8")
