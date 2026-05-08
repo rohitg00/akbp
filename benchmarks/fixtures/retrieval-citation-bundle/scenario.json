@@ -1,0 +1,101 @@
+{
+  "id": "retrieval-citation-bundle-001",
+  "task": "Verify retrieval returns the claim whose evidence can be cited through the JSONL tool server.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_release_risk_note",
+        "type": "file",
+        "locator": "notes/release-risk.md",
+        "title": "Release risk note"
+      },
+      {
+        "id": "source_operator_review",
+        "type": "transcript",
+        "locator": "sessions/operator-review.md",
+        "title": "Operator review transcript"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_release_needs_rollback_owner",
+        "text": "Release work should name a rollback owner before the deployment window starts.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.86,
+        "evidence": [
+          "source_release_risk_note",
+          "source_operator_review"
+        ],
+        "entities": [
+          "release",
+          "rollback",
+          "owner",
+          "deployment window"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "context-release-rollback",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "prepare release rollback owner",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_release_needs_rollback_owner"
+          ]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      },
+      {
+        "id": "cite-release-rollback",
+        "method": "akbp.cite",
+        "approved": false,
+        "params": {
+          "claim_id": "claim_release_needs_rollback_owner"
+        },
+        "expected_result_fields": [
+          "claim_id",
+          "text",
+          "evidence",
+          "status"
+        ],
+        "expected_result_values": {
+          "claim_id": "claim_release_needs_rollback_owner",
+          "status": "stable"
+        },
+        "expected_result_contains": {
+          "evidence[]": [
+            "source_release_risk_note",
+            "source_operator_review"
+          ]
+        },
+        "expected_result_schema": "#/$defs/cite_result"
+      }
+    ]
+  },
+  "query": "What must be ready before a release deployment window?",
+  "expected": {
+    "must_retrieve": [
+      "claim_release_needs_rollback_owner"
+    ],
+    "must_cite": [
+      "source_release_risk_note",
+      "source_operator_review"
+    ],
+    "answer_should_include": [
+      "rollback owner",
+      "deployment window",
+      "release"
+    ]
+  }
+}
