@@ -254,6 +254,7 @@ class ToolServerTest(unittest.TestCase):
         reference_result = json.loads(reference.stdout)["result"]
         installed_result = json.loads(installed.stdout)["result"]
         self.assertEqual(installed_result["features"], reference_result["features"])
+        self.assertEqual(installed_result["runtime"], reference_result["runtime"])
         self.assertEqual(set(installed_result["methods"]), set(reference_result["methods"]))
         self.assertIn("akbp.import_apply", installed_result["methods"])
         self.assertTrue(installed_result["features"]["method_param_schemas"])
@@ -279,6 +280,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])
+            self.assertEqual(lines[0]["result"]["runtime"]["transport"], "jsonl-stdio")
+            self.assertEqual(lines[0]["result"]["runtime"]["write_policy"], "review-gated")
+            self.assertIn("sha256", lines[0]["result"]["runtime"]["hash_algorithms"])
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])

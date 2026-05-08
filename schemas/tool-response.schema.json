@@ -251,6 +251,7 @@
         "version",
         "features",
         "schemas",
+        "runtime",
         "methods",
         "examples"
       ],
@@ -330,6 +331,48 @@
             "methods": {
               "type": "string",
               "minLength": 1
+            }
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "transport",
+            "default_path",
+            "max_request_bytes",
+            "hash_algorithms",
+            "supports_dry_run",
+            "write_policy",
+            "approval_field"
+          ],
+          "properties": {
+            "transport": {
+              "const": "jsonl-stdio"
+            },
+            "default_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "max_request_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "hash_algorithms": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "enum": ["sha256"]
+              }
+            },
+            "supports_dry_run": {
+              "const": true
+            },
+            "write_policy": {
+              "const": "review-gated"
+            },
+            "approval_field": {
+              "const": "approved"
             }
           }
         },
