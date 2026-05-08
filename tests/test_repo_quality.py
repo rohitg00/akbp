@@ -376,6 +376,22 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("Action Items", text)
         self.assertIn("speaker prefixes", text)
 
+
+    def test_install_smoke_verifies_console_scripts(self):
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        install_doc = (ROOT / "docs" / "INSTALL.md").read_text(encoding="utf-8")
+        for required in [
+            "PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp --path",
+            "PATH=$$TMP/pkg/bin:$$PATH PYTHONPATH=$$TMP/pkg akbp-tool-server",
+        ]:
+            self.assertIn(required, makefile)
+        for required in [
+            'PATH="$TMP/pkg/bin:$PATH" PYTHONPATH="$TMP/pkg" akbp --path',
+            'PATH="$TMP/pkg/bin:$PATH" PYTHONPATH="$TMP/pkg" akbp-tool-server',
+            "console scripts work",
+        ]:
+            self.assertIn(required, install_doc)
+
     def test_validate_target_is_documented_and_used_by_ci(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
