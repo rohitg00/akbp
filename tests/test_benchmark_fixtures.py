@@ -220,6 +220,14 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("claim_crystallize_apply_is_schema_backed", data["expected"]["must_retrieve"])
 
 
+    def test_retrieval_ambiguity_ranking_fixture_covers_lifecycle_context(self):
+        path = FIXTURES / "retrieval-ambiguity-ranking" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertIn("claim_adapter_lifecycle_uses_session_methods", data["expected"]["must_retrieve"])
+        self.assertIn("claim_validation_keeps_adapter_flow_green", data["expected"]["must_retrieve"])
+        self.assertIn("source_runtime_adapter_notes", data["expected"]["must_cite"])
+        self.assertIn("source_validation_notes", data["expected"]["must_cite_in_context"])
+
     def test_retrieval_citation_bundle_fixture_covers_context_and_cite(self):
         path = FIXTURES / "retrieval-citation-bundle" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

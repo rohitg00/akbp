@@ -1,0 +1,87 @@
+{
+  "id": "retrieval-ambiguity-ranking-001",
+  "task": "Verify retrieval handles ambiguous adapter memory queries by returning the operational claim with direct evidence instead of only broadly related context.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_runtime_adapter_notes",
+        "type": "transcript",
+        "locator": "sessions/runtime-adapter-lifecycle.md",
+        "title": "Runtime adapter lifecycle notes"
+      },
+      {
+        "id": "source_release_copy_notes",
+        "type": "file",
+        "locator": "docs/release-copy-notes.md",
+        "title": "Release copy notes"
+      },
+      {
+        "id": "source_validation_notes",
+        "type": "file",
+        "locator": "logs/adapter-validation.txt",
+        "title": "Adapter validation notes"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_adapter_lifecycle_uses_session_methods",
+        "text": "Adapter lifecycle integrations should call akbp.session.start before planning and akbp.session.end for transcript-backed shutdown memory.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_runtime_adapter_notes", "source_validation_notes"],
+        "entities": ["adapter", "lifecycle", "session.start", "session.end", "retrieval"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_public_copy_mentions_adapter_templates",
+        "text": "Public launch copy can mention adapter templates as an alpha integration path.",
+        "type": "fact",
+        "status": "working",
+        "confidence": 0.65,
+        "evidence": ["source_release_copy_notes"],
+        "entities": ["adapter", "launch", "copy"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_validation_keeps_adapter_flow_green",
+        "text": "Adapter lifecycle changes should keep make validate and the JSONL benchmark runner green before merge.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.85,
+        "evidence": ["source_validation_notes"],
+        "entities": ["adapter", "validation", "benchmark", "lifecycle"],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_lifecycle_requires_validation",
+        "source": "claim_adapter_lifecycle_uses_session_methods",
+        "target": "claim_validation_keeps_adapter_flow_green",
+        "relation": "depends_on",
+        "evidence": ["source_validation_notes"]
+      }
+    ]
+  },
+  "query": "adapter lifecycle session.start session.end validation before merge",
+  "expected": {
+    "must_retrieve": [
+      "claim_adapter_lifecycle_uses_session_methods",
+      "claim_validation_keeps_adapter_flow_green"
+    ],
+    "must_cite": [
+      "source_runtime_adapter_notes",
+      "source_validation_notes"
+    ],
+    "must_cite_in_context": [
+      "source_runtime_adapter_notes",
+      "source_validation_notes"
+    ],
+    "answer_should_include": [
+      "adapter",
+      "lifecycle",
+      "validation"
+    ]
+  }
+}
