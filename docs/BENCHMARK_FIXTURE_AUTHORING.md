@@ -8,7 +8,7 @@ Each scenario lives in its own directory and uses `scenario.json` as the entrypo
 
 Required top-level fields:
 
-- `id`: stable scenario id ending in a version or sequence number.
+- `id`: stable scenario id. Use a version or sequence suffix when you need to introduce a non-breaking variant.
 - `task`: what the agent runtime must prove.
 - `setup`: records, imports, or JSONL tool-server requests used by the fixture.
 - `query`: retrieval task or runtime prompt.
