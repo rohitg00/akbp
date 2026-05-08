@@ -279,13 +279,21 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
         tool_outputs = run_tool_server(setup.get("tool_server_requests", []) or [], kb) if setup.get("tool_server_requests") else []
     expected = data.get("expected", {})
     query_ids = {item.get("id") for item in query.get("results", [])}
-    context_ids = {item.get("id") for item in context.get("items", [])}
+    context_items = context.get("items", []) if isinstance(context.get("items"), list) else []
+    context_ids = {item.get("id") for item in context_items if isinstance(item, dict)}
+    context_citation_ids = {citation for item in context_items if isinstance(item, dict) for citation in (item.get("citations", []) or [])}
     checks = []
     for claim_id in expected.get("must_retrieve", []) or []:
         checks.append({
             "name": "akbp_query_or_context_must_retrieve",
             "ok": claim_id in query_ids or claim_id in context_ids,
             "details": claim_id,
+        })
+    for source_id in expected.get("must_cite_in_context", []) or []:
+        checks.append({
+            "name": "akbp_context_must_cite",
+            "ok": source_id in context_citation_ids,
+            "details": source_id,
         })
     requests = setup.get("tool_server_requests", []) or []
     output_by_id = {output.get("id"): output for output in tool_outputs}
@@ -318,6 +326,7 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
         "ok": all(check["ok"] for check in checks),
         "query_result_ids": sorted(x for x in query_ids if x),
         "context_item_ids": sorted(x for x in context_ids if x),
+        "context_citation_ids": sorted(x for x in context_citation_ids if x),
         "tool_output_ids": sorted(x for x in output_by_id if x),
         "checks": checks,
     }

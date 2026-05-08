@@ -171,6 +171,16 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(search["expected_result_values"]["fts_query"], "pref* AND index*")
         self.assertEqual(search["expected_result_schema"], "#/$defs/search_result")
 
+
+    def test_session_crystallization_fixture_requires_context_citations(self):
+        path = FIXTURES / "session-crystallization" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(data["expected"]["must_cite_in_context"], ["source_structured_session_001", "source_agent_flow_doc"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("source_structured_session_001", report["context_citation_ids"])
+        self.assertIn("source_agent_flow_doc", report["context_citation_ids"])
+
     def test_write_preview_crystallize_fixture_covers_schema_refs(self):
         path = FIXTURES / "write-preview-crystallize-schema" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
