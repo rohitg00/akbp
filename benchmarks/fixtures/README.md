@@ -46,6 +46,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `export-bundle-compatibility`: validate portable bundle manifest counts, artifact hash shape, safety flags, and strict failure results.
 - `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, missing, wrong-typed, wrong item-typed, out-of-range, and unsupported enum method parameters before CLI execution.
 - `import-apply-flow`: validate JSONL `akbp.import_apply` dry-run and approved apply responses before durable writes.
+- `import-compatibility-edges`: validate mixed JSONL compatibility for accepted source/claim records, unknown evidence ids, unsupported kinds, and invalid claim shapes.
 - `import-apply-malformed`: validate import apply returns schema-backed failure results for malformed JSONL before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.
 - `graph-jsonl-records`: populate real JSONL entities and relations and validate schema-backed export.
