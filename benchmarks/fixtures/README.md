@@ -57,3 +57,4 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes, including import apply, without `approved:true` return structured `approval_required` errors.
 - `unknown-method-rejection` checks that unsupported JSONL tool methods return structured `unknown_method` errors with advertised alternatives.
+- `capability-negotiation` checks that runtimes can discover method schemas, structured errors, and write-review policy before invoking tools.
