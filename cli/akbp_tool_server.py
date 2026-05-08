@@ -137,6 +137,7 @@ def capabilities() -> dict[str, Any]:
             "max_request_bytes_enforced": True,
             "path_validation": True,
             "param_length_validation": True,
+            "param_control_char_validation": True,
             "dry_run_argv_redaction": True,
         },
         "schemas": {
@@ -154,6 +155,7 @@ def capabilities() -> dict[str, Any]:
             "approval_field": "approved",
             "path_policy": "caller-supplied local path; empty paths, oversized paths, and control characters are rejected before dispatch",
             "param_length_policy": "string params are capped before CLI dispatch according to method schemas",
+            "param_control_char_policy": "path-like and identifier string params reject NUL, newline, and carriage return before CLI dispatch",
         },
         "methods": {
             name: {
@@ -302,6 +304,24 @@ def schema_enum(schema_name: str, property_name: str, fallback: set[str]) -> set
 CLAIM_TYPES = schema_enum("claim.schema.json", "type", {"fact", "decision", "preference", "workflow", "observation", "question", "warning"})
 SOURCE_TYPES = schema_enum("source.schema.json", "type", {"file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"})
 
+CONTROL_CHAR_STRING_PARAMS = {
+    "file",
+    "locator",
+    "source_id",
+    "claim_id",
+    "old_claim_id",
+    "source_claim_id",
+    "target_claim_id",
+    "type",
+    "claim_type",
+    "level",
+}
+
+
+def has_control_char(value: str) -> bool:
+    return any(char in value for char in ("\x00", "\n", "\r"))
+
+
 STRING_PARAMS = {
     "query",
     "task",
@@ -332,6 +352,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         max_length = PARAM_MAX_LENGTHS.get(name)
         if max_length is not None and len(value) > max_length:
             errors.append(f"{name} must be at most {max_length} characters")
+        if name in CONTROL_CHAR_STRING_PARAMS and has_control_char(value):
+            errors.append(f"{name} must not contain control characters")
     if "type" in params and method in {"akbp.remember", "akbp.supersede"} and params.get("type") not in CLAIM_TYPES:
         errors.append("type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "type" in params and method in {"akbp.source.add", "akbp.ingest"} and params.get("type") not in SOURCE_TYPES:

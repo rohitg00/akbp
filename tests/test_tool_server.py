@@ -822,6 +822,32 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(line["error"]["code"], "unknown_method")
         self.assertIn("available_methods", line["error"]["details"])
 
+    def test_path_like_string_params_reject_control_chars_before_cli(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            requests = "\n".join([
+                json.dumps({
+                    "id": "bad-file",
+                    "method": "akbp.import_check",
+                    "path": tmp,
+                    "params": {"file": "import\n.jsonl"},
+                }),
+                json.dumps({
+                    "id": "bad-locator",
+                    "method": "akbp.source.add",
+                    "path": tmp,
+                    "dry_run": True,
+                    "params": {"locator": "docs/notes\r.md"},
+                }),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            rows = [json.loads(line) for line in proc.stdout.splitlines()]
+        for row in rows:
+            self.assertFalse(row["ok"])
+            self.assertEqual(row["error"]["code"], "invalid_params")
+            assert_matches_required_schema(self, row["error"]["details"], schema_def("invalid_params_details"))
+        self.assertIn("file must not contain control characters", rows[0]["error"]["details"]["type_errors"])
+        self.assertIn("locator must not contain control characters", rows[1]["error"]["details"]["type_errors"])
+
     def test_oversized_string_params_are_structured_before_cli(self):
         with tempfile.TemporaryDirectory() as d:
             req = {"id": "too-long-query", "method": "akbp.search", "path": d, "params": {"query": "x" * 4097}}
