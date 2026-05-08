@@ -262,6 +262,27 @@ class AkbpCliSmokeTest(unittest.TestCase):
             claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
             self.assertEqual(claims[0]["evidence"], [data["source_id"]])
 
+    def test_source_add_redacts_secret_like_title(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kb = Path(tmp) / "kb"
+            note = Path(tmp) / "note.md"
+            note.write_text("# Note\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            proc = run_cli(
+                "--path",
+                str(kb),
+                "source",
+                "add",
+                str(note),
+                "--type",
+                "file",
+                "--title",
+                "Incident api_key=sk-live-demo",
+            )
+            data = json.loads(proc.stdout)
+            self.assertEqual(data["title"], "Incident [REDACTED]")
+            self.assertNotIn("sk-live-demo", (kb / "raw" / "sources" / "sources.jsonl").read_text(encoding="utf-8"))
+
     def test_ingest_redacts_secret_like_title(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
@@ -380,6 +401,44 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(data["skipped_existing"], {"sources": [], "claims": []})
             self.assertEqual(data["rejected_count"], 1)
             self.assertNotIn("sk-example123456789", proc.stdout)
+
+    def test_import_check_accepts_export_shaped_source_and_claim_objects(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            kb = Path(tmp) / "kb"
+            source = {
+                "id": "source_export_shaped",
+                "type": "file",
+                "locator": "notes.md",
+                "title": "Export shaped source",
+                "hash": None,
+                "immutable": True,
+                "scope": "project",
+                "created_at": "2026-05-08T00:00:00Z",
+                "metadata": {},
+            }
+            claim = {
+                "id": "claim_export_shaped",
+                "text": "Export-shaped claim objects can be imported without adding a kind field.",
+                "type": "workflow",
+                "status": "working",
+                "confidence": 0.8,
+                "evidence": ["source_export_shaped"],
+                "entities": [],
+                "supersedes": [],
+                "superseded_by": None,
+                "scope": "project",
+                "created_at": "2026-05-08T00:00:00Z",
+                "updated_at": "2026-05-08T00:00:00Z",
+                "last_confirmed_at": None,
+            }
+            exchange = Path(tmp) / "exchange.jsonl"
+            exchange.write_text(json.dumps(source) + "\n" + json.dumps(claim) + "\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            checked = json.loads(run_cli("--path", str(kb), "import-check", str(exchange), "--fail-on-rejected").stdout)
+            self.assertTrue(checked["ok"])
+            self.assertEqual(checked["accepted_count"], 2)
+            self.assertEqual(checked["rejected"], [])
+            self.assertEqual([item["kind"] for item in checked["accepted"]], ["source", "claim"])
 
     def test_import_apply_requires_review_and_writes_accepted_objects(self):
         with tempfile.TemporaryDirectory() as d:

@@ -724,6 +724,27 @@ class ToolServerTest(unittest.TestCase):
             self.assertNotIn("sk-example123456789", claims[0]["text"])
 
 
+    def test_source_add_redacts_secret_like_title(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            note = Path(tmp) / "note.md"
+            note.write_text("# Note\n", encoding="utf-8")
+            requests = json.dumps({
+                "id": "source-add",
+                "method": "akbp.source.add",
+                "path": tmp,
+                "approved": True,
+                "params": {
+                    "locator": str(note),
+                    "type": "file",
+                    "title": "Incident api_key=sk-live-demo",
+                },
+            }) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertEqual(line["result"]["title"], "Incident [REDACTED]")
+            self.assertNotIn("sk-live-demo", json.dumps(line))
+
     def test_ingest_dry_run_returns_redacted_preview(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
