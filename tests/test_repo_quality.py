@@ -196,6 +196,26 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn("akbp.crystallize_session", text, str(adapter.relative_to(ROOT)))
             self.assertIn("dry-run", text, str(adapter.relative_to(ROOT)))
 
+
+    def test_adapter_review_checklist_covers_runtime_safety(self):
+        text = (ROOT / "docs" / "ADAPTER_REVIEW_CHECKLIST.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp.capabilities",
+            "params_schema",
+            "akbp.context",
+            "akbp.search",
+            "akbp.cite",
+            "dry_run:true",
+            "review_required",
+            "apply_instruction",
+            "approved:true",
+            "akbp.import_check",
+            "akbp.import_apply",
+            "secret-like values",
+            "make validate",
+        ]:
+            self.assertIn(required, text)
+
     def test_adapter_docs_use_current_validation_and_crystallize_flow(self):
         text = (ROOT / "docs" / "ADAPTERS.md").read_text(encoding="utf-8")
         self.assertIn("akbp.crystallize_session", text)
