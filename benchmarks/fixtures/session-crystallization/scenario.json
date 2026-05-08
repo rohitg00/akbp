@@ -68,6 +68,10 @@
       "source_structured_session_001",
       "source_agent_flow_doc"
     ],
+    "must_cite_in_context": [
+      "source_structured_session_001",
+      "source_agent_flow_doc"
+    ],
     "answer_should_include": [
       "dry-run",
       "applying",
