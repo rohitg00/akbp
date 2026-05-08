@@ -55,3 +55,4 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes, including import apply, without `approved:true` return structured `approval_required` errors.
+- `unknown-method-rejection` checks that unsupported JSONL tool methods return structured `unknown_method` errors with advertised alternatives.

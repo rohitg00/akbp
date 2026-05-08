@@ -1,0 +1,24 @@
+{
+  "id": "unknown-method-rejection-001",
+  "task": "Verify that an agent runtime gets a structured rejection when it calls a method that the AKBP JSONL tool server does not advertise.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "unknown-method",
+        "method": "akbp.not_supported",
+        "params": {},
+        "expected_error_code": "unknown_method",
+        "expected_error_schema": "#/$defs/unknown_method_details",
+        "expected_error_fields": ["available_methods"],
+        "expected_error_contains": {
+          "available_methods[]": ["akbp.capabilities", "akbp.search", "akbp.import_apply"]
+        }
+      }
+    ]
+  },
+  "query": "unsupported tool method",
+  "expected": {
+    "answer_should_include": ["unknown_method", "available_methods"],
+    "must_reject_tool_methods": ["akbp.not_supported"]
+  }
+}
