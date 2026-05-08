@@ -56,6 +56,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.audit": {"write": False, "params": ["limit"]},
     "akbp.cite": {"write": False, "params": ["claim_id"]},
     "akbp.source.add": {"write": True, "params": ["locator", "type", "title", "evidence", "dry_run"]},
+    "akbp.source.verify": {"write": False, "params": ["source_id", "fail_on_issue"]},
     "akbp.ingest": {"write": True, "params": ["file", "type", "title", "claim", "claim_type", "confidence", "entity", "dry_run"]},
     "akbp.import_check": {"write": False, "params": ["file", "fail_on_rejected"]},
     "akbp.import_apply": {"write": True, "params": ["file", "dry_run"]},
@@ -132,6 +133,7 @@ def capabilities() -> dict[str, Any]:
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "safe-write-apply-1", "method": "akbp.remember", "path": ".", "approved": True, "params": {"text": "Agents need rollback paths"}},
             {"id": "ingest-1", "method": "akbp.ingest", "path": ".", "dry_run": True, "params": {"file": "notes.md", "claim": "The project ships small verified batches"}},
+            {"id": "source-verify-1", "method": "akbp.source.verify", "path": ".", "params": {"source_id": "source_example", "fail_on_issue": True}},
             {"id": "export-check-1", "method": "akbp.export_check", "path": ".", "params": {"file": "bundle.json", "fail_on_issues": True}},
             {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl", "fail_on_rejected": True}},
             {"id": "import-apply-1", "method": "akbp.import_apply", "path": ".", "dry_run": True, "params": {"file": "export.jsonl"}},
@@ -154,6 +156,7 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.audit": ["audit", "--limit", str(params.get("limit", 20))],
         "akbp.cite": ["cite", params.get("claim_id", "")],
         "akbp.source.add": ["source", "add", params.get("locator", ""), "--type", params.get("type", "file")],
+        "akbp.source.verify": ["source", "verify"],
         "akbp.ingest": ["ingest", params.get("file", ""), "--type", params.get("type", "file")],
         "akbp.import_check": ["import-check", params.get("file", "")],
         "akbp.import_apply": ["import-apply", params.get("file", "")],
@@ -170,6 +173,10 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
     for entity in params.get("entity", []) or []:
         if method in {"akbp.remember", "akbp.supersede", "akbp.ingest"}:
             argv.extend(["--entity", str(entity)])
+    if method == "akbp.source.verify" and params.get("source_id"):
+        argv.append(str(params["source_id"]))
+    if method == "akbp.source.verify" and params.get("fail_on_issue"):
+        argv.append("--fail-on-issue")
     if method in {"akbp.source.add", "akbp.ingest"} and params.get("title"):
         argv.extend(["--title", str(params["title"])])
     if method == "akbp.crystallize_session" and params.get("apply"):
@@ -250,6 +257,7 @@ STRING_PARAMS = {
     "claim",
     "claim_type",
     "old_claim_id",
+    "source_id",
     "source_claim_id",
     "target_claim_id",
     "transcript",
@@ -287,6 +295,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("incremental must be a boolean")
     if "fail_on_rejected" in params and not isinstance(params.get("fail_on_rejected"), bool):
         errors.append("fail_on_rejected must be a boolean")
+    if "fail_on_issue" in params and not isinstance(params.get("fail_on_issue"), bool):
+        errors.append("fail_on_issue must be a boolean")
     if "fail_on_issues" in params and not isinstance(params.get("fail_on_issues"), bool):
         errors.append("fail_on_issues must be a boolean")
     if "evidence" in params:
@@ -404,7 +414,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if method == "akbp.import_apply":
         argv = [*argv, "--approved"]
     code, stdout, stderr = run_cli(path, argv)
-    if method in {"akbp.import_check", "akbp.import_apply"} and stdout.strip():
+    if method in {"akbp.import_check", "akbp.import_apply", "akbp.source.verify"} and stdout.strip():
         return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
     if code != 0:
         return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})

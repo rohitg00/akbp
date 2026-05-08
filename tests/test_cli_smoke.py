@@ -15,6 +15,24 @@ def run_cli(*args):
 
 
 class AkbpCliSmokeTest(unittest.TestCase):
+    def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            cwd_file = Path.cwd() / "akbp-cwd-source-smoke.txt"
+            try:
+                cwd_file.write_text("cwd source", encoding="utf-8")
+                source = json.loads(
+                    run_cli("--path", str(kb), "source", "add", cwd_file.name, "--type", "file").stdout
+                )
+                verified = json.loads(
+                    run_cli("--path", str(kb), "source", "verify", source["id"], "--fail-on-issue").stdout
+                )
+                self.assertTrue(verified["ok"])
+                self.assertEqual(verified["counts"]["verified"], 1)
+            finally:
+                cwd_file.unlink(missing_ok=True)
+
     def test_init_remember_query_lint(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
@@ -24,6 +42,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             card = json.loads((kb / "akbp.json").read_text(encoding="utf-8"))
             self.assertEqual(card["schema_version"], "0.1-draft")
             self.assertIn("claims", card["artifacts"])
+            (kb / "README.md").write_text("# Readme\n", encoding="utf-8")
 
             out = run_cli("--path", str(kb), "source", "add", "README.md", "--type", "file", "--title", "Readme")
             source = json.loads(out.stdout)
@@ -117,8 +136,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(exported["manifest"]["safety"]["excludes_indexes"])
             self.assertEqual(exported["manifest"]["verification"]["hash_algorithm"], "sha256")
 
+            out = run_cli("--path", str(kb), "source", "verify", "--fail-on-issue")
+            source_verify = json.loads(out.stdout)
+            self.assertTrue(source_verify["ok"])
+            self.assertEqual(source_verify["counts"]["verified"], 1)
+            (kb / "README.md").write_text("changed", encoding="utf-8")
+            changed_verify = json.loads(run_cli("--path", str(kb), "source", "verify").stdout)
+            self.assertFalse(changed_verify["ok"])
+            self.assertEqual(changed_verify["counts"]["changed"], 1)
+
             bundle = Path(d) / "bundle.json"
-            bundle.write_text(out.stdout, encoding="utf-8")
+            bundle.write_text(json.dumps(exported), encoding="utf-8")
             checked = json.loads(run_cli("--path", str(kb), "export-check", str(bundle), "--fail-on-issues").stdout)
             self.assertTrue(checked["ok"])
             self.assertEqual(checked["manifest_format"], "akbp-portable-bundle")

@@ -480,6 +480,28 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"]["relations"][0], schema_def("relation_result"))
 
 
+    def test_source_verify_method_reports_file_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            source = json.loads(run_cli("--path", str(kb), "source", "add", "AKBP.md", "--title", "AKBP doc").stdout)
+            requests = "\n".join([
+                json.dumps({"id": "source-ok", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"], "fail_on_issue": True}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("source_verify_result"))
+            self.assertTrue(line["result"]["ok"])
+            self.assertEqual(line["result"]["counts"]["verified"], 1)
+            (kb / "AKBP.md").write_text("changed", encoding="utf-8")
+            request = json.dumps({"id": "source-changed", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"], "fail_on_issue": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            self.assertFalse(line["result"]["ok"])
+            self.assertEqual(line["result"]["counts"]["changed"], 1)
+
     def test_export_check_method_validates_bundle_manifest(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

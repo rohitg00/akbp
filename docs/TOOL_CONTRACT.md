@@ -144,6 +144,10 @@ Return recent audit events.
 
 Return a portable bundle of protocol artifacts: card, claims, sources, entities, and relations. Local indexes and engine-owned state are excluded. The result includes a `manifest` with artifact paths, SHA-256 hashes when files exist, object counts, safety flags, and verification metadata so another agent can inspect the bundle before accepting it.
 
+## `akbp.source.verify`
+
+Re-check recorded file sources against their stored SHA-256 hashes. The result separates verified, changed, missing, and unchecked sources so agents can catch evidence drift before relying on old claims.
+
 ## `akbp.export_check`
 
 Validate a portable export bundle before another agent trusts it. The check verifies JSON shape, manifest presence, object counts, artifact hash format, safety flags, and secret-like values. Use `fail_on_issues:true` in automation when any issue should stop the workflow.
@@ -171,6 +175,7 @@ Supported methods in the first server slice:
 - `akbp.audit`
 - `akbp.cite`
 - `akbp.source.add`
+- `akbp.source.verify`
 - `akbp.ingest`
 - `akbp.import_check`
 - `akbp.import_apply`
@@ -202,6 +207,7 @@ Request and response envelopes are specified in:
 - `akbp.audit`
 - `akbp.cite`
 - `akbp.source.add`
+- `akbp.source.verify`
 - `akbp.ingest`
 - `akbp.import_check`
 - `akbp.import_apply`

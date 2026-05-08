@@ -1358,6 +1358,68 @@ def cmd_source_add(args: argparse.Namespace) -> int:
     return 0
 
 
+
+def resolve_source_file(base: Path, locator: str) -> Path:
+    candidate = Path(locator)
+    if candidate.is_absolute():
+        return candidate
+    base_candidate = (base / locator).resolve()
+    if base_candidate.exists():
+        return base_candidate
+    return candidate.resolve()
+
+
+def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
+    sources = load_sources(base)
+    if source_id:
+        sources = [source for source in sources if source.get("id") == source_id]
+    verified: list[dict[str, Any]] = []
+    changed: list[dict[str, Any]] = []
+    missing: list[dict[str, Any]] = []
+    unchecked: list[dict[str, Any]] = []
+    for source in sources:
+        sid = str(source.get("id") or "")
+        stype = str(source.get("type") or "")
+        locator = str(source.get("locator") or "")
+        expected = source.get("hash")
+        if stype != "file":
+            unchecked.append({"id": sid, "type": stype, "locator": locator, "reason": "non_file_source"})
+            continue
+        if not expected:
+            unchecked.append({"id": sid, "type": stype, "locator": locator, "reason": "missing_recorded_hash"})
+            continue
+        path = resolve_source_file(base, locator)
+        actual = file_hash(path)
+        if actual is None:
+            missing.append({"id": sid, "type": stype, "locator": locator, "expected_hash": expected})
+        elif actual == expected:
+            verified.append({"id": sid, "type": stype, "locator": locator, "hash": actual})
+        else:
+            changed.append({"id": sid, "type": stype, "locator": locator, "expected_hash": expected, "actual_hash": actual})
+    return {
+        "ok": not changed and not missing,
+        "checked_at": now_iso(),
+        "source_id": source_id,
+        "counts": {
+            "checked": len(sources),
+            "verified": len(verified),
+            "changed": len(changed),
+            "missing": len(missing),
+            "unchecked": len(unchecked),
+        },
+        "verified": verified,
+        "changed": changed,
+        "missing": missing,
+        "unchecked": unchecked,
+    }
+
+
+def cmd_source_verify(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    result = verify_sources(base, args.source_id)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+    return 1 if args.fail_on_issue and not result["ok"] else 0
+
 def cmd_cite(args: argparse.Namespace) -> int:
     base = root(args.path)
     claims = load_claims(base)
@@ -1502,6 +1564,10 @@ def build_parser() -> argparse.ArgumentParser:
     s_add.add_argument("--mutable", action="store_true")
     s_add.add_argument("--scope", default="project", choices=["private", "project", "team", "public"])
     s_add.set_defaults(func=cmd_source_add)
+    s_verify = source_sub.add_parser("verify")
+    s_verify.add_argument("source_id", nargs="?")
+    s_verify.add_argument("--fail-on-issue", action="store_true")
+    s_verify.set_defaults(func=cmd_source_verify)
 
     s = sub.add_parser("cite")
     s.add_argument("claim_id")

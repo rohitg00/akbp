@@ -181,6 +181,7 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.audit",
             "akbp.cite",
             "akbp.source.add",
+            "akbp.source.verify",
             "akbp.ingest",
             "akbp.supersede",
             "akbp.contradict",
