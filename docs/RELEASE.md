@@ -1,6 +1,6 @@
 # Release Readiness
 
-Use this checklist before tagging or announcing an AKBP release.
+Use this checklist before tagging or announcing an AKBP release. For marketing or public launch, also complete [PUBLIC_LAUNCH_CHECKLIST.md](PUBLIC_LAUNCH_CHECKLIST.md).
 
 ## Version scope
 

@@ -318,7 +318,7 @@ akbp/
 - New user: run `make demo`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`.
 - Protocol reviewer: read `docs/ARCHITECTURE.md`, `docs/TOOL_CONTRACT.md`, and `schemas/`.
-- Release reviewer: run `make validate`, then read `docs/RELEASE.md`.
+- Release reviewer: run `make validate`, then read `docs/RELEASE.md` and `docs/PUBLIC_LAUNCH_CHECKLIST.md`.
 - Troubleshooting: read `docs/TROUBLESHOOTING.md`.
 
 ## License
