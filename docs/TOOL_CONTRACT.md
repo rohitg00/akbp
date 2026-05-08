@@ -84,9 +84,36 @@ Input:
 }
 ```
 
+### akbp.session.start
+
+Adapter-level session entrypoint. It returns a stable `session_id` and a cited context pack for the current task. Use this at runtime startup before planning or making write decisions.
+
+```json
+{
+  "id": "session-start-1",
+  "method": "akbp.session.start",
+  "path": ".",
+  "params": {"task": "continue the release", "limit": 5}
+}
+```
+
+### akbp.session.end
+
+Adapter-level session-end operation. It crystallizes a transcript using the same underlying behavior as `akbp.crystallize_session`, but gives adapter authors a stable operation name for session lifecycle wiring. Start with request-level `dry_run:true`; only repeat with `approved:true` and `params.apply:true` after reviewing the summary.
+
+```json
+{
+  "id": "session-end-preview-1",
+  "method": "akbp.session.end",
+  "path": ".",
+  "dry_run": true,
+  "params": {"transcript": "session.md", "apply": true}
+}
+```
+
 ### akbp.crystallize_session
 
-Convert a session transcript into durable knowledge. Start with request-level `dry_run:true`; only set `params.apply:true` after reviewing the summary.
+Low-level transcript crystallization operation. Prefer `akbp.session.end` for adapter lifecycle integrations. Start with request-level `dry_run:true`; only set `params.apply:true` after reviewing the summary.
 
 Request envelope:
 
@@ -182,6 +209,10 @@ Supported methods in the first server slice:
 - `akbp.supersede`
 - `akbp.contradict`
 - `akbp.crystallize_session`
+- `akbp.session.start`
+- `akbp.session.end`
+- `akbp.session.start`
+- `akbp.session.end`
 
 The CLI also has local-only commands such as `akbp lint`; those are not JSONL server methods unless listed above.
 
@@ -267,6 +298,8 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/import_check_result`: a closed `akbp.import_check` result with checked, accepted, rejected, and error counts, strict-fail mode status, accepted object ids, rejected object ids, unknown source-evidence rejection, and parse errors without raw secret echo.
 - `#/$defs/import_apply_result`: a closed `akbp.import_apply` result with dry-run/apply status, accepted counts, rejected counts, would-write ids, and skipped-existing ids. Review `accepted_count`, `rejected_count`, `error_count`, `would_write.sources`, and `would_write.claims` before repeating the request with `approved:true`.
 - `#/$defs/crystallize_session_result`: a closed approved session crystallization result with `session_id`, extracted closed `summary`, output page, source id, created claims, and skipped claims.
+- `#/$defs/session_start_result`: a closed adapter session-start result with `session_id`, task, and cited context pack.
+- `#/$defs/session_end_preview_result`: a closed session-end dry-run result with extracted summary, planned page, review metadata, and no durable writes.
 - `#/$defs/approval_required_details`: a closed `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/invalid_request_details`: closed request-envelope validation details with `errors` and `schema`.
 - `#/$defs/invalid_json_details`: closed invalid JSON line details with parse `errors` and the request-envelope `schema`, without echoing the raw input line.

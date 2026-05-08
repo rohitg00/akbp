@@ -414,6 +414,44 @@
           "default": false
         }
       }
+    },
+    "akbp.session.start.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "$ref": "#/$defs/limit"
+        }
+      }
+    },
+    "akbp.session.end.params": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transcript"
+      ],
+      "properties": {
+        "transcript": {
+          "type": "string",
+          "minLength": 1
+        },
+        "apply": {
+          "type": "boolean",
+          "default": false
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      }
     }
   },
   "type": "object",
@@ -479,6 +517,12 @@
         },
         "akbp.crystallize_session": {
           "$ref": "#/$defs/akbp.crystallize_session.params"
+        },
+        "akbp.session.start": {
+          "$ref": "#/$defs/akbp.session.start.params"
+        },
+        "akbp.session.end": {
+          "$ref": "#/$defs/akbp.session.end.params"
         }
       }
     }

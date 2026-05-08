@@ -47,10 +47,16 @@ Do not hard-code future methods. If a method is missing, degrade gracefully and 
 
 ## 3. Retrieve context at session start
 
-Use `akbp.context` for planning context and `akbp.search` for targeted lookup.
+Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.
 
 ```json
-{"id":"ctx-1","method":"akbp.context","path":".","params":{"query":"current task goals and constraints","limit":5}}
+{"id":"session-start-1","method":"akbp.session.start","path":".","params":{"task":"current task goals and constraints","limit":5}}
+```
+
+Lower-level context request:
+
+```json
+{"id":"ctx-1","method":"akbp.context","path":".","params":{"task":"current task goals and constraints","limit":5}}
 ```
 
 ```json
@@ -63,10 +69,10 @@ The adapter should show citations or source ids when prior knowledge affects a p
 
 All write-capable calls must start as previews.
 
-Example session crystallization preview:
+Example session-end preview:
 
 ```json
-{"id":"crystallize-preview-1","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript_path":"session.md"}}
+{"id":"session-end-preview-1","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session.md","apply":true}}
 ```
 
 If the response includes review metadata, surface it in the runtime UI or command output:
@@ -79,7 +85,7 @@ If the response includes review metadata, surface it in the runtime UI or comman
 Apply only after approval or an explicit trusted local policy:
 
 ```json
-{"id":"crystallize-apply-1","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript_path":"session.md"}}
+{"id":"session-end-apply-1","method":"akbp.session.end","path":".","approved":true,"params":{"transcript":"session.md","apply":true}}
 ```
 
 ## 5. Preserve evidence and auditability
@@ -137,7 +143,7 @@ An adapter is publishable when:
 - it uses `akbp.capabilities` before method assumptions
 - startup retrieves cited context
 - writes are dry-run first and approval-gated
-- session-end memory uses `akbp.crystallize_session` where possible
+- session-end memory uses `akbp.session.end` or `akbp.crystallize_session` where possible
 - private data and secrets are excluded by default
 - examples are copy-pasteable and public-safe
 - `make validate` passes

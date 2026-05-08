@@ -1,0 +1,107 @@
+{
+  "id": "adapter-session-operation-001",
+  "task": "Verify adapter session lifecycle operations expose start context and end crystallization contracts.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_adapter_quickstart",
+        "type": "file",
+        "locator": "docs/ADAPTER_AUTHOR_QUICKSTART.md",
+        "title": "Adapter author quickstart"
+      },
+      {
+        "id": "source_tool_contract",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_adapter_session_start_context",
+        "text": "Adapters should start a session by discovering capabilities and retrieving cited context before planning.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_adapter_quickstart"],
+        "entities": ["adapter", "session.start", "context"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_adapter_session_end_review",
+        "text": "Adapters should end a session with a dry-run transcript crystallization preview before applying durable memory with approval.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_adapter_quickstart", "source_tool_contract"],
+        "entities": ["adapter", "session.end", "dry_run", "approved:true"],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "session-start",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "adapter session lifecycle",
+          "limit": 5
+        },
+        "expected_result_fields": ["session_id", "task", "context"],
+        "expected_result_values": {
+          "task": "adapter session lifecycle"
+        },
+        "expected_result_schema": "#/$defs/session_start_result"
+      },
+      {
+        "id": "session-end-preview",
+        "method": "akbp.session.end",
+        "params": {
+          "transcript": "examples/coding-agent/structured-session-transcript.md",
+          "apply": true,
+          "dry_run": true
+        },
+        "expected_result_fields": ["session_id", "apply", "summary", "page", "source_id", "created_claims", "skipped_claims", "dry_run", "would_write", "review_required", "apply_instruction"],
+        "expected_result_values": {
+          "apply": false,
+          "dry_run": true,
+          "would_write": true,
+          "review_required": true
+        },
+        "expected_result_schema": "#/$defs/session_end_preview_result"
+      },
+      {
+        "id": "session-end-apply",
+        "method": "akbp.session.end",
+        "approved": true,
+        "params": {
+          "transcript": "examples/coding-agent/structured-session-transcript.md",
+          "apply": true
+        },
+        "expected_result_fields": ["session_id", "apply", "summary", "page", "source_id", "created_claims", "skipped_claims"],
+        "expected_result_values": {
+          "apply": true
+        },
+        "expected_result_schema": "#/$defs/crystallize_session_result"
+      }
+    ]
+  },
+  "query": "How should an adapter manage AKBP session lifecycle operations?",
+  "expected": {
+    "must_retrieve": [
+      "claim_adapter_session_start_context",
+      "claim_adapter_session_end_review"
+    ],
+    "must_cite": [
+      "source_adapter_quickstart",
+      "source_tool_contract"
+    ],
+    "answer_should_include": [
+      "session.start",
+      "session.end",
+      "dry-run",
+      "approval"
+    ],
+    "must_apply_tool_methods": ["akbp.session.end"],
+    "must_dry_run_tool_methods": ["akbp.session.end"]
+  }
+}

@@ -236,6 +236,7 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
         for required in [
             "akbp.capabilities",
+            "akbp.session.start",
             "akbp.context",
             "akbp.search",
             "dry_run",
@@ -252,6 +253,7 @@ class RepoQualityTest(unittest.TestCase):
         for required in [
             "akbp.capabilities",
             "params_schema",
+            "akbp.session.start",
             "akbp.context",
             "akbp.search",
             "akbp.cite",
