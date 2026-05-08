@@ -249,6 +249,7 @@ The repo currently includes:
 - `benchmarks/fixtures/` for durable retrieval, citation, write-safety, import/apply, and capability scenarios
 - `examples/quickstart-demo/` for the one-command happy path
 - `docs/TROUBLESHOOTING.md` for common local failures
+- `docs/OBSIDIAN.md` for using an AKBP knowledge base inside an Obsidian vault
 
 ## Conformance levels
 

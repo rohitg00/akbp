@@ -275,6 +275,24 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("Run `make validate`", text)
         self.assertNotIn("Run `make guard`, `make test`, `make smoke`, and `make benchmark`", text)
 
+
+    def test_obsidian_doc_positions_akbp_as_memory_contract(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        text = (ROOT / "docs" / "OBSIDIAN.md").read_text(encoding="utf-8")
+        self.assertIn("docs/OBSIDIAN.md", readme)
+        for required in [
+            "Obsidian is for humans",
+            "AKBP is for agents",
+            "AKBP does not replace Obsidian",
+            "claims/",
+            "raw/",
+            "akbp.session.start",
+            "akbp.session.end",
+            "approved:true",
+            "review-gated writes",
+        ]:
+            self.assertIn(required, text)
+
     def test_tool_contract_documents_write_safety(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         for required in [
