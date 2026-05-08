@@ -573,6 +573,27 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("akbp.import_apply", install_doc)
         self.assertIn("schema-backed `invalid_params`", install_doc)
 
+
+    def test_readme_has_public_landing_page_quality_sections(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "Agents should not start every session with amnesia.",
+            "## Why this exists",
+            "## What ships today",
+            "## See it work",
+            "make demo",
+            "## The sprint loop for agents",
+            "## Tool server contract",
+            "## Adapter path",
+            "## Architecture",
+            "## Validation",
+            "## Roadmap to 1.0",
+            "It is still alpha",
+        ]:
+            self.assertIn(required, readme)
+        self.assertNotIn("tiny installable reference CLI", readme)
+        self.assertNotIn("The narrow MVP", readme)
+
     def test_readme_documents_tool_write_approval_gate(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("dry_run:true", readme)
