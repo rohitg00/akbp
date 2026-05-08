@@ -2,53 +2,118 @@
 
 [![CI](https://github.com/rohitg00/akbp/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/akbp/actions/workflows/ci.yml)
 
-Agent Knowledge Base Protocol.
+> Agents should not start every session with amnesia.
 
-Agents should not start every session with amnesia.
+AKBP is the Agent Knowledge Base Protocol: an open, local-first way for AI agents to compile durable project knowledge, cite where it came from, update it safely, and carry it across tools.
 
-AKBP is an open, local-first protocol for agent-maintained knowledge bases. It lets AI agents compile, update, cite, supersede, and share knowledge across sessions, tools, and runtimes.
+The short version: AKBP turns messy agent work into a portable knowledge base that the next agent session can actually use.
 
-The repo now includes a tiny installable reference CLI and JSONL tool server that can initialize a knowledge base, remember claims, crystallize transcripts, query memory, verify sources, check portable exports, and return agent-ready context packs.
+Today this repo ships a working reference CLI, a JSONL tool server, schemas, adapters, conformance checks, benchmarks, import/export safety checks, and CI across Python 3.9, 3.10, 3.11, and 3.12.
 
-CI runs `make validate`, which covers the public-reference guard, tests, CLI smoke flow, retrieval benchmarks, and install smoke flow on pushes and pull requests. Local release checks should also run `make guard`, `make test`, `make smoke`, and `make install-smoke`.
+It is still alpha. It is not a 1.0 compatibility promise yet. It is ready for serious demos, adapter work, protocol feedback, and early dogfooding.
 
-## Why
+## Why this exists
 
-RAG retrieves and forgets. LLM Wiki compiles and compounds. AKBP makes that compiled knowledge portable across agents.
+RAG retrieves and forgets. Repository instruction files help agents behave, but they do not become a shared memory system. Chat transcripts contain useful decisions, but they are usually trapped in one runtime. Every new agent session pays the same context tax again.
 
-The current ecosystem is fragmented: Obsidian vaults, Markdown memories, tool-server implementations, coding-agent session logs, graph memory systems, local search tools, and custom second-brain apps. AKBP defines the common layer between them.
+AKBP gives agents a durable layer:
 
-## Who it is for
+```text
+agent finishes work
+  -> transcript and sources are reviewed
+  -> durable claims and wiki pages are written
+  -> evidence and source hashes are kept
+  -> local search/indexes are refreshed
+  -> the next session gets cited context instead of guesswork
+```
 
-- Coding agents that need memory across sessions
-- Research agents that compile sources into durable knowledge
-- Teams that need shared agent-readable context
-- Obsidian and Markdown users who want agent-maintained notes
-- tool protocol tool builders who need a standard memory contract
+The goal is not another private memory database. The goal is a protocol that a coding agent, research agent, IDE, CLI, or second-brain tool can all read and write.
 
-## What AKBP standardizes
+## What ships today
 
-- Folder structure
-- Markdown page conventions
-- Claim schema
-- Entity schema
-- Relationship schema
-- Evidence/provenance schema
-- Source integrity checks
-- Portable export manifests
-- Import review and apply flow
-- Memory lifecycle rules
-- Retrieval contract
-- Agent hooks
-- JSONL tool method names
-- Structured tool errors
-- Dry-run and approval-gated writes
-- Runtime capability discovery
-- Sync and conflict behavior
-- Privacy and audit rules
-- Benchmarks for durable agent knowledge
+| Area | Current support |
+|------|-----------------|
+| Local knowledge base | `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, sources, audit log |
+| CLI | `akbp init`, `source add`, `ingest`, `remember`, `crystallize`, `index`, `search`, `context`, `export`, `import-check`, `import-apply`, `conformance` |
+| Tool server | JSONL server with `akbp.capabilities`, structured responses, schema-backed params, and structured errors |
+| Safety | `dry_run:true`, `approved:true`, `approval_required`, review-gated writes, secret-like value rejection, source verification |
+| Portability | Export manifests with artifact paths, SHA-256 hashes, object counts, safety flags, and verification metadata |
+| Retrieval | SQLite FTS5 local search, context packs, citations, benchmark fixtures |
+| Adapters | Templates and public-safe examples for coding-agent runtimes |
+| Validation | `make validate`, GitHub CI matrix, package build artifact, install smoke tests |
 
-## Five-minute adoption
+## See it work
+
+Run the complete public-alpha demo:
+
+```bash
+git clone https://github.com/rohitg00/akbp.git
+cd akbp
+make demo
+```
+
+The demo creates a fresh knowledge base, registers a source, ingests one durable release decision, verifies evidence, builds search, retrieves context, exports a portable bundle, checks the bundle, and runs level 3 conformance.
+
+Expected success markers:
+
+```text
+AKBP quickstart demo
+Initialized AKBP knowledge base at ...
+"verified": 1
+"results": [
+"items": [
+"ok": true
+AKBP quickstart demo passed
+```
+
+If you prefer the direct CLI path:
+
+```bash
+python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb source add notes.md --type file --title "Project notes"
+python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Capture the durable decision from this note." --claim-type decision
+python3 cli/akbp.py --path ./my-kb source verify --fail-on-issue
+python3 cli/akbp.py --path ./my-kb index --incremental
+python3 cli/akbp.py --path ./my-kb search "durable decision"
+python3 cli/akbp.py --path ./my-kb context "continue this project"
+```
+
+## Install
+
+For repo-local development:
+
+```bash
+python3 cli/akbp.py --help
+```
+
+For installed console scripts:
+
+```bash
+python3 -m pip install .
+akbp --path ./my-kb init
+akbp-tool-server < requests.jsonl
+```
+
+Full install and verification notes are in `docs/INSTALL.md`.
+
+## The sprint loop for agents
+
+AKBP is designed around the way coding agents actually work:
+
+| Moment | AKBP action |
+|--------|-------------|
+| Session starts | Call `akbp.context` and `akbp.search` for cited project memory |
+| Agent reads files or notes | Register evidence with `akbp.source.add` |
+| Agent proposes durable memory | Preview with `akbp.ingest` or `akbp.crystallize_session` and `dry_run:true` |
+| User or trusted policy approves | Apply with `approved:true` |
+| Work finishes | Refresh index and audit durable writes |
+| Another agent starts later | Retrieve compact context packs with citations |
+
+The core rule: agents can suggest memory, but durable writes must be review-gated.
+
+See `docs/AGENT_FLOW.md` and `examples/tool-server-approval-flow/`.
+
+## The knowledge base format
 
 A minimal AKBP knowledge base starts with two files:
 
@@ -57,190 +122,201 @@ AKBP.md      human-readable entry point for agents and maintainers
 akbp.json    machine-readable Knowledge Base Card
 ```
 
-Then add portable artifacts as the knowledge base matures:
+As the knowledge base matures, it adds portable artifacts:
 
 ```text
-wiki/
-claims/claims.jsonl
-graph/entities.jsonl
-graph/relations.jsonl
-raw/sources/
-.akbp/audit.jsonl
+wiki/                  compiled markdown knowledge
+claims/claims.jsonl    atomic claims with evidence and lifecycle state
+graph/entities.jsonl   entities referenced by claims and pages
+graph/relations.jsonl  typed relations and lifecycle links
+raw/sources/           optional copied source material
+.akbp/audit.jsonl      append-only operation history
 ```
 
-Exports include a manifest with artifact paths, SHA-256 hashes, object counts, safety flags, and verification metadata. Imported bundles can be checked before apply so agents do not trust unknown evidence or secret-like values blindly.
+Local runtime state lives under `.akbp/`, including the rebuildable SQLite FTS5 index. Portable knowledge remains in markdown and JSONL.
 
-Create the starter layout with:
+## Tool server contract
 
-```bash
-python3 cli/akbp.py init
+Agents talk to AKBP through newline-delimited JSON.
+
+Capability discovery:
+
+```json
+{"id":"caps-1","method":"akbp.capabilities"}
 ```
 
-Or install the local CLI:
+Context retrieval:
 
-```bash
-python3 -m pip install .
-akbp --path ./my-kb init
+```json
+{"id":"ctx-1","method":"akbp.context","path":".","params":{"query":"current release decisions","limit":5}}
 ```
 
-Run `make demo` or see `examples/quickstart-demo/` for the one-command happy path. See `docs/INSTALL.md` for install, build, and smoke-test instructions. See `docs/RELEASE.md` and `docs/RELEASE_NOTES_DRAFT.md` for release readiness, validation, and announcement prep.
+Write preview:
 
-## Quickstart
-
-Run the local flow with source verification and retrieval:
-
-```bash
-python3 cli/akbp.py --path ./my-kb init
-python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Capture the durable decision from this note." --claim-type decision
-python3 cli/akbp.py --path ./my-kb source verify --fail-on-issue
-python3 cli/akbp.py --path ./my-kb index --incremental
-python3 cli/akbp.py --path ./my-kb search "durable decision"
-python3 cli/akbp.py --path ./my-kb context "continue this project"
+```json
+{"id":"write-preview-1","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Decision: keep public alpha releases small and evidence-backed."}}
 ```
 
-For a complete runnable example, see `docs/AGENT_FLOW.md` and `examples/end-to-end-agent-flow/`.
+Approved write:
 
-## First implementation target
+```json
+{"id":"write-apply-1","method":"akbp.remember","path":".","approved":true,"params":{"text":"Decision: keep public alpha releases small and evidence-backed."}}
+```
 
-The narrow MVP is coding-agent memory:
+Adapters should branch on `error.code`, not free-form strings. See `docs/TOOL_CONTRACT.md` and `examples/tool-error-handling/`.
+
+## Adapter path
+
+Start here if you want AKBP inside a coding agent, IDE agent, task runner, or local assistant runtime:
+
+1. Read `docs/ADAPTER_AUTHOR_QUICKSTART.md`.
+2. Copy `adapters/coding-agent-template/`.
+3. Call `akbp.capabilities` at startup.
+4. Retrieve context before planning.
+5. Preview writes with `dry_run:true`.
+6. Apply only with `approved:true` or an explicit trusted local policy.
+7. Keep durable output in AKBP artifacts.
+8. Run `make validate`.
+
+Tracked adapter directories:
 
 ```text
-agent finishes work
-→ transcript is crystallized
-→ facts, decisions, workflows, and open questions are extracted
-→ wiki pages and claims are updated
-→ next agent session retrieves better context automatically
+adapters/coding-agent-template/
+adapters/example-coding-agent/
+adapters/terminal-coding-agent/
+adapters/editor-coding-agent/
+adapters/openclaw/
+adapters/codex/
+adapters/claude-code/
+adapters/cursor/
+adapters/gemini-cli/
 ```
+
+## Architecture
+
+```text
+Agent runtime / IDE / task runner
+        |
+        | CLI commands or JSONL tool requests
+        v
+Reference interface layer
+  - akbp console script
+  - akbp-tool-server JSONL server
+        |
+        v
+Protocol operations
+  - initialize and validate
+  - register and verify sources
+  - ingest reviewed source material
+  - remember cited claims
+  - crystallize session transcripts
+  - retrieve search results and context packs
+  - export, check, import, and audit bundles
+        |
+        v
+AKBP knowledge base
+  - markdown and JSONL source-of-truth artifacts
+  - append-only audit log
+  - rebuildable local SQLite FTS5 index
+```
+
+Read the current architecture map in `docs/ARCHITECTURE.md`.
+
+## Validation
+
+The public gate is:
+
+```bash
+make validate
+```
+
+It runs:
+
+```text
+make guard
+make test
+make smoke
+make benchmark-score
+make benchmark
+make install-smoke
+```
+
+GitHub CI runs full validation across Python 3.9, 3.10, 3.11, and 3.12, then builds package artifacts.
+
+The repo currently includes:
+
+- `tests/` for CLI, tool server, schemas, docs, adapters, and repo quality
+- `benchmarks/fixtures/` for durable retrieval, citation, write-safety, import/apply, and capability scenarios
+- `examples/quickstart-demo/` for the one-command happy path
+- `docs/TROUBLESHOOTING.md` for common local failures
+
+## Conformance levels
+
+| Level | Meaning |
+|-------|---------|
+| 0 | File convention: `AKBP.md` and `akbp.json` |
+| 1 | Structured claims and evidence |
+| 2 | Retrieval and context packs |
+| 3 | Lifecycle relations |
+
+Check a knowledge base:
+
+```bash
+akbp --path ./my-kb conformance --level 3
+```
+
+## What AKBP is not
+
+AKBP does not replace:
+
+- repository instruction files
+- tool protocol servers
+- chat history
+- vector databases
+- Obsidian or markdown editors
+- hosted memory products
+
+AKBP is the durable knowledge contract below those tools.
+
+## Roadmap to 1.0
+
+Before 1.0, AKBP still needs:
+
+- broader real-world adapter dogfooding
+- stronger import/export compatibility fixtures
+- clearer versioning and migration policy
+- larger retrieval quality benchmarks
+- more release and security review hardening
+
+Alpha status is intentional. The project should earn stability through usage and tests, not marketing language.
 
 ## Repository layout
 
 ```text
 akbp/
   README.md
+  AKBP.md
   SPEC.md
   ROADMAP.md
   docs/
-    ARCHITECTURE.md
-    BUILD_PLAN.md
-    ADAPTERS.md
-    ADAPTER_REVIEW_CHECKLIST.md
-    BENCHMARK.md
-    BENCHMARK_FIXTURE_AUTHORING.md
-    INSTALL.md
-    RELEASE.md
-    RELEASE_NOTES_DRAFT.md
-    SCHEMAS.md
-    TOOL_CONTRACT.md
-    AGENT_FLOW.md
-    STANDARDS_TRACK.md
-    KNOWLEDGE_BASE_CARD.md
   spec/
   schemas/
-    claim.schema.json
-    entity.schema.json
-    relation.schema.json
-    evidence.schema.json
-    source.schema.json
-    page.schema.json
-    audit-event.schema.json
-    context-pack.schema.json
   examples/
-    level-0/
-    level-1/
-    level-3/
-    end-to-end-agent-flow/
-    portable-bundle/
-    source-intake/
-    tool-error-handling/
-    coding-agent/
-    research/
-    personal/
   adapters/
-    coding-agent-template/
-    example-coding-agent/
-    terminal-coding-agent/
-    editor-coding-agent/
-    openclaw/
-    codex/
-    claude-code/
-    cursor/
-    gemini-cli/
   cli/
   tool-server/
   benchmarks/
+  tests/
 ```
 
-## Relationship to other protocols
+## Start here
 
-AKBP is not trying to replace repository instruction files, tool protocol, or agent communication.
+- New user: run `make demo`.
+- Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`.
+- Protocol reviewer: read `docs/ARCHITECTURE.md`, `docs/TOOL_CONTRACT.md`, and `schemas/`.
+- Release reviewer: run `make validate`, then read `docs/RELEASE.md`.
+- Troubleshooting: read `docs/TROUBLESHOOTING.md`.
 
-- Repository instruction files tell coding agents how to work inside a repo.
-- Tool protocols let agents call tools and retrieve context.
-- Agent communication protocols let agents communicate and collaborate.
-- AKBP defines durable, portable knowledge that agents can discover, update, cite, and sync.
+## License
 
-## Status
-
-Draft protocol with a small installable reference CLI, conformance checks, ingest, local search, retrieval benchmarks, adapter templates, a complete runtime-neutral adapter example, and a JSONL local tool server.
-
-Current alpha-ready pieces:
-
-- Portable export manifest and `akbp export-check`.
-- Source hash verification with changed, missing, verified, and unchecked buckets.
-- Import safety checks for unknown source evidence and secret-like values.
-- Structured JSONL errors for invalid requests, invalid params, unsupported methods, approval gates, CLI failures, and internal failures.
-- Capability discovery with method schemas, runtime policy, write policy, and schema references.
-- Audit event operation metadata.
-- Retrieval and tool-server benchmark fixtures for citations, capability negotiation, unsupported methods, write approval, and import/apply flow.
-- Install smoke coverage for installed `akbp` and `akbp-tool-server` console scripts.
-
-Still draft: schema compatibility, extraction quality, adapter ecosystem coverage, release versioning, and broader production battle testing. Do not treat the current protocol as a stable 1.0 contract yet.
-
-## Examples
-
-- `examples/level-0/` shows the minimal file convention.
-- `examples/level-1/` shows structured claims with evidence.
-- `examples/level-3/` shows lifecycle relations with concrete JSONL records.
-- `examples/end-to-end-agent-flow/` shows ingest, remember, index, search, context, and cite flow.
-- `examples/quickstart-demo/` shows the one-command public-alpha demo path with expected success markers.
-- `examples/tool-server-approval-flow/` shows dry-run, `approval_required`, and approved JSONL write flow.
-- `examples/portable-bundle/` shows export review, import check, and approval before apply.
-- `examples/source-intake/` shows review-first source intake before durable claims.
-- `examples/tool-error-handling/` shows structured JSONL error handling for agent runtimes.
-
-Validate them with:
-
-```bash
-python3 cli/akbp.py --path examples/level-0 conformance --level 0
-python3 cli/akbp.py --path examples/level-1 conformance --level 1
-python3 cli/akbp.py --path examples/level-3 conformance --level 3
-```
-
-## Local tool server
-
-The repo includes a dependency-free JSONL tool server for local agent integrations:
-
-```bash
-echo '{"id":"1","method":"akbp.status","path":"."}' | python3 tool-server/akbp_tool_server.py
-```
-
-Write-capable tool calls are review-gated. Start with request-level `dry_run:true`; apply only after approval with request-level `approved:true`. Non-approved writes return a structured `approval_required` error instead of mutating the knowledge base.
-
-```bash
-echo '{"id":"2","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Agents need rollback paths"}}' | python3 tool-server/akbp_tool_server.py
-echo '{"id":"2-apply","method":"akbp.remember","path":".","approved":true,"params":{"text":"Agents need rollback paths"}}' | python3 tool-server/akbp_tool_server.py
-```
-
-Discover supported methods, runtime policy, method parameter schemas, and write-review requirements with:
-
-```bash
-echo '{"id":"caps","method":"akbp.capabilities","path":"."}' | python3 tool-server/akbp_tool_server.py
-```
-
-Useful read-only review calls:
-
-```bash
-python3 cli/akbp.py --path ./my-kb source verify --fail-on-issue
-python3 cli/akbp.py --path ./my-kb export > bundle.json
-python3 cli/akbp.py --path ./my-kb export-check bundle.json --fail-on-issues
-```
+MIT
