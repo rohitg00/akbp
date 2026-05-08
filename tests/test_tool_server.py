@@ -582,6 +582,30 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(line["result"]["ok"])
             self.assertEqual(line["result"]["issues"], [])
 
+            invalid_bundle = Path(d) / "invalid-bundle.json"
+            invalid_bundle.write_text(json.dumps({
+                "akbp_version": "0.1.0",
+                "exported_at": "2026-05-08T12:00:00Z",
+                "card": {},
+                "claims": [],
+                "sources": [],
+                "entities": [],
+                "relations": [],
+                "manifest": {
+                    "format": "akbp-portable-bundle",
+                    "counts": {"claims": 1, "sources": 0, "entities": 0, "relations": 0},
+                    "artifact_hashes": {"card": "not-a-hash", "claims": None, "sources": None, "entities": None, "relations": None},
+                    "safety": {"excludes_local_state": False, "excludes_indexes": True, "secret_redaction_required": True},
+                },
+            }), encoding="utf-8")
+            strict_request = json.dumps({"id": "export-check-strict", "path": str(kb), "method": "akbp.export_check", "params": {"file": str(invalid_bundle), "fail_on_issues": True}}) + "\n"
+            strict_proc = subprocess.run([sys.executable, str(SERVER)], input=strict_request, text=True, capture_output=True, check=True)
+            strict_line = json.loads(strict_proc.stdout)
+            self.assertTrue(strict_line["ok"])
+            assert_matches_required_schema(self, strict_line["result"], schema_def("export_check_result"))
+            self.assertFalse(strict_line["result"]["ok"])
+            self.assertEqual({issue["code"] for issue in strict_line["result"]["issues"]}, {"count_mismatch", "invalid_artifact_hash", "unsafe_manifest"})
+
     def test_import_check_method_validates_jsonl_without_echoing_secret(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

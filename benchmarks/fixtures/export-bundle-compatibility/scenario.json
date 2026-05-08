@@ -1,0 +1,46 @@
+{
+  "id": "export-bundle-compatibility-001",
+  "task": "Validate export bundle compatibility checks for manifest safety flags and safe exchange between runtimes.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "export-check-valid",
+        "method": "akbp.export_check",
+        "params": {
+          "file": "benchmarks/fixtures/export-bundle-compatibility/valid-bundle.json"
+        },
+        "expected_result_fields": ["ok", "file", "checked_at", "manifest_format", "counts", "issues"],
+        "expected_result_values": {
+          "ok": true,
+          "manifest_format": "akbp-portable-bundle"
+        },
+        "expected_result_contains": {
+          "counts.claims": [1],
+          "counts.sources": [1]
+        },
+        "expected_result_schema": "#/$defs/export_check_result"
+      },
+      {
+        "id": "export-check-invalid",
+        "method": "akbp.export_check",
+        "params": {
+          "file": "benchmarks/fixtures/export-bundle-compatibility/invalid-bundle.json",
+          "fail_on_issues": true
+        },
+        "expected_result_fields": ["ok", "file", "checked_at", "manifest_format", "counts", "issues"],
+        "expected_result_values": {
+          "ok": false,
+          "manifest_format": "akbp-portable-bundle"
+        },
+        "expected_result_contains": {
+          "issues[].code": ["secret_like_value", "count_mismatch", "invalid_artifact_hash", "unsafe_manifest"]
+        },
+        "expected_result_schema": "#/$defs/export_check_result"
+      }
+    ]
+  },
+  "query": "Can this portable bundle be exchanged safely between AKBP-compatible runtimes?",
+  "expected": {
+    "answer_should_include": ["export", "bundle", "compatibility", "manifest", "safety"]
+  }
+}

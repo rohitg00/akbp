@@ -1,0 +1,35 @@
+{
+  "akbp_version": "0.1.0",
+  "exported_at": "2026-05-08T12:00:00Z",
+  "card": {"name": "unsafe compatibility fixture"},
+  "claims": [
+    {
+      "id": "claim_export_bundle_unsafe",
+      "text": "Export bundles with EXAMPLE_API_TOKEN=token-example-123456 must fail compatibility checks before exchange.",
+      "type": "warning",
+      "status": "working",
+      "confidence": 0.5,
+      "evidence": [],
+      "scope": "project"
+    }
+  ],
+  "sources": [],
+  "entities": [],
+  "relations": [],
+  "manifest": {
+    "format": "akbp-portable-bundle",
+    "counts": {"claims": 2, "sources": 0, "entities": 0, "relations": 0},
+    "artifact_hashes": {
+      "card": "not-a-sha256",
+      "claims": "1111111111111111111111111111111111111111111111111111111111111111",
+      "sources": null,
+      "entities": null,
+      "relations": null
+    },
+    "safety": {
+      "excludes_local_state": false,
+      "excludes_indexes": true,
+      "secret_redaction_required": true
+    }
+  }
+}
