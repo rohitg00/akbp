@@ -173,6 +173,12 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("sk-example", text)
         self.assertNotIn("sk-proj-", text)
         self.assertNotIn("xoxb-", text)
+        data = json.loads(text)
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.source.add")
+        self.assertEqual(request["expected_result_values"]["title"], "Terminal output [REDACTED]")
+        self.assertIn("title", request["expected_result_fields"])
+        self.assertEqual(request["expected_result_schema"], "#/$defs/source_result")
 
     def test_fixture_readme_lists_every_scenario_directory(self):
         readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
