@@ -40,6 +40,7 @@ WRITE_METHODS = {
     "akbp.supersede",
     "akbp.contradict",
     "akbp.crystallize_session",
+    "akbp.session.end",
 }
 
 METHODS: dict[str, dict[str, Any]] = {
@@ -63,6 +64,8 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
+    "akbp.session.start": {"write": False, "params": ["task", "query", "limit"]},
+    "akbp.session.end": {"write": True, "params": ["transcript", "apply", "dry_run"]},
 }
 
 REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
@@ -79,6 +82,7 @@ REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "akbp.supersede": ("old_claim_id", "text"),
     "akbp.contradict": ("source_claim_id", "target_claim_id"),
     "akbp.crystallize_session": ("transcript",),
+    "akbp.session.end": ("transcript",),
 }
 
 
@@ -151,6 +155,8 @@ def capabilities() -> dict[str, Any]:
             {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl", "fail_on_rejected": True}},
             {"id": "import-apply-1", "method": "akbp.import_apply", "path": ".", "dry_run": True, "params": {"file": "export.jsonl"}},
             {"id": "crystallize-1", "method": "akbp.crystallize_session", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
+            {"id": "session-start-1", "method": "akbp.session.start", "path": ".", "params": {"task": "continue the release", "limit": 5}},
+            {"id": "session-end-1", "method": "akbp.session.end", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
         ],
     }
 
@@ -176,6 +182,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.supersede": ["supersede", params.get("old_claim_id", ""), params.get("text", ""), "--type", params.get("type", "observation")],
         "akbp.contradict": ["contradict", params.get("source_claim_id", ""), params.get("target_claim_id", "")],
         "akbp.crystallize_session": ["crystallize", params.get("transcript", "")],
+        "akbp.session.start": ["context", params.get("task") or params.get("query") or "current task goals and constraints", "--limit", str(params.get("limit", 5))],
+        "akbp.session.end": ["crystallize", params.get("transcript", "")],
     }
     argv = [str(a) for a in mapping[method] if a != ""]
     if method == "akbp.index" and params.get("incremental"):
@@ -192,7 +200,7 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         argv.append("--fail-on-issue")
     if method in {"akbp.source.add", "akbp.ingest"} and params.get("title"):
         argv.extend(["--title", str(params["title"])])
-    if method == "akbp.crystallize_session" and params.get("apply"):
+    if method in {"akbp.crystallize_session", "akbp.session.end"} and params.get("apply"):
         argv.append("--apply")
     if method == "akbp.export_check" and params.get("fail_on_issues"):
         argv.append("--fail-on-issues")
@@ -339,7 +347,7 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
             errors.append("entity must be an array")
         elif any(not isinstance(item, str) for item in entity):
             errors.append("entity items must be strings")
-    if method == "akbp.crystallize_session" and "apply" in params and not isinstance(params.get("apply"), bool):
+    if method in {"akbp.crystallize_session", "akbp.session.end"} and "apply" in params and not isinstance(params.get("apply"), bool):
         errors.append("apply must be a boolean")
     return errors
 
@@ -398,6 +406,35 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         if isinstance(result, dict):
             result.setdefault("review_required", True)
             result.setdefault("apply_instruction", "Repeat the same request without dry_run only after reviewing redaction status, extracted signals, claim ids, would_write paths, and approval or trusted local policy.")
+        return {"id": request_id, "ok": True, "result": result, "error": None}
+
+    if method == "akbp.session.start":
+        code, stdout, stderr = run_cli(path, argv)
+        if code != 0:
+            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+        task = params.get("task") or params.get("query") or "current task goals and constraints"
+        return {
+            "id": request_id,
+            "ok": True,
+            "result": {
+                "session_id": akbp.stable_id("adapter_session", path, str(task)),
+                "task": str(task),
+                "context": parse_payload(stdout),
+            },
+            "error": None,
+        }
+
+    if dry_run and method == "akbp.session.end":
+        preview_argv = [arg for arg in argv if arg != "--apply"]
+        code, stdout, stderr = run_cli(path, preview_argv)
+        if code != 0:
+            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+        result = parse_payload(stdout)
+        if isinstance(result, dict):
+            result.setdefault("dry_run", True)
+            result.setdefault("would_write", True)
+            result.setdefault("review_required", True)
+            result.setdefault("apply_instruction", "Review the extracted session summary, skipped claims, planned page path, and evidence before repeating with approved:true and apply:true.")
         return {"id": request_id, "ok": True, "result": result, "error": None}
 
     if dry_run and method == "akbp.import_apply":

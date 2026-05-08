@@ -155,6 +155,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn(field, dry_run["required"])
         ingest_apply = defs["ingest_result"]
         crystallize = defs["crystallize_session_result"]
+        session_start = defs["session_start_result"]
+        session_preview = defs["session_end_preview_result"]
         self.assertFalse(ingest_dry_run["additionalProperties"])
         for field in ["source_id", "page", "signals", "created_claims", "redacted", "would_write"]:
             self.assertIn(field, ingest_dry_run["required"])
@@ -165,6 +167,12 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(crystallize["properties"]["summary"]["additionalProperties"])
         for field in ["session_id", "summary", "page", "source_id", "created_claims", "skipped_claims"]:
             self.assertIn(field, crystallize["required"])
+        self.assertFalse(session_start["additionalProperties"])
+        for field in ["session_id", "task", "context"]:
+            self.assertIn(field, session_start["required"])
+        self.assertFalse(session_preview["additionalProperties"])
+        for field in ["session_id", "summary", "page", "dry_run", "would_write", "review_required", "apply_instruction"]:
+            self.assertIn(field, session_preview["required"])
         capabilities = defs["capabilities_result"]
         self.assertFalse(capabilities["additionalProperties"])
         self.assertFalse(capabilities["properties"]["features"]["additionalProperties"])
@@ -284,6 +292,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(installed_result["runtime"], reference_result["runtime"])
         self.assertEqual(set(installed_result["methods"]), set(reference_result["methods"]))
         self.assertIn("akbp.import_apply", installed_result["methods"])
+        self.assertIn("akbp.session.start", installed_result["methods"])
+        self.assertIn("akbp.session.end", installed_result["methods"])
         self.assertTrue(installed_result["features"]["method_param_schemas"])
         self.assertTrue(installed_result["features"]["approval_required_errors"])
         self.assertTrue(installed_result["features"]["max_request_bytes_enforced"])
@@ -717,6 +727,33 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, line["result"], schema_def("ingest_dry_run_result"))
             self.assertFalse((kb / "claims" / "claims.jsonl").exists())
             self.assertFalse((kb / line["result"]["page"]).exists())
+
+    def test_adapter_session_start_and_end_methods(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            transcript = Path(d) / "session.md"
+            transcript.write_text("# Session\n\nDecision: adapters should expose session lifecycle operations.\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            run_cli("--path", str(kb), "remember", "Adapters retrieve context at session start", "--type", "workflow", "--evidence", "AKBP.md")
+            requests = "\n".join([
+                json.dumps({"id": "start", "path": str(kb), "method": "akbp.session.start", "params": {"task": "adapter session lifecycle", "limit": 5}}),
+                json.dumps({"id": "end-preview", "path": str(kb), "method": "akbp.session.end", "dry_run": True, "params": {"transcript": str(transcript), "apply": True}}),
+                json.dumps({"id": "end-apply", "path": str(kb), "method": "akbp.session.end", "approved": True, "params": {"transcript": str(transcript), "apply": True}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+            lines = [json.loads(line) for line in proc.stdout.splitlines()]
+            self.assertEqual([line["id"] for line in lines], ["start", "end-preview", "end-apply"])
+            self.assertTrue(lines[0]["ok"])
+            assert_matches_required_schema(self, lines[0]["result"], schema_def("session_start_result"))
+            self.assertEqual(lines[0]["result"]["task"], "adapter session lifecycle")
+            self.assertTrue(lines[1]["ok"])
+            assert_matches_required_schema(self, lines[1]["result"], schema_def("session_end_preview_result"))
+            self.assertFalse(lines[1]["result"]["apply"])
+            self.assertTrue(lines[1]["result"]["review_required"])
+            self.assertTrue(lines[2]["ok"])
+            assert_matches_required_schema(self, lines[2]["result"], schema_def("crystallize_session_result"))
+            self.assertTrue(lines[2]["result"]["apply"])
+            self.assertTrue((kb / lines[2]["result"]["page"]).exists())
 
     def test_crystallize_session_method(self):
         with tempfile.TemporaryDirectory() as d:

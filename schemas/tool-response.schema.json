@@ -792,8 +792,7 @@
           "minLength": 1
         },
         "source_id": {
-          "type": "string",
-          "minLength": 1
+          "type": ["string", "null"]
         },
         "created_claims": {
           "type": "array",
@@ -806,6 +805,136 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "session_start_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "task",
+        "context"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "$ref": "#/$defs/context_result"
+        }
+      }
+    },
+    "session_end_preview_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_id",
+        "apply",
+        "summary",
+        "page",
+        "source_id",
+        "created_claims",
+        "skipped_claims",
+        "dry_run",
+        "would_write",
+        "review_required",
+        "apply_instruction"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "apply": {
+          "const": false
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "decisions",
+            "actions",
+            "blockers",
+            "preferences",
+            "questions",
+            "files"
+          ],
+          "properties": {
+            "decisions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "blockers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "preferences": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "questions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "page": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": ["string", "null"]
+        },
+        "created_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dry_run": {
+          "const": true
+        },
+        "would_write": {
+          "const": true
+        },
+        "review_required": {
+          "const": true
+        },
+        "apply_instruction": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },

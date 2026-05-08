@@ -11,12 +11,13 @@ Use this checklist before publishing or updating an AKBP adapter for any coding 
 
 ## Retrieval before work
 
-- Call `akbp.context` before substantial planning or code changes.
+- Call `akbp.session.start` at lifecycle startup when available, or `akbp.context` before substantial planning or code changes.
 - Use `akbp.search` for targeted lookup when a user asks about prior decisions, known constraints, or project facts.
 - Cite claims with `akbp.cite` when retrieved knowledge materially affects an answer or implementation.
 
 ## Write safety
 
+- Use `akbp.session.end` for transcript crystallization at lifecycle shutdown when available.
 - Start every write-capable operation with request-level `dry_run:true`.
 - Surface `review_required`, `apply_instruction`, and would-write paths to the runtime review layer.
 - Apply writes only with request-level `approved:true` after user approval or trusted local policy.
