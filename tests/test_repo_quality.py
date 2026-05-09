@@ -106,6 +106,8 @@ class RepoQualityTest(unittest.TestCase):
             "\"release checklist\"",
             "deploy*",
             "fts_query",
+            "leading standalone `NOT`",
+            "empty result set",
         ]:
             self.assertIn(required, text)
 
@@ -672,6 +674,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn('"limit": 10', contract)
         self.assertIn("Current backend: `sqlite_fts5`", contract)
         self.assertIn("#/$defs/search_result", contract)
+        self.assertIn("leading standalone `NOT`", contract)
+        self.assertIn("empty `fts_query`", contract)
         self.assertNotIn('"modes": ["bm25", "vector", "graph"]', contract)
         self.assertNotIn('"scope": "default"', contract)
         self.assertEqual(set(search_props), {"query", "limit"})
