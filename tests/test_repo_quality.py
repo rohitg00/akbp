@@ -321,6 +321,16 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_tool_contract_documents_import_rejection_edges(self):
+        text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        for required in [
+            "unknown source-evidence rejection",
+            "duplicate import-id rejection",
+            "scalar collection-field rejection",
+            "without raw secret echo",
+        ]:
+            self.assertIn(required, text)
+
     def test_tool_contract_documents_crystallize_envelope(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         self.assertIn('"method": "akbp.crystallize_session"', text)
