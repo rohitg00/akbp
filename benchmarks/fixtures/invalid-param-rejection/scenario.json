@@ -483,6 +483,42 @@
         }
       },
       {
+        "id": "source-verify-source-id-too-long",
+        "method": "akbp.source.verify",
+        "params": {
+          "source_id": "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "source_id must be at most 512 characters"
+          ]
+        }
+      },
+      {
+        "id": "source-verify-source-id-control-char",
+        "method": "akbp.source.verify",
+        "params": {
+          "source_id": "source_bad\nnext"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "source_id must not contain control characters"
+          ]
+        }
+      },
+      {
         "id": "ingest-claim-type-enum-error",
         "method": "akbp.ingest",
         "approved": false,

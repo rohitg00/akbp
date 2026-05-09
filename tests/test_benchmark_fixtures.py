@@ -118,7 +118,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
         self.assertIn("import/export file-param", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 20)
+        self.assertEqual(len(requests), 22)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
@@ -146,6 +146,10 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("confidence must be between 0 and 1", requests["ingest-confidence-range-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("type must be one of: decision, fact, observation, preference, question, warning, workflow", requests["remember-type-enum-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("type must be one of: audio, commit, file, folder, issue, message, pdf, screenshot, transcript, url, video", requests["source-type-enum-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertEqual(requests["source-verify-source-id-too-long"]["method"], "akbp.source.verify")
+        self.assertEqual(requests["source-verify-source-id-control-char"]["method"], "akbp.source.verify")
+        self.assertIn("source_id must be at most 512 characters", requests["source-verify-source-id-too-long"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("source_id must not contain control characters", requests["source-verify-source-id-control-char"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("claim_type must be one of: decision, fact, observation, preference, question, warning, workflow", requests["ingest-claim-type-enum-error"]["expected_error_contains"]["type_errors[]"])
 
     def test_import_compatibility_edges_fixture_rejects_bad_shapes(self):
