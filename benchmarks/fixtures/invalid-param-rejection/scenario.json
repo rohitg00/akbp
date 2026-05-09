@@ -154,6 +154,136 @@
         }
       },
       {
+        "id": "remember-evidence-count-error",
+        "method": "akbp.remember",
+        "approved": false,
+        "params": {
+          "text": "Record a cited claim",
+          "evidence": [
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract",
+            "source_invalid_param_contract"
+          ]
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "evidence must contain at most 64 items"
+          ]
+        }
+      },
+      {
+        "id": "remember-evidence-length-error",
+        "method": "akbp.remember",
+        "approved": false,
+        "params": {
+          "text": "Record a cited claim",
+          "evidence": [
+            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          ]
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "evidence[0] must be at most 512 characters"
+          ]
+        }
+      },
+      {
+        "id": "ingest-entity-control-char-error",
+        "method": "akbp.ingest",
+        "approved": false,
+        "params": {
+          "file": "docs/TOOL_CONTRACT.md",
+          "entity": [
+            "JSONL\nserver"
+          ]
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "entity[0] must not contain control characters"
+          ]
+        }
+      },
+      {
         "id": "ingest-entity-item-type-error",
         "method": "akbp.ingest",
         "approved": false,

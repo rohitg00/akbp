@@ -116,7 +116,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 12)
+        self.assertEqual(len(requests), 15)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
@@ -124,7 +124,10 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("limit must be an integer", requests["search-type-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("query must be at most 4096 characters", requests["search-query-too-long"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("evidence items must be strings", requests["remember-evidence-item-type-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("evidence must contain at most 64 items", requests["remember-evidence-count-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("evidence[0] must be at most 512 characters", requests["remember-evidence-length-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("entity items must be strings", requests["ingest-entity-item-type-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("entity[0] must not contain control characters", requests["ingest-entity-control-char-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("limit must be between 1 and 100", requests["search-limit-range-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("confidence must be between 0 and 1", requests["ingest-confidence-range-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("type must be one of: decision, fact, observation, preference, question, warning, workflow", requests["remember-type-enum-error"]["expected_error_contains"]["type_errors[]"])
