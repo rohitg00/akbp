@@ -407,6 +407,46 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(applied["rejected_count"], 1)
             self.assertIn("unknown evidence source id", applied["rejected"][0]["reason"])
 
+    def test_import_rejects_non_list_claim_collections(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            export = Path(d) / "bad-claim-lists.jsonl"
+            rows = [
+                {
+                    "kind": "claim",
+                    "id": "claim_string_evidence",
+                    "text": "Imported claims must keep evidence as a list.",
+                    "type": "workflow",
+                    "status": "working",
+                    "confidence": 0.7,
+                    "evidence": "source_not_a_list",
+                    "scope": "project",
+                },
+                {
+                    "kind": "claim",
+                    "id": "claim_string_entities",
+                    "text": "Imported claims must keep entities as a list.",
+                    "type": "workflow",
+                    "status": "working",
+                    "confidence": 0.7,
+                    "evidence": [],
+                    "entities": "agent",
+                    "scope": "project",
+                },
+            ]
+            export.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+
+            proc = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-check", str(export), "--fail-on-rejected"], text=True, capture_output=True)
+            self.assertEqual(proc.returncode, 1)
+            checked = json.loads(proc.stdout)
+            self.assertFalse(checked["ok"])
+            self.assertEqual(checked["accepted_count"], 0)
+            self.assertEqual(checked["rejected_count"], 2)
+            reasons = [item["reason"] for item in checked["rejected"]]
+            self.assertTrue(any("evidence must be a list" in reason for reason in reasons))
+            self.assertTrue(any("entities must be a list of strings" in reason for reason in reasons))
+
     def test_import_apply_failure_shape_includes_review_fields(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
