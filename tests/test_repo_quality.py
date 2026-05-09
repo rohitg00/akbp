@@ -521,7 +521,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("review-gated writes", changelog)
         self.assertIn("approval-gated non-dry-run writes", changelog)
         self.assertIn("schema-backed invalid parameter errors", changelog)
-        self.assertIn("array-item", changelog)
+        self.assertIn("bounded array-item count and length", changelog)
         self.assertIn("range", changelog)
         self.assertIn("enum checks", changelog)
         self.assertIn("invalid parameter rejections", changelog)
@@ -654,6 +654,10 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("#/$defs/invalid_json_details", tool_contract)
         self.assertIn("#/$defs/cli_error_details", tool_contract)
         self.assertIn("#/$defs/internal_error_details", tool_contract)
+        self.assertIn("evidence/entity array validation", tool_contract)
+        self.assertIn("at most 64 string items", tool_contract)
+        self.assertIn("at most 128 string items", tool_contract)
+        self.assertIn("param_array_validation", response_schema)
         self.assertIn("invalid_json_details", response_schema)
         self.assertIn("cli_error_details", response_schema)
         self.assertIn("internal_error_details", response_schema)
@@ -723,7 +727,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("Security model", readme)
         for text in ["Trust boundaries", "Write safety contract", "Secret-handling expectations", "Adapter requirements"]:
             self.assertIn(text, model)
-        for text in ["request-size limits", "path validation", "dry-run previews", "explicit approval"]:
+        for text in ["request-size limits", "path validation", "bounded evidence/entity arrays", "dry-run previews", "explicit approval"]:
             self.assertIn(text, model)
 
     def test_release_docs_require_review_gated_writes_and_approval(self):

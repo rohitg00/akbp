@@ -220,9 +220,11 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
-`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, path validation, string parameter length validation, path-like parameter control-character validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size guidance, caller-supplied local path policy, string parameter length policy, path-like parameter control-character policy, supported hash algorithms, dry-run support, review-gated writes, and the approval field name.
+`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, path validation, string parameter length validation, path-like parameter control-character validation, evidence/entity array validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size guidance, caller-supplied local path policy, string parameter length policy, path-like parameter control-character policy, evidence/entity array count and item-length policy, supported hash algorithms, dry-run support, review-gated writes, and the approval field name.
 
-`tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method, including:
+`tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method. Shared list contracts are bounded before CLI dispatch: `evidence` accepts at most 64 string items of 512 characters each, and `entity` accepts at most 128 string items of 256 characters each. Both reject NUL, newline, and carriage-return characters.
+
+Supported method contracts include:
 
 - `akbp.capabilities`
 - `akbp.status`
