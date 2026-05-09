@@ -223,6 +223,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
         for path in sorted(FIXTURES.glob("*/scenario.json")):
             self.assertIn(f"`{path.parent.name}`", readme)
+        self.assertIn("scalar collection-field rejection", readme)
 
     def test_search_index_observability_fixture_covers_prefix_and_index_keys(self):
         path = FIXTURES / "search-index-observability" / "scenario.json"
