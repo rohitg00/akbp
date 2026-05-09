@@ -115,6 +115,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
     def test_invalid_param_rejection_fixture_covers_param_error_shapes(self):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
+        fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
+        self.assertIn("import/export file-param", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
         self.assertEqual(len(requests), 20)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
