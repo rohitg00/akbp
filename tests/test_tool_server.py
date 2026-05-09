@@ -875,12 +875,23 @@ class ToolServerTest(unittest.TestCase):
 
     def test_oversized_string_params_are_structured_before_cli(self):
         with tempfile.TemporaryDirectory() as d:
-            req = {"id": "too-long-query", "method": "akbp.search", "path": d, "params": {"query": "x" * 4097}}
-            proc = subprocess.run([sys.executable, str(SERVER)], input=json.dumps(req) + "\n", text=True, capture_output=True, check=True)
+            requests = "\n".join([
+                json.dumps({"id": "too-long-query", "method": "akbp.search", "path": d, "params": {"query": "x" * 4097}}),
+                json.dumps({"id": "too-long-import-check-file", "method": "akbp.import_check", "path": d, "params": {"file": "x" * 4097}}),
+                json.dumps({"id": "too-long-import-apply-file", "method": "akbp.import_apply", "path": d, "dry_run": True, "params": {"file": "x" * 4097}}),
+            ]) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
-            self.assertFalse(lines[0]["ok"])
-            self.assertEqual(lines[0]["error"]["code"], "invalid_params")
+            self.assertEqual(len(lines), 3)
+            for line in lines:
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["error"]["code"], "invalid_params")
+                assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
             self.assertIn("query must be at most 4096 characters", lines[0]["error"]["details"]["type_errors"])
+            self.assertIn("file must be at most 4096 characters", lines[1]["error"]["details"]["type_errors"])
+            self.assertIn("file must be at most 4096 characters", lines[2]["error"]["details"]["type_errors"])
+            self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.import_check.params"))
+            self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.import_apply.params"))
 
     def test_evidence_and_entity_arrays_are_bounded_before_cli(self):
         requests = "\n".join([
