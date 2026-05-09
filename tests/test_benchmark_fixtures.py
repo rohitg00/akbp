@@ -140,11 +140,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
         mixed = requests["import-check-mixed"]
         self.assertEqual(mixed["method"], "akbp.import_check")
-        self.assertEqual(mixed["expected_result_values"]["checked"], 6)
+        self.assertEqual(mixed["expected_result_values"]["checked"], 7)
         self.assertEqual(mixed["expected_result_values"]["accepted_count"], 2)
-        self.assertEqual(mixed["expected_result_values"]["rejected_count"], 4)
+        self.assertEqual(mixed["expected_result_values"]["rejected_count"], 5)
         self.assertIn("claim_import_compat_bad_evidence_item", mixed["expected_result_contains"]["rejected[].id"])
+        self.assertIn("claim_import_compat_entity_too_long", mixed["expected_result_contains"]["rejected[].id"])
         self.assertIn("claim claim_import_compat_bad_evidence_item evidence items must be strings", mixed["expected_result_contains"]["rejected[].reason"])
+        self.assertIn("claim claim_import_compat_entity_too_long entities[0] must be at most 256 characters", mixed["expected_result_contains"]["rejected[].reason"])
         export_path = ROOT / mixed["params"]["file"]
         self.assertTrue(export_path.exists())
         self.assertIn('"evidence":[42]', export_path.read_text(encoding="utf-8"))

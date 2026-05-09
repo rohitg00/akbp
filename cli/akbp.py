@@ -218,6 +218,13 @@ def known_evidence_ids(base: Path) -> set[str]:
     return {str(i) for i in ids}
 
 
+IMPORT_CLAIM_LIST_LIMITS = {
+    "evidence": (64, 512),
+    "entities": (128, 256),
+    "supersedes": (64, 256),
+}
+
+
 def claim_required_fields() -> list[str]:
     return ["id", "text", "status", "confidence", "evidence", "created_at"]
 
@@ -236,15 +243,25 @@ def validate_claim_shape(claim: dict[str, Any]) -> list[str]:
     confidence = claim.get("confidence")
     if not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1:
         errors.append(f"claim {claim.get('id')} has invalid confidence")
-    evidence = claim.get("evidence")
-    if not isinstance(evidence, list):
-        errors.append(f"claim {claim.get('id')} evidence must be a list")
-    elif any(not isinstance(item, str) for item in evidence):
-        errors.append(f"claim {claim.get('id')} evidence items must be strings")
-    for list_field in ("entities", "supersedes"):
+    for list_field, (max_items, max_item_length) in IMPORT_CLAIM_LIST_LIMITS.items():
         values = claim.get(list_field)
-        if values is not None and (not isinstance(values, list) or any(not isinstance(item, str) for item in values)):
+        if list_field == "evidence" and not isinstance(values, list):
+            errors.append(f"claim {claim.get('id')} evidence must be a list")
+            continue
+        if values is None:
+            continue
+        if not isinstance(values, list):
             errors.append(f"claim {claim.get('id')} {list_field} must be a list of strings")
+            continue
+        if len(values) > max_items:
+            errors.append(f"claim {claim.get('id')} {list_field} must contain at most {max_items} items")
+        for index, item in enumerate(values):
+            if not isinstance(item, str):
+                errors.append(f"claim {claim.get('id')} {list_field} items must be strings")
+                break
+            if len(item) > max_item_length:
+                errors.append(f"claim {claim.get('id')} {list_field}[{index}] must be at most {max_item_length} characters")
+                break
     return errors
 
 def audit(base: Path, event: str, data: dict[str, Any]) -> None:
