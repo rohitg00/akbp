@@ -220,6 +220,18 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(search["expected_result_values"]["fts_query"], "pref* AND index*")
         self.assertEqual(search["expected_result_schema"], "#/$defs/search_result")
 
+    def test_search_query_compatibility_fixture_covers_empty_fts_queries(self):
+        path = FIXTURES / "search-query-compatibility" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        for request_id in ["leading-not-empty-search", "punctuation-empty-search"]:
+            request = requests[request_id]
+            self.assertEqual(request["method"], "akbp.search")
+            self.assertEqual(request["expected_result_schema"], "#/$defs/search_result")
+            self.assertEqual(request["expected_result_values"]["backend"], "sqlite_fts5")
+            self.assertEqual(request["expected_result_values"]["fts_query"], "")
+            self.assertEqual(request["expected_result_values"]["results"], [])
+
 
     def test_session_crystallization_fixture_requires_context_citations(self):
         path = FIXTURES / "session-crystallization" / "scenario.json"

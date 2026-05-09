@@ -17,8 +17,16 @@
         "type": "workflow",
         "status": "stable",
         "confidence": 0.9,
-        "evidence": ["source_search_query_compat"],
-        "entities": ["Python 3.12", "Node-22", "JSONL", "tool-server", "retrieval/search"],
+        "evidence": [
+          "source_search_query_compat"
+        ],
+        "entities": [
+          "Python 3.12",
+          "Node-22",
+          "JSONL",
+          "tool-server",
+          "retrieval/search"
+        ],
         "scope": "project"
       }
     ],
@@ -27,9 +35,25 @@
         "id": "index-for-search-compat",
         "method": "akbp.index",
         "approved": true,
-        "params": {"incremental": true},
-        "expected_result_fields": ["ok", "db", "rows", "indexed", "skipped", "removed", "incremental", "indexed_keys", "skipped_keys", "removed_keys"],
-        "expected_result_values": {"ok": true, "incremental": true},
+        "params": {
+          "incremental": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "db",
+          "rows",
+          "indexed",
+          "skipped",
+          "removed",
+          "incremental",
+          "indexed_keys",
+          "skipped_keys",
+          "removed_keys"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "incremental": true
+        },
         "expected_result_schema": "#/$defs/index_result"
       },
       {
@@ -39,13 +63,20 @@
           "query": "\"Python 3.12\" AND Node-22 AND JSONL",
           "limit": 5
         },
-        "expected_result_fields": ["query", "backend", "fts_query", "results"],
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
         "expected_result_values": {
           "backend": "sqlite_fts5",
           "fts_query": "\"Python 3 12\" AND \"Node-22\" AND \"JSONL\""
         },
         "expected_result_contains": {
-          "results[].id": ["claim_search_query_compat"]
+          "results[].id": [
+            "claim_search_query_compat"
+          ]
         },
         "expected_result_schema": "#/$defs/search_result"
       },
@@ -56,13 +87,60 @@
           "query": "retrieval/search AND tool*",
           "limit": 5
         },
-        "expected_result_fields": ["query", "backend", "fts_query", "results"],
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
         "expected_result_values": {
           "backend": "sqlite_fts5",
           "fts_query": "\"retrieval/search\" AND tool*"
         },
         "expected_result_contains": {
-          "results[].id": ["claim_search_query_compat"]
+          "results[].id": [
+            "claim_search_query_compat"
+          ]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "leading-not-empty-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "NOT JSONL",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "",
+          "results": []
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "punctuation-empty-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "!!!",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "",
+          "results": []
         },
         "expected_result_schema": "#/$defs/search_result"
       }
@@ -70,9 +148,21 @@
   },
   "query": "How should Python 3.12 and Node-22 agents search JSONL tool-server knowledge?",
   "expected": {
-    "must_retrieve": ["claim_search_query_compat"],
-    "must_cite": ["source_search_query_compat"],
-    "answer_should_include": ["Python 3.12", "Node-22", "JSONL", "tool-server", "retrieval/search"],
-    "must_apply_tool_methods": ["akbp.index"]
+    "must_retrieve": [
+      "claim_search_query_compat"
+    ],
+    "must_cite": [
+      "source_search_query_compat"
+    ],
+    "answer_should_include": [
+      "Python 3.12",
+      "Node-22",
+      "JSONL",
+      "tool-server",
+      "retrieval/search"
+    ],
+    "must_apply_tool_methods": [
+      "akbp.index"
+    ]
   }
 }
