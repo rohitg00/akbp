@@ -494,6 +494,9 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn(f"reference CLI version: `{match.group(1)}`", release_notes)
         self.assertIn("adapters/example-coding-agent/", release_notes)
         self.assertIn("akbp.crystallize_session", release_notes)
+        self.assertIn("akbp.session.start", release_notes)
+        self.assertIn("akbp.session.end", release_notes)
+        self.assertIn("adapter lifecycle methods", release_notes)
         self.assertIn("make validate", release_notes)
         self.assertIn("make benchmark-score", release_notes)
         self.assertIn("ingest dry-run preview responses", release_notes)
@@ -527,6 +530,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("range", changelog)
         self.assertIn("enum checks", changelog)
         self.assertIn("invalid parameter rejections", changelog)
+        self.assertIn("akbp.session.start", changelog)
+        self.assertIn("akbp.session.end", changelog)
 
     def test_architecture_documents_current_reference_contract(self):
         text = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")

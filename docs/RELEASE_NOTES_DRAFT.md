@@ -87,8 +87,10 @@ The local tool server currently supports:
 - `akbp.supersede`
 - `akbp.contradict`
 - `akbp.crystallize_session`
+- `akbp.session.start`
+- `akbp.session.end`
 
-It includes capability discovery, schema references for every supported method, advertised parameter-schema enforcement features, structured errors, schema-backed invalid JSON errors that do not echo raw input, schema-backed invalid parameter errors for unknown, missing, wrong-typed, wrong item-typed, bounded evidence/entity arrays, out-of-range, and unsupported enum params, schema-backed CLI and internal failure details, dry-run write support, `review_required` metadata, `apply_instruction` guidance, approval-gated non-dry-run writes with `approved:true`, ingest dry-run preview responses, approved ingest result responses, schema-backed JSONL import checks with accepted, rejected, and error counts plus strict failure gates, review-gated JSONL import apply for source and claim records through the CLI and JSONL server, schema-backed import-apply failure shapes for rejected and malformed JSONL exports, skipped-existing reporting for duplicate imports, write-safety guidance, local search/index tools, and transcript crystallization through the JSONL server.
+It includes capability discovery, schema references for every supported method, advertised parameter-schema enforcement features, structured errors, schema-backed invalid JSON errors that do not echo raw input, schema-backed invalid parameter errors for unknown, missing, wrong-typed, wrong item-typed, bounded evidence/entity arrays, out-of-range, and unsupported enum params, schema-backed CLI and internal failure details, dry-run write support, `review_required` metadata, `apply_instruction` guidance, approval-gated non-dry-run writes with `approved:true`, ingest dry-run preview responses, approved ingest result responses, schema-backed JSONL import checks with accepted, rejected, and error counts plus strict failure gates, review-gated JSONL import apply for source and claim records through the CLI and JSONL server, schema-backed import-apply failure shapes for rejected and malformed JSONL exports, skipped-existing reporting for duplicate imports, write-safety guidance, local search/index tools, transcript crystallization through the JSONL server, and adapter lifecycle methods for session start context retrieval plus review-gated session-end memory.
 
 ## Examples and benchmarks
 
@@ -107,6 +109,7 @@ Included examples:
 - `adapters/example-coding-agent/`
 - `adapters/terminal-coding-agent/`
 - `adapters/editor-coding-agent/`
+- runtime-specific adapter examples for OpenClaw, Codex, Claude Code, Cursor, and Gemini CLI
 
 Included benchmark fixtures:
 
