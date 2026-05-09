@@ -949,6 +949,15 @@ class ToolServerTest(unittest.TestCase):
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_session_end_missing_transcript_reports_lifecycle_schema(self):
+        request = json.dumps({"id": "missing-session-end", "method": "akbp.session.end", "dry_run": True, "params": {}}) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+        line = json.loads(proc.stdout)
+        self.assertEqual(line["error"]["code"], "invalid_params")
+        self.assertEqual(line["error"]["details"]["missing"], ["transcript"])
+        self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.session.end.params"))
+        assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
 
 if __name__ == "__main__":
     unittest.main()
