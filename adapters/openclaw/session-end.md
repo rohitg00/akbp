@@ -7,7 +7,7 @@ Use this checklist when a session produces durable knowledge.
 3. Preview crystallization with dry-run:
 
 ```json
-{"id":"openclaw-crystallize-preview","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"openclaw-crystallize-preview","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 4. For JSONL exports, run `akbp.import_check`, then preview `akbp.import_apply` with `dry_run:true`.
@@ -15,7 +15,7 @@ Use this checklist when a session produces durable knowledge.
 6. Apply only after approval:
 
 ```json
-{"id":"openclaw-crystallize-approved","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"openclaw-crystallize-approved","method":"akbp.session.end","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 7. Refresh local search after approved writes:
@@ -23,5 +23,7 @@ Use this checklist when a session produces durable knowledge.
 ```json
 {"id":"openclaw-index-approved","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}
 ```
+
+`akbp.session.end` is the adapter lifecycle method for the same transcript crystallization contract exposed by low-level `akbp.crystallize_session`.
 
 Follow `docs/AGENT_FLOW.md` for the canonical session-end loop.

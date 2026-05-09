@@ -40,7 +40,7 @@ Every adapter must use the same durable write boundary:
 - call `akbp.context` before planning substantial work
 - start source imports with ingest dry-run
 - validate JSONL exports with `akbp.import_check` and preview accepted imports with `akbp.import_apply` plus `dry_run:true`
-- preview session memory with `akbp.crystallize_session` and request-level `dry_run:true`
+- preview session memory with `akbp.session.end` and request-level `dry_run:true`
 - surface `review_required` and `apply_instruction` before applying writes
 - apply only with request-level `approved:true` after approval or trusted local policy
 - Do not store secrets, tokens, cookies, auth headers, private DMs, or raw logs with credentials

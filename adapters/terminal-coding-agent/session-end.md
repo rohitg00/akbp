@@ -12,7 +12,7 @@ Before ending the session:
 Example transcript dry-run:
 
 ```json
-{"id":"crystallize-terminal","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"crystallize-terminal","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Example direct claim dry-run:

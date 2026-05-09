@@ -25,7 +25,7 @@ Adapters may translate runtime-specific events into AKBP calls, but durable know
 
 ## Recommended flow
 
-Use `docs/AGENT_FLOW.md` as the default loop for runtime integrations: preview source imports with ingest dry-run, inspect `review_required` and `apply_instruction` from dry-run responses, apply approved imports, retrieve with search/context, run `akbp.crystallize_session` for transcript-backed session memory with dry-run preview, refresh the index, and cite claims when prior knowledge affects work.
+Use `docs/AGENT_FLOW.md` as the default loop for runtime integrations: preview source imports with ingest dry-run, inspect `review_required` and `apply_instruction` from dry-run responses, apply approved imports, retrieve with search/context, run `akbp.session.end` for transcript-backed session memory with dry-run preview, refresh the index, and cite claims when prior knowledge affects work.
 
 ## Approval-gated write safety
 
@@ -34,7 +34,7 @@ Every adapter must use the same durable write boundary:
 - call `akbp.capabilities` before assuming methods or schemas
 - call `akbp.context` before planning substantial work
 - start source imports with ingest dry-run
-- preview session memory with `akbp.crystallize_session` and request-level `dry_run:true`
+- preview session memory with `akbp.session.end` and request-level `dry_run:true`
 - surface `review_required` and `apply_instruction` before applying writes
 - apply only with request-level `approved:true` after approval or trusted local policy
 - Do not store secrets, tokens, cookies, auth headers, private DMs, or raw logs with credentials

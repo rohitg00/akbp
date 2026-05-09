@@ -216,21 +216,22 @@ class RepoQualityTest(unittest.TestCase):
             )
             self.assertIn("docs/AGENT_FLOW.md", markdown_text, str(adapter.relative_to(ROOT)))
 
-    def test_adapter_session_end_uses_crystallize_dry_run(self):
+    def test_adapter_session_end_uses_lifecycle_dry_run(self):
         adapters_root = ROOT / "adapters"
         adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
         for adapter in adapters:
             text = (adapter / "session-end.md").read_text(encoding="utf-8")
+            self.assertIn("akbp.session.end", text, str(adapter.relative_to(ROOT)))
             self.assertIn("akbp.crystallize_session", text, str(adapter.relative_to(ROOT)))
             self.assertIn('"dry_run":true', text, str(adapter.relative_to(ROOT)))
             self.assertIn('"apply":true', text, str(adapter.relative_to(ROOT)))
 
-    def test_adapter_readmes_use_crystallize_dry_run(self):
+    def test_adapter_readmes_use_session_end_dry_run(self):
         adapters_root = ROOT / "adapters"
         adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
         for adapter in adapters:
             text = (adapter / "README.md").read_text(encoding="utf-8")
-            self.assertIn("akbp.crystallize_session", text, str(adapter.relative_to(ROOT)))
+            self.assertIn("akbp.session.end", text, str(adapter.relative_to(ROOT)))
             self.assertIn("dry-run", text, str(adapter.relative_to(ROOT)))
 
 

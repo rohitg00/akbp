@@ -11,7 +11,7 @@ Use this shutdown routine after substantial work.
 Example transcript dry-run write:
 
 ```json
-{"id":"crystallize-end","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"crystallize-end","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Example direct claim dry-run write:
@@ -19,3 +19,6 @@ Example direct claim dry-run write:
 ```json
 {"id":"remember-end","method":"akbp.remember","path":".","dry_run":true,"params":{"text":"Release validation uses make validate","type":"workflow","evidence":["Makefile"]}}
 ```
+
+
+`akbp.session.end` is the adapter lifecycle method for the same transcript crystallization contract exposed by low-level `akbp.crystallize_session`.

@@ -6,13 +6,13 @@ Use this checklist before closing a coding-agent session.
 2. Ignore scratch work, failed guesses, and low-value logs.
 3. Add source records for transcript files, commits, or docs when available.
 4. Use dry-run first if the session did not explicitly approve writes.
-5. Prefer `akbp.crystallize_session` for transcript-backed shutdown memory.
+5. Prefer `akbp.session.end` for adapter lifecycle shutdown memory. It uses the same transcript crystallization contract as `akbp.crystallize_session` but gives integrations a stable lifecycle method name.
 6. Write concise claims with evidence pointers when no transcript exists.
 
 Example transcript dry-run request:
 
 ```json
-{"id":"crystallize-1","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"session-end-1","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Example direct claim dry-run request:
@@ -23,4 +23,4 @@ Example direct claim dry-run request:
 
 ## Write loop
 
-For the full write flow, see `docs/AGENT_FLOW.md`. Prefer source-backed `akbp.ingest` with ingest dry-run preview first, transcript-backed `akbp.crystallize_session`, or `akbp.import_check` plus `akbp.import_apply` for reviewed JSONL exports. Refresh the index with `akbp.index` when the integration does not auto-refresh it.
+For the full write flow, see `docs/AGENT_FLOW.md`. Prefer source-backed `akbp.ingest` with ingest dry-run preview first, transcript-backed `akbp.session.end`, or `akbp.import_check` plus `akbp.import_apply` for reviewed JSONL exports. Refresh the index with `akbp.index` when the integration does not auto-refresh it.

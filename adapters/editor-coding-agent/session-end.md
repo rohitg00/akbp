@@ -12,7 +12,7 @@ When a user accepts changes:
 Example transcript dry-run:
 
 ```json
-{"id":"crystallize-editor","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"crystallize-editor","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Avoid storing raw editor buffers unless the user explicitly requests it.
