@@ -690,6 +690,25 @@ def import_reference_rejections(base: Path, normalized: list[tuple[str, dict[str
                 break
     return rejected
 
+
+def import_duplicate_rejections(normalized: list[tuple[str, dict[str, Any], int]]) -> list[dict[str, Any]]:
+    seen: set[tuple[str, str]] = set()
+    rejected: list[dict[str, Any]] = []
+    for kind, record, line in normalized:
+        record_id = str(record.get("id") or f"line-{line}")
+        key = (kind, record_id)
+        if key in seen:
+            rejected.append({
+                "id": record_id,
+                "kind": kind,
+                "line": line,
+                "reason": f"duplicate import id: {record_id}",
+            })
+            continue
+        seen.add(key)
+    return rejected
+
+
 def cmd_import_check(args: argparse.Namespace) -> int:
     source = Path(args.file).resolve()
     if not source.exists() or not source.is_file():
@@ -706,7 +725,7 @@ def cmd_import_check(args: argparse.Namespace) -> int:
             accepted_by_line.pop(item["line"], None)
             continue
         normalized.append((kind, record, item["line"]))
-    for item in import_reference_rejections(root(args.path), normalized):
+    for item in [*import_reference_rejections(root(args.path), normalized), *import_duplicate_rejections(normalized)]:
         rejected.append(item)
         accepted_by_line.pop(item["line"], None)
     accepted_public = public_import_items(list(accepted_by_line.values()))
@@ -745,6 +764,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             continue
         normalized.append((kind, record, item["line"]))
     rejected.extend(import_reference_rejections(base, normalized))
+    rejected.extend(import_duplicate_rejections(normalized))
     rejected_lines = {item["line"] for item in rejected}
     normalized = [item for item in normalized if item[2] not in rejected_lines]
     if errors or rejected:
