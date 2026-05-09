@@ -56,6 +56,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval, including advertised enforcement flags and method schema references.
 - `retrieval-citation-bundle`: verify context retrieval and citation lookup return the same evidence-backed claim through JSONL tool calls.
 - `retrieval-ambiguity-ranking`: verify ambiguous adapter lifecycle queries retrieve the direct lifecycle and validation claims with citations.
+- `retrieval-noisy-evidence`: verify direct, cited lifecycle decisions are returned despite noisy adjacent memory and launch-copy claims.
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
 - `search-query-compatibility`: verify phrase, version, hyphenated, slash-separated, and prefix FTS query compatibility.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.

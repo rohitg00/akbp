@@ -237,6 +237,17 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("source_runtime_adapter_notes", data["expected"]["must_cite"])
         self.assertIn("source_validation_notes", data["expected"]["must_cite_in_context"])
 
+    def test_retrieval_noisy_evidence_fixture_covers_direct_cited_claims(self):
+        path = FIXTURES / "retrieval-noisy-evidence" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertIn("claim_shutdown_writes_require_review_gate", data["expected"]["must_retrieve"])
+        self.assertIn("source_adapter_shutdown_checklist", data["expected"]["must_cite_in_context"])
+        self.assertEqual(len(data["setup"]["claims"]), 4)
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("claim_shutdown_writes_require_review_gate", report["query_result_ids"])
+        self.assertIn("source_adapter_shutdown_checklist", report["context_citation_ids"])
+
     def test_retrieval_citation_bundle_fixture_covers_context_and_cite(self):
         path = FIXTURES / "retrieval-citation-bundle" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

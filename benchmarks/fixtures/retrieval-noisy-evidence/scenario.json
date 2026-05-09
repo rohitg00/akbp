@@ -1,0 +1,169 @@
+{
+  "id": "retrieval-noisy-evidence-001",
+  "task": "Verify retrieval returns a direct, cited release lifecycle decision even when noisy adjacent claims share generic agent and memory terms.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_release_lifecycle_review",
+        "type": "transcript",
+        "locator": "sessions/release-lifecycle-review.md",
+        "title": "Release lifecycle review"
+      },
+      {
+        "id": "source_adapter_shutdown_checklist",
+        "type": "file",
+        "locator": "docs/adapter-shutdown-checklist.md",
+        "title": "Adapter shutdown checklist"
+      },
+      {
+        "id": "source_general_memory_notes",
+        "type": "file",
+        "locator": "notes/general-agent-memory.md",
+        "title": "General agent memory notes"
+      },
+      {
+        "id": "source_marketing_launch_notes",
+        "type": "file",
+        "locator": "docs/launch-copy.md",
+        "title": "Launch copy notes"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_shutdown_writes_require_review_gate",
+        "text": "Release adapters must preview shutdown memory with dry_run:true and require approved:true before applying akbp.session.end writes.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.92,
+        "evidence": [
+          "source_release_lifecycle_review",
+          "source_adapter_shutdown_checklist"
+        ],
+        "entities": [
+          "adapter",
+          "release",
+          "shutdown",
+          "dry_run",
+          "approved",
+          "session.end"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_startup_context_is_read_only",
+        "text": "Adapter startup should use akbp.session.start for read-only context retrieval before planning.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.88,
+        "evidence": [
+          "source_release_lifecycle_review"
+        ],
+        "entities": [
+          "adapter",
+          "startup",
+          "context",
+          "session.start"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_generic_memory_should_be_searchable",
+        "text": "Agent memory notes should be searchable across sessions and include enough context for future agents.",
+        "type": "observation",
+        "status": "working",
+        "confidence": 0.55,
+        "evidence": [
+          "source_general_memory_notes"
+        ],
+        "entities": [
+          "agent",
+          "memory",
+          "search",
+          "context"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_launch_copy_mentions_memory",
+        "text": "Launch copy can describe AKBP as portable memory for coding agents.",
+        "type": "fact",
+        "status": "working",
+        "confidence": 0.6,
+        "evidence": [
+          "source_marketing_launch_notes"
+        ],
+        "entities": [
+          "launch",
+          "memory",
+          "coding agents"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "context-shutdown-review-gate",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "release adapter shutdown dry_run approved session.end write gate",
+          "limit": 4
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_shutdown_writes_require_review_gate"
+          ]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      },
+      {
+        "id": "cite-shutdown-review-gate",
+        "method": "akbp.cite",
+        "approved": false,
+        "params": {
+          "claim_id": "claim_shutdown_writes_require_review_gate"
+        },
+        "expected_result_fields": [
+          "claim_id",
+          "text",
+          "evidence",
+          "status"
+        ],
+        "expected_result_values": {
+          "claim_id": "claim_shutdown_writes_require_review_gate",
+          "status": "stable"
+        },
+        "expected_result_contains": {
+          "evidence[]": [
+            "source_release_lifecycle_review",
+            "source_adapter_shutdown_checklist"
+          ]
+        },
+        "expected_result_schema": "#/$defs/cite_result"
+      }
+    ]
+  },
+  "query": "For release adapter shutdown memory, what review gate is required before applying session.end writes?",
+  "expected": {
+    "must_retrieve": [
+      "claim_shutdown_writes_require_review_gate"
+    ],
+    "must_cite": [
+      "source_release_lifecycle_review",
+      "source_adapter_shutdown_checklist"
+    ],
+    "must_cite_in_context": [
+      "source_release_lifecycle_review",
+      "source_adapter_shutdown_checklist"
+    ],
+    "answer_should_include": [
+      "dry_run:true",
+      "approved:true",
+      "session.end"
+    ]
+  }
+}
