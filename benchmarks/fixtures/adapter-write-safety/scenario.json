@@ -35,12 +35,12 @@
       },
       {
         "id": "claim_adapter_docs_require_review_boundary",
-        "text": "Adapter docs must instruct clients to call capabilities, fetch context, start ingest dry-run, preview crystallize_session with dry_run, surface review_required and apply_instruction, and apply only with approved:true.",
+        "text": "Adapter docs must instruct clients to call capabilities, fetch context, start ingest dry-run, preview session-end lifecycle writes with dry_run, surface review_required and apply_instruction, and apply only with approved:true.",
         "type": "workflow",
         "status": "stable",
         "confidence": 0.9,
         "evidence": ["source_adapter_readme_policy", "source_agent_flow_write_boundary"],
-        "entities": ["adapter", "akbp.capabilities", "akbp.context", "ingest", "dry_run", "akbp.crystallize_session", "review_required", "apply_instruction", "approved:true"],
+        "entities": ["adapter", "akbp.capabilities", "akbp.context", "ingest", "dry_run", "akbp.session.end", "review_required", "apply_instruction", "approved:true"],
         "scope": "project"
       },
       {

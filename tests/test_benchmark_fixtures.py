@@ -515,12 +515,14 @@ class BenchmarkFixtureTest(unittest.TestCase):
             "dry_run_first",
             "require_review_metadata",
             "apply_requires_approved",
+            "akbp.session.end",
             "review_required",
             "apply_instruction",
             "approved:true",
             "secrets",
         ]:
             self.assertIn(required, text)
+        self.assertNotIn("akbp.crystallize_session", text)
         self.assertIn("claim_adapter_docs_require_review_boundary", data["expected"]["must_retrieve"])
 
     def test_benchmark_runner_passes(self):
