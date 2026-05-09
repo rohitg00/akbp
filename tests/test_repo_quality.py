@@ -692,6 +692,29 @@ class RepoQualityTest(unittest.TestCase):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertIn("JSONL tool-server approval flow", changelog)
 
+    def test_adapter_lifecycle_example_is_complete(self):
+        text = (ROOT / "examples" / "adapter-lifecycle" / "README.md").read_text(encoding="utf-8")
+        transcript = (ROOT / "examples" / "adapter-lifecycle" / "session-summary.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp.capabilities",
+            "akbp.session.start",
+            "akbp.session.end",
+            "params_schema",
+            "dry_run:true",
+            "approved:true",
+            "review_required",
+            "apply_instruction",
+            "akbp.index",
+        ]:
+            self.assertIn(required, text)
+        self.assertIn("examples/adapter-lifecycle/session-summary.md", text)
+        self.assertIn("Use `akbp.session.start`", transcript)
+        self.assertIn("Use `akbp.session.end`", transcript)
+        self.assertIn("examples/adapter-lifecycle/", readme)
+        self.assertIn("examples/adapter-lifecycle/", release_notes)
+
     def test_readme_lists_tracked_adapter_directories(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for adapter in [

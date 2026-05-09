@@ -99,6 +99,7 @@ Included examples:
 - `examples/level-3/`
 - `examples/end-to-end-agent-flow/`
 - `examples/tool-server-approval-flow/`
+- `examples/adapter-lifecycle/`
 - `examples/coding-agent/`
 - `examples/research/`
 - `examples/personal/`
