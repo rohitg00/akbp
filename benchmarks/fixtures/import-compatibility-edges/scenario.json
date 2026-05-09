@@ -75,6 +75,27 @@
         "confidence": 0.6,
         "evidence": [],
         "scope": "project"
+      },
+      {
+        "kind": "claim",
+        "id": "claim_import_compat_evidence_not_list",
+        "text": "Claims with evidence encoded as a scalar should be rejected before import apply.",
+        "type": "warning",
+        "status": "working",
+        "confidence": 0.6,
+        "evidence": "source_import_compat_edge",
+        "scope": "project"
+      },
+      {
+        "kind": "claim",
+        "id": "claim_import_compat_entities_not_list",
+        "text": "Claims with entities encoded as a scalar should be rejected before import apply.",
+        "type": "warning",
+        "status": "working",
+        "confidence": 0.6,
+        "evidence": [],
+        "entities": "agent",
+        "scope": "project"
       }
     ],
     "tool_server_requests": [
@@ -99,9 +120,9 @@
         ],
         "expected_result_values": {
           "ok": false,
-          "checked": 8,
+          "checked": 10,
           "accepted_count": 2,
-          "rejected_count": 6,
+          "rejected_count": 8,
           "error_count": 0,
           "fail_on_rejected": true
         },
@@ -116,6 +137,8 @@
             "claim_import_compat_bad_evidence_item",
             "claim_import_compat_entity_too_long",
             "claim_import_compat_bad_type",
+            "claim_import_compat_evidence_not_list",
+            "claim_import_compat_entities_not_list",
             "claim_import_compat_valid"
           ],
           "rejected[].reason": [
@@ -124,6 +147,8 @@
             "claim claim_import_compat_bad_evidence_item evidence items must be strings",
             "claim claim_import_compat_entity_too_long entities[0] must be at most 256 characters",
             "claim claim_import_compat_bad_type has invalid status",
+            "claim claim_import_compat_evidence_not_list evidence must be a list",
+            "claim claim_import_compat_entities_not_list entities must be a list of strings",
             "duplicate import id: claim_import_compat_valid"
           ]
         },
@@ -155,9 +180,9 @@
           "ok": false,
           "dry_run": true,
           "applied": false,
-          "checked": 8,
+          "checked": 10,
           "accepted_count": 2,
-          "rejected_count": 6,
+          "rejected_count": 8,
           "error_count": 0
         },
         "expected_result_contains": {
@@ -171,6 +196,8 @@
             "claim_import_compat_bad_evidence_item",
             "claim_import_compat_entity_too_long",
             "claim_import_compat_bad_type",
+            "claim_import_compat_evidence_not_list",
+            "claim_import_compat_entities_not_list",
             "claim_import_compat_valid"
           ],
           "rejected[].reason": []

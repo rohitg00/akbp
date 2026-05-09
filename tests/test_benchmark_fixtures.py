@@ -146,19 +146,25 @@ class BenchmarkFixtureTest(unittest.TestCase):
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
         mixed = requests["import-check-mixed"]
         self.assertEqual(mixed["method"], "akbp.import_check")
-        self.assertEqual(mixed["expected_result_values"]["checked"], 8)
+        self.assertEqual(mixed["expected_result_values"]["checked"], 10)
         self.assertEqual(mixed["expected_result_values"]["accepted_count"], 2)
-        self.assertEqual(mixed["expected_result_values"]["rejected_count"], 6)
+        self.assertEqual(mixed["expected_result_values"]["rejected_count"], 8)
         self.assertIn("claim_import_compat_bad_evidence_item", mixed["expected_result_contains"]["rejected[].id"])
+        self.assertIn("claim_import_compat_evidence_not_list", mixed["expected_result_contains"]["rejected[].id"])
         self.assertIn("claim_import_compat_entity_too_long", mixed["expected_result_contains"]["rejected[].id"])
+        self.assertIn("claim_import_compat_entities_not_list", mixed["expected_result_contains"]["rejected[].id"])
         self.assertIn("claim_import_compat_valid", mixed["expected_result_contains"]["rejected[].id"])
         self.assertIn("claim claim_import_compat_bad_evidence_item evidence items must be strings", mixed["expected_result_contains"]["rejected[].reason"])
+        self.assertIn("claim claim_import_compat_evidence_not_list evidence must be a list", mixed["expected_result_contains"]["rejected[].reason"])
         self.assertIn("claim claim_import_compat_entity_too_long entities[0] must be at most 256 characters", mixed["expected_result_contains"]["rejected[].reason"])
+        self.assertIn("claim claim_import_compat_entities_not_list entities must be a list of strings", mixed["expected_result_contains"]["rejected[].reason"])
         self.assertIn("duplicate import id: claim_import_compat_valid", mixed["expected_result_contains"]["rejected[].reason"])
         export_path = ROOT / mixed["params"]["file"]
         self.assertTrue(export_path.exists())
         export_text = export_path.read_text(encoding="utf-8")
         self.assertIn('"evidence":[42]', export_text)
+        self.assertIn('"evidence":"source_import_compat_edge"', export_text)
+        self.assertIn('"entities":"agent"', export_text)
         self.assertIn('"id":"claim_import_compat_valid"', export_text)
 
     def test_import_safety_fixture_covers_import_check_tool(self):
