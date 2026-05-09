@@ -666,6 +666,28 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("installed JSONL tool-server smoke coverage", changelog)
         self.assertIn("installed JSONL tool-server entrypoint", release_notes)
 
+    def test_release_notes_list_current_benchmark_coverage(self):
+        text = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        for required in [
+            "import compatibility edges",
+            "export bundle compatibility",
+            "graph JSONL records",
+            "retrieval citation bundle",
+            "retrieval ambiguity ranking",
+            "retrieval noisy evidence",
+            "search index observability",
+            "search query compatibility",
+            "adapter session operation",
+            "adapter write safety",
+            "read method schema",
+            "unknown method rejection",
+            "capability negotiation",
+            "write preview crystallize schema",
+            "empty FTS query behavior",
+            "adapter lifecycle operations",
+        ]:
+            self.assertIn(required, text)
+
     def test_tool_contract_search_matches_current_reference_params(self):
         contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
         methods = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
