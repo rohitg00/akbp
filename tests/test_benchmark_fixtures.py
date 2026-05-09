@@ -384,6 +384,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
             "akbp.supersede",
             "akbp.contradict",
             "akbp.import_apply",
+            "akbp.crystallize_session",
+            "akbp.session.end",
         })
         for request in data["setup"]["tool_server_requests"]:
             self.assertFalse(request["approved"])

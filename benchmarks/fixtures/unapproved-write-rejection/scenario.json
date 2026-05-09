@@ -164,6 +164,50 @@
           "review_required": true
         },
         "expected_error_schema": "#/$defs/approval_required_details"
+      },
+      {
+        "id": "crystallize-unapproved",
+        "method": "akbp.crystallize_session",
+        "approved": false,
+        "params": {
+          "transcript": "examples/coding-agent/structured-session-transcript.md",
+          "apply": true
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "dry_run",
+          "apply_instruction"
+        ],
+        "expected_error_values": {
+          "method": "akbp.crystallize_session",
+          "dry_run": false,
+          "review_required": true
+        },
+        "expected_error_schema": "#/$defs/approval_required_details"
+      },
+      {
+        "id": "session-end-unapproved",
+        "method": "akbp.session.end",
+        "approved": false,
+        "params": {
+          "transcript": "examples/coding-agent/structured-session-transcript.md",
+          "apply": true
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_fields": [
+          "method",
+          "review_required",
+          "dry_run",
+          "apply_instruction"
+        ],
+        "expected_error_values": {
+          "method": "akbp.session.end",
+          "dry_run": false,
+          "review_required": true
+        },
+        "expected_error_schema": "#/$defs/approval_required_details"
       }
     ]
   },
@@ -185,7 +229,9 @@
       "akbp.source.add",
       "akbp.supersede",
       "akbp.contradict",
-      "akbp.import_apply"
+      "akbp.import_apply",
+      "akbp.crystallize_session",
+      "akbp.session.end"
     ]
   }
 }
