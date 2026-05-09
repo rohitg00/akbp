@@ -58,7 +58,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `retrieval-ambiguity-ranking`: verify ambiguous adapter lifecycle queries retrieve the direct lifecycle and validation claims with citations.
 - `retrieval-noisy-evidence`: verify direct, cited lifecycle decisions are returned despite noisy adjacent memory and launch-copy claims.
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
-- `search-query-compatibility`: verify phrase, version, hyphenated, slash-separated, and prefix FTS query compatibility.
+- `search-query-compatibility`: verify phrase, version, hyphenated, slash-separated, prefix, empty, and malformed-operator FTS query compatibility.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes, including import apply, without `approved:true` return structured `approval_required` errors.

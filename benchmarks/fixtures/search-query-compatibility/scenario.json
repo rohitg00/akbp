@@ -143,6 +143,50 @@
           "results": []
         },
         "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "operator-only-empty-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "AND OR NOT",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "",
+          "results": []
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "dangling-operator-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "JSONL AND",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "\"JSONL\""
+        },
+        "expected_result_contains": {
+          "results[].id": [
+            "claim_search_query_compat"
+          ]
+        },
+        "expected_result_schema": "#/$defs/search_result"
       }
     ]
   },
