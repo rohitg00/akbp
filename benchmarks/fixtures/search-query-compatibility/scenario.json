@@ -105,6 +105,30 @@
         "expected_result_schema": "#/$defs/search_result"
       },
       {
+        "id": "mixed-operator-prefix-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "JSONL AND tool* OR Python*",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "\"JSONL\" AND tool* OR Python*"
+        },
+        "expected_result_contains": {
+          "results[].id": [
+            "claim_search_query_compat"
+          ]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
         "id": "leading-not-empty-search",
         "method": "akbp.search",
         "params": {
