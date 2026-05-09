@@ -117,6 +117,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         data = json.loads(path.read_text(encoding="utf-8"))
         fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
         self.assertIn("import/export file-param", fixture_readme)
+        self.assertIn("source verification id", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
         self.assertEqual(len(requests), 22)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
