@@ -689,7 +689,9 @@ class RepoQualityTest(unittest.TestCase):
             "capability negotiation",
             "write preview crystallize schema",
             "empty FTS query behavior",
+            "mixed operator plus prefix FTS search",
             "adapter lifecycle operations",
+            "lifecycle method `invalid_params` schema refs",
         ]:
             self.assertIn(required, text)
 
