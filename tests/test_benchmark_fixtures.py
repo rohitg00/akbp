@@ -116,7 +116,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 17)
+        self.assertEqual(len(requests), 20)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
@@ -129,6 +129,12 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("type_errors[]", requests["search-type-error"]["expected_error_contains"])
         self.assertIn("limit must be an integer", requests["search-type-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("query must be at most 4096 characters", requests["search-query-too-long"]["expected_error_contains"]["type_errors[]"])
+        self.assertEqual(requests["export-check-file-too-long"]["method"], "akbp.export_check")
+        self.assertEqual(requests["import-check-file-too-long"]["method"], "akbp.import_check")
+        self.assertEqual(requests["import-apply-file-too-long"]["method"], "akbp.import_apply")
+        self.assertIn("file must be at most 4096 characters", requests["export-check-file-too-long"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("file must be at most 4096 characters", requests["import-check-file-too-long"]["expected_error_contains"]["type_errors[]"])
+        self.assertIn("file must be at most 4096 characters", requests["import-apply-file-too-long"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("evidence items must be strings", requests["remember-evidence-item-type-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("evidence must contain at most 64 items", requests["remember-evidence-count-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("evidence[0] must be at most 512 characters", requests["remember-evidence-length-error"]["expected_error_contains"]["type_errors[]"])
