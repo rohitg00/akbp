@@ -958,6 +958,15 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.session.end.params"))
         assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_session_start_limit_error_reports_lifecycle_schema(self):
+        request = json.dumps({"id": "bad-session-start", "method": "akbp.session.start", "params": {"task": "adapter lifecycle", "limit": 0}}) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+        line = json.loads(proc.stdout)
+        self.assertEqual(line["error"]["code"], "invalid_params")
+        self.assertIn("limit must be between 1 and 100", line["error"]["details"]["type_errors"])
+        self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.session.start.params"))
+        assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
 
 if __name__ == "__main__":
     unittest.main()
