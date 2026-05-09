@@ -119,4 +119,4 @@ Supported query forms:
 - `"release checklist"` searches a phrase.
 - `deploy*` searches a token prefix.
 
-The CLI returns the generated `fts_query` with every indexed search response so agents can inspect how user text was normalized before trusting results.
+The CLI returns the generated `fts_query` with every indexed search response so agents can inspect how user text was normalized before trusting results. Queries with no safe searchable terms, including a leading standalone `NOT`, return an empty `fts_query` and empty result set instead of falling back to broad text scanning.

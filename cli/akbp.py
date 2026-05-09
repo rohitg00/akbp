@@ -1237,12 +1237,16 @@ def fts_query(query: str) -> str:
     has_operator = any(upper in operators for upper, _ in tokens)
     if not has_operator:
         cleaned = [term for _, token in tokens if (term := fts_term(token))]
-        return " OR ".join(cleaned) or '""'
+        return " OR ".join(cleaned)
 
     parts: list[str] = []
     expecting_term = True
+    skip_next_term = False
     for upper, token in tokens:
         if upper in {"AND", "OR", "NOT"}:
+            if upper == "NOT" and expecting_term:
+                skip_next_term = True
+                continue
             if not expecting_term:
                 parts.append(upper)
                 expecting_term = True
@@ -1250,13 +1254,16 @@ def fts_query(query: str) -> str:
         term = fts_term(token)
         if not term:
             continue
+        if skip_next_term:
+            skip_next_term = False
+            continue
         if not expecting_term:
             parts.append("OR")
         parts.append(term)
         expecting_term = False
     while parts and parts[-1] in operators:
         parts.pop()
-    return " ".join(parts) or '""'
+    return " ".join(parts)
 
 
 def cmd_search(args: argparse.Namespace) -> int:
@@ -1266,6 +1273,10 @@ def cmd_search(args: argparse.Namespace) -> int:
         return cmd_query(args)
     con = sqlite3.connect(db_path)
     query_used = fts_query(args.query)
+    if not query_used:
+        con.close()
+        print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": []}, indent=2, ensure_ascii=False))
+        return 0
     try:
         rows = con.execute(
             "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
