@@ -12,15 +12,21 @@
     },
     "evidenceList": {
       "type": "array",
+      "maxItems": 64,
       "items": {
-        "type": "string"
+        "type": "string",
+        "maxLength": 512,
+        "pattern": "^[^\\u0000\\n\\r]*$"
       },
       "default": []
     },
     "entityList": {
       "type": "array",
+      "maxItems": 128,
       "items": {
-        "type": "string"
+        "type": "string",
+        "maxLength": 256,
+        "pattern": "^[^\\u0000\\n\\r]*$"
       },
       "default": []
     },

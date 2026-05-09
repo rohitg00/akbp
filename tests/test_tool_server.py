@@ -176,6 +176,8 @@ class ToolServerTest(unittest.TestCase):
         capabilities = defs["capabilities_result"]
         self.assertFalse(capabilities["additionalProperties"])
         self.assertFalse(capabilities["properties"]["features"]["additionalProperties"])
+        self.assertIn("param_array_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
@@ -324,6 +326,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("path_policy", lines[0]["result"]["runtime"])
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
+            self.assertTrue(lines[0]["result"]["features"]["param_array_validation"])
+            self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])
             self.assertEqual(lines[0]["result"]["runtime"]["transport"], "jsonl-stdio")
             self.assertEqual(lines[0]["result"]["runtime"]["write_policy"], "review-gated")
@@ -877,6 +881,23 @@ class ToolServerTest(unittest.TestCase):
             self.assertFalse(lines[0]["ok"])
             self.assertEqual(lines[0]["error"]["code"], "invalid_params")
             self.assertIn("query must be at most 4096 characters", lines[0]["error"]["details"]["type_errors"])
+
+    def test_evidence_and_entity_arrays_are_bounded_before_cli(self):
+        requests = "\n".join([
+            json.dumps({"id": "too-many-evidence", "method": "akbp.remember", "params": {"text": "x", "evidence": ["source_ok"] * 65}}),
+            json.dumps({"id": "long-evidence", "method": "akbp.remember", "params": {"text": "x", "evidence": ["e" * 513]}}),
+            json.dumps({"id": "bad-entity-control", "method": "akbp.ingest", "params": {"file": "notes.md", "entity": ["agent\nname"]}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 3)
+        for line in lines:
+            self.assertFalse(line["ok"])
+            self.assertEqual(line["error"]["code"], "invalid_params")
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+        self.assertIn("evidence must contain at most 64 items", lines[0]["error"]["details"]["type_errors"])
+        self.assertIn("evidence[0] must be at most 512 characters", lines[1]["error"]["details"]["type_errors"])
+        self.assertIn("entity[0] must not contain control characters", lines[2]["error"]["details"]["type_errors"])
 
     def test_invalid_params_are_structured_before_cli(self):
         requests = "\n".join([

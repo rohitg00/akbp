@@ -23,6 +23,11 @@ REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
 RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 MAX_REQUEST_BYTES = 1048576
+PARAM_LIST_LIMITS = {
+    "evidence": {"max_items": 64, "max_item_length": 512},
+    "entity": {"max_items": 128, "max_item_length": 256},
+}
+
 PARAM_MAX_LENGTHS = {
     "query": 4096,
     "task": 8192,
@@ -138,6 +143,7 @@ def capabilities() -> dict[str, Any]:
             "path_validation": True,
             "param_length_validation": True,
             "param_control_char_validation": True,
+            "param_array_validation": True,
             "dry_run_argv_redaction": True,
         },
         "schemas": {
@@ -155,7 +161,8 @@ def capabilities() -> dict[str, Any]:
             "approval_field": "approved",
             "path_policy": "caller-supplied local path; empty paths, oversized paths, and control characters are rejected before dispatch",
             "param_length_policy": "string params are capped before CLI dispatch according to method schemas",
-            "param_control_char_policy": "path-like and identifier string params reject NUL, newline, and carriage return before CLI dispatch",
+            "param_control_char_policy": "path-like, identifier, evidence, and entity string params reject NUL, newline, and carriage return before CLI dispatch",
+            "param_array_policy": "evidence and entity arrays are capped for item count and per-item string length before CLI dispatch",
         },
         "methods": {
             name: {
@@ -382,18 +389,24 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("fail_on_issue must be a boolean")
     if "fail_on_issues" in params and not isinstance(params.get("fail_on_issues"), bool):
         errors.append("fail_on_issues must be a boolean")
-    if "evidence" in params:
-        evidence = params.get("evidence")
-        if not isinstance(evidence, list):
-            errors.append("evidence must be an array")
-        elif any(not isinstance(item, str) for item in evidence):
-            errors.append("evidence items must be strings")
-    if "entity" in params:
-        entity = params.get("entity")
-        if not isinstance(entity, list):
-            errors.append("entity must be an array")
-        elif any(not isinstance(item, str) for item in entity):
-            errors.append("entity items must be strings")
+    for list_name in ("evidence", "entity"):
+        if list_name not in params:
+            continue
+        values = params.get(list_name)
+        limits = PARAM_LIST_LIMITS[list_name]
+        if not isinstance(values, list):
+            errors.append(f"{list_name} must be an array")
+            continue
+        if len(values) > limits["max_items"]:
+            errors.append(f"{list_name} must contain at most {limits['max_items']} items")
+        for index, item in enumerate(values):
+            if not isinstance(item, str):
+                errors.append(f"{list_name} items must be strings")
+                break
+            if len(item) > limits["max_item_length"]:
+                errors.append(f"{list_name}[{index}] must be at most {limits['max_item_length']} characters")
+            if has_control_char(item):
+                errors.append(f"{list_name}[{index}] must not contain control characters")
     if method in {"akbp.crystallize_session", "akbp.session.end"} and "apply" in params and not isinstance(params.get("apply"), bool):
         errors.append("apply must be a boolean")
     return errors
