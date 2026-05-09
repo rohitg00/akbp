@@ -519,6 +519,66 @@
         }
       },
       {
+        "id": "supersede-old-claim-id-too-long",
+        "method": "akbp.supersede",
+        "dry_run": true,
+        "params": {
+          "old_claim_id": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "text": "Replacement claim"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "old_claim_id must be at most 512 characters"
+          ]
+        }
+      },
+      {
+        "id": "contradict-source-claim-id-control-char",
+        "method": "akbp.contradict",
+        "dry_run": true,
+        "params": {
+          "source_claim_id": "claim_a\nnext",
+          "target_claim_id": "claim_b"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "source_claim_id must not contain control characters"
+          ]
+        }
+      },
+      {
+        "id": "contradict-target-claim-id-too-long",
+        "method": "akbp.contradict",
+        "dry_run": true,
+        "params": {
+          "source_claim_id": "claim_a",
+          "target_claim_id": "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "target_claim_id must be at most 512 characters"
+          ]
+        }
+      },
+      {
         "id": "ingest-claim-type-enum-error",
         "method": "akbp.ingest",
         "approved": false,
