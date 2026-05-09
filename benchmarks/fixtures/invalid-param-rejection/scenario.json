@@ -92,6 +92,26 @@
         "expected_error_schema": "#/$defs/invalid_params_details"
       },
       {
+        "id": "session-start-limit-range-error",
+        "method": "akbp.session.start",
+        "approved": false,
+        "params": {
+          "task": "adapter lifecycle",
+          "limit": 0
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "limit must be between 1 and 100"
+          ]
+        }
+      },
+      {
         "id": "session-end-missing-param",
         "method": "akbp.session.end",
         "approved": false,
