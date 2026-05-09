@@ -236,8 +236,15 @@ def validate_claim_shape(claim: dict[str, Any]) -> list[str]:
     confidence = claim.get("confidence")
     if not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1:
         errors.append(f"claim {claim.get('id')} has invalid confidence")
-    if not isinstance(claim.get("evidence"), list):
+    evidence = claim.get("evidence")
+    if not isinstance(evidence, list):
         errors.append(f"claim {claim.get('id')} evidence must be a list")
+    elif any(not isinstance(item, str) for item in evidence):
+        errors.append(f"claim {claim.get('id')} evidence items must be strings")
+    for list_field in ("entities", "supersedes"):
+        values = claim.get(list_field)
+        if values is not None and (not isinstance(values, list) or any(not isinstance(item, str) for item in values)):
+            errors.append(f"claim {claim.get('id')} {list_field} must be a list of strings")
     return errors
 
 def audit(base: Path, event: str, data: dict[str, Any]) -> None:

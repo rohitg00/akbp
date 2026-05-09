@@ -134,6 +134,21 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("type must be one of: audio, commit, file, folder, issue, message, pdf, screenshot, transcript, url, video", requests["source-type-enum-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("claim_type must be one of: decision, fact, observation, preference, question, warning, workflow", requests["ingest-claim-type-enum-error"]["expected_error_contains"]["type_errors[]"])
 
+    def test_import_compatibility_edges_fixture_rejects_bad_shapes(self):
+        path = FIXTURES / "import-compatibility-edges" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        mixed = requests["import-check-mixed"]
+        self.assertEqual(mixed["method"], "akbp.import_check")
+        self.assertEqual(mixed["expected_result_values"]["checked"], 6)
+        self.assertEqual(mixed["expected_result_values"]["accepted_count"], 2)
+        self.assertEqual(mixed["expected_result_values"]["rejected_count"], 4)
+        self.assertIn("claim_import_compat_bad_evidence_item", mixed["expected_result_contains"]["rejected[].id"])
+        self.assertIn("claim claim_import_compat_bad_evidence_item evidence items must be strings", mixed["expected_result_contains"]["rejected[].reason"])
+        export_path = ROOT / mixed["params"]["file"]
+        self.assertTrue(export_path.exists())
+        self.assertIn('"evidence":[42]', export_path.read_text(encoding="utf-8"))
+
     def test_import_safety_fixture_covers_import_check_tool(self):
         path = FIXTURES / "import-safety" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
