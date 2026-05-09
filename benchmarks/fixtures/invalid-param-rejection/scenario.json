@@ -92,6 +92,24 @@
         "expected_error_schema": "#/$defs/invalid_params_details"
       },
       {
+        "id": "session-end-missing-param",
+        "method": "akbp.session.end",
+        "approved": false,
+        "dry_run": true,
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_values": {
+          "missing": [
+            "transcript"
+          ]
+        },
+        "expected_error_schema": "#/$defs/invalid_params_details"
+      },
+      {
         "id": "search-type-error",
         "method": "akbp.search",
         "approved": false,

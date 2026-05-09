@@ -116,10 +116,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "invalid-param-rejection" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 15)
+        self.assertEqual(len(requests), 16)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
+        self.assertEqual(requests["session-end-missing-param"]["method"], "akbp.session.end")
+        self.assertEqual(requests["session-end-missing-param"]["expected_error_values"]["missing"], ["transcript"])
+        self.assertEqual(requests["session-end-missing-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertIn("type_errors[]", requests["search-type-error"]["expected_error_contains"])
         self.assertIn("limit must be an integer", requests["search-type-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("query must be at most 4096 characters", requests["search-query-too-long"]["expected_error_contains"]["type_errors[]"])
