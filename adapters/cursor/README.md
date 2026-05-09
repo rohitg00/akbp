@@ -16,13 +16,13 @@ Use it when the agent can read workspace files, run local commands, or call the 
 Start durable writes with dry-run. Render `review_required` and `apply_instruction` before applying.
 
 ```json
-{"id":"cursor-crystallize-preview","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"cursor-crystallize-preview","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Apply only after approval or trusted local policy:
 
 ```json
-{"id":"cursor-crystallize-approved","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"cursor-crystallize-approved","method":"akbp.session.end","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 For imported notes, specs, or review artifacts, begin with ingest dry-run:

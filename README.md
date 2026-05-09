@@ -104,7 +104,7 @@ AKBP is designed around the way coding agents actually work:
 |--------|-------------|
 | Session starts | Call `akbp.context` and `akbp.search` for cited project memory |
 | Agent reads files or notes | Register evidence with `akbp.source.add` |
-| Agent proposes durable memory | Preview with `akbp.ingest` or `akbp.crystallize_session` and `dry_run:true` |
+| Agent proposes durable memory | Preview with `akbp.ingest` or `akbp.session.end` and `dry_run:true` |
 | User or trusted policy approves | Apply with `approved:true` |
 | Work finishes | Refresh index and audit durable writes |
 | Another agent starts later | Retrieve compact context packs with citations |

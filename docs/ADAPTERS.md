@@ -124,7 +124,7 @@ Use this checklist before opening a pull request:
 - Show both read flow and write flow: retrieve context first, write cited durable records after work, then validate or index when useful.
 - Prefer `dry_run` examples for write-capable tool-server calls.
 - Treat `review_required` and `apply_instruction` as UI/runtime obligations, not optional metadata.
-- Prefer `akbp.crystallize_session` for transcript-backed session-end memory, with dry-run preview before apply.
+- Prefer `akbp.session.end` for transcript-backed session-end memory, with dry-run preview before apply.
 - Keep durable output in AKBP artifacts: markdown wiki pages, JSONL claims, JSONL graph records, sources, audit events, and context packs.
 - Do not introduce a new memory format or runtime-only storage as the source of truth.
 - Run `make validate` before submitting.

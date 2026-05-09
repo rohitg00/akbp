@@ -16,7 +16,7 @@ The adapter keeps AKBP as the durable knowledge format while letting the editor 
 Editor agents should not silently write durable memory. Use dry-run for proposed writes, render `review_required` responses as reviewable UI items with `apply_instruction`, and ask for approval before applying them. Prefer transcript-backed crystallization for accepted session summaries:
 
 ```json
-{"id":"editor-crystallize","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"editor-crystallize","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Use direct claims for small standalone facts:

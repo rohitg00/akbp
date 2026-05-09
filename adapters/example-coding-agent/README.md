@@ -17,7 +17,7 @@ It is intentionally runtime-neutral. Copy it when starting a new adapter, then r
 Use dry-run first. Prefer transcript-backed crystallization when a session summary exists:
 
 ```json
-{"id":"example-crystallize","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"example-crystallize","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Use direct claims when there is no transcript or summary to crystallize:

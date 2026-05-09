@@ -4,7 +4,7 @@ When a user accepts changes:
 
 1. Identify durable knowledge created during the edit.
 2. Create dry-run memory proposals.
-3. Prefer `akbp.crystallize_session` for accepted session summaries.
+3. Prefer `akbp.session.end` for accepted session summaries.
 4. For JSONL exports, run `akbp.import_check`, then preview `akbp.import_apply` with `dry_run:true`.
 5. Ask the user to approve or reject the proposals.
 6. Apply approved writes only with request-level `approved:true`.

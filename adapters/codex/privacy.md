@@ -20,7 +20,7 @@ Use AKBP for concise, cited, durable project knowledge. Do not use it as a raw t
 
 - Default to project scope.
 - Use ingest dry-run for imported files.
-- Use `akbp.crystallize_session` dry-run for session memory.
+- Use `akbp.session.end` dry-run for session memory.
 - Treat `review_required` and `apply_instruction` as mandatory obligations.
 - Apply writes only with `approved:true` after approval or trusted local policy.
 

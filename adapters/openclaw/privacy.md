@@ -20,7 +20,7 @@ OpenClaw integrations should keep AKBP durable knowledge useful, cited, and safe
 
 - Default to project scope.
 - Use ingest dry-run for imported files or source notes.
-- Use `akbp.crystallize_session` dry-run for transcript-backed memory.
+- Use `akbp.session.end` dry-run for transcript-backed memory.
 - Treat `review_required` and `apply_instruction` as mandatory UI/runtime obligations.
 - Apply writes only with `approved:true` after approval or trusted local policy.
 

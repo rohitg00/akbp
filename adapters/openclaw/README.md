@@ -16,13 +16,13 @@ Use it when an OpenClaw agent can read workspace instructions, run local CLI com
 Start durable writes with dry-run. Render `review_required` and `apply_instruction` to the user or local runtime before applying.
 
 ```json
-{"id":"openclaw-crystallize-preview","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"openclaw-crystallize-preview","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Apply only after explicit approval or trusted local policy:
 
 ```json
-{"id":"openclaw-crystallize-approved","method":"akbp.crystallize_session","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"openclaw-crystallize-approved","method":"akbp.session.end","path":".","approved":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 For source imports, begin with ingest dry-run:

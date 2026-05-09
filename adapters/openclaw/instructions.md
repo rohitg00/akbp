@@ -23,7 +23,7 @@ Use AKBP as the durable knowledge layer for project facts, decisions, preference
 ## At session end
 
 - Summarize durable decisions, actions, blockers, preferences, and open questions into a transcript file.
-- Preview crystallization with `akbp.crystallize_session` and `dry_run:true`.
+- Preview crystallization with `akbp.session.end` and `dry_run:true`.
 - Apply only after approval.
 - Refresh search with approved `akbp.index` when durable writes landed.
 

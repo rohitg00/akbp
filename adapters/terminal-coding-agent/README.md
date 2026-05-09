@@ -17,7 +17,7 @@ It uses the AKBP JSONL tool server when available and falls back to the AKBP CLI
 Use dry-run first unless the user already approved durable memory writes. Prefer transcript-backed crystallization at session end:
 
 ```json
-{"id":"terminal-crystallize","method":"akbp.crystallize_session","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
+{"id":"terminal-crystallize","method":"akbp.session.end","path":".","dry_run":true,"params":{"transcript":"session-summary.md","apply":true}}
 ```
 
 Use direct claims for small standalone facts:

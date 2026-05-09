@@ -222,7 +222,6 @@ class RepoQualityTest(unittest.TestCase):
         for adapter in adapters:
             text = (adapter / "session-end.md").read_text(encoding="utf-8")
             self.assertIn("akbp.session.end", text, str(adapter.relative_to(ROOT)))
-            self.assertIn("akbp.crystallize_session", text, str(adapter.relative_to(ROOT)))
             self.assertIn('"dry_run":true', text, str(adapter.relative_to(ROOT)))
             self.assertIn('"apply":true', text, str(adapter.relative_to(ROOT)))
 
@@ -271,9 +270,9 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
-    def test_adapter_docs_use_current_validation_and_crystallize_flow(self):
+    def test_adapter_docs_use_current_validation_and_session_end_flow(self):
         text = (ROOT / "docs" / "ADAPTERS.md").read_text(encoding="utf-8")
-        self.assertIn("akbp.crystallize_session", text)
+        self.assertIn("akbp.session.end", text)
         self.assertIn("dry-run preview before apply", text)
         self.assertIn("Run `make validate`", text)
         self.assertNotIn("Run `make guard`, `make test`, `make smoke`, and `make benchmark`", text)
@@ -362,7 +361,7 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")
         self.assertIn("Start write-capable calls with dry-run", text)
         self.assertIn('"method":"akbp.ingest"', text)
-        self.assertIn('"method":"akbp.crystallize_session"', text)
+        self.assertIn('"method":"akbp.session.end"', text)
         self.assertIn('"dry_run":true', text)
         self.assertIn('"apply":true', text)
         self.assertIn("After review or approval", text)
@@ -475,7 +474,7 @@ class RepoQualityTest(unittest.TestCase):
             for required in [
                 "akbp.capabilities",
                 "akbp.context",
-                "akbp.crystallize_session",
+                "akbp.session.end",
                 "dry_run",
                 "review_required",
                 "apply_instruction",
