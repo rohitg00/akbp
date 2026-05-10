@@ -69,6 +69,50 @@
         }
       },
       {
+        "id": "status-unknown-param",
+        "method": "akbp.status",
+        "params": {
+          "surprise": true
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "unknown",
+          "allowed",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "unknown": [
+            "surprise"
+          ]
+        },
+        "expected_error_contains": {
+          "allowed[]": []
+        }
+      },
+      {
+        "id": "export-unknown-param",
+        "method": "akbp.export",
+        "params": {
+          "surprise": true
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "unknown",
+          "allowed",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "unknown": [
+            "surprise"
+          ]
+        },
+        "expected_error_contains": {
+          "allowed[]": []
+        }
+      },
+      {
         "id": "index-incremental-type-error",
         "method": "akbp.index",
         "params": {
