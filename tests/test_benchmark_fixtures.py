@@ -120,6 +120,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("source verification id", fixture_readme)
         self.assertIn("claim relation id", fixture_readme)
         self.assertIn("audit limit", fixture_readme)
+        self.assertIn("read-method limit", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
         self.assertEqual(len(requests), 29)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
