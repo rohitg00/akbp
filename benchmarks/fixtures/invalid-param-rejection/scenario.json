@@ -593,6 +593,42 @@
         }
       },
       {
+        "id": "cite-claim-id-too-long",
+        "method": "akbp.cite",
+        "params": {
+          "claim_id": "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "claim_id must be at most 512 characters"
+          ]
+        }
+      },
+      {
+        "id": "cite-claim-id-control-char",
+        "method": "akbp.cite",
+        "params": {
+          "claim_id": "claim_bad\nnext"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "claim_id must not contain control characters"
+          ]
+        }
+      },
+      {
         "id": "supersede-old-claim-id-too-long",
         "method": "akbp.supersede",
         "dry_run": true,
