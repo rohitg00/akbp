@@ -69,6 +69,81 @@
         }
       },
       {
+        "id": "index-incremental-type-error",
+        "method": "akbp.index",
+        "params": {
+          "incremental": "yes"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "incremental must be a boolean"
+          ]
+        }
+      },
+      {
+        "id": "export-check-fail-on-issues-type-error",
+        "method": "akbp.export_check",
+        "params": {
+          "file": "bundle.akbp.json",
+          "fail_on_issues": "yes"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "fail_on_issues must be a boolean"
+          ]
+        }
+      },
+      {
+        "id": "import-check-fail-on-rejected-type-error",
+        "method": "akbp.import_check",
+        "params": {
+          "file": "import.jsonl",
+          "fail_on_rejected": "yes"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "fail_on_rejected must be a boolean"
+          ]
+        }
+      },
+      {
+        "id": "source-verify-fail-on-issue-type-error",
+        "method": "akbp.source.verify",
+        "params": {
+          "source_id": "source_ok",
+          "fail_on_issue": "yes"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "fail_on_issue must be a boolean"
+          ]
+        }
+      },
+      {
         "id": "search-unknown-param",
         "method": "akbp.search",
         "approved": false,
