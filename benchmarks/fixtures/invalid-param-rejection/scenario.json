@@ -271,6 +271,70 @@
         "expected_error_schema": "#/$defs/invalid_params_details"
       },
       {
+        "id": "query-missing-param",
+        "method": "akbp.query",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "query"
+          ]
+        }
+      },
+      {
+        "id": "context-missing-param",
+        "method": "akbp.context",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "task"
+          ]
+        }
+      },
+      {
+        "id": "cite-missing-param",
+        "method": "akbp.cite",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "claim_id"
+          ]
+        }
+      },
+      {
+        "id": "import-apply-missing-param",
+        "method": "akbp.import_apply",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "file"
+          ]
+        }
+      },
+      {
         "id": "search-type-error",
         "method": "akbp.search",
         "approved": false,
