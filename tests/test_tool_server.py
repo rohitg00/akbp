@@ -968,6 +968,24 @@ class ToolServerTest(unittest.TestCase):
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_file_and_source_missing_params_report_method_schemas(self):
+        requests = "\n".join([
+            json.dumps({"id": "missing-export-check", "method": "akbp.export_check", "params": {}}),
+            json.dumps({"id": "missing-import-check", "method": "akbp.import_check", "params": {}}),
+            json.dumps({"id": "missing-source-verify", "method": "akbp.source.verify", "params": {}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 3)
+        self.assertEqual(lines[0]["error"]["details"]["missing"], ["file"])
+        self.assertTrue(lines[0]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.export_check.params"))
+        self.assertEqual(lines[1]["error"]["details"]["missing"], ["file"])
+        self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.import_check.params"))
+        self.assertEqual(lines[2]["error"]["details"]["missing"], ["source_id"])
+        self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.source.verify.params"))
+        for line in lines:
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
     def test_session_end_missing_transcript_reports_lifecycle_schema(self):
         request = json.dumps({"id": "missing-session-end", "method": "akbp.session.end", "dry_run": True, "params": {}}) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
