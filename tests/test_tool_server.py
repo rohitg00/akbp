@@ -981,6 +981,24 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.session.start.params"))
         assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_read_method_limit_errors_report_method_schemas(self):
+        requests = "\n".join([
+            json.dumps({"id": "bad-query-limit", "method": "akbp.query", "params": {"query": "release notes", "limit": False}}),
+            json.dumps({"id": "bad-context-limit", "method": "akbp.context", "params": {"task": "adapter lifecycle", "limit": 101}}),
+            json.dumps({"id": "bad-audit-limit", "method": "akbp.audit", "params": {"limit": "20"}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 3)
+        self.assertIn("limit must be an integer", lines[0]["error"]["details"]["type_errors"])
+        self.assertIn("limit must be between 1 and 100", lines[1]["error"]["details"]["type_errors"])
+        self.assertIn("limit must be an integer", lines[2]["error"]["details"]["type_errors"])
+        self.assertTrue(lines[0]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.query.params"))
+        self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.context.params"))
+        self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.audit.params"))
+        for line in lines:
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
 
 if __name__ == "__main__":
     unittest.main()
