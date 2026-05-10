@@ -565,6 +565,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(data["dry_run"])
             self.assertTrue(data["redacted"])
             self.assertIn("claims/claims.jsonl", data["would_write"])
+            self.assertIn(".akbp/audit.log.jsonl", data["would_write"])
+            self.assertNotIn("logs/audit.jsonl", data["would_write"])
             self.assertFalse((kb / "raw" / "sources" / "sources.jsonl").exists())
             self.assertFalse((kb / "claims" / "claims.jsonl").exists())
             self.assertFalse((kb / data["page"]).exists())

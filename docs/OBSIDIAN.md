@@ -23,8 +23,8 @@ obsidian-vault/
   wiki/
     decisions/
     imports/
-  logs/
-    audit.jsonl
+  .akbp/
+    audit.log.jsonl
 ```
 
 Humans can browse `AKBP.md`, `wiki/`, and imported source pages in Obsidian. Agents should write through the AKBP CLI or JSONL tool server so writes stay structured, reviewable, and auditable.

@@ -142,7 +142,7 @@ claims/claims.jsonl    atomic claims with evidence and lifecycle state
 graph/entities.jsonl   entities referenced by claims and pages
 graph/relations.jsonl  typed relations and lifecycle links
 raw/sources/           optional copied source material
-.akbp/audit.jsonl      append-only operation history
+.akbp/audit.log.jsonl  append-only operation history
 ```
 
 Local runtime state lives under `.akbp/`, including the rebuildable SQLite FTS5 index. Markdown and JSONL artifacts are the source of truth.

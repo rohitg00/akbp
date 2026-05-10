@@ -537,7 +537,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
                 str(page.relative_to(base)),
                 *(["claims/claims.jsonl"] if claim_id else []),
                 "logs/log.md",
-                "logs/audit.jsonl",
+                ".akbp/audit.log.jsonl",
             ],
         }, indent=2, ensure_ascii=False))
         return 0

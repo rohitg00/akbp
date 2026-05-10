@@ -32,7 +32,7 @@ AKBP knowledge base
   - graph/entities.jsonl
   - graph/relations.jsonl
   - raw/sources/*
-  - .akbp/audit.jsonl
+  - .akbp/audit.log.jsonl
         │
         ▼
 Local runtime state
@@ -50,7 +50,7 @@ Portable AKBP artifacts are the source of truth:
 - `graph/entities.jsonl`: entities referenced by claims and pages.
 - `graph/relations.jsonl`: typed relations and lifecycle links.
 - `raw/sources/`: optional copied source material.
-- `.akbp/audit.jsonl`: append-only operation history.
+- `.akbp/audit.log.jsonl`: append-only operation history.
 
 The SQLite database is rebuildable local state. It must not become the only copy of durable knowledge.
 

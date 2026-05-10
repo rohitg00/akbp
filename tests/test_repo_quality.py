@@ -548,7 +548,7 @@ class RepoQualityTest(unittest.TestCase):
         for required in [
             "akbp-tool-server JSONL server",
             "claims/claims.jsonl",
-            ".akbp/audit.jsonl",
+            ".akbp/audit.log.jsonl",
             ".akbp/state.db SQLite FTS5 index",
             "akbp.capabilities",
             "akbp.crystallize_session",
