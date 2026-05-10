@@ -304,7 +304,7 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.capabilities",
             '"dry_run":true',
             "request-level `dry_run:true`",
-            "project-local scope",
+            "caller-supplied knowledge-base path",
             "redact secret-like strings",
         ]:
             self.assertIn(required, text)
@@ -721,6 +721,18 @@ class RepoQualityTest(unittest.TestCase):
         self.assertNotIn('"modes": ["bm25", "vector", "graph"]', contract)
         self.assertNotIn('"scope": "default"', contract)
         self.assertEqual(set(search_props), {"query", "limit"})
+
+    def test_tool_contract_write_params_match_current_reference_params(self):
+        contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        methods = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        remember_props = methods["$defs"]["akbp.remember.params"]["properties"]
+        self.assertIn('"entity": []', contract)
+        self.assertIn('"dry_run": false', contract)
+        self.assertNotIn('"scope": "private|project|team|public"', contract)
+        self.assertIn("caller-supplied knowledge-base path", contract)
+        self.assertIn("`akbp.session.start`", contract)
+        self.assertIn("`akbp.session.end`", contract)
+        self.assertEqual(set(remember_props), {"text", "type", "evidence", "entity", "dry_run"})
 
     def test_tool_server_approval_example_is_complete(self):
         text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")

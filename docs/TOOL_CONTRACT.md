@@ -80,7 +80,8 @@ Input:
   "text": "string",
   "type": "observation|decision|preference|workflow|fact",
   "evidence": [],
-  "scope": "private|project|team|public"
+  "entity": [],
+  "dry_run": false
 }
 ```
 
@@ -245,6 +246,8 @@ Supported method contracts include:
 - `akbp.supersede`
 - `akbp.contradict`
 - `akbp.crystallize_session`
+- `akbp.session.start`
+- `akbp.session.end`
 
 Every response uses the same envelope:
 
@@ -322,7 +325,7 @@ Agents should:
 2. use request-level `dry_run: true` before the first write in a session
 3. show the planned write to the user or calling runtime when approval is required
 4. repeat the same request with `approved: true` and without `dry_run` only after approval or trusted local policy
-5. use project-local scope unless the user explicitly asks for team or public memory
+5. keep writes local to the caller-supplied knowledge-base path unless the user explicitly chooses another path
 6. cite evidence for durable claims and avoid storing transient logs
 7. redact secret-like strings before sending write requests
 
