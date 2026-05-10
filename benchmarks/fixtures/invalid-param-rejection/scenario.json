@@ -459,6 +459,44 @@
         }
       },
       {
+        "id": "query-limit-type-error",
+        "method": "akbp.query",
+        "params": {
+          "query": "release notes",
+          "limit": false
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "limit must be an integer"
+          ]
+        }
+      },
+      {
+        "id": "context-limit-range-error",
+        "method": "akbp.context",
+        "params": {
+          "task": "continue adapter work",
+          "limit": 101
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "limit must be between 1 and 100"
+          ]
+        }
+      },
+      {
         "id": "ingest-confidence-range-error",
         "method": "akbp.ingest",
         "approved": false,
