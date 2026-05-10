@@ -465,6 +465,42 @@
         }
       },
       {
+        "id": "supersede-text-missing-param",
+        "method": "akbp.supersede",
+        "params": {
+          "old_claim_id": "claim_old"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "text"
+          ]
+        }
+      },
+      {
+        "id": "contradict-target-missing-param",
+        "method": "akbp.contradict",
+        "params": {
+          "source_claim_id": "claim_a"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "target_claim_id"
+          ]
+        }
+      },
+      {
         "id": "search-type-error",
         "method": "akbp.search",
         "approved": false,

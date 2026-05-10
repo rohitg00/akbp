@@ -127,7 +127,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("read-method limit", fixture_readme)
         self.assertIn("conformance level", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 51)
+        self.assertEqual(len(requests), 53)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["capabilities-unknown-param"]["method"], "akbp.capabilities")
         self.assertEqual(requests["capabilities-unknown-param"]["expected_error_values"]["unknown"], ["surprise"])
@@ -162,7 +162,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(requests["source-add-missing-param"]["expected_error_values"]["missing"], ["locator"])
         self.assertEqual(requests["ingest-missing-param"]["expected_error_values"]["missing"], ["file"])
         self.assertEqual(requests["supersede-missing-param"]["expected_error_values"]["missing"], ["old_claim_id", "text"])
+        self.assertEqual(requests["supersede-text-missing-param"]["expected_error_values"]["missing"], ["text"])
         self.assertEqual(requests["contradict-missing-param"]["expected_error_values"]["missing"], ["source_claim_id", "target_claim_id"])
+        self.assertEqual(requests["contradict-target-missing-param"]["expected_error_values"]["missing"], ["target_claim_id"])
         self.assertIn("type_errors[]", requests["search-type-error"]["expected_error_contains"])
         self.assertIn("limit must be an integer", requests["search-type-error"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("query must be at most 4096 characters", requests["search-query-too-long"]["expected_error_contains"]["type_errors[]"])
