@@ -335,6 +335,54 @@
         }
       },
       {
+        "id": "export-check-missing-param",
+        "method": "akbp.export_check",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "file"
+          ]
+        }
+      },
+      {
+        "id": "import-check-missing-param",
+        "method": "akbp.import_check",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "file"
+          ]
+        }
+      },
+      {
+        "id": "source-verify-missing-param",
+        "method": "akbp.source.verify",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "source_id"
+          ]
+        }
+      },
+      {
         "id": "remember-missing-param",
         "method": "akbp.remember",
         "params": {},

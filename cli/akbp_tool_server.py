@@ -102,6 +102,7 @@ REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "akbp.export_check": ("file",),
     "akbp.import_check": ("file",),
     "akbp.import_apply": ("file",),
+    "akbp.source.verify": ("source_id",),
     "akbp.supersede": ("old_claim_id", "text"),
     "akbp.contradict": ("source_claim_id", "target_claim_id"),
     "akbp.crystallize_session": ("transcript",),
