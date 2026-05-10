@@ -968,6 +968,21 @@ class ToolServerTest(unittest.TestCase):
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_relation_partial_missing_params_report_method_schemas(self):
+        requests = "\n".join([
+            json.dumps({"id": "missing-supersede-text", "method": "akbp.supersede", "params": {"old_claim_id": "claim_old"}}),
+            json.dumps({"id": "missing-contradict-target", "method": "akbp.contradict", "params": {"source_claim_id": "claim_a"}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 2)
+        self.assertEqual(lines[0]["error"]["details"]["missing"], ["text"])
+        self.assertTrue(lines[0]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.supersede.params"))
+        self.assertEqual(lines[1]["error"]["details"]["missing"], ["target_claim_id"])
+        self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.contradict.params"))
+        for line in lines:
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
     def test_file_and_source_missing_params_report_method_schemas(self):
         requests = "\n".join([
             json.dumps({"id": "missing-export-check", "method": "akbp.export_check", "params": {}}),
