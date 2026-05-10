@@ -968,6 +968,27 @@ class ToolServerTest(unittest.TestCase):
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_enum_param_errors_report_method_schemas(self):
+        requests = "\n".join([
+            json.dumps({"id": "bad-remember-type", "method": "akbp.remember", "params": {"text": "x", "type": "blocker"}}),
+            json.dumps({"id": "bad-source-type", "method": "akbp.source.add", "params": {"locator": "notes.md", "type": "binary"}}),
+            json.dumps({"id": "bad-ingest-claim-type", "method": "akbp.ingest", "params": {"file": "notes.md", "claim_type": "blocker"}}),
+            json.dumps({"id": "bad-conformance-level", "method": "akbp.conformance", "params": {"level": "4"}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        expected = [
+            ("type must be one of:", "#/$defs/akbp.remember.params"),
+            ("type must be one of:", "#/$defs/akbp.source.add.params"),
+            ("claim_type must be one of:", "#/$defs/akbp.ingest.params"),
+            ("level must be one of:", "#/$defs/akbp.conformance.params"),
+        ]
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 4)
+        for line, (message, schema_ref) in zip(lines, expected):
+            self.assertIn(message, line["error"]["details"]["type_errors"][0])
+            self.assertTrue(line["error"]["details"]["params_schema"].endswith(schema_ref))
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
     def test_boolean_param_errors_report_method_schemas(self):
         requests = "\n".join([
             json.dumps({"id": "bad-index-incremental", "method": "akbp.index", "params": {"incremental": "yes"}}),
