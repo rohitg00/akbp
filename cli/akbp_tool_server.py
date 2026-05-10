@@ -310,6 +310,7 @@ def schema_enum(schema_name: str, property_name: str, fallback: set[str]) -> set
 
 CLAIM_TYPES = schema_enum("claim.schema.json", "type", {"fact", "decision", "preference", "workflow", "observation", "question", "warning"})
 SOURCE_TYPES = schema_enum("source.schema.json", "type", {"file", "url", "transcript", "message", "commit", "issue", "screenshot", "pdf", "audio", "video", "folder"})
+CONFORMANCE_LEVELS = {"0", "1", "2", "3"}
 
 CONTROL_CHAR_STRING_PARAMS = {
     "file",
@@ -367,6 +368,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("type must be one of: " + ", ".join(sorted(SOURCE_TYPES)))
     if "claim_type" in params and method == "akbp.ingest" and params.get("claim_type") not in CLAIM_TYPES:
         errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
+    if "level" in params and method == "akbp.conformance" and params.get("level") not in CONFORMANCE_LEVELS:
+        errors.append("level must be one of: " + ", ".join(sorted(CONFORMANCE_LEVELS)))
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "limit" in params:

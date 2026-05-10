@@ -1004,6 +1004,15 @@ class ToolServerTest(unittest.TestCase):
         for line in lines:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_conformance_level_errors_report_method_schema(self):
+        request = json.dumps({"id": "bad-conformance-level", "method": "akbp.conformance", "params": {"level": "9"}}) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+        line = json.loads(proc.stdout)
+        self.assertEqual(line["error"]["code"], "invalid_params")
+        self.assertIn("level must be one of: 0, 1, 2, 3", line["error"]["details"]["type_errors"])
+        self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.conformance.params"))
+        assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
 
 if __name__ == "__main__":
     unittest.main()

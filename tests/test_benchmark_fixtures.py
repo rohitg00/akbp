@@ -122,8 +122,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("claim relation id", fixture_readme)
         self.assertIn("audit limit", fixture_readme)
         self.assertIn("read-method limit", fixture_readme)
+        self.assertIn("conformance level", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 32)
+        self.assertEqual(len(requests), 33)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
         self.assertEqual(requests["capabilities-unknown-param"]["method"], "akbp.capabilities")
         self.assertEqual(requests["capabilities-unknown-param"]["expected_error_values"]["unknown"], ["surprise"])
@@ -176,6 +177,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("source_claim_id must not contain control characters", requests["contradict-source-claim-id-control-char"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("target_claim_id must be at most 512 characters", requests["contradict-target-claim-id-too-long"]["expected_error_contains"]["type_errors[]"])
         self.assertIn("claim_type must be one of: decision, fact, observation, preference, question, warning, workflow", requests["ingest-claim-type-enum-error"]["expected_error_contains"]["type_errors[]"])
+        self.assertEqual(requests["conformance-level-enum-error"]["method"], "akbp.conformance")
+        self.assertIn("level must be one of: 0, 1, 2, 3", requests["conformance-level-enum-error"]["expected_error_contains"]["type_errors[]"])
 
     def test_import_compatibility_edges_fixture_rejects_bad_shapes(self):
         path = FIXTURES / "import-compatibility-edges" / "scenario.json"

@@ -729,6 +729,24 @@
             "claim_type must be one of: decision, fact, observation, preference, question, warning, workflow"
           ]
         }
+      },
+      {
+        "id": "conformance-level-enum-error",
+        "method": "akbp.conformance",
+        "params": {
+          "level": "9"
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "type_errors",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_contains": {
+          "type_errors[]": [
+            "level must be one of: 0, 1, 2, 3"
+          ]
+        }
       }
     ]
   },
