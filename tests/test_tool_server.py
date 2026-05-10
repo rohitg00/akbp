@@ -917,6 +917,7 @@ class ToolServerTest(unittest.TestCase):
         requests = "\n".join([
             json.dumps({"id": "shape", "method": "akbp.search", "params": "not an object"}),
             json.dumps({"id": "unknown", "method": "akbp.search", "params": {"query": "release", "surprise": True}}),
+            json.dumps({"id": "capabilities-unknown", "method": "akbp.capabilities", "params": {"surprise": True}}),
             json.dumps({"id": "missing", "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": ""}}),
             json.dumps({"id": "bad-param-dry", "method": "akbp.remember", "params": {"text": "x", "dry_run": "yes"}}),
             json.dumps({"id": "bad-limit", "method": "akbp.search", "params": {"query": "release", "limit": "5"}}),
@@ -943,23 +944,27 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("query", lines[1]["error"]["details"]["allowed"])
         self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.search.params"))
         self.assertEqual(lines[2]["error"]["code"], "invalid_params")
-        self.assertEqual(lines[2]["error"]["details"]["missing"], ["transcript"])
-        self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.crystallize_session.params"))
+        self.assertEqual(lines[2]["error"]["details"]["unknown"], ["surprise"])
+        self.assertEqual(lines[2]["error"]["details"]["allowed"], [])
+        self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.capabilities.params"))
         self.assertEqual(lines[3]["error"]["code"], "invalid_params")
-        self.assertIn("dry_run must be a boolean", lines[3]["error"]["details"]["type_errors"])
-        self.assertIn("limit must be an integer", lines[4]["error"]["details"]["type_errors"])
-        self.assertIn("apply must be a boolean", lines[5]["error"]["details"]["type_errors"])
-        self.assertIn("query must be a string", lines[6]["error"]["details"]["type_errors"])
-        self.assertIn("confidence must be a number", lines[7]["error"]["details"]["type_errors"])
-        self.assertIn("evidence items must be strings", lines[8]["error"]["details"]["type_errors"])
-        self.assertIn("entity items must be strings", lines[9]["error"]["details"]["type_errors"])
-        self.assertIn("limit must be between 1 and 100", lines[10]["error"]["details"]["type_errors"])
-        self.assertIn("confidence must be between 0 and 1", lines[11]["error"]["details"]["type_errors"])
-        self.assertIn("type must be one of:", lines[12]["error"]["details"]["type_errors"][0])
-        self.assertIn("warning", lines[12]["error"]["details"]["type_errors"][0])
+        self.assertEqual(lines[3]["error"]["details"]["missing"], ["transcript"])
+        self.assertTrue(lines[3]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.crystallize_session.params"))
+        self.assertEqual(lines[4]["error"]["code"], "invalid_params")
+        self.assertIn("dry_run must be a boolean", lines[4]["error"]["details"]["type_errors"])
+        self.assertIn("limit must be an integer", lines[5]["error"]["details"]["type_errors"])
+        self.assertIn("apply must be a boolean", lines[6]["error"]["details"]["type_errors"])
+        self.assertIn("query must be a string", lines[7]["error"]["details"]["type_errors"])
+        self.assertIn("confidence must be a number", lines[8]["error"]["details"]["type_errors"])
+        self.assertIn("evidence items must be strings", lines[9]["error"]["details"]["type_errors"])
+        self.assertIn("entity items must be strings", lines[10]["error"]["details"]["type_errors"])
+        self.assertIn("limit must be between 1 and 100", lines[11]["error"]["details"]["type_errors"])
+        self.assertIn("confidence must be between 0 and 1", lines[12]["error"]["details"]["type_errors"])
         self.assertIn("type must be one of:", lines[13]["error"]["details"]["type_errors"][0])
-        self.assertIn("transcript", lines[13]["error"]["details"]["type_errors"][0])
-        self.assertIn("claim_type must be one of:", lines[14]["error"]["details"]["type_errors"][0])
+        self.assertIn("warning", lines[13]["error"]["details"]["type_errors"][0])
+        self.assertIn("type must be one of:", lines[14]["error"]["details"]["type_errors"][0])
+        self.assertIn("transcript", lines[14]["error"]["details"]["type_errors"][0])
+        self.assertIn("claim_type must be one of:", lines[15]["error"]["details"]["type_errors"][0])
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 

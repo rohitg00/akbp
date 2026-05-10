@@ -47,6 +47,28 @@
         }
       },
       {
+        "id": "capabilities-unknown-param",
+        "method": "akbp.capabilities",
+        "params": {
+          "surprise": true
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "unknown",
+          "allowed",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "unknown": [
+            "surprise"
+          ]
+        },
+        "expected_error_contains": {
+          "allowed[]": []
+        }
+      },
+      {
         "id": "search-unknown-param",
         "method": "akbp.search",
         "approved": false,

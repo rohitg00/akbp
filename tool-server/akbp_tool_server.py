@@ -421,8 +421,6 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     path = str(req.get("path", "."))
     params = req.get("params", {}) or {}
 
-    if method == "akbp.capabilities":
-        return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
     if not isinstance(params, dict):
@@ -455,6 +453,9 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             f"missing required params for {method}: {', '.join(missing)}",
             details={"missing": missing, "params_schema": method_schema_ref(method)},
         )
+
+    if method == "akbp.capabilities":
+        return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
 
     argv = build_argv(method, params)
     if dry_run and method == "akbp.ingest":

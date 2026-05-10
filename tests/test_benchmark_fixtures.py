@@ -123,8 +123,10 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("audit limit", fixture_readme)
         self.assertIn("read-method limit", fixture_readme)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
-        self.assertEqual(len(requests), 31)
+        self.assertEqual(len(requests), 32)
         self.assertIn("params must be an object", requests["search-params-not-object"]["expected_error_contains"]["type_errors[]"])
+        self.assertEqual(requests["capabilities-unknown-param"]["method"], "akbp.capabilities")
+        self.assertEqual(requests["capabilities-unknown-param"]["expected_error_values"]["unknown"], ["surprise"])
         self.assertEqual(requests["search-unknown-param"]["expected_error_schema"], "#/$defs/invalid_params_details")
         self.assertEqual(requests["crystallize-missing-param"]["expected_error_values"]["missing"], ["transcript"])
         self.assertEqual(requests["session-start-limit-range-error"]["method"], "akbp.session.start")
