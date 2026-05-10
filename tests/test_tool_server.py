@@ -968,6 +968,21 @@ class ToolServerTest(unittest.TestCase):
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
+    def test_array_param_errors_report_method_schemas(self):
+        requests = "\n".join([
+            json.dumps({"id": "bad-remember-evidence", "method": "akbp.remember", "params": {"text": "x", "evidence": [42]}}),
+            json.dumps({"id": "bad-ingest-entity", "method": "akbp.ingest", "params": {"file": "notes.md", "entity": [False]}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 2)
+        self.assertIn("evidence items must be strings", lines[0]["error"]["details"]["type_errors"])
+        self.assertTrue(lines[0]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.remember.params"))
+        self.assertIn("entity items must be strings", lines[1]["error"]["details"]["type_errors"])
+        self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.ingest.params"))
+        for line in lines:
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
     def test_enum_param_errors_report_method_schemas(self):
         requests = "\n".join([
             json.dumps({"id": "bad-remember-type", "method": "akbp.remember", "params": {"text": "x", "type": "blocker"}}),
