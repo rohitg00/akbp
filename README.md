@@ -2,9 +2,15 @@
 
 [![CI](https://github.com/rohitg00/akbp/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/akbp/actions/workflows/ci.yml)
 
+<p align="center">
+  <img src="docs/assets/akbp-banner.svg" alt="AKBP banner: stop re-deriving, start compiling" width="100%">
+</p>
+
 > Agents should not start every session with amnesia.
 
-AKBP is the Agent Knowledge Base Protocol. It defines a local-first, file-backed knowledge base that agents can read, write, verify, export, and carry across runtimes.
+AKBP turns the LLM Wiki pattern into a protocol surface for agent runtimes. It is a local-first, file-backed knowledge base that agents can read, write, verify, export, and carry across tools.
+
+The idea comes from the same insight behind [LLM Wiki v2](https://gist.github.com/rohitg00/2067ab416f7bbe447c1977edaaa681e2): stop re-deriving, start compiling. AKBP adds the machinery a repo needs when that pattern becomes operational: typed claims, source hashes, lifecycle relations, review-gated writes, JSONL tool calls, schemas, and conformance tests.
 
 This repository contains the reference implementation:
 
@@ -20,7 +26,7 @@ It is still alpha. The implementation is usable for demos, adapter work, protoco
 
 Most agent memory is either trapped in a chat transcript, hidden inside one product, or rebuilt from scratch with every session. Repository instruction files help with behavior, but they do not capture reviewed project knowledge. Plain RAG can retrieve documents, but it does not define how durable claims, evidence, source hashes, audit history, and lifecycle updates should be represented.
 
-AKBP provides a small protocol layer for that missing contract.
+The LLM Wiki pattern solves the right problem: useful knowledge should compound. AKBP takes that pattern one step lower in the stack and defines the artifacts, methods, schemas, and safety gates agents need to maintain it consistently.
 
 ```text
 agent runtime reads project context
