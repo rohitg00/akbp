@@ -335,6 +335,88 @@
         }
       },
       {
+        "id": "remember-missing-param",
+        "method": "akbp.remember",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "text"
+          ]
+        }
+      },
+      {
+        "id": "source-add-missing-param",
+        "method": "akbp.source.add",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "locator"
+          ]
+        }
+      },
+      {
+        "id": "ingest-missing-param",
+        "method": "akbp.ingest",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "file"
+          ]
+        }
+      },
+      {
+        "id": "supersede-missing-param",
+        "method": "akbp.supersede",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "old_claim_id",
+            "text"
+          ]
+        }
+      },
+      {
+        "id": "contradict-missing-param",
+        "method": "akbp.contradict",
+        "params": {},
+        "expected_error_code": "invalid_params",
+        "expected_error_fields": [
+          "missing",
+          "params_schema"
+        ],
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_values": {
+          "missing": [
+            "source_claim_id",
+            "target_claim_id"
+          ]
+        }
+      },
+      {
         "id": "search-type-error",
         "method": "akbp.search",
         "approved": false,
