@@ -4,13 +4,12 @@ This note tracks public signals from adjacent agent-memory and agent-harness pro
 
 It is not a vendor ranking. It is a product checklist for making AKBP easier for real users to understand, run, and adopt.
 
-## Last scan
+## Research input
 
-- Date: 2026-05-11
-- Local trend scan: `/last30days` returned no usable ranked evidence for the exact AKBP/protocol query. Treat that as a retrieval limitation, not proof the space is quiet.
-- Follow-up sources checked: web search across GitHub, Hacker News, Reddit-indexed pages, and public project pages.
-- Public themes observed:
-  - persistent memory for Claude Code and tool-compatible agents
+This synthesis is based on recent public signals from developer-tooling, agent-memory, and documentation-workflow discussions. Keep the repo artifact focused on reusable patterns, not vendor names or source-by-source research notes.
+
+Public themes observed:
+  - persistent memory for coding agents and tool-compatible runtimes
   - shared memory across multiple engineers and agents
   - local-first `.agent` style folders for portable skills and memory
   - remote tool APIs, REST APIs, dashboards, OAuth, and multi-transport access
@@ -113,7 +112,7 @@ AKBP should avoid overpromising runtime features. It should emphasize artifacts 
    - Output shows cited context and lifecycle relation.
 
 2. **Adapter quickstart matrix**
-   - One table for Claude Code, Codex-style CLI agents, Cursor-style agents, OpenClaw, and custom scripts.
+   - One table for terminal agents, editor agents, local assistants, and custom scripts.
    - For each: transport, setup file, session-start call, write-preview call, approval flow.
 
 3. **Protocol vs memory server explanation**
@@ -139,7 +138,7 @@ AKBP should avoid overpromising runtime features. It should emphasize artifacts 
    - Keep this as examples first, not a broad compatibility promise.
 
 8. **REST and tool bridge guidance**
-   - Document how AKBP can sit behind an tool-server or REST wrapper without making the reference implementation responsible for hosting every transport.
+   - Document how AKBP can sit behind a tool-server or REST wrapper without making the reference implementation responsible for hosting every transport.
 
 9. **Project namespace guidance**
    - Clarify how to use one KB per repo, one KB per team, or exported bundles across repos.
@@ -181,3 +180,180 @@ Success criteria:
 - A user sees why AKBP is more than generic persistent memory.
 - A tool builder sees exactly what to integrate.
 - A skeptical engineer sees files, citations, safety gates, and conformance instead of vague “AI memory” claims.
+
+## Added research track: spec-driven agent development kits
+
+Spec-driven development kits are adjacent to AKBP even when they are not memory systems. The reusable pattern is that agent work improves when intent, constraints, plans, and tasks become durable reviewable artifacts before code or automation runs.
+
+### Why this matters
+
+Spec-driven agent workflows solve a different but related problem:
+
+- They turn intent into durable project artifacts before code is written.
+- They give coding agents a staged workflow instead of one giant prompt.
+- They make the human review boundary explicit between phases.
+- They produce files that can be versioned, inspected, reused, and handed between agents.
+
+That is close to AKBP's core job: turn useful agent context into durable, inspectable project knowledge.
+
+### Pattern signals
+
+Observed public pattern:
+
+- Framing: open source toolkit for spec-driven development with coding agents.
+- Core flow: project rules -> user intent -> technical plan -> task list -> implementation.
+- User promise: stop vague prompt-driven development; make specifications living artifacts that drive implementation.
+- Integration style: installed CLI plus agent-facing commands/templates.
+- Strongest product lesson: the workflow is memorable because each phase has a named artifact and a clear gate.
+
+### What AKBP should learn from this category
+
+1. **Name the workflow stages, not just the methods**
+   - Users remember named stages better than raw method names.
+   - AKBP should expose a similarly human-readable path:
+     - discover evidence
+     - preview memory
+     - approve write
+     - retrieve cited context
+     - supersede stale knowledge
+     - export bundle
+
+2. **Make durable artifacts feel first-class**
+   - Specs, plans, and tasks work because users see them as product artifacts.
+   - AKBP should make claims/sources/context packs/audit events feel like the product, not internal implementation details.
+
+3. **Add phase gates to demos and docs**
+   - AKBP already has dry-run and approval gates.
+   - The docs should frame them as a user workflow, not only as safety mechanics:
+     - proposed knowledge
+     - reviewed knowledge
+     - active knowledge
+     - superseded knowledge
+
+4. **Create agent-facing commands that map to user language**
+   - Tool methods are useful for integrations, but humans need memorable commands.
+   - Candidate public demo language:
+     - `akbp capture`
+     - `akbp review`
+     - `akbp recall`
+     - `akbp supersede`
+   - This can stay as documentation first before adding CLI aliases.
+
+5. **Ship templates, not only reference docs**
+   - Agent workflow kits spread when people can initialize scaffolding quickly.
+   - AKBP should offer starter templates:
+     - `project-memory-template`
+     - `release-memory-template`
+     - `adapter-author-template`
+     - `multi-agent-consistency-template`
+
+6. **Treat project rules as a first-class artifact**
+   - AKBP could define a lightweight `AKBP.md` section for project memory rules:
+     - what counts as durable knowledge
+     - who can approve writes
+     - what must never be stored
+     - when to supersede vs contradict
+     - required evidence quality
+
+7. **Make implementation tasks come from knowledge gaps**
+   - Staged agent workflows turn planning artifacts into tasks.
+   - AKBP can turn missing/contested/stale knowledge into tasks:
+     - verify source hash
+     - resolve contested claim
+     - add evidence for uncited claim
+     - supersede stale workflow
+     - export reviewed bundle
+
+### New AKBP artifact ideas from this track
+
+High-value, low-risk docs/examples:
+
+1. `docs/AKBP_WORKFLOW.md`
+   - A named workflow from evidence -> reviewed memory -> recall -> lifecycle update.
+
+2. `examples/multi-agent-consistency-demo/`
+   - Shows Agent A recording a decision and Agent B retrieving/superseding it.
+
+3. `templates/project-memory-rules/AKBP.md`
+   - Starter rules for what agents should and should not store.
+
+4. `docs/TEMPLATES.md`
+   - Explains starter memory templates and when to use each.
+
+5. `benchmarks/fixtures/knowledge-gap-to-task/`
+   - Converts missing evidence, contested claims, or stale sources into actionable tasks.
+
+### Positioning update
+
+Spec-driven agent workflows are proving that users want explicit durable artifacts and checkpoints. AKBP should borrow that packaging:
+
+> Spec-driven development makes product intent executable. AKBP makes project knowledge portable, reviewable, and reusable across agent sessions.
+
+This keeps AKBP distinct while learning from the adoption mechanics of staged agent workflows.
+
+## Added research track: rich review artifacts
+
+Rohit pointed at a current agent-output pattern that fits AKBP well. The useful lesson is not any specific brand, author, or implementation. The reusable pattern is this:
+
+> Agents should compile messy context into portable, cited, interactive review artifacts, not only linear markdown summaries.
+
+### Why this matters for AKBP
+
+AKBP's source of truth is structured and file-backed: claims, sources, source hashes, relations, audit events, and context packs. That is exactly the substrate needed for rich artifacts that humans can review and future agents can reuse.
+
+A good artifact is not the source of truth. It is a generated view over AKBP data.
+
+### High-value AKBP artifact formats
+
+- decision review page
+- agent handoff page
+- pull request understanding page
+- postmortem page
+- research map page
+- release readiness page
+
+These should be self-contained, static-first HTML files generated from AKBP objects.
+
+### Product lesson
+
+Markdown is still useful for durable notes, but complex knowledge often needs structure:
+
+- diagrams
+- timelines
+- annotated diffs
+- severity colors
+- collapsible source snippets
+- relation maps
+- review checklists
+- export buttons for proposed updates
+
+AKBP can own the trust layer while the HTML artifact owns the review surface.
+
+### Safety lesson
+
+Rich artifacts must not become a bypass around review-gated writes.
+
+Rules:
+
+- no network calls by default
+- no secrets or private dumps
+- proposed updates export as JSONL
+- existing `import-check` validates before apply
+- existing approval gates apply before durable writes
+- artifacts cite source ids and hashes
+
+### Concrete next artifact
+
+Build `examples/rich-context-artifact/`:
+
+1. create a small KB with a source note, claims, and lifecycle relation
+2. generate `agent-handoff.html`
+3. include cited claims and source ids
+4. export selected proposed updates as `updates.jsonl`
+5. run `import-check` before any apply
+
+This gives AKBP a very clear public demo:
+
+> AKBP is the source of truth. Rich artifacts are the review surface.
+
+See `docs/RICH_CONTEXT_ARTIFACTS.md` for the implementation sketch.
