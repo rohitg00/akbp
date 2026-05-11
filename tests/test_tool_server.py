@@ -109,6 +109,24 @@ class ToolServerTest(unittest.TestCase):
                 self.assertEqual(line["error"]["code"], "invalid_request")
                 self.assertIn("path", " ".join(line["error"]["details"]["errors"]))
 
+    def test_server_rejects_non_object_params_before_dispatch(self):
+        requests = "\n".join([
+            json.dumps({"id": "null", "method": "akbp.status", "params": None}),
+            json.dumps({"id": "array", "method": "akbp.status", "params": []}),
+            json.dumps({"id": "false", "method": "akbp.status", "params": False}),
+            json.dumps({"id": "string", "method": "akbp.status", "params": ""}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 4)
+        for line in lines:
+            with self.subTest(line=line):
+                assert_response_envelope(self, line)
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["error"]["code"], "invalid_params")
+                self.assertEqual(line["error"]["details"]["type_errors"], ["params must be an object"])
+                self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.status.params"))
+
     def test_server_rejects_oversized_request_lines_before_json_parse(self):
         request = " " * (1048576 + 1) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)

@@ -457,7 +457,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
 
     method = req.get("method")
     path = str(req.get("path", "."))
-    params = req.get("params", {}) or {}
+    params = req["params"] if "params" in req else {}
 
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
