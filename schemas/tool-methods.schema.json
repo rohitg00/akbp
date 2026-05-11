@@ -88,7 +88,8 @@
             "warning"
           ],
           "default": "observation",
-          "maxLength": 64
+          "maxLength": 64,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -112,7 +113,8 @@
         "locator": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 4096
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "type": {
           "type": "string",
@@ -130,7 +132,8 @@
             "video",
             "folder"
           ],
-          "maxLength": 64
+          "maxLength": 64,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "title": {
           "type": "string",
@@ -156,7 +159,8 @@
         "old_claim_id": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "text": {
           "type": "string",
@@ -175,7 +179,8 @@
             "question",
             "warning"
           ],
-          "maxLength": 64
+          "maxLength": 64,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -200,12 +205,14 @@
         "source_claim_id": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "target_claim_id": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "evidence": {
           "$ref": "#/$defs/evidenceList"
@@ -226,7 +233,8 @@
         "source_id": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "fail_on_issue": {
           "type": "boolean",
@@ -244,7 +252,8 @@
         "file": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 4096
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "type": {
           "type": "string",
@@ -262,7 +271,8 @@
             "video",
             "folder"
           ],
-          "maxLength": 64
+          "maxLength": 64,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "title": {
           "type": "string",
@@ -284,7 +294,8 @@
             "question",
             "warning"
           ],
-          "maxLength": 64
+          "maxLength": 64,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "confidence": {
           "type": "number",
@@ -311,7 +322,8 @@
         "file": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 4096
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "fail_on_issues": {
           "type": "boolean",
@@ -329,7 +341,8 @@
         "file": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 4096
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "fail_on_rejected": {
           "type": "boolean",
@@ -347,7 +360,8 @@
         "file": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 4096
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         },
         "dry_run": {
           "type": "boolean",
@@ -409,7 +423,8 @@
             "3"
           ],
           "default": "0",
-          "maxLength": 16
+          "maxLength": 16,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         }
       }
     },
@@ -437,7 +452,8 @@
         "claim_id": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 512
+          "maxLength": 512,
+          "pattern": "^[^\\u0000\\n\\r]*$"
         }
       }
     },

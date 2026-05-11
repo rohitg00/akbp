@@ -376,6 +376,22 @@ class ToolServerTest(unittest.TestCase):
                 schema_required = tuple(defs[f"{method}.params"].get("required", []))
                 self.assertEqual(schema_required, tuple(required))
 
+    def test_method_schemas_match_runtime_control_char_params(self):
+        method_schema = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        defs = method_schema["$defs"]
+        server = load_server_module()
+        expected_pattern = "^[^\\u0000\\n\\r]*$"
+        documented = set()
+        for def_name, definition in defs.items():
+            if not def_name.startswith("akbp."):
+                continue
+            for param_name, spec in definition.get("properties", {}).items():
+                if param_name in server.CONTROL_CHAR_STRING_PARAMS:
+                    with self.subTest(definition=def_name, param=param_name):
+                        self.assertEqual(spec.get("pattern"), expected_pattern)
+                        documented.add(param_name)
+        self.assertEqual(documented, server.CONTROL_CHAR_STRING_PARAMS)
+
     def test_installed_server_capabilities_match_reference_server(self):
         request = json.dumps({"id": "caps", "method": "akbp.capabilities"}) + "\n"
         reference = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
