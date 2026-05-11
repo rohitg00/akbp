@@ -102,6 +102,28 @@ class ToolServerTest(unittest.TestCase):
         assert_matches_required_schema(self, lines[6]["error"]["details"], schema_def("invalid_json_details"))
         self.assertIn("tool-request.schema.json", lines[6]["error"]["details"]["schema"])
 
+
+    def test_non_object_json_requests_return_schema_backed_errors(self):
+        requests = '\n'.join([
+            '[]',
+            '"string"',
+            '42',
+            'true',
+        ]) + '\n'
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 4)
+        for line in lines:
+            with self.subTest(line=line):
+                assert_response_envelope(self, line)
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["id"], None)
+                self.assertEqual(line["error"]["code"], "invalid_request")
+                self.assertEqual(line["error"]["message"], "request must be a JSON object")
+                self.assertEqual(line["error"]["details"]["errors"], ["request must be a JSON object"])
+                self.assertIn("tool-request.schema.json", line["error"]["details"]["schema"])
+                assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_request_details"))
+
     def test_request_schema_documents_runtime_envelope_guards(self):
         schema = json.loads((ROOT / "schemas" / "tool-request.schema.json").read_text(encoding="utf-8"))
         id_schema = schema["properties"]["id"]

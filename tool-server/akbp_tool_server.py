@@ -178,6 +178,15 @@ def error_response(request_id: Any, code: str, message: str, *, details: Any = N
     return {"id": request_id, "ok": False, "result": None, "error": error}
 
 
+def invalid_request_response(request_id: Any, errors: list[str], message: str = "request does not match AKBP tool request envelope") -> dict[str, Any]:
+    return error_response(
+        request_id,
+        "invalid_request",
+        message,
+        details={"errors": errors, "schema": REQUEST_SCHEMA},
+    )
+
+
 def cli_error_response(request_id: Any, method: str, code: int, stdout: str, stderr: str) -> dict[str, Any]:
     safe_stdout = akbp.redact_text(stdout)
     safe_stderr = akbp.redact_text(stderr.strip())
@@ -556,7 +565,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     request_id = req.get("id") if is_valid_request_id(req.get("id")) else None
     shape_errors = request_shape_errors(req)
     if shape_errors:
-        return error_response(request_id, "invalid_request", "request does not match AKBP tool request envelope", details={"errors": shape_errors, "schema": REQUEST_SCHEMA})
+        return invalid_request_response(request_id, shape_errors)
 
     method = req.get("method")
     path = str(req.get("path", "."))
@@ -720,7 +729,14 @@ def main() -> int:
         try:
             req = json.loads(line, parse_constant=reject_json_constant)
             if not isinstance(req, dict):
-                print(json.dumps(error_response(None, "invalid_request", "request must be a JSON object"), ensure_ascii=False, allow_nan=False), flush=True)
+                print(
+                    json.dumps(
+                        invalid_request_response(None, ["request must be a JSON object"], "request must be a JSON object"),
+                        ensure_ascii=False,
+                        allow_nan=False,
+                    ),
+                    flush=True,
+                )
                 continue
             request_id = req.get("id") if is_valid_request_id(req.get("id")) else None
             res = handle(req)
