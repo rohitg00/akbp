@@ -1,0 +1,3 @@
+{"kind":"source","id":"source_rich_context_handoff_note","type":"file","locator":"examples/rich-context-artifact/source-note.md","title":"Release handoff note"}
+{"kind":"claim","id":"claim_rich_artifacts_review_surface","text":"Rich review artifacts should be generated views over AKBP knowledge, not the durable source of truth.","type":"decision","status":"working","confidence":0.82,"evidence":["source_rich_context_handoff_note"],"scope":"project"}
+{"kind":"claim","id":"claim_jsonl_proposals_are_write_path","text":"Selected updates from a review artifact should be exported as JSONL and validated before approval-gated apply.","type":"workflow","status":"working","confidence":0.86,"evidence":["source_rich_context_handoff_note"],"scope":"project"}

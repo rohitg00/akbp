@@ -280,6 +280,7 @@ The repo includes:
 - `benchmarks/fixtures/` for durable retrieval, citation, write-safety, import/apply, and capability scenarios
 - `examples/quickstart-demo/` for the one-command happy path
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
+- `examples/rich-context-artifact/` for a static review surface backed by JSONL proposals
 - `docs/TROUBLESHOOTING.md` for common local failures
 - `docs/OBSIDIAN.md` for using an AKBP knowledge base inside an Obsidian vault
 
@@ -354,6 +355,7 @@ akbp/
 - New user: run `make demo`, then read `docs/USABILITY_DEMO_PLAN.md`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
+- Handoff reviewer: inspect `examples/rich-context-artifact/`, then read `docs/RICH_CONTEXT_ARTIFACTS.md`.
 - Protocol reviewer: read `docs/ARCHITECTURE.md`, `docs/TOOL_CONTRACT.md`, and `schemas/`.
 - Release reviewer: run `make validate`, then read `docs/RELEASE.md` and `docs/PUBLIC_LAUNCH_CHECKLIST.md`.
 - Troubleshooting: read `docs/TROUBLESHOOTING.md`.
