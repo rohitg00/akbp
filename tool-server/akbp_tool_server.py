@@ -26,6 +26,7 @@ RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 MAX_REQUEST_BYTES = 1048576
 MAX_REQUEST_ID_LENGTH = 512
+MAX_REQUEST_ID_ABS_VALUE = 9007199254740991
 MAX_ERROR_OUTPUT_BYTES = 8192
 ALLOWED_REQUEST_FIELDS = {"id", "method", "path", "dry_run", "approved", "params"}
 PARAM_LIST_LIMITS = {
@@ -239,6 +240,7 @@ def capabilities() -> dict[str, Any]:
             "strict_json_output": True,
             "finite_request_id_validation": True,
             "request_id_string_validation": True,
+            "request_id_numeric_bounds": True,
             "cli_error_output_truncation": True,
         },
         "schemas": {
@@ -251,6 +253,7 @@ def capabilities() -> dict[str, Any]:
             "default_path": ".",
             "max_request_bytes": MAX_REQUEST_BYTES,
             "max_request_id_length": MAX_REQUEST_ID_LENGTH,
+            "max_request_id_abs_value": MAX_REQUEST_ID_ABS_VALUE,
             "max_error_output_bytes": MAX_ERROR_OUTPUT_BYTES,
             "hash_algorithms": ["sha256"],
             "supports_dry_run": True,
@@ -264,7 +267,7 @@ def capabilities() -> dict[str, Any]:
             "param_enum_policy": "claim type, source type, conformance level, and related enum params are checked against the public schemas before CLI dispatch",
             "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
             "finite_numeric_param_policy": "numeric params are rejected when parser overflow would produce non-finite floats before CLI dispatch",
-            "request_id_policy": "request ids must be finite strings or numbers; string ids are capped at 512 characters and reject NUL, newline, and carriage return before dispatch",
+            "request_id_policy": "request ids must be finite strings or numbers; string ids are capped at 512 characters and reject NUL, newline, and carriage return; numeric ids are capped at the JavaScript safe integer range before dispatch",
             "cli_error_output_policy": "CLI error stdout and stderr are redacted first, then capped before being returned in structured error responses",
             "method_schema_parity_policy": "implemented methods, accepted params, and required params are checked against tool-methods.schema.json at server startup when schemas are present; installed single-module packages use the embedded runtime declarations as a fallback",
         },
@@ -380,6 +383,8 @@ def request_id_errors(value: Any) -> list[str]:
         return ["id must be a finite string or number"]
     if isinstance(value, float) and not math.isfinite(value):
         return ["id must be a finite string or number"]
+    if isinstance(value, (int, float)) and abs(value) > MAX_REQUEST_ID_ABS_VALUE:
+        return [f"id numeric value must be between -{MAX_REQUEST_ID_ABS_VALUE} and {MAX_REQUEST_ID_ABS_VALUE}"]
     if isinstance(value, str):
         errors = []
         if len(value) > MAX_REQUEST_ID_LENGTH:

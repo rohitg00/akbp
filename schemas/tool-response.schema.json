@@ -298,6 +298,7 @@
             "strict_json_output",
             "finite_request_id_validation",
             "request_id_string_validation",
+            "request_id_numeric_bounds",
             "cli_error_output_truncation"
           ],
           "properties": {
@@ -384,6 +385,9 @@
             },
             "cli_error_output_truncation": {
               "const": true
+            },
+            "request_id_numeric_bounds": {
+              "const": true
             }
           }
         },
@@ -418,6 +422,7 @@
             "default_path",
             "max_request_bytes",
             "max_request_id_length",
+            "max_request_id_abs_value",
             "max_error_output_bytes",
             "hash_algorithms",
             "supports_dry_run",
@@ -516,6 +521,10 @@
             "cli_error_output_policy": {
               "type": "string",
               "minLength": 1
+            },
+            "max_request_id_abs_value": {
+              "type": "integer",
+              "minimum": 1
             }
           }
         },

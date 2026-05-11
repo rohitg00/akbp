@@ -128,6 +128,8 @@ class ToolServerTest(unittest.TestCase):
         schema = json.loads((ROOT / "schemas" / "tool-request.schema.json").read_text(encoding="utf-8"))
         id_schema = schema["properties"]["id"]
         self.assertEqual(id_schema["maxLength"], 512)
+        self.assertEqual(id_schema["minimum"], -9007199254740991)
+        self.assertEqual(id_schema["maximum"], 9007199254740991)
         self.assertEqual(id_schema["pattern"], "^[^\\u0000\\n\\r]*$")
         path_schema = schema["properties"]["path"]
         self.assertEqual(path_schema["minLength"], 1)
@@ -155,12 +157,13 @@ class ToolServerTest(unittest.TestCase):
             '{"id":1e999,"method":"akbp.status"}',
             json.dumps({"id": "line\nbreak", "method": "akbp.status"}),
             json.dumps({"id": "x" * 513, "method": "akbp.status"}),
+            json.dumps({"id": 9007199254740992, "method": "akbp.status"}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         self.assertNotIn("Infinity", proc.stdout)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual(len(lines), 3)
-        expected = ["finite string or number", "control characters", "512 characters"]
+        self.assertEqual(len(lines), 4)
+        expected = ["finite string or number", "control characters", "512 characters", "9007199254740991"]
         for line, message in zip(lines, expected):
             with self.subTest(line=line):
                 assert_response_envelope(self, line)
@@ -288,7 +291,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("finite_numeric_param_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("method_schema_runtime_parity", capabilities["properties"]["features"]["required"])
         self.assertIn("cli_error_output_truncation", capabilities["properties"]["features"]["required"])
+        self.assertIn("request_id_numeric_bounds", capabilities["properties"]["features"]["required"])
         self.assertIn("max_request_id_length", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("max_request_id_abs_value", capabilities["properties"]["runtime"]["required"])
         self.assertIn("max_error_output_bytes", capabilities["properties"]["runtime"]["required"])
         self.assertIn("request_id_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("cli_error_output_policy", capabilities["properties"]["runtime"]["required"])
@@ -458,7 +463,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["param_min_length_validation"])
         self.assertTrue(installed_result["features"]["strict_json_parse"])
         self.assertTrue(installed_result["features"]["method_schema_runtime_parity"])
+        self.assertTrue(installed_result["features"]["request_id_numeric_bounds"])
         self.assertTrue(installed_result["features"]["cli_error_output_truncation"])
+        self.assertEqual(installed_result["runtime"]["max_request_id_abs_value"], reference_result["runtime"]["max_request_id_abs_value"])
         self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
         self.assertEqual(installed_result["runtime"]["method_schema_parity_policy"], reference_result["runtime"]["method_schema_parity_policy"])
 
@@ -505,6 +512,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["param_numeric_range_validation"])
             self.assertTrue(lines[0]["result"]["features"]["strict_json_parse"])
             self.assertTrue(lines[0]["result"]["features"]["method_schema_runtime_parity"])
+            self.assertTrue(lines[0]["result"]["features"]["request_id_numeric_bounds"])
+            self.assertEqual(lines[0]["result"]["runtime"]["max_request_id_abs_value"], 9007199254740991)
+            self.assertIn("safe integer range", lines[0]["result"]["runtime"]["request_id_policy"])
             self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
             self.assertIn("enum params", lines[0]["result"]["runtime"]["param_enum_policy"])
             self.assertIn("schema bounds", lines[0]["result"]["runtime"]["param_numeric_range_policy"])
