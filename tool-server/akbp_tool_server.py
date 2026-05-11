@@ -149,6 +149,7 @@ def capabilities() -> dict[str, Any]:
             "param_control_char_validation": True,
             "param_array_validation": True,
             "dry_run_argv_redaction": True,
+            "strict_json_parse": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -252,6 +253,10 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
 def redact_argv(argv: list[str]) -> tuple[list[str], bool]:
     redacted = [akbp.redact_text(arg) for arg in argv]
     return redacted, redacted != argv
+
+
+def reject_json_constant(value: str) -> None:
+    raise json.JSONDecodeError(f"invalid JSON constant: {value}", value, 0)
 
 
 def parse_payload(stdout: str) -> Any:
@@ -578,7 +583,7 @@ def main() -> int:
             continue
         request_id = None
         try:
-            req = json.loads(line)
+            req = json.loads(line, parse_constant=reject_json_constant)
             if not isinstance(req, dict):
                 print(json.dumps(error_response(None, "invalid_request", "request must be a JSON object"), ensure_ascii=False), flush=True)
                 continue

@@ -287,7 +287,8 @@
             "param_length_validation",
             "param_control_char_validation",
             "param_array_validation",
-            "dry_run_argv_redaction"
+            "dry_run_argv_redaction",
+            "strict_json_parse"
           ],
           "properties": {
             "structured_errors": {
@@ -339,6 +340,9 @@
               "const": true
             },
             "unknown_request_field_rejection": {
+              "const": true
+            },
+            "strict_json_parse": {
               "const": true
             }
           }

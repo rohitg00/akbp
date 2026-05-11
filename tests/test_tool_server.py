@@ -119,6 +119,23 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("max_request_bytes", line["error"]["message"])
         self.assertIn("tool-request.schema.json", line["error"]["details"]["schema"])
 
+    def test_server_rejects_non_standard_json_constants(self):
+        requests = "\n".join([
+            '{"id":"nan","method":"akbp.status","params":{"limit":NaN}}',
+            '{"id":"inf","method":"akbp.status","params":{"limit":Infinity}}',
+            '{"id":"neg-inf","method":"akbp.status","params":{"limit":-Infinity}}',
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 3)
+        for line in lines:
+            with self.subTest(line=line):
+                assert_response_envelope(self, line)
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["error"]["code"], "invalid_json")
+                self.assertIn("invalid JSON constant", " ".join(line["error"]["details"]["errors"]))
+                self.assertIn("tool-request.schema.json", line["error"]["details"]["schema"])
+
     def test_response_schema_has_only_documented_flexible_pockets(self):
         schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
         allowed = {
@@ -182,6 +199,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(capabilities["properties"]["features"]["additionalProperties"])
         self.assertIn("unknown_request_field_rejection", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("strict_json_parse", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
@@ -306,6 +324,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["max_request_bytes_enforced"])
         self.assertTrue(installed_result["features"]["path_validation"])
         self.assertTrue(installed_result["features"]["dry_run_argv_redaction"])
+        self.assertTrue(installed_result["features"]["strict_json_parse"])
         self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
 
     def test_status_context_and_capabilities_methods(self):
@@ -332,6 +351,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
             self.assertTrue(lines[0]["result"]["features"]["param_array_validation"])
+            self.assertTrue(lines[0]["result"]["features"]["strict_json_parse"])
             self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])
             self.assertEqual(lines[0]["result"]["runtime"]["transport"], "jsonl-stdio")
