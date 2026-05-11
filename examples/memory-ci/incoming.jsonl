@@ -1,0 +1,2 @@
+{"kind":"source","id":"source_memory_ci_review_note","type":"file","locator":"examples/memory-ci/review-note.md","title":"Memory CI review note"}
+{"kind":"claim","id":"claim_memory_ci_requires_dry_run","text":"Memory CI should preview imported knowledge with dry-run before durable apply.","type":"workflow","status":"working","confidence":0.88,"evidence":["source_memory_ci_review_note"],"scope":"project"}

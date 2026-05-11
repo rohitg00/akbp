@@ -279,6 +279,9 @@ The repo includes:
 - `tests/` for CLI, tool server, schemas, docs, adapters, and repo quality
 - `benchmarks/fixtures/` for durable retrieval, citation, write-safety, import/apply, and capability scenarios
 - `examples/quickstart-demo/` for the one-command happy path
+- `examples/akbp-bench/` for a small scorecard covering cited writes, retrieval, supersession, export, and conformance
+- `examples/repo-memory-demo/` for turning issue, PR, and release-note fixtures into later-session context
+- `examples/memory-ci/` for CI gates around lint, source verification, conformance, export-check, import-check, and dry-run apply
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
 - `examples/multi-agent-consistency-demo/` for cross-agent retrieval and supersession
 - `examples/rich-context-artifact/` for a static review surface backed by JSONL proposals
@@ -354,6 +357,9 @@ akbp/
 ## Start here
 
 - New user: run `make demo`, then read `docs/USABILITY_DEMO_PLAN.md`.
+- Benchmark reviewer: run `examples/akbp-bench/run.sh`.
+- Repo-memory reviewer: run `examples/repo-memory-demo/run.sh`.
+- CI reviewer: run `examples/memory-ci/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
 - Multi-agent workflow reviewer: run `examples/multi-agent-consistency-demo/run.sh`.
