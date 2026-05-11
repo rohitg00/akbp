@@ -258,6 +258,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("param_enum_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("param_numeric_range_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("param_min_length_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("cli_error_redaction", capabilities["properties"]["features"]["required"])
         self.assertIn("strict_json_parse", capabilities["properties"]["features"]["required"])
         self.assertIn("strict_json_output", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_request_id_validation", capabilities["properties"]["features"]["required"])
@@ -322,6 +323,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("method", cli_error["required"])
         self.assertIn("exit_code", cli_error["required"])
         self.assertIn("stdout", cli_error["required"])
+        self.assertIn("redacted", cli_error["required"])
         self.assertIn("errors", internal_error["required"])
         for details_schema in [
             approval,
@@ -650,6 +652,24 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, line["error"]["details"], schema_def("cli_error_details"))
             self.assertEqual(line["error"]["details"]["method"], "akbp.cite")
             self.assertEqual(line["error"]["details"]["exit_code"], 1)
+            self.assertFalse(line["error"]["details"]["redacted"])
+
+
+    def test_cli_error_redacts_stdout_and_message(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            secret = "sk-example123456789"
+            request = json.dumps({"id": "bad-cite", "path": str(kb), "method": "akbp.cite", "params": {"claim_id": secret}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            assert_response_envelope(self, line)
+            self.assertFalse(line["ok"])
+            self.assertEqual(line["error"]["code"], "cli_error")
+            self.assertNotIn(secret, proc.stdout)
+            self.assertNotIn(secret, line["error"]["message"])
+            self.assertNotIn(secret, line["error"]["details"]["stdout"])
+            self.assertTrue(line["error"]["details"]["redacted"])
 
     def test_audit_cite_and_export_response_shapes(self):
         with tempfile.TemporaryDirectory() as d:

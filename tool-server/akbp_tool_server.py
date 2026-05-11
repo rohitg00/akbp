@@ -178,6 +178,22 @@ def error_response(request_id: Any, code: str, message: str, *, details: Any = N
     return {"id": request_id, "ok": False, "result": None, "error": error}
 
 
+def cli_error_response(request_id: Any, method: str, code: int, stdout: str, stderr: str) -> dict[str, Any]:
+    safe_stdout = akbp.redact_text(stdout)
+    safe_stderr = akbp.redact_text(stderr.strip())
+    return error_response(
+        request_id,
+        "cli_error",
+        safe_stderr or "AKBP command failed",
+        details={
+            "method": method,
+            "exit_code": code,
+            "stdout": safe_stdout,
+            "redacted": safe_stdout != stdout or safe_stderr != stderr.strip(),
+        },
+    )
+
+
 def capabilities() -> dict[str, Any]:
     return {
         "protocol": "akbp-jsonl-tool-server",
@@ -205,6 +221,7 @@ def capabilities() -> dict[str, Any]:
             "param_numeric_range_validation": True,
             "finite_numeric_param_validation": True,
             "dry_run_argv_redaction": True,
+            "cli_error_redaction": True,
             "strict_json_parse": True,
             "strict_json_output": True,
             "finite_request_id_validation": True,
@@ -592,7 +609,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if dry_run and method == "akbp.ingest":
         code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
         if code != 0:
-            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+            return cli_error_response(request_id, method, code, stdout, stderr)
         result = parse_payload(stdout)
         if isinstance(result, dict):
             result.setdefault("review_required", True)
@@ -602,7 +619,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if method == "akbp.session.start":
         code, stdout, stderr = run_cli(path, argv)
         if code != 0:
-            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+            return cli_error_response(request_id, method, code, stdout, stderr)
         task = params.get("task") or params.get("query") or "current task goals and constraints"
         return {
             "id": request_id,
@@ -619,7 +636,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         preview_argv = [arg for arg in argv if arg != "--apply"]
         code, stdout, stderr = run_cli(path, preview_argv)
         if code != 0:
-            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+            return cli_error_response(request_id, method, code, stdout, stderr)
         result = parse_payload(stdout)
         if isinstance(result, dict):
             result.setdefault("dry_run", True)
@@ -631,7 +648,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if dry_run and method == "akbp.import_apply":
         code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
         if code != 0 and not stdout.strip():
-            return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+            return cli_error_response(request_id, method, code, stdout, stderr)
         result = parse_payload(stdout)
         if isinstance(result, dict):
             result.setdefault("review_required", True)
@@ -675,7 +692,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
     if method in {"akbp.export_check", "akbp.import_check", "akbp.import_apply", "akbp.source.verify"} and stdout.strip():
         return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
     if code != 0:
-        return error_response(request_id, "cli_error", stderr.strip() or "AKBP command failed", details={"method": method, "exit_code": code, "stdout": stdout})
+        return cli_error_response(request_id, method, code, stdout, stderr)
     return {"id": request_id, "ok": True, "result": parse_payload(stdout), "error": None}
 
 

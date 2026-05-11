@@ -306,7 +306,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/approval_required_details`: a closed `approval_required` error details object with `dry_run:false`, `review_required:true`, and `apply_instruction`.
 - `#/$defs/invalid_request_details`: closed request-envelope validation details with `errors` and `schema`.
 - `#/$defs/invalid_json_details`: closed invalid JSON line details with parse `errors` and the request-envelope `schema`, without echoing the raw input line.
-- `#/$defs/cli_error_details`: closed CLI execution failure details with `method`, `exit_code`, and captured `stdout`.
+- `#/$defs/cli_error_details`: closed CLI execution failure details with `method`, `exit_code`, redacted captured `stdout`, and a `redacted` flag.
 - `#/$defs/internal_error_details`: closed defensive server-boundary failure details with sanitized `errors`.
 - `#/$defs/invalid_params_details`: closed parameter validation details with `params_schema` plus missing, unknown, allowed, or type-error metadata when relevant.
 - `#/$defs/unknown_method_details`: closed unknown-method details with the advertised `available_methods` list.

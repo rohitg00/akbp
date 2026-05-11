@@ -117,7 +117,7 @@ Common codes an adapter should handle:
 - `approval_required`: show the preview and ask for approval before retrying with `approved:true`.
 - `unknown_method`: refresh capabilities and disable that flow.
 - `invalid_params`: show the schema-backed parameter issue.
-- `cli_error`: show the command failure without leaking sensitive input.
+- `cli_error`: show the command failure from the redacted message/stdout, and use `redacted` to explain that sensitive-looking values were hidden.
 
 See `examples/tool-error-handling/README.md`.
 

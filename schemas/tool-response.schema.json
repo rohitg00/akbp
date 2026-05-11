@@ -293,6 +293,7 @@
             "param_numeric_range_validation",
             "finite_numeric_param_validation",
             "dry_run_argv_redaction",
+            "cli_error_redaction",
             "strict_json_parse",
             "strict_json_output",
             "finite_request_id_validation",
@@ -336,6 +337,9 @@
               "const": true
             },
             "dry_run_argv_redaction": {
+              "const": true
+            },
+            "cli_error_redaction": {
               "const": true
             },
             "param_length_validation": {
@@ -2193,7 +2197,8 @@
       "required": [
         "method",
         "exit_code",
-        "stdout"
+        "stdout",
+        "redacted"
       ],
       "properties": {
         "method": {
@@ -2205,6 +2210,9 @@
         },
         "stdout": {
           "type": "string"
+        },
+        "redacted": {
+          "type": "boolean"
         }
       }
     },

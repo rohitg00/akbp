@@ -20,7 +20,7 @@ This example shows how an agent runtime should handle AKBP JSONL tool-server fai
 | `unknown_method` | The method is not advertised by `akbp.capabilities`. | Re-read capabilities before retrying. |
 | `invalid_params` | Method params failed schema-backed validation. | Fix params before retrying. |
 | `approval_required` | A non-dry-run write was requested without approval. | Show the planned write and require explicit approval. |
-| `cli_error` | The reference CLI rejected the operation. | Surface details and stop the current operation. |
+| `cli_error` | The reference CLI rejected the operation. | Surface the redacted details, mention if `redacted:true`, and stop the current operation. |
 | `internal_error` | The server failed unexpectedly. | Stop, preserve the request id, and report the failure. |
 
 ## Safe retry pattern
