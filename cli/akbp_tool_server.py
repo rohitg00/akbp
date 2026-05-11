@@ -23,6 +23,7 @@ REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
 RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 MAX_REQUEST_BYTES = 1048576
+ALLOWED_REQUEST_FIELDS = {"id", "method", "path", "dry_run", "approved", "params"}
 PARAM_LIST_LIMITS = {
     "evidence": {"max_items": 64, "max_item_length": 512},
     "entity": {"max_items": 128, "max_item_length": 256},
@@ -137,6 +138,7 @@ def capabilities() -> dict[str, Any]:
             "write_apply_requires_approval": True,
             "jsonl_transport": True,
             "method_param_schemas": True,
+            "unknown_request_field_rejection": True,
             "unknown_param_rejection": True,
             "required_param_validation": True,
             "approval_required_errors": True,
@@ -262,6 +264,9 @@ def parse_payload(stdout: str) -> Any:
 
 def request_shape_errors(req: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    unknown_fields = sorted(name for name in req if name not in ALLOWED_REQUEST_FIELDS)
+    if unknown_fields:
+        errors.append("unknown request field(s): " + ", ".join(unknown_fields))
     if "id" not in req:
         errors.append("missing required field: id")
     elif not isinstance(req.get("id"), (str, int, float)) or isinstance(req.get("id"), bool):

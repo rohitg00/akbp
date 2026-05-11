@@ -38,7 +38,7 @@ Before public launch:
 
 - read `SECURITY.md` and `docs/SECURITY_MODEL.md`
 - confirm write-capable JSONL methods remain dry-run and approval gated
-- confirm request-size limits and path validation are advertised in capabilities
+- confirm request-size limits, closed request-envelope validation, and path validation are advertised in capabilities
 - confirm ingest redacts source content, optional claim text, and source titles
 - confirm import/export checks reject secret-like bundle values
 - inspect examples, fixtures, screenshots, and docs for live secrets or private data

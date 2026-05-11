@@ -69,25 +69,29 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "status", "method": "akbp.status"}),
             json.dumps({"id": "bad", "method": "akbp.missing"}),
             json.dumps({"method": "akbp.status"}),
+            json.dumps({"id": "extra", "method": "akbp.status", "unexpected": True}),
             json.dumps({"id": "bad-params", "method": "akbp.search", "params": {"query": 123}}),
             "not-json",
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual(len(lines), 6)
+        self.assertEqual(len(lines), 7)
         for line in lines:
             with self.subTest(response=line):
                 assert_response_envelope(self, line)
         self.assertEqual(lines[0]["error"], None)
         self.assertEqual(lines[2]["error"]["code"], "unknown_method")
         self.assertEqual(lines[3]["error"]["code"], "invalid_request")
-        self.assertEqual(lines[4]["error"]["code"], "invalid_params")
-        self.assertEqual(lines[5]["error"]["code"], "invalid_json")
+        self.assertEqual(lines[4]["error"]["code"], "invalid_request")
+        self.assertIn("unknown request field", " ".join(lines[4]["error"]["details"]["errors"]))
+        self.assertEqual(lines[5]["error"]["code"], "invalid_params")
+        self.assertEqual(lines[6]["error"]["code"], "invalid_json")
         assert_matches_required_schema(self, lines[2]["error"]["details"], schema_def("unknown_method_details"))
         assert_matches_required_schema(self, lines[3]["error"]["details"], schema_def("invalid_request_details"))
-        assert_matches_required_schema(self, lines[4]["error"]["details"], schema_def("invalid_params_details"))
-        assert_matches_required_schema(self, lines[5]["error"]["details"], schema_def("invalid_json_details"))
-        self.assertIn("tool-request.schema.json", lines[5]["error"]["details"]["schema"])
+        assert_matches_required_schema(self, lines[4]["error"]["details"], schema_def("invalid_request_details"))
+        assert_matches_required_schema(self, lines[5]["error"]["details"], schema_def("invalid_params_details"))
+        assert_matches_required_schema(self, lines[6]["error"]["details"], schema_def("invalid_json_details"))
+        self.assertIn("tool-request.schema.json", lines[6]["error"]["details"]["schema"])
 
     def test_server_rejects_unsafe_request_paths_before_dispatch(self):
         requests = "\n".join([
@@ -176,6 +180,7 @@ class ToolServerTest(unittest.TestCase):
         capabilities = defs["capabilities_result"]
         self.assertFalse(capabilities["additionalProperties"])
         self.assertFalse(capabilities["properties"]["features"]["additionalProperties"])
+        self.assertIn("unknown_request_field_rejection", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])

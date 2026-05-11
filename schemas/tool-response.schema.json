@@ -278,6 +278,7 @@
             "write_apply_requires_approval",
             "jsonl_transport",
             "method_param_schemas",
+            "unknown_request_field_rejection",
             "unknown_param_rejection",
             "required_param_validation",
             "approval_required_errors",
@@ -335,6 +336,9 @@
               "const": true
             },
             "param_array_validation": {
+              "const": true
+            },
+            "unknown_request_field_rejection": {
               "const": true
             }
           }
