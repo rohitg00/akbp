@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import subprocess
 import sys
@@ -18,6 +19,14 @@ def run_cli(*args):
 def schema_def(name):
     schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
     return schema["$defs"][name]
+
+
+def load_server_module():
+    spec = importlib.util.spec_from_file_location("akbp_tool_server_reference", SERVER)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
 def assert_matches_required_schema(testcase, payload, schema):
@@ -357,6 +366,15 @@ class ToolServerTest(unittest.TestCase):
                 params = set(meta["params"])
                 schema_params = set(defs[def_name].get("properties", {}))
                 self.assertEqual(params, schema_params, method)
+
+    def test_method_schemas_match_runtime_required_params(self):
+        method_schema = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        defs = method_schema["$defs"]
+        server = load_server_module()
+        for method, required in server.REQUIRED_PARAMS.items():
+            with self.subTest(method=method):
+                schema_required = tuple(defs[f"{method}.params"].get("required", []))
+                self.assertEqual(schema_required, tuple(required))
 
     def test_installed_server_capabilities_match_reference_server(self):
         request = json.dumps({"id": "caps", "method": "akbp.capabilities"}) + "\n"
