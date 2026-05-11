@@ -164,21 +164,19 @@ Avoid:
 - “AKBP solves all agent memory.”
 - “AKBP is a vector database.”
 
-## Immediate next artifact
+## Shipped artifact: multi-agent consistency demo
 
-Build `examples/multi-agent-consistency-demo/` with:
+`examples/multi-agent-consistency-demo/` now shows:
 
-- `run.sh`
-- `agent-a-notes.md`
-- `agent-b-notes.md`
-- JSONL request examples
-- expected output snippets
-- README explaining the story in 2 minutes
+- Agent A recording a durable decision with evidence.
+- Agent B retrieving cited context before acting.
+- Agent B superseding the old decision with a more precise validation-backed decision.
+- Level 3 conformance confirming lifecycle relations.
 
 Success criteria:
 
 - A user sees why AKBP is more than generic persistent memory.
-- A tool builder sees exactly what to integrate.
+- A tool builder sees the retrieval and supersession path.
 - A skeptical engineer sees files, citations, safety gates, and conformance instead of vague “AI memory” claims.
 
 ## Added research track: spec-driven agent development kits
