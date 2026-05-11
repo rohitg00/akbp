@@ -24,6 +24,7 @@ REQUEST_SCHEMA = f"{SCHEMA_BASE}/tool-request.schema.json"
 RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 MAX_REQUEST_BYTES = 1048576
+MAX_REQUEST_ID_LENGTH = 512
 ALLOWED_REQUEST_FIELDS = {"id", "method", "path", "dry_run", "approved", "params"}
 PARAM_LIST_LIMITS = {
     "evidence": {"max_items": 64, "max_item_length": 512},
@@ -206,6 +207,7 @@ def capabilities() -> dict[str, Any]:
             "strict_json_parse": True,
             "strict_json_output": True,
             "finite_request_id_validation": True,
+            "request_id_string_validation": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -216,6 +218,7 @@ def capabilities() -> dict[str, Any]:
             "transport": "jsonl-stdio",
             "default_path": ".",
             "max_request_bytes": MAX_REQUEST_BYTES,
+            "max_request_id_length": MAX_REQUEST_ID_LENGTH,
             "hash_algorithms": ["sha256"],
             "supports_dry_run": True,
             "write_policy": "review-gated",
@@ -228,6 +231,7 @@ def capabilities() -> dict[str, Any]:
             "param_enum_policy": "claim type, source type, conformance level, and related enum params are checked against the public schemas before CLI dispatch",
             "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
             "finite_numeric_param_policy": "numeric params are rejected when parser overflow would produce non-finite floats before CLI dispatch",
+            "request_id_policy": "request ids must be finite strings or numbers; string ids are capped at 512 characters and reject NUL, newline, and carriage return before dispatch",
             "method_schema_parity_policy": "implemented methods, accepted params, and required params are checked against tool-methods.schema.json at server startup when schemas are present; installed single-module packages use the embedded runtime declarations as a fallback",
         },
         "methods": {
@@ -329,12 +333,23 @@ def parse_payload(stdout: str) -> Any:
         return stdout
 
 
-def is_valid_request_id(value: Any) -> bool:
+def request_id_errors(value: Any) -> list[str]:
     if not isinstance(value, (str, int, float)) or isinstance(value, bool):
-        return False
+        return ["id must be a finite string or number"]
     if isinstance(value, float) and not math.isfinite(value):
-        return False
-    return True
+        return ["id must be a finite string or number"]
+    if isinstance(value, str):
+        errors = []
+        if len(value) > MAX_REQUEST_ID_LENGTH:
+            errors.append(f"id must be at most {MAX_REQUEST_ID_LENGTH} characters")
+        if has_control_char(value):
+            errors.append("id must not contain control characters")
+        return errors
+    return []
+
+
+def is_valid_request_id(value: Any) -> bool:
+    return not request_id_errors(value)
 
 
 def request_shape_errors(req: dict[str, Any]) -> list[str]:
@@ -344,8 +359,8 @@ def request_shape_errors(req: dict[str, Any]) -> list[str]:
         errors.append("unknown request field(s): " + ", ".join(unknown_fields))
     if "id" not in req:
         errors.append("missing required field: id")
-    elif not is_valid_request_id(req.get("id")):
-        errors.append("id must be a finite string or number")
+    else:
+        errors.extend(request_id_errors(req.get("id")))
     if "method" not in req:
         errors.append("missing required field: method")
     elif not isinstance(req.get("method"), str) or not req.get("method", "").startswith("akbp."):

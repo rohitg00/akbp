@@ -102,8 +102,11 @@ class ToolServerTest(unittest.TestCase):
         assert_matches_required_schema(self, lines[6]["error"]["details"], schema_def("invalid_json_details"))
         self.assertIn("tool-request.schema.json", lines[6]["error"]["details"]["schema"])
 
-    def test_request_schema_documents_runtime_path_guards(self):
+    def test_request_schema_documents_runtime_envelope_guards(self):
         schema = json.loads((ROOT / "schemas" / "tool-request.schema.json").read_text(encoding="utf-8"))
+        id_schema = schema["properties"]["id"]
+        self.assertEqual(id_schema["maxLength"], 512)
+        self.assertEqual(id_schema["pattern"], "^[^\\u0000\\n\\r]*$")
         path_schema = schema["properties"]["path"]
         self.assertEqual(path_schema["minLength"], 1)
         self.assertEqual(path_schema["maxLength"], 4096)
@@ -125,21 +128,24 @@ class ToolServerTest(unittest.TestCase):
                 self.assertEqual(line["error"]["code"], "invalid_request")
                 self.assertIn("path", " ".join(line["error"]["details"]["errors"]))
 
-    def test_server_rejects_non_finite_numeric_request_ids_before_output(self):
-        proc = subprocess.run(
-            [sys.executable, str(SERVER)],
-            input='{"id":1e999,"method":"akbp.status"}\n',
-            text=True,
-            capture_output=True,
-            check=True,
-        )
+    def test_server_rejects_unsafe_request_ids_before_output(self):
+        requests = "\n".join([
+            '{"id":1e999,"method":"akbp.status"}',
+            json.dumps({"id": "line\nbreak", "method": "akbp.status"}),
+            json.dumps({"id": "x" * 513, "method": "akbp.status"}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         self.assertNotIn("Infinity", proc.stdout)
-        line = json.loads(proc.stdout)
-        assert_response_envelope(self, line)
-        self.assertIsNone(line["id"])
-        self.assertFalse(line["ok"])
-        self.assertEqual(line["error"]["code"], "invalid_request")
-        self.assertIn("finite string or number", " ".join(line["error"]["details"]["errors"]))
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 3)
+        expected = ["finite string or number", "control characters", "512 characters"]
+        for line, message in zip(lines, expected):
+            with self.subTest(line=line):
+                assert_response_envelope(self, line)
+                self.assertIsNone(line["id"])
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["error"]["code"], "invalid_request")
+                self.assertIn(message, " ".join(line["error"]["details"]["errors"]))
 
     def test_server_rejects_non_object_params_before_dispatch(self):
         requests = "\n".join([
@@ -255,8 +261,11 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("strict_json_parse", capabilities["properties"]["features"]["required"])
         self.assertIn("strict_json_output", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_request_id_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("request_id_string_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_numeric_param_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("method_schema_runtime_parity", capabilities["properties"]["features"]["required"])
+        self.assertIn("max_request_id_length", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("request_id_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_enum_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_numeric_range_policy", capabilities["properties"]["runtime"]["required"])

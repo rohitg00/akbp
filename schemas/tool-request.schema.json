@@ -4,11 +4,19 @@
   "title": "AKBP Tool Request",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "method"],
+  "required": [
+    "id",
+    "method"
+  ],
   "properties": {
     "id": {
-      "description": "Client-provided request identifier copied into the response.",
-      "type": ["string", "number"]
+      "description": "Client-provided request identifier copied into the response. String ids over 512 characters or containing NUL, newline, or carriage return are rejected by the reference JSONL server before dispatch.",
+      "type": [
+        "string",
+        "number"
+      ],
+      "maxLength": 512,
+      "pattern": "^[^\\u0000\\n\\r]*$"
     },
     "method": {
       "description": "AKBP tool method name.",

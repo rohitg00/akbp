@@ -6,7 +6,7 @@ AKBP is a local-first durable knowledge protocol. The reference implementation i
 
 | Boundary | What crosses it | Required control |
 | --- | --- | --- |
-| Agent runtime to JSONL tool server | Method requests, paths, params, write intent | Closed request envelopes, method schemas, request-size limits, path validation, file/path string length caps, bounded evidence/entity arrays, structured errors |
+| Agent runtime to JSONL tool server | Method requests, request ids, paths, params, write intent | Closed request envelopes, method schemas, request-size limits, bounded request-id strings, path validation, file/path string length caps, bounded evidence/entity arrays, structured errors |
 | Tool server to local knowledge base | Source records, pages, claims, graph records, audit logs | Review-gated writes, dry-run previews, redaction before durable writes |
 | Local knowledge base to portable bundle | Export manifest and protocol artifacts | Export checks, manifest validation, secret-like value rejection |
 | Imported bundle to local knowledge base | JSONL source and claim records | Import checks, evidence validation, dry-run apply previews |

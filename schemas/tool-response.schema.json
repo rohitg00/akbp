@@ -295,7 +295,8 @@
             "dry_run_argv_redaction",
             "strict_json_parse",
             "strict_json_output",
-            "finite_request_id_validation"
+            "finite_request_id_validation",
+            "request_id_string_validation"
           ],
           "properties": {
             "structured_errors": {
@@ -372,6 +373,9 @@
             },
             "method_schema_runtime_parity": {
               "const": true
+            },
+            "request_id_string_validation": {
+              "const": true
             }
           }
         },
@@ -405,6 +409,7 @@
             "transport",
             "default_path",
             "max_request_bytes",
+            "max_request_id_length",
             "hash_algorithms",
             "supports_dry_run",
             "write_policy",
@@ -417,6 +422,7 @@
             "param_enum_policy",
             "param_numeric_range_policy",
             "finite_numeric_param_policy",
+            "request_id_policy",
             "method_schema_parity_policy"
           ],
           "properties": {
@@ -482,6 +488,14 @@
               "minLength": 1
             },
             "method_schema_parity_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "max_request_id_length": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "request_id_policy": {
               "type": "string",
               "minLength": 1
             }
