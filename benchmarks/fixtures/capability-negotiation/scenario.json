@@ -6,9 +6,12 @@
       {
         "id": "caps",
         "method": "akbp.capabilities",
-        "params": {},
+        "params": {
+          "client": "benchmark-adapter",
+          "requires": ["method_param_schemas", "features.capability_negotiation", "future_feature"]
+        },
         "expected_result_schema": "#/$defs/capabilities_result",
-        "expected_result_fields": ["protocol", "features", "schemas", "methods"],
+        "expected_result_fields": ["protocol", "features", "negotiation", "schemas", "methods"],
         "expected_result_values": {
           "protocol": "akbp-jsonl-tool-server"
         },
@@ -16,6 +19,11 @@
           "features.method_param_schemas": [true],
           "features.structured_errors": [true],
           "features.write_review_required": [true],
+          "features.capability_negotiation": [true],
+          "negotiation.client": ["benchmark-adapter"],
+          "negotiation.supported_features[]": ["method_param_schemas", "features.capability_negotiation"],
+          "negotiation.unsupported_features[]": ["future_feature"],
+          "negotiation.satisfied": [false],
           "schemas.methods": ["https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json"],
           "methods.akbp\\.search.write": [false],
           "methods.akbp\\.remember.write": [true],

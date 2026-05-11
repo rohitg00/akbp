@@ -292,6 +292,13 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("method_schema_runtime_parity", capabilities["properties"]["features"]["required"])
         self.assertIn("cli_error_output_truncation", capabilities["properties"]["features"]["required"])
         self.assertIn("request_id_numeric_bounds", capabilities["properties"]["features"]["required"])
+        self.assertIn("capability_negotiation", capabilities["properties"]["features"]["required"])
+        self.assertIn("negotiation", capabilities["required"])
+        negotiation = capabilities["properties"]["negotiation"]
+        self.assertFalse(negotiation["additionalProperties"])
+        self.assertIn("requested_features", negotiation["required"])
+        self.assertIn("unsupported_features", negotiation["required"])
+        self.assertIn("satisfied", negotiation["required"])
         self.assertIn("max_request_id_length", capabilities["properties"]["runtime"]["required"])
         self.assertIn("max_request_id_abs_value", capabilities["properties"]["runtime"]["required"])
         self.assertIn("max_error_output_bytes", capabilities["properties"]["runtime"]["required"])
@@ -513,6 +520,11 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["strict_json_parse"])
             self.assertTrue(lines[0]["result"]["features"]["method_schema_runtime_parity"])
             self.assertTrue(lines[0]["result"]["features"]["request_id_numeric_bounds"])
+            self.assertTrue(lines[0]["result"]["features"]["capability_negotiation"])
+            self.assertEqual(lines[0]["result"]["negotiation"]["requested_features"], [])
+            self.assertEqual(lines[0]["result"]["negotiation"]["supported_features"], [])
+            self.assertEqual(lines[0]["result"]["negotiation"]["unsupported_features"], [])
+            self.assertTrue(lines[0]["result"]["negotiation"]["satisfied"])
             self.assertEqual(lines[0]["result"]["runtime"]["max_request_id_abs_value"], 9007199254740991)
             self.assertIn("safe integer range", lines[0]["result"]["runtime"]["request_id_policy"])
             self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
@@ -549,6 +561,41 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"], schema_def("context_result"))
             self.assertTrue(lines[2]["result"]["items"])
             assert_matches_required_schema(self, lines[2]["result"]["items"][0], schema_def("context_item"))
+
+    def test_capabilities_negotiates_required_features(self):
+        request = json.dumps({
+            "id": "caps-negotiate",
+            "method": "akbp.capabilities",
+            "params": {
+                "client": "adapter-test",
+                "requires": ["method_param_schemas", "features.capability_negotiation", "future_feature"],
+            },
+        }) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+        line = json.loads(proc.stdout)
+        assert_response_envelope(self, line)
+        assert_matches_required_schema(self, line["result"], schema_def("capabilities_result"))
+        negotiation = line["result"]["negotiation"]
+        self.assertEqual(negotiation["client"], "adapter-test")
+        self.assertEqual(negotiation["requested_features"], ["method_param_schemas", "features.capability_negotiation", "future_feature"])
+        self.assertEqual(negotiation["supported_features"], ["method_param_schemas", "features.capability_negotiation"])
+        self.assertEqual(negotiation["unsupported_features"], ["future_feature"])
+        self.assertFalse(negotiation["satisfied"])
+
+    def test_capabilities_negotiation_params_are_bounded(self):
+        requests = "\n".join([
+            json.dumps({"id": "bad-client", "method": "akbp.capabilities", "params": {"client": "x" * 129}}),
+            json.dumps({"id": "bad-requires", "method": "akbp.capabilities", "params": {"requires": [""]}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 2)
+        for line in lines:
+            with self.subTest(line=line):
+                assert_response_envelope(self, line)
+                self.assertFalse(line["ok"])
+                self.assertEqual(line["error"]["code"], "invalid_params")
+                self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.capabilities.params"))
 
     def test_generic_dry_run_redacts_secret_like_argv(self):
         with tempfile.TemporaryDirectory() as d:
@@ -1170,7 +1217,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.search.params"))
         self.assertEqual(lines[2]["error"]["code"], "invalid_params")
         self.assertEqual(lines[2]["error"]["details"]["unknown"], ["surprise"])
-        self.assertEqual(lines[2]["error"]["details"]["allowed"], [])
+        self.assertEqual(lines[2]["error"]["details"]["allowed"], ["client", "requires"])
         self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.capabilities.params"))
         self.assertEqual(lines[3]["error"]["code"], "invalid_params")
         self.assertEqual(lines[3]["error"]["details"]["missing"], ["transcript"])

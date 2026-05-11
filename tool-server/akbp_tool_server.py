@@ -73,7 +73,7 @@ WRITE_METHODS = {
 }
 
 METHODS: dict[str, dict[str, Any]] = {
-    "akbp.capabilities": {"write": False, "params": []},
+    "akbp.capabilities": {"write": False, "params": ["client", "requires"]},
     "akbp.status": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
     "akbp.context": {"write": False, "params": ["task", "limit"]},
@@ -208,11 +208,8 @@ def cli_error_response(request_id: Any, method: str, code: int, stdout: str, std
     )
 
 
-def capabilities() -> dict[str, Any]:
+def capability_features() -> dict[str, bool]:
     return {
-        "protocol": "akbp-jsonl-tool-server",
-        "version": "0.1-draft",
-        "features": {
             "structured_errors": True,
             "capability_discovery": True,
             "dry_run": True,
@@ -242,7 +239,37 @@ def capabilities() -> dict[str, Any]:
             "request_id_string_validation": True,
             "request_id_numeric_bounds": True,
             "cli_error_output_truncation": True,
-        },
+            "capability_negotiation": True,
+        }
+
+
+def normalize_feature_name(name: str) -> str:
+    return name.removeprefix("features.")
+
+
+def negotiation_result(params: dict[str, Any], features: dict[str, bool]) -> dict[str, Any]:
+    requested = list(params.get("requires", []) or [])
+    supported = [name for name in requested if features.get(normalize_feature_name(name)) is True]
+    unsupported = [name for name in requested if features.get(normalize_feature_name(name)) is not True]
+    result: dict[str, Any] = {
+        "requested_features": requested,
+        "supported_features": supported,
+        "unsupported_features": unsupported,
+        "satisfied": not unsupported,
+    }
+    if params.get("client"):
+        result["client"] = params["client"]
+    return result
+
+
+def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
+    params = params or {}
+    features = capability_features()
+    return {
+        "protocol": "akbp-jsonl-tool-server",
+        "version": "0.1-draft",
+        "features": features,
+        "negotiation": negotiation_result(params, features),
         "schemas": {
             "request": REQUEST_SCHEMA,
             "response": RESPONSE_SCHEMA,
@@ -536,6 +563,32 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "level" in params and method == "akbp.conformance" and params.get("level") not in CONFORMANCE_LEVELS:
         errors.append("level must be one of: " + ", ".join(sorted(CONFORMANCE_LEVELS)))
+    if "client" in params:
+        client = params.get("client")
+        if not isinstance(client, str):
+            errors.append("client must be a string")
+        else:
+            if len(client) > 128:
+                errors.append("client must be at most 128 characters")
+            if has_control_char(client):
+                errors.append("client must not contain control characters")
+    if "requires" in params:
+        requires = params.get("requires")
+        if not isinstance(requires, list):
+            errors.append("requires must be an array")
+        else:
+            if len(requires) > 64:
+                errors.append("requires must contain at most 64 items")
+            for index, item in enumerate(requires):
+                if not isinstance(item, str):
+                    errors.append("requires items must be strings")
+                    break
+                if not item.strip():
+                    errors.append(f"requires[{index}] must not be empty")
+                if len(item) > 128:
+                    errors.append(f"requires[{index}] must be at most 128 characters")
+                if has_control_char(item):
+                    errors.append(f"requires[{index}] must not contain control characters")
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "limit" in params:
@@ -632,7 +685,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         )
 
     if method == "akbp.capabilities":
-        return {"id": request_id, "ok": True, "result": capabilities(), "error": None}
+        return {"id": request_id, "ok": True, "result": capabilities(params), "error": None}
 
     argv = build_argv(method, params)
     if dry_run and method == "akbp.ingest":

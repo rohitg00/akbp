@@ -403,7 +403,24 @@
     "akbp.capabilities.params": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {}
+      "properties": {
+        "client": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[^\\u0000\\n\\r]*$"
+        },
+        "requires": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[^\\u0000\\n\\r]*$"
+          },
+          "default": []
+        }
+      }
     },
     "akbp.status.params": {
       "type": "object",

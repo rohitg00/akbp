@@ -254,6 +254,7 @@
         "protocol",
         "version",
         "features",
+        "negotiation",
         "schemas",
         "runtime",
         "methods",
@@ -299,7 +300,8 @@
             "finite_request_id_validation",
             "request_id_string_validation",
             "request_id_numeric_bounds",
-            "cli_error_output_truncation"
+            "cli_error_output_truncation",
+            "capability_negotiation"
           ],
           "properties": {
             "structured_errors": {
@@ -387,6 +389,9 @@
               "const": true
             },
             "request_id_numeric_bounds": {
+              "const": true
+            },
+            "capability_negotiation": {
               "const": true
             }
           }
@@ -587,6 +592,47 @@
                 "type": "object",
                 "additionalProperties": true
               }
+            }
+          }
+        },
+        "negotiation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requested_features",
+            "supported_features",
+            "unsupported_features",
+            "satisfied"
+          ],
+          "properties": {
+            "client": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "requested_features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "supported_features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "unsupported_features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "satisfied": {
+              "type": "boolean"
             }
           }
         }

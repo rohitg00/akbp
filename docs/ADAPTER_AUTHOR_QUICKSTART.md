@@ -32,8 +32,10 @@ An adapter should call `akbp.capabilities` at startup and cache the response for
 JSONL request:
 
 ```json
-{"id":"caps-1","method":"akbp.capabilities"}
+{"id":"caps-1","method":"akbp.capabilities","params":{"client":"example-adapter","requires":["method_param_schemas","capability_negotiation","write_apply_requires_approval"]}}
 ```
+
+The response includes `result.negotiation.satisfied`. If it is `false`, disable or degrade the flows named in `unsupported_features` instead of guessing.
 
 Adapter checks:
 
