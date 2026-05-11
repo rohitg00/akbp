@@ -116,6 +116,22 @@ class ToolServerTest(unittest.TestCase):
                 self.assertEqual(line["error"]["code"], "invalid_request")
                 self.assertIn("path", " ".join(line["error"]["details"]["errors"]))
 
+    def test_server_rejects_non_finite_numeric_request_ids_before_output(self):
+        proc = subprocess.run(
+            [sys.executable, str(SERVER)],
+            input='{"id":1e999,"method":"akbp.status"}\n',
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertNotIn("Infinity", proc.stdout)
+        line = json.loads(proc.stdout)
+        assert_response_envelope(self, line)
+        self.assertIsNone(line["id"])
+        self.assertFalse(line["ok"])
+        self.assertEqual(line["error"]["code"], "invalid_request")
+        self.assertIn("finite string or number", " ".join(line["error"]["details"]["errors"]))
+
     def test_server_rejects_non_object_params_before_dispatch(self):
         requests = "\n".join([
             json.dumps({"id": "null", "method": "akbp.status", "params": None}),
@@ -228,6 +244,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("param_numeric_range_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("param_min_length_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("strict_json_parse", capabilities["properties"]["features"]["required"])
+        self.assertIn("strict_json_output", capabilities["properties"]["features"]["required"])
+        self.assertIn("finite_request_id_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_enum_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_numeric_range_policy", capabilities["properties"]["runtime"]["required"])

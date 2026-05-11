@@ -291,7 +291,9 @@
             "param_enum_validation",
             "param_numeric_range_validation",
             "dry_run_argv_redaction",
-            "strict_json_parse"
+            "strict_json_parse",
+            "strict_json_output",
+            "finite_request_id_validation"
           ],
           "properties": {
             "structured_errors": {
@@ -355,6 +357,12 @@
               "const": true
             },
             "param_min_length_validation": {
+              "const": true
+            },
+            "strict_json_output": {
+              "const": true
+            },
+            "finite_request_id_validation": {
               "const": true
             }
           }

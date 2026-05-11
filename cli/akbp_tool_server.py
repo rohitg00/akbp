@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -152,6 +153,8 @@ def capabilities() -> dict[str, Any]:
             "param_numeric_range_validation": True,
             "dry_run_argv_redaction": True,
             "strict_json_parse": True,
+            "strict_json_output": True,
+            "finite_request_id_validation": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -273,6 +276,14 @@ def parse_payload(stdout: str) -> Any:
         return stdout
 
 
+def is_valid_request_id(value: Any) -> bool:
+    if not isinstance(value, (str, int, float)) or isinstance(value, bool):
+        return False
+    if isinstance(value, float) and not math.isfinite(value):
+        return False
+    return True
+
+
 def request_shape_errors(req: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     unknown_fields = sorted(name for name in req if name not in ALLOWED_REQUEST_FIELDS)
@@ -280,8 +291,8 @@ def request_shape_errors(req: dict[str, Any]) -> list[str]:
         errors.append("unknown request field(s): " + ", ".join(unknown_fields))
     if "id" not in req:
         errors.append("missing required field: id")
-    elif not isinstance(req.get("id"), (str, int, float)) or isinstance(req.get("id"), bool):
-        errors.append("id must be a string or number")
+    elif not is_valid_request_id(req.get("id")):
+        errors.append("id must be a finite string or number")
     if "method" not in req:
         errors.append("missing required field: method")
     elif not isinstance(req.get("method"), str) or not req.get("method", "").startswith("akbp."):
@@ -450,7 +461,7 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
 
 
 def handle(req: dict[str, Any]) -> dict[str, Any]:
-    request_id = req.get("id")
+    request_id = req.get("id") if is_valid_request_id(req.get("id")) else None
     shape_errors = request_shape_errors(req)
     if shape_errors:
         return error_response(request_id, "invalid_request", "request does not match AKBP tool request envelope", details={"errors": shape_errors, "schema": REQUEST_SCHEMA})
@@ -598,6 +609,7 @@ def main() -> int:
                         details={"errors": [f"request line exceeds max_request_bytes ({MAX_REQUEST_BYTES})"], "schema": REQUEST_SCHEMA},
                     ),
                     ensure_ascii=False,
+                    allow_nan=False,
                 ),
                 flush=True,
             )
@@ -609,9 +621,9 @@ def main() -> int:
         try:
             req = json.loads(line, parse_constant=reject_json_constant)
             if not isinstance(req, dict):
-                print(json.dumps(error_response(None, "invalid_request", "request must be a JSON object"), ensure_ascii=False), flush=True)
+                print(json.dumps(error_response(None, "invalid_request", "request must be a JSON object"), ensure_ascii=False, allow_nan=False), flush=True)
                 continue
-            request_id = req.get("id")
+            request_id = req.get("id") if is_valid_request_id(req.get("id")) else None
             res = handle(req)
         except json.JSONDecodeError as exc:
             res = error_response(
@@ -622,7 +634,7 @@ def main() -> int:
             )
         except Exception as exc:  # pragma: no cover - defensive server boundary
             res = error_response(request_id, "internal_error", "internal server error", details={"errors": [str(exc)]})
-        print(json.dumps(res, ensure_ascii=False), flush=True)
+        print(json.dumps(res, ensure_ascii=False, allow_nan=False), flush=True)
     return 0
 
 
