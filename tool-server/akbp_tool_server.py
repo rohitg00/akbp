@@ -26,6 +26,7 @@ RESPONSE_SCHEMA = f"{SCHEMA_BASE}/tool-response.schema.json"
 METHODS_SCHEMA = f"{SCHEMA_BASE}/tool-methods.schema.json"
 MAX_REQUEST_BYTES = 1048576
 MAX_REQUEST_ID_LENGTH = 512
+MAX_ERROR_OUTPUT_BYTES = 8192
 ALLOWED_REQUEST_FIELDS = {"id", "method", "path", "dry_run", "approved", "params"}
 PARAM_LIST_LIMITS = {
     "evidence": {"max_items": 64, "max_item_length": 512},
@@ -188,8 +189,10 @@ def invalid_request_response(request_id: Any, errors: list[str], message: str = 
 
 
 def cli_error_response(request_id: Any, method: str, code: int, stdout: str, stderr: str) -> dict[str, Any]:
-    safe_stdout = akbp.redact_text(stdout)
-    safe_stderr = akbp.redact_text(stderr.strip())
+    redacted_stdout = akbp.redact_text(stdout)
+    redacted_stderr = akbp.redact_text(stderr.strip())
+    safe_stdout, stdout_truncated = truncate_text(redacted_stdout, MAX_ERROR_OUTPUT_BYTES)
+    safe_stderr, stderr_truncated = truncate_text(redacted_stderr, MAX_ERROR_OUTPUT_BYTES)
     return error_response(
         request_id,
         "cli_error",
@@ -198,7 +201,8 @@ def cli_error_response(request_id: Any, method: str, code: int, stdout: str, std
             "method": method,
             "exit_code": code,
             "stdout": safe_stdout,
-            "redacted": safe_stdout != stdout or safe_stderr != stderr.strip(),
+            "redacted": redacted_stdout != stdout or redacted_stderr != stderr.strip(),
+            "truncated": stdout_truncated or stderr_truncated,
         },
     )
 
@@ -235,6 +239,7 @@ def capabilities() -> dict[str, Any]:
             "strict_json_output": True,
             "finite_request_id_validation": True,
             "request_id_string_validation": True,
+            "cli_error_output_truncation": True,
         },
         "schemas": {
             "request": REQUEST_SCHEMA,
@@ -246,6 +251,7 @@ def capabilities() -> dict[str, Any]:
             "default_path": ".",
             "max_request_bytes": MAX_REQUEST_BYTES,
             "max_request_id_length": MAX_REQUEST_ID_LENGTH,
+            "max_error_output_bytes": MAX_ERROR_OUTPUT_BYTES,
             "hash_algorithms": ["sha256"],
             "supports_dry_run": True,
             "write_policy": "review-gated",
@@ -259,6 +265,7 @@ def capabilities() -> dict[str, Any]:
             "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
             "finite_numeric_param_policy": "numeric params are rejected when parser overflow would produce non-finite floats before CLI dispatch",
             "request_id_policy": "request ids must be finite strings or numbers; string ids are capped at 512 characters and reject NUL, newline, and carriage return before dispatch",
+            "cli_error_output_policy": "CLI error stdout and stderr are redacted first, then capped before being returned in structured error responses",
             "method_schema_parity_policy": "implemented methods, accepted params, and required params are checked against tool-methods.schema.json at server startup when schemas are present; installed single-module packages use the embedded runtime declarations as a fallback",
         },
         "methods": {
@@ -345,6 +352,14 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
 def redact_argv(argv: list[str]) -> tuple[list[str], bool]:
     redacted = [akbp.redact_text(arg) for arg in argv]
     return redacted, redacted != argv
+
+
+def truncate_text(value: str, max_bytes: int) -> tuple[str, bool]:
+    encoded = value.encode("utf-8")
+    if len(encoded) <= max_bytes:
+        return value, False
+    truncated = encoded[:max_bytes].decode("utf-8", errors="ignore").rstrip()
+    return f"{truncated}\n[truncated]", True
 
 
 def reject_json_constant(value: str) -> None:

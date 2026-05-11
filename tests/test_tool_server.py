@@ -287,8 +287,11 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("request_id_string_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_numeric_param_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("method_schema_runtime_parity", capabilities["properties"]["features"]["required"])
+        self.assertIn("cli_error_output_truncation", capabilities["properties"]["features"]["required"])
         self.assertIn("max_request_id_length", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("max_error_output_bytes", capabilities["properties"]["runtime"]["required"])
         self.assertIn("request_id_policy", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("cli_error_output_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_enum_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_numeric_range_policy", capabilities["properties"]["runtime"]["required"])
@@ -346,6 +349,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("exit_code", cli_error["required"])
         self.assertIn("stdout", cli_error["required"])
         self.assertIn("redacted", cli_error["required"])
+        self.assertIn("truncated", cli_error["required"])
         self.assertIn("errors", internal_error["required"])
         for details_schema in [
             approval,
@@ -454,8 +458,23 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["param_min_length_validation"])
         self.assertTrue(installed_result["features"]["strict_json_parse"])
         self.assertTrue(installed_result["features"]["method_schema_runtime_parity"])
+        self.assertTrue(installed_result["features"]["cli_error_output_truncation"])
         self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
         self.assertEqual(installed_result["runtime"]["method_schema_parity_policy"], reference_result["runtime"]["method_schema_parity_policy"])
+
+    def test_cli_error_response_truncates_large_output_after_redaction(self):
+        server = load_server_module()
+        oversized = "x" * (server.MAX_ERROR_OUTPUT_BYTES + 100)
+        response = server.cli_error_response("err", "akbp.status", 2, oversized, oversized)
+        assert_response_envelope(self, response)
+        self.assertFalse(response["ok"])
+        details = response["error"]["details"]
+        self.assertEqual(details["method"], "akbp.status")
+        self.assertTrue(details["truncated"])
+        self.assertFalse(details["redacted"])
+        self.assertLess(len(details["stdout"]), len(oversized))
+        self.assertTrue(details["stdout"].endswith("[truncated]"))
+        self.assertTrue(response["error"]["message"].endswith("[truncated]"))
 
     def test_status_context_and_capabilities_methods(self):
         with tempfile.TemporaryDirectory() as d:

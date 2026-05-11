@@ -297,7 +297,8 @@
             "strict_json_parse",
             "strict_json_output",
             "finite_request_id_validation",
-            "request_id_string_validation"
+            "request_id_string_validation",
+            "cli_error_output_truncation"
           ],
           "properties": {
             "structured_errors": {
@@ -380,6 +381,9 @@
             },
             "request_id_string_validation": {
               "const": true
+            },
+            "cli_error_output_truncation": {
+              "const": true
             }
           }
         },
@@ -414,6 +418,7 @@
             "default_path",
             "max_request_bytes",
             "max_request_id_length",
+            "max_error_output_bytes",
             "hash_algorithms",
             "supports_dry_run",
             "write_policy",
@@ -427,6 +432,7 @@
             "param_numeric_range_policy",
             "finite_numeric_param_policy",
             "request_id_policy",
+            "cli_error_output_policy",
             "method_schema_parity_policy"
           ],
           "properties": {
@@ -499,7 +505,15 @@
               "type": "integer",
               "minimum": 1
             },
+            "max_error_output_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
             "request_id_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cli_error_output_policy": {
               "type": "string",
               "minLength": 1
             }
@@ -2198,7 +2212,8 @@
         "method",
         "exit_code",
         "stdout",
-        "redacted"
+        "redacted",
+        "truncated"
       ],
       "properties": {
         "method": {
@@ -2212,6 +2227,9 @@
           "type": "string"
         },
         "redacted": {
+          "type": "boolean"
+        },
+        "truncated": {
           "type": "boolean"
         }
       }
