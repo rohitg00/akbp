@@ -16,8 +16,11 @@
       "pattern": "^akbp\\.[a-z0-9_.-]+$"
     },
     "path": {
-      "description": "Knowledge base root path. Defaults to the current working directory when omitted.",
+      "description": "Knowledge base root path. Defaults to the current working directory when omitted. Empty paths, paths over 4096 characters, and paths containing NUL, newline, or carriage return are rejected by the reference JSONL server before dispatch.",
       "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^[^\\u0000\\n\\r]*$",
       "default": "."
     },
     "dry_run": {

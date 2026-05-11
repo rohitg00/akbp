@@ -93,6 +93,13 @@ class ToolServerTest(unittest.TestCase):
         assert_matches_required_schema(self, lines[6]["error"]["details"], schema_def("invalid_json_details"))
         self.assertIn("tool-request.schema.json", lines[6]["error"]["details"]["schema"])
 
+    def test_request_schema_documents_runtime_path_guards(self):
+        schema = json.loads((ROOT / "schemas" / "tool-request.schema.json").read_text(encoding="utf-8"))
+        path_schema = schema["properties"]["path"]
+        self.assertEqual(path_schema["minLength"], 1)
+        self.assertEqual(path_schema["maxLength"], 4096)
+        self.assertEqual(path_schema["pattern"], "^[^\\u0000\\n\\r]*$")
+
     def test_server_rejects_unsafe_request_paths_before_dispatch(self):
         requests = "\n".join([
             json.dumps({"id": "empty", "path": "", "method": "akbp.status"}),
