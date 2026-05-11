@@ -112,6 +112,55 @@ REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
 }
 
 
+def fallback_method_schema_defs() -> dict[str, Any]:
+    return {
+        f"{method}.params": {
+            "properties": {name: {} for name in meta.get("params", [])},
+            "required": list(REQUIRED_PARAMS.get(method, ())),
+        }
+        for method, meta in METHODS.items()
+    }
+
+
+def load_method_schema_defs() -> dict[str, Any]:
+    schema_path = ROOT / "schemas" / "tool-methods.schema.json"
+    if not schema_path.exists():
+        return fallback_method_schema_defs()
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    return schema.get("$defs", {})
+
+
+def method_schema_runtime_errors() -> list[str]:
+    errors: list[str] = []
+    defs = load_method_schema_defs()
+    methods = set(METHODS)
+    schema_methods = {name.removesuffix(".params") for name in defs if name.startswith("akbp.") and name.endswith(".params")}
+    for method in sorted(methods - schema_methods):
+        errors.append(f"{method} is missing from tool-methods.schema.json")
+    for method in sorted(schema_methods - methods):
+        errors.append(f"{method} is documented in tool-methods.schema.json but not implemented")
+    for method in sorted(methods & schema_methods):
+        definition = defs[f"{method}.params"]
+        runtime_params = set(METHODS[method].get("params", []))
+        schema_params = set(definition.get("properties", {}))
+        if runtime_params != schema_params:
+            errors.append(
+                f"{method} params differ from schema: "
+                f"runtime={sorted(runtime_params)} schema={sorted(schema_params)}"
+            )
+        runtime_required = tuple(REQUIRED_PARAMS.get(method, ()))
+        schema_required = tuple(definition.get("required", []))
+        if runtime_required != schema_required:
+            errors.append(
+                f"{method} required params differ from schema: "
+                f"runtime={list(runtime_required)} schema={list(schema_required)}"
+            )
+    return errors
+
+
+SCHEMA_RUNTIME_ERRORS = method_schema_runtime_errors()
+
+
 def run_cli(path: str, argv: list[str]) -> tuple[int, str, str]:
     out = io.StringIO()
     err = io.StringIO()
@@ -139,6 +188,7 @@ def capabilities() -> dict[str, Any]:
             "write_apply_requires_approval": True,
             "jsonl_transport": True,
             "method_param_schemas": True,
+            "method_schema_runtime_parity": not SCHEMA_RUNTIME_ERRORS,
             "unknown_request_field_rejection": True,
             "unknown_param_rejection": True,
             "required_param_validation": True,
@@ -178,6 +228,7 @@ def capabilities() -> dict[str, Any]:
             "param_enum_policy": "claim type, source type, conformance level, and related enum params are checked against the public schemas before CLI dispatch",
             "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
             "finite_numeric_param_policy": "numeric params are rejected when parser overflow would produce non-finite floats before CLI dispatch",
+            "method_schema_parity_policy": "implemented methods, accepted params, and required params are checked against tool-methods.schema.json at server startup when schemas are present; installed single-module packages use the embedded runtime declarations as a fallback",
         },
         "methods": {
             name: {
@@ -482,6 +533,13 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
 
     if method not in METHODS:
         return error_response(request_id, "unknown_method", f"unknown method: {method}", details={"available_methods": sorted(METHODS)})
+    if SCHEMA_RUNTIME_ERRORS:
+        return error_response(
+            request_id,
+            "internal_error",
+            "tool method schema/runtime parity check failed",
+            details={"errors": SCHEMA_RUNTIME_ERRORS},
+        )
     if not isinstance(params, dict):
         return error_response(request_id, "invalid_params", "params must be an object", details={"params_schema": method_schema_ref(method), "type_errors": ["params must be an object"]})
     dry_run = bool(req.get("dry_run") or params.get("dry_run"))

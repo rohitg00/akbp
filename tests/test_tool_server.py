@@ -256,11 +256,13 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("strict_json_output", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_request_id_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_numeric_param_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("method_schema_runtime_parity", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_enum_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_numeric_range_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_min_length_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("finite_numeric_param_policy", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("method_schema_parity_policy", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
@@ -376,6 +378,11 @@ class ToolServerTest(unittest.TestCase):
                 schema_required = tuple(defs[f"{method}.params"].get("required", []))
                 self.assertEqual(schema_required, tuple(required))
 
+    def test_server_runtime_schema_parity_check_is_clean(self):
+        server = load_server_module()
+        self.assertEqual(server.SCHEMA_RUNTIME_ERRORS, [])
+        self.assertEqual(server.method_schema_runtime_errors(), [])
+
     def test_method_schemas_match_runtime_control_char_params(self):
         method_schema = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
         defs = method_schema["$defs"]
@@ -413,7 +420,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["param_numeric_range_validation"])
         self.assertTrue(installed_result["features"]["param_min_length_validation"])
         self.assertTrue(installed_result["features"]["strict_json_parse"])
+        self.assertTrue(installed_result["features"]["method_schema_runtime_parity"])
         self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
+        self.assertEqual(installed_result["runtime"]["method_schema_parity_policy"], reference_result["runtime"]["method_schema_parity_policy"])
 
     def test_status_context_and_capabilities_methods(self):
         with tempfile.TemporaryDirectory() as d:
@@ -443,6 +452,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["param_enum_validation"])
             self.assertTrue(lines[0]["result"]["features"]["param_numeric_range_validation"])
             self.assertTrue(lines[0]["result"]["features"]["strict_json_parse"])
+            self.assertTrue(lines[0]["result"]["features"]["method_schema_runtime_parity"])
             self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
             self.assertIn("enum params", lines[0]["result"]["runtime"]["param_enum_policy"])
             self.assertIn("schema bounds", lines[0]["result"]["runtime"]["param_numeric_range_policy"])
