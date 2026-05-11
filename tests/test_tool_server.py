@@ -246,10 +246,12 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("strict_json_parse", capabilities["properties"]["features"]["required"])
         self.assertIn("strict_json_output", capabilities["properties"]["features"]["required"])
         self.assertIn("finite_request_id_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("finite_numeric_param_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_enum_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_numeric_range_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("param_min_length_policy", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("finite_numeric_param_policy", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
@@ -410,6 +412,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
             self.assertIn("enum params", lines[0]["result"]["runtime"]["param_enum_policy"])
             self.assertIn("schema bounds", lines[0]["result"]["runtime"]["param_numeric_range_policy"])
+            self.assertIn("non-finite floats", lines[0]["result"]["runtime"]["finite_numeric_param_policy"])
             self.assertIn("non-empty string params", lines[0]["result"]["runtime"]["param_min_length_policy"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])
             self.assertEqual(lines[0]["result"]["runtime"]["transport"], "jsonl-stdio")
@@ -1053,7 +1056,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("limit must be an integer", lines[5]["error"]["details"]["type_errors"])
         self.assertIn("apply must be a boolean", lines[6]["error"]["details"]["type_errors"])
         self.assertIn("query must be a string", lines[7]["error"]["details"]["type_errors"])
-        self.assertIn("confidence must be a number", lines[8]["error"]["details"]["type_errors"])
+        self.assertIn("confidence must be a finite number", lines[8]["error"]["details"]["type_errors"])
         self.assertIn("evidence items must be strings", lines[9]["error"]["details"]["type_errors"])
         self.assertIn("entity items must be strings", lines[10]["error"]["details"]["type_errors"])
         self.assertIn("limit must be between 1 and 100", lines[11]["error"]["details"]["type_errors"])
@@ -1065,6 +1068,23 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("claim_type must be one of:", lines[15]["error"]["details"]["type_errors"][0])
         for line in lines[3:]:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+
+
+    def test_numeric_params_reject_parser_overflow_before_dispatch(self):
+        proc = subprocess.run(
+            [sys.executable, str(SERVER)],
+            input='{"id":"overflow","method":"akbp.ingest","params":{"file":"notes.md","confidence":1e999}}\n',
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        line = json.loads(proc.stdout)
+        assert_response_envelope(self, line)
+        self.assertFalse(line["ok"])
+        self.assertEqual(line["error"]["code"], "invalid_params")
+        self.assertIn("confidence must be a finite number", line["error"]["details"]["type_errors"])
+        self.assertTrue(line["error"]["details"]["params_schema"].endswith("#/$defs/akbp.ingest.params"))
+        assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 
     def test_array_param_errors_report_method_schemas(self):
         requests = "\n".join([

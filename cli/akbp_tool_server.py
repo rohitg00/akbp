@@ -151,6 +151,7 @@ def capabilities() -> dict[str, Any]:
             "param_array_validation": True,
             "param_enum_validation": True,
             "param_numeric_range_validation": True,
+            "finite_numeric_param_validation": True,
             "dry_run_argv_redaction": True,
             "strict_json_parse": True,
             "strict_json_output": True,
@@ -176,6 +177,7 @@ def capabilities() -> dict[str, Any]:
             "param_array_policy": "evidence and entity arrays are capped for item count and per-item string length before CLI dispatch",
             "param_enum_policy": "claim type, source type, conformance level, and related enum params are checked against the public schemas before CLI dispatch",
             "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
+            "finite_numeric_param_policy": "numeric params are rejected when parser overflow would produce non-finite floats before CLI dispatch",
         },
         "methods": {
             name: {
@@ -393,6 +395,14 @@ STRING_PARAMS = {
 }
 
 
+def is_finite_number(value: Any) -> bool:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    if isinstance(value, float) and not math.isfinite(value):
+        return False
+    return True
+
+
 def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     for name in sorted(STRING_PARAMS.intersection(params)):
@@ -425,8 +435,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
             errors.append("limit must be between 1 and 100")
     if "confidence" in params:
         confidence = params.get("confidence")
-        if not isinstance(confidence, (int, float)) or isinstance(confidence, bool):
-            errors.append("confidence must be a number")
+        if not is_finite_number(confidence):
+            errors.append("confidence must be a finite number")
         elif confidence < 0 or confidence > 1:
             errors.append("confidence must be between 0 and 1")
     if "incremental" in params and not isinstance(params.get("incremental"), bool):

@@ -290,6 +290,7 @@
             "param_array_validation",
             "param_enum_validation",
             "param_numeric_range_validation",
+            "finite_numeric_param_validation",
             "dry_run_argv_redaction",
             "strict_json_parse",
             "strict_json_output",
@@ -350,6 +351,9 @@
             "param_numeric_range_validation": {
               "const": true
             },
+            "finite_numeric_param_validation": {
+              "const": true
+            },
             "unknown_request_field_rejection": {
               "const": true
             },
@@ -407,7 +411,8 @@
             "param_control_char_policy",
             "param_array_policy",
             "param_enum_policy",
-            "param_numeric_range_policy"
+            "param_numeric_range_policy",
+            "finite_numeric_param_policy"
           ],
           "properties": {
             "transport": {
@@ -464,6 +469,10 @@
               "minLength": 1
             },
             "param_numeric_range_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "finite_numeric_param_policy": {
               "type": "string",
               "minLength": 1
             }
