@@ -94,6 +94,6 @@ Run the full local validation set before publishing or tagging a release:
 make validate
 ```
 
-`make validate` runs the public-reference guard, unit and conformance tests, CLI smoke flow, retrieval benchmarks, and install smoke flow.
+`make validate` runs the public-reference guard, unit and conformance tests, CLI smoke flow, runnable public examples, retrieval benchmarks, and install smoke flow.
 
 For faster local iteration, run individual targets such as `make test`, `make guard`, or `make smoke`.

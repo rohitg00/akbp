@@ -1,4 +1,4 @@
-.PHONY: test guard smoke install-smoke demo benchmark-score benchmark validate build clean
+.PHONY: test guard smoke install-smoke demo examples benchmark-score benchmark validate build clean
 
 test:
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -28,13 +28,19 @@ install-smoke:
 demo:
 	./examples/quickstart-demo/run.sh
 
+examples:
+	./examples/akbp-bench/run.sh
+	./examples/repo-memory-demo/run.sh
+	./examples/memory-ci/run.sh
+	./examples/multi-agent-consistency-demo/run.sh
+
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score
 
 benchmark:
 	python3 benchmarks/run_benchmarks.py --akbp
 
-validate: guard test smoke benchmark-score benchmark install-smoke
+validate: guard test smoke examples benchmark-score benchmark install-smoke
 
 build:
 	python3 -m build

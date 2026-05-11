@@ -1,0 +1,121 @@
+# AKBP use cases
+
+AKBP is useful when an agent needs durable project knowledge that can be reviewed, cited, exported, and reused by future sessions or different tools.
+
+This page maps the public examples to real use cases people can understand quickly.
+
+## 1. Repo memory for coding agents
+
+**Problem:** every agent session rereads issues, PRs, release notes, and docs from scratch.
+
+**AKBP use case:** capture reviewed project facts, decisions, and workflows as cited claims.
+
+**Demo:** `examples/repo-memory-demo/`
+
+**What it proves:**
+
+- project artifacts become durable knowledge
+- later sessions retrieve context with citations
+- the agent does not rely only on chat history
+
+## 2. Multi-agent consistency
+
+**Problem:** different agents make conflicting decisions because they do not share reviewed context.
+
+**AKBP use case:** one agent records a decision, another retrieves it, then supersedes it explicitly when the decision changes.
+
+**Demo:** `examples/multi-agent-consistency-demo/`
+
+**What it proves:**
+
+- prior decisions are visible to the next runtime
+- changed decisions keep lifecycle history
+- supersession is explicit instead of silent overwrite
+
+## 3. Memory quality benchmark
+
+**Problem:** agent memory claims are usually vague and hard to evaluate.
+
+**AKBP use case:** score memory behavior against concrete checks: cited write, cited retrieval, supersession, export-check, and conformance.
+
+**Demo:** `examples/akbp-bench/`
+
+**What it proves:**
+
+- memory quality can be tested
+- benchmarks can use real protocol artifacts
+- AKBP can grow into a reusable evaluation harness
+
+## 4. Memory CI for teams
+
+**Problem:** project memory can rot, leak unsafe content, or drift away from source evidence.
+
+**AKBP use case:** CI validates lint, source verification, conformance, export bundles, incoming JSONL proposals, and dry-run apply.
+
+**Demo:** `examples/memory-ci/`
+
+**What it proves:**
+
+- memory can have quality gates like code
+- unsafe imports are checked before apply
+- teams can enforce review-gated writes
+
+## 5. Rich handoff and review artifacts
+
+**Problem:** long agent summaries are hard to review and often mix facts, guesses, and proposed updates.
+
+**AKBP use case:** generate a static review artifact from AKBP objects while keeping JSONL proposals as the only durable write path.
+
+**Demo:** `examples/rich-context-artifact/`
+
+**What it proves:**
+
+- humans get a navigable review surface
+- AKBP remains the source of truth
+- proposed updates still pass import-check and approval gates
+
+## 6. Adapter integration
+
+**Problem:** agent runtimes need a predictable way to request context, propose writes, and close sessions without inventing their own memory format.
+
+**AKBP use case:** call JSONL tool methods for capability discovery, context retrieval, dry-run writes, approved writes, and session-end crystallization.
+
+**Demo:** `examples/adapter-lifecycle/`
+
+**What it proves:**
+
+- adapters can integrate without a hosted service
+- write safety is protocol-level behavior
+- session memory becomes portable files
+
+## 7. Portable knowledge bundles
+
+**Problem:** memory is trapped in one tool or workspace.
+
+**AKBP use case:** export a bundle, verify hashes and counts, then import checked JSONL into another knowledge base.
+
+**Demo:** `examples/portable-bundle/`
+
+**What it proves:**
+
+- project knowledge can move between tools
+- bundles can be checked before trust
+- import is review-gated
+
+## Good launch framing
+
+> AKBP is not another chat memory. It is a local-first protocol for reviewed project knowledge: cited claims, source hashes, lifecycle history, dry-run writes, conformance checks, and portable bundles.
+
+## Best public demo path
+
+For a first-time reviewer, run these in order:
+
+```bash
+make demo
+examples/akbp-bench/run.sh
+examples/repo-memory-demo/run.sh
+examples/memory-ci/run.sh
+examples/multi-agent-consistency-demo/run.sh
+```
+
+That path shows the protocol, the benchmark, the repo use case, the CI gate, and cross-agent consistency.

@@ -123,7 +123,7 @@ AKBP is designed for short, repeated agent sessions where the next runtime must 
 
 The core rule: agents can propose memory, but durable writes are review-gated.
 
-See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, and `examples/tool-server-approval-flow/`.
+See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, and `examples/tool-server-approval-flow/`.
 
 ## Knowledge base layout
 
@@ -267,6 +267,7 @@ It runs:
 make guard
 make test
 make smoke
+make examples
 make benchmark-score
 make benchmark
 make install-smoke
@@ -356,7 +357,7 @@ akbp/
 
 ## Start here
 
-- New user: run `make demo`, then read `docs/USABILITY_DEMO_PLAN.md`.
+- New user: run `make demo`, then read `docs/USABILITY_DEMO_PLAN.md` and `docs/USE_CASES.md`.
 - Benchmark reviewer: run `examples/akbp-bench/run.sh`.
 - Repo-memory reviewer: run `examples/repo-memory-demo/run.sh`.
 - CI reviewer: run `examples/memory-ci/run.sh`.
