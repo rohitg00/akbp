@@ -199,8 +199,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(capabilities["properties"]["features"]["additionalProperties"])
         self.assertIn("unknown_request_field_rejection", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_validation", capabilities["properties"]["features"]["required"])
+        self.assertIn("param_min_length_validation", capabilities["properties"]["features"]["required"])
         self.assertIn("strict_json_parse", capabilities["properties"]["features"]["required"])
         self.assertIn("param_array_policy", capabilities["properties"]["runtime"]["required"])
+        self.assertIn("param_min_length_policy", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
@@ -324,6 +326,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(installed_result["features"]["max_request_bytes_enforced"])
         self.assertTrue(installed_result["features"]["path_validation"])
         self.assertTrue(installed_result["features"]["dry_run_argv_redaction"])
+        self.assertTrue(installed_result["features"]["param_min_length_validation"])
         self.assertTrue(installed_result["features"]["strict_json_parse"])
         self.assertEqual(installed_result["runtime"]["path_policy"], reference_result["runtime"]["path_policy"])
 
@@ -351,8 +354,10 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
             self.assertTrue(lines[0]["result"]["features"]["param_array_validation"])
+            self.assertTrue(lines[0]["result"]["features"]["param_min_length_validation"])
             self.assertTrue(lines[0]["result"]["features"]["strict_json_parse"])
             self.assertIn("arrays are capped", lines[0]["result"]["runtime"]["param_array_policy"])
+            self.assertIn("non-empty string params", lines[0]["result"]["runtime"]["param_min_length_policy"])
             self.assertTrue(lines[0]["result"]["features"]["approval_required_errors"])
             self.assertEqual(lines[0]["result"]["runtime"]["transport"], "jsonl-stdio")
             self.assertEqual(lines[0]["result"]["runtime"]["write_policy"], "review-gated")
@@ -920,6 +925,21 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.export_check.params"))
             self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.import_check.params"))
             self.assertTrue(lines[3]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.import_apply.params"))
+
+    def test_empty_string_params_are_structured_before_cli(self):
+        requests = "\n".join([
+            json.dumps({"id": "blank-session-query", "method": "akbp.session.start", "params": {"query": "   "}}),
+            json.dumps({"id": "blank-session-task", "method": "akbp.session.start", "params": {"task": ""}}),
+        ]) + "\n"
+        proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
+        lines = [json.loads(line) for line in proc.stdout.splitlines()]
+        self.assertEqual(len(lines), 2)
+        for line in lines:
+            self.assertFalse(line["ok"])
+            self.assertEqual(line["error"]["code"], "invalid_params")
+            assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
+        self.assertIn("query must not be empty", lines[0]["error"]["details"]["type_errors"])
+        self.assertIn("task must not be empty", lines[1]["error"]["details"]["type_errors"])
 
     def test_evidence_and_entity_arrays_are_bounded_before_cli(self):
         requests = "\n".join([

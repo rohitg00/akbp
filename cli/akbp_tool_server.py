@@ -145,6 +145,7 @@ def capabilities() -> dict[str, Any]:
             "max_request_bytes_enforced": True,
             "path_validation": True,
             "param_length_validation": True,
+            "param_min_length_validation": True,
             "param_control_char_validation": True,
             "param_array_validation": True,
             "dry_run_argv_redaction": True,
@@ -165,6 +166,7 @@ def capabilities() -> dict[str, Any]:
             "approval_field": "approved",
             "path_policy": "caller-supplied local path; empty paths, oversized paths, and control characters are rejected before dispatch",
             "param_length_policy": "string params are capped before CLI dispatch according to method schemas",
+            "param_min_length_policy": "non-empty string params reject empty or whitespace-only values before CLI dispatch",
             "param_control_char_policy": "path-like, identifier, evidence, and entity string params reject NUL, newline, and carriage return before CLI dispatch",
             "param_array_policy": "evidence and entity arrays are capped for item count and per-item string length before CLI dispatch",
         },
@@ -341,6 +343,21 @@ def has_control_char(value: str) -> bool:
     return any(char in value for char in ("\x00", "\n", "\r"))
 
 
+NON_EMPTY_STRING_PARAMS = {
+    "query",
+    "task",
+    "text",
+    "locator",
+    "file",
+    "old_claim_id",
+    "source_id",
+    "source_claim_id",
+    "target_claim_id",
+    "transcript",
+    "claim_id",
+}
+
+
 STRING_PARAMS = {
     "query",
     "task",
@@ -368,6 +385,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         if not isinstance(value, str):
             errors.append(f"{name} must be a string")
             continue
+        if name in NON_EMPTY_STRING_PARAMS and name not in REQUIRED_PARAMS.get(method, ()) and not value.strip():
+            errors.append(f"{name} must not be empty")
         max_length = PARAM_MAX_LENGTHS.get(name)
         if max_length is not None and len(value) > max_length:
             errors.append(f"{name} must be at most {max_length} characters")

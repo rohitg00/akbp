@@ -285,6 +285,7 @@
             "max_request_bytes_enforced",
             "path_validation",
             "param_length_validation",
+            "param_min_length_validation",
             "param_control_char_validation",
             "param_array_validation",
             "dry_run_argv_redaction",
@@ -344,6 +345,9 @@
             },
             "strict_json_parse": {
               "const": true
+            },
+            "param_min_length_validation": {
+              "const": true
             }
           }
         },
@@ -383,6 +387,7 @@
             "approval_field",
             "path_policy",
             "param_length_policy",
+            "param_min_length_policy",
             "param_control_char_policy",
             "param_array_policy"
           ],
@@ -429,6 +434,10 @@
               "minLength": 1
             },
             "param_array_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "param_min_length_policy": {
               "type": "string",
               "minLength": 1
             }
