@@ -148,6 +148,8 @@ def capabilities() -> dict[str, Any]:
             "param_min_length_validation": True,
             "param_control_char_validation": True,
             "param_array_validation": True,
+            "param_enum_validation": True,
+            "param_numeric_range_validation": True,
             "dry_run_argv_redaction": True,
             "strict_json_parse": True,
         },
@@ -169,6 +171,8 @@ def capabilities() -> dict[str, Any]:
             "param_min_length_policy": "non-empty string params reject empty or whitespace-only values before CLI dispatch",
             "param_control_char_policy": "path-like, identifier, evidence, and entity string params reject NUL, newline, and carriage return before CLI dispatch",
             "param_array_policy": "evidence and entity arrays are capped for item count and per-item string length before CLI dispatch",
+            "param_enum_policy": "claim type, source type, conformance level, and related enum params are checked against the public schemas before CLI dispatch",
+            "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
         },
         "methods": {
             name: {

@@ -288,6 +288,8 @@
             "param_min_length_validation",
             "param_control_char_validation",
             "param_array_validation",
+            "param_enum_validation",
+            "param_numeric_range_validation",
             "dry_run_argv_redaction",
             "strict_json_parse"
           ],
@@ -340,6 +342,12 @@
             "param_array_validation": {
               "const": true
             },
+            "param_enum_validation": {
+              "const": true
+            },
+            "param_numeric_range_validation": {
+              "const": true
+            },
             "unknown_request_field_rejection": {
               "const": true
             },
@@ -389,7 +397,9 @@
             "param_length_policy",
             "param_min_length_policy",
             "param_control_char_policy",
-            "param_array_policy"
+            "param_array_policy",
+            "param_enum_policy",
+            "param_numeric_range_policy"
           ],
           "properties": {
             "transport": {
@@ -438,6 +448,14 @@
               "minLength": 1
             },
             "param_min_length_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "param_enum_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "param_numeric_range_policy": {
               "type": "string",
               "minLength": 1
             }
