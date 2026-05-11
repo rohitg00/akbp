@@ -351,7 +351,7 @@ akbp/
 
 ## Start here
 
-- New user: run `make demo`.
+- New user: run `make demo`, then read `docs/USABILITY_DEMO_PLAN.md`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
 - Protocol reviewer: read `docs/ARCHITECTURE.md`, `docs/TOOL_CONTRACT.md`, and `schemas/`.
