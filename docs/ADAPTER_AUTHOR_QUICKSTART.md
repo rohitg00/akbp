@@ -47,6 +47,16 @@ Adapter checks:
 
 Do not hard-code future methods. If a method is missing, degrade gracefully and tell the user which capability is unavailable.
 
+Minimum startup gate:
+
+1. Call `akbp.capabilities`.
+2. Confirm `result.negotiation.satisfied` is `true` for required features.
+3. Confirm `result.features.method_schema_runtime_parity` is `true`.
+4. Confirm `result.runtime.method_schema_runtime_errors` is empty.
+5. Confirm the write method you plan to call advertises `review_required:true`.
+
+If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
+
 ## 3. Retrieve context at session start
 
 Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.
@@ -89,6 +99,26 @@ Apply only after approval or an explicit trusted local policy:
 ```json
 {"id":"session-end-apply-1","method":"akbp.session.end","path":".","approved":true,"params":{"transcript":"session.md","apply":true}}
 ```
+
+Adapter write state machine:
+
+```text
+read-only startup
+  -> dry-run preview request
+  -> render preview, warnings, would-write paths, and apply_instruction
+  -> wait for user approval or trusted local policy
+  -> repeat the same method/path/params with approved:true and without dry_run
+  -> run akbp.index with approved:true when retrieval state should refresh
+  -> fetch context/search again before relying on the new memory
+```
+
+Safety rules:
+
+- Never send both `dry_run:true` and `approved:true` in the same request.
+- Do not silently alter `params` between preview and apply.
+- Do not auto-apply `akbp.session.end` just because a session is closing.
+- Treat `approval_required` as a stop signal, not a warning.
+- Show redacted CLI output as redacted; do not retry with raw secrets.
 
 ## 5. Preserve evidence and auditability
 

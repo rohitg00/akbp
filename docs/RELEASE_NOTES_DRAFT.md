@@ -15,7 +15,7 @@ Release candidate scope:
 - Defines a local-first knowledge base layout with `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, source records, and audit history.
 - Ships a dependency-free Python reference CLI and JSONL local tool server.
 - Adds conformance checks through Level 3: file convention, structured claims, retrieval/context packs, and lifecycle relations.
-- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, invalid parameter rejections, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, and end-to-end agent flow.
+- Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, invalid parameter rejections, review-gated writes, approved write apply outputs, unapproved write rejections, adapter startup/write safety, secret-safety, and end-to-end agent flow.
 - Documents critique response and current limits so AKBP is positioned as an alpha protocol and reference implementation, not as a breakthrough memory claim.
 
 ## Protocol surface
