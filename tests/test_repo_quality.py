@@ -633,7 +633,7 @@ class RepoQualityTest(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for required in [
             "Agents should not start every session with amnesia.",
-            "docs/assets/akbp-banner.svg",
+            "docs/assets/akbp-product-explainer-banner.png",
             "LLM Wiki v2",
             "stop re-deriving, start compiling",
             "typed claims",
@@ -653,9 +653,9 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, readme)
         self.assertNotIn("tiny installable reference CLI", readme)
         self.assertNotIn("The narrow MVP", readme)
-        banner = ROOT / "docs" / "assets" / "akbp-banner.svg"
+        banner = ROOT / "docs" / "assets" / "akbp-product-explainer-banner.png"
         self.assertTrue(banner.exists())
-        self.assertIn("Stop re-deriving", banner.read_text(encoding="utf-8"))
+        self.assertGreater(banner.stat().st_size, 100_000)
 
     def test_readme_documents_tool_write_approval_gate(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

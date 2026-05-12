@@ -3,7 +3,7 @@
 [![CI](https://github.com/rohitg00/akbp/actions/workflows/ci.yml/badge.svg)](https://github.com/rohitg00/akbp/actions/workflows/ci.yml)
 
 <p align="center">
-  <img src="docs/assets/akbp-banner.svg" alt="AKBP banner: stop re-deriving, start compiling" width="100%">
+  <img src="docs/assets/akbp-product-explainer-banner.png" alt="AKBP banner showing capture, structure, verify, and retrieve workflow for agent knowledge" width="100%">
 </p>
 
 > Agents should not start every session with amnesia.
