@@ -28,6 +28,13 @@ class SearchQuerySanitizerTest(unittest.TestCase):
             '"JSONL" AND tool* OR "session lifecycle"',
         )
 
+    def test_fts_query_preserves_dotted_method_names_as_phrases(self):
+        self.assertEqual(akbp_cli.fts_query("akbp.session.start"), '"akbp.session.start"')
+        self.assertEqual(
+            akbp_cli.fts_query("akbp.session.start AND approved:true"),
+            '"akbp.session.start" AND "approved" OR "true"',
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

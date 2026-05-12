@@ -323,6 +323,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
         mixed = requests["mixed-operator-prefix-search"]
         self.assertEqual(mixed["expected_result_values"]["fts_query"], '"JSONL" AND tool* OR Python*')
         self.assertEqual(mixed["expected_result_contains"]["results[].id"], ["claim_search_query_compat"])
+        dotted = requests["dotted-method-search"]
+        self.assertEqual(dotted["expected_result_values"]["fts_query"], '"akbp.session.start" AND "JSONL"')
+        self.assertEqual(dotted["expected_result_contains"]["results[].id"], ["claim_search_query_compat"])
         dangling = requests["dangling-operator-search"]
         self.assertEqual(dangling["expected_result_values"]["fts_query"], '"JSONL"')
         self.assertEqual(dangling["expected_result_contains"]["results[].id"], ["claim_search_query_compat"])

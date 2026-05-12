@@ -10,7 +10,7 @@
 - Add capability runtime reporting for method-schema parity errors so adapters can detect schema/runtime drift.
 - Add JSON schemas for core AKBP records, context packs, tool request/response envelopes, and tool method parameters.
 - Add conformance checks through Level 3, covering file convention, structured claims/evidence, retrieval/context packs, and lifecycle relations.
-- Add SQLite FTS5 local search with incremental indexing, stale entry cleanup, safe query sanitization, and automatic index refresh after write commands when state exists.
+- Add SQLite FTS5 local search with incremental indexing, stale entry cleanup, safe query sanitization, dotted method-name query preservation, and automatic index refresh after write commands when state exists.
 - Use the SQLite FTS5 index for context retrieval when the local index exists, keeping term-overlap retrieval as an unindexed fallback.
 - Add safe local file ingest with common credential redaction, source records, imported wiki pages, lightweight signal extraction, optional claim creation, claim-text redaction, and dry-run previews.
 - Add conservative transcript crystallization for decisions, actions, blockers, preferences, questions, and touched files with citations, duplicate skipping, preview-first CLI flow, and JSONL tool-server access.

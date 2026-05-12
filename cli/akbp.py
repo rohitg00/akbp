@@ -1293,11 +1293,11 @@ def fts_term(token: str) -> str | None:
     if not token:
         return None
     if token.startswith('"') and token.endswith('"'):
-        phrase = re.sub(r'[^a-zA-Z0-9_/-]+', ' ', token[1:-1]).strip()
+        phrase = re.sub(r'[^a-zA-Z0-9_./-]+', ' ', token[1:-1]).strip()
         return '"' + phrase.replace('"', '""') + '"' if phrase else None
     has_prefix = token.endswith("*")
     body = token[:-1] if has_prefix else token
-    cleaned = re.sub(r'[^a-zA-Z0-9_/-]+', '', body)
+    cleaned = re.sub(r'[^a-zA-Z0-9_./-]+', '', body)
     if not re.search(r'[a-zA-Z0-9_]', cleaned):
         return None
     if has_prefix and re.fullmatch(r'[a-zA-Z0-9_]+', cleaned or ''):
@@ -1306,7 +1306,7 @@ def fts_term(token: str) -> str | None:
 
 
 def fts_query(query: str) -> str:
-    raw_tokens = re.findall(r'"[^"]+"|[a-zA-Z0-9_/-]+\*?', query)
+    raw_tokens = re.findall(r'"[^"]+"|[a-zA-Z0-9_./-]+\*?', query)
     tokens = [(token.upper(), token) for token in raw_tokens if token.strip()]
     operators = {"AND", "OR", "NOT"}
     has_operator = any(upper in operators for upper, _ in tokens)

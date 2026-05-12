@@ -1,6 +1,6 @@
 {
   "id": "search-query-compatibility-001",
-  "task": "Validate SQLite FTS query compatibility for phrase, version, hyphenated, and slash-separated search terms.",
+  "task": "Validate SQLite FTS query compatibility for phrase, version, hyphenated, slash-separated, dotted method-name, and empty search terms.",
   "setup": {
     "sources": [
       {
@@ -13,7 +13,7 @@
     "claims": [
       {
         "id": "claim_search_query_compat",
-        "text": "Python 3.12 and Node-22 compatible agents should use the JSONL tool-server contract for retrieval/search interop.",
+        "text": "Python 3.12 and Node-22 compatible agents should use the JSONL tool-server contract, including akbp.session.start, for retrieval/search interop.",
         "type": "workflow",
         "status": "stable",
         "confidence": 0.9,
@@ -25,7 +25,8 @@
           "Node-22",
           "JSONL",
           "tool-server",
-          "retrieval/search"
+          "retrieval/search",
+          "akbp.session.start"
         ],
         "scope": "project"
       }
@@ -71,7 +72,7 @@
         ],
         "expected_result_values": {
           "backend": "sqlite_fts5",
-          "fts_query": "\"Python 3 12\" AND \"Node-22\" AND \"JSONL\""
+          "fts_query": "\"Python 3.12\" AND \"Node-22\" AND \"JSONL\""
         },
         "expected_result_contains": {
           "results[].id": [
@@ -120,6 +121,30 @@
         "expected_result_values": {
           "backend": "sqlite_fts5",
           "fts_query": "\"JSONL\" AND tool* OR Python*"
+        },
+        "expected_result_contains": {
+          "results[].id": [
+            "claim_search_query_compat"
+          ]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "dotted-method-search",
+        "method": "akbp.search",
+        "params": {
+          "query": "akbp.session.start AND JSONL",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "fts_query": "\"akbp.session.start\" AND \"JSONL\""
         },
         "expected_result_contains": {
           "results[].id": [
@@ -227,7 +252,8 @@
       "Node-22",
       "JSONL",
       "tool-server",
-      "retrieval/search"
+      "retrieval/search",
+      "akbp.session.start"
     ],
     "must_apply_tool_methods": [
       "akbp.index"
