@@ -807,7 +807,27 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
     ensure_dirs(base)
     source = Path(args.file).resolve()
     if not source.exists() or not source.is_file():
-        print(json.dumps({"ok": False, "error": f"file not found: {source}"}, indent=2), file=sys.stderr)
+        print(json.dumps({
+            "ok": False,
+            "file": str(source),
+            "dry_run": bool(args.dry_run),
+            "applied": False,
+            "checked": 0,
+            "accepted_count": 0,
+            "rejected_count": 0,
+            "error_count": 1,
+            "would_write": {
+                "sources": [],
+                "claims": [],
+            },
+            "skipped_existing": {
+                "sources": [],
+                "claims": [],
+            },
+            "accepted": [],
+            "rejected": [],
+            "errors": [{"line": 1, "error": f"file not found: {source}"}],
+        }, indent=2, ensure_ascii=False))
         return 1
     accepted, rejected, errors = import_jsonl_objects(source)
     checked_count = len(accepted) + len(rejected)

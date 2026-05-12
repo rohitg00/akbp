@@ -448,6 +448,25 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(any("evidence must be a list" in reason for reason in reasons))
             self.assertTrue(any("entities must be a list of strings" in reason for reason in reasons))
 
+    def test_import_apply_missing_file_returns_result_shape(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            missing = Path(d) / "missing-export.jsonl"
+            run_cli("--path", str(kb), "init")
+            proc = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-apply", str(missing), "--dry-run"], text=True, capture_output=True)
+            self.assertEqual(proc.returncode, 1)
+            self.assertEqual(proc.stderr, "")
+            data = json.loads(proc.stdout)
+            self.assertFalse(data["ok"])
+            self.assertEqual(data["file"], str(missing.resolve()))
+            self.assertTrue(data["dry_run"])
+            self.assertFalse(data["applied"])
+            self.assertEqual(data["checked"], 0)
+            self.assertEqual(data["error_count"], 1)
+            self.assertEqual(data["would_write"], {"sources": [], "claims": []})
+            self.assertEqual(data["skipped_existing"], {"sources": [], "claims": []})
+            self.assertIn("file not found", data["errors"][0]["error"])
+
     def test_import_apply_failure_shape_includes_review_fields(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
