@@ -124,6 +124,8 @@ Expected behavior:
 - `ok:true`
 - `result.dry_run:true`
 - `result.applied:false`
+- `result.review_required:true`
+- `result.apply_instruction` tells the caller to repeat with `approved:true` after review
 - `result.would_write.sources` and `result.would_write.claims` list the reviewed ids
 
 Apply only after review:

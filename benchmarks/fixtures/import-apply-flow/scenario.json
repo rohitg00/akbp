@@ -21,7 +21,9 @@
           "rejected_count",
           "error_count",
           "would_write",
-          "skipped_existing"
+          "skipped_existing",
+          "review_required",
+          "apply_instruction"
         ],
         "expected_result_values": {
           "ok": true,
@@ -30,7 +32,9 @@
           "checked": 2,
           "accepted_count": 2,
           "rejected_count": 0,
-          "error_count": 0
+          "error_count": 0,
+          "review_required": true,
+          "apply_instruction": "Repeat with --approved only after reviewing import-check output and dry-run would_write ids."
         },
         "expected_result_schema": "#/$defs/import_apply_result",
         "expected_result_contains": {

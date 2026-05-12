@@ -94,6 +94,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(preview["params"]["dry_run"])
         self.assertFalse(preview["approved"])
         self.assertEqual(preview["expected_result_schema"], "#/$defs/import_apply_result")
+        self.assertTrue(preview["expected_result_values"]["review_required"])
+        self.assertIn("--approved", preview["expected_result_values"]["apply_instruction"])
         self.assertTrue(approved["approved"])
         self.assertEqual(approved["expected_result_values"]["applied"], True)
         self.assertEqual(preview["expected_result_contains"]["would_write.claims[]"], ["claim_import_apply_fixture"])

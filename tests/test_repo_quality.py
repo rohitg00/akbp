@@ -398,6 +398,8 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("akbp.import_check", text)
         self.assertIn("akbp.import_apply", text)
         self.assertIn("result.would_write.sources", text)
+        self.assertIn("result.review_required:true", text)
+        self.assertIn("result.apply_instruction", text)
         self.assertIn("approved", text)
 
     def test_adapter_docs_start_ingest_with_dry_run(self):
