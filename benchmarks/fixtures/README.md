@@ -37,6 +37,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 
 - `adapter-write-safety`: require runtime adapters to share the same dry-run, review metadata, approved write, and privacy boundary.
 - `adapter-session-operation`: verify adapter session start/end lifecycle operations and compatibility shapes.
+- `git-native-agent-handoff`: verify git-native agent adapters retrieve cited handoff context and review-gated write policy before continuing repository work.
 - `preference-recall`: recall a durable user preference with evidence.
 - `supersession`: prefer a newer claim while preserving the old claim.
 - `contradiction`: detect conflicting claims and require resolution.

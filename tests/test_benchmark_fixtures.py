@@ -613,6 +613,21 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertNotIn("akbp.crystallize_session", text)
         self.assertIn("claim_adapter_docs_require_review_boundary", data["expected"]["must_retrieve"])
 
+    def test_git_native_agent_handoff_fixture_covers_context_and_write_policy(self):
+        path = FIXTURES / "git-native-agent-handoff" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        self.assertEqual(requests["session-start-git-native"]["method"], "akbp.session.start")
+        self.assertEqual(requests["session-start-git-native"]["expected_result_schema"], "#/$defs/session_start_result")
+        self.assertEqual(requests["context-git-native-write-policy"]["method"], "akbp.context")
+        self.assertIn("claim_git_native_reads_context_first", data["expected"]["must_retrieve"])
+        self.assertIn("claim_git_native_write_review_gate", data["expected"]["must_retrieve"])
+        self.assertIn("source_adapter_policy", data["expected"]["must_cite"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("claim_git_native_write_review_gate", report["query_result_ids"])
+        self.assertIn("source_adapter_policy", report["context_citation_ids"])
+
     def test_benchmark_runner_passes(self):
         proc = subprocess.run([sys.executable, str(RUNNER), "--akbp"], text=True, capture_output=True, check=True)
         report = json.loads(proc.stdout)

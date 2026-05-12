@@ -1,0 +1,113 @@
+{
+  "id": "git-native-agent-handoff-001",
+  "task": "Verify a git-native agent adapter can retrieve prior session constraints and review-gated write policy before continuing work.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_git_native_session",
+        "type": "transcript",
+        "locator": "sessions/git-native-agent-session.md",
+        "title": "Git-native agent session handoff"
+      },
+      {
+        "id": "source_adapter_policy",
+        "type": "file",
+        "locator": "adapters/git-native-agent/README.md",
+        "title": "Git-native adapter policy"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_git_native_reads_context_first",
+        "text": "Git-native agent adapters should retrieve cited AKBP context before planning substantial repository work.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.88,
+        "evidence": [
+          "source_git_native_session",
+          "source_adapter_policy"
+        ],
+        "entities": [
+          "git-native agent",
+          "adapter",
+          "context retrieval",
+          "repository work"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_git_native_write_review_gate",
+        "text": "Git-native agent adapters must preview durable memory writes with dry_run before applying them with approved:true.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_adapter_policy"
+        ],
+        "entities": [
+          "git-native agent",
+          "dry_run",
+          "approved:true",
+          "review-gated writes"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "session-start-git-native",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "continue git-native agent repository work with safe memory writes",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "session_id",
+          "context"
+        ],
+        "expected_result_contains": {
+          "context.items[].id": [
+            "claim_git_native_reads_context_first",
+            "claim_git_native_write_review_gate"
+          ]
+        },
+        "expected_result_schema": "#/$defs/session_start_result"
+      },
+      {
+        "id": "context-git-native-write-policy",
+        "method": "akbp.context",
+        "params": {
+          "task": "git-native adapter dry_run approved write policy",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_git_native_write_review_gate"
+          ]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      }
+    ]
+  },
+  "query": "What should a git-native adapter do before planning and applying durable memory writes?",
+  "expected": {
+    "must_retrieve": [
+      "claim_git_native_reads_context_first",
+      "claim_git_native_write_review_gate"
+    ],
+    "must_cite": [
+      "source_git_native_session",
+      "source_adapter_policy"
+    ],
+    "answer_should_include": [
+      "cited AKBP context",
+      "dry_run",
+      "approved:true",
+      "review-gated"
+    ]
+  }
+}
