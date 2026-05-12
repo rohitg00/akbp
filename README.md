@@ -292,6 +292,7 @@ The repo includes:
 - `examples/repo-memory-demo/` for turning issue, PR, and release-note fixtures into later-session context
 - `examples/memory-ci/` for CI gates around lint, source verification, conformance, export-check, import-check, and dry-run apply
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
+- `examples/git-native-agent-handoff/` for repo-backed agent handoffs with cited context and review-gated shutdown memory
 - `examples/multi-agent-consistency-demo/` for cross-agent retrieval and supersession
 - `examples/rich-context-artifact/` for a static review surface backed by JSONL proposals
 - `docs/TROUBLESHOOTING.md` for common local failures
@@ -371,6 +372,7 @@ akbp/
 - CI reviewer: run `examples/memory-ci/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
+- Git-native adapter reviewer: run `examples/git-native-agent-handoff/run.sh`.
 - Multi-agent workflow reviewer: run `examples/multi-agent-consistency-demo/run.sh`.
 - Handoff reviewer: inspect `examples/rich-context-artifact/`, then read `docs/RICH_CONTEXT_ARTIFACTS.md`.
 - Skeptical reviewer: read `docs/CRITIQUE_RESPONSE.md`, then run `make benchmark`.

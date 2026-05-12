@@ -782,6 +782,30 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("examples/adapter-lifecycle/", readme)
         self.assertIn("examples/adapter-lifecycle/", release_notes)
 
+    def test_git_native_agent_handoff_example_is_complete(self):
+        text = (ROOT / "examples" / "git-native-agent-handoff" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "git-native-agent-handoff" / "run.sh").read_text(encoding="utf-8")
+        transcript = (ROOT / "examples" / "git-native-agent-handoff" / "session-summary.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        for required in [
+            "akbp.capabilities",
+            "akbp.session.start",
+            "akbp.session.end",
+            "dry_run:true",
+            "approved:true",
+            "akbp.index",
+            "Keep repository state in Git",
+        ]:
+            self.assertIn(required, text)
+        self.assertIn("AKBP git-native handoff example passed", script)
+        self.assertIn('"method":"akbp.session.start"', script)
+        self.assertIn('"method":"akbp.session.end"', script)
+        self.assertIn("Use `akbp.session.start`", transcript)
+        self.assertIn("Use `akbp.session.end`", transcript)
+        self.assertIn("examples/git-native-agent-handoff/", readme)
+        self.assertIn("examples/git-native-agent-handoff/", release_notes)
+
     def test_readme_lists_tracked_adapter_directories(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for adapter in [

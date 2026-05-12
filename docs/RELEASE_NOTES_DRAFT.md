@@ -103,6 +103,7 @@ Included examples:
 - `examples/end-to-end-agent-flow/`
 - `examples/tool-server-approval-flow/`
 - `examples/adapter-lifecycle/`
+- `examples/git-native-agent-handoff/`
 - `examples/coding-agent/`
 - `examples/research/`
 - `examples/personal/`
