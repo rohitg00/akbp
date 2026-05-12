@@ -37,6 +37,8 @@ akbp --path ./kb import-check incoming.jsonl --fail-on-rejected
 akbp --path ./kb import-apply incoming.jsonl --dry-run
 ```
 
+The dry-run output includes `review_required`, `apply_instruction`, and concrete `would_write` ids so CI or an adapter can render the review surface before any durable mutation.
+
 Apply only after review:
 
 ```bash

@@ -951,6 +951,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["dry_run"])
             self.assertFalse(lines[0]["result"]["applied"])
             self.assertEqual(lines[0]["result"]["would_write"]["claims"], ["claim_tool_import"])
+            self.assertTrue(lines[0]["result"]["review_required"])
+            self.assertIn("--approved", lines[0]["result"]["apply_instruction"])
             self.assertFalse(lines[1]["ok"])
             self.assertEqual(lines[1]["error"]["code"], "approval_required")
             self.assertTrue(lines[2]["ok"])

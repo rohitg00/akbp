@@ -874,6 +874,8 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         },
     }
     if args.dry_run:
+        result["review_required"] = True
+        result["apply_instruction"] = "Repeat with --approved only after reviewing import-check output and dry-run would_write ids."
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
     if not args.approved:

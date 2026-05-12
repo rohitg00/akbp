@@ -521,6 +521,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse(dry["applied"])
             self.assertEqual(dry["would_write"]["sources"], ["source_imported_safe"])
             self.assertEqual(dry["would_write"]["claims"], ["claim_imported_safe"])
+            self.assertTrue(dry["review_required"])
+            self.assertIn("--approved", dry["apply_instruction"])
             self.assertFalse((kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").strip())
 
             blocked = subprocess.run([sys.executable, str(CLI), "--path", str(kb), "import-apply", str(export)], text=True, capture_output=True)
