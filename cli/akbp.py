@@ -7,7 +7,6 @@ It writes portable markdown + JSONL artifacts. It is intentionally boring.
 
 from __future__ import annotations
 
-import contextlib
 import argparse
 import datetime as dt
 import hashlib
@@ -361,7 +360,7 @@ def iter_markdown(base: Path) -> Iterable[tuple[str, str]]:
         yield str(p.relative_to(base)), p.read_text(encoding="utf-8", errors="ignore")
 
 
-def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
+def collect_keyword_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
     claims = read_jsonl(base / "claims" / "claims.jsonl")
     results: list[dict[str, Any]] = []
     for c in claims:
@@ -375,6 +374,60 @@ def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
             results.append({"type": "page", "score": score, "path": rel, "snippet": snippet})
     results.sort(key=lambda x: x["score"], reverse=True)
     return results[:limit]
+
+
+def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, Any]] | None:
+    db_path = base / ".akbp" / "state.db"
+    if not db_path.exists():
+        return None
+    query_used = fts_query(query)
+    if not query_used:
+        return []
+    claims_by_id = {str(c.get("id")): c for c in load_claims(base)}
+    con = sqlite3.connect(db_path)
+    try:
+        rows = con.execute(
+            "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
+            (query_used, limit),
+        ).fetchall()
+    except sqlite3.Error:
+        return None
+    finally:
+        con.close()
+    results: list[dict[str, Any]] = []
+    for kind, object_id, path, snippet, rank in rows:
+        score = -float(rank)
+        if kind == "claim":
+            claim = claims_by_id.get(str(object_id), {})
+            results.append({
+                "type": "claim",
+                "score": score,
+                "rank": rank,
+                "id": object_id,
+                "path": path,
+                "text": claim.get("text") or snippet,
+                "snippet": snippet,
+                "evidence": claim.get("evidence", []),
+                "backend": "sqlite_fts5",
+            })
+        else:
+            results.append({
+                "type": "page",
+                "score": score,
+                "rank": rank,
+                "id": object_id,
+                "path": path,
+                "snippet": snippet,
+                "backend": "sqlite_fts5",
+            })
+    return results
+
+
+def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
+    fts_results = collect_fts_results(base, query, limit)
+    if fts_results is not None:
+        return fts_results
+    return collect_keyword_results(base, query, limit)
 
 
 def cmd_query(args: argparse.Namespace) -> int:
@@ -391,6 +444,7 @@ def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
             "type": "claim",
             "summary": result["text"],
             "score": result["score"],
+            "backend": result.get("backend", "keyword"),
             "citations": result.get("evidence", []),
             "freshness": "unknown",
         }
@@ -399,6 +453,7 @@ def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
         "type": "page",
         "summary": result["snippet"],
         "score": result["score"],
+        "backend": result.get("backend", "keyword"),
         "citations": [result["path"]],
         "freshness": "unknown",
     }
@@ -1291,25 +1346,18 @@ def cmd_search(args: argparse.Namespace) -> int:
     db_path = base / ".akbp" / "state.db"
     if not db_path.exists():
         return cmd_query(args)
-    con = sqlite3.connect(db_path)
     query_used = fts_query(args.query)
     if not query_used:
-        con.close()
         print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": []}, indent=2, ensure_ascii=False))
         return 0
-    try:
-        rows = con.execute(
-            "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
-            (query_used, args.limit),
-        ).fetchall()
-    except sqlite3.Error:
-        con.close()
+    results = collect_fts_results(base, args.query, args.limit)
+    if results is None:
         return cmd_query(args)
-    finally:
-        with contextlib.suppress(Exception):
-            con.close()
-    results = [{"type": kind, "id": object_id, "path": path, "snippet": snippet, "rank": rank} for kind, object_id, path, snippet, rank in rows]
-    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": results}, indent=2, ensure_ascii=False))
+    compact_results = [
+        {k: item[k] for k in ("type", "id", "path", "snippet", "rank") if k in item}
+        for item in results
+    ]
+    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": compact_results}, indent=2, ensure_ascii=False))
     return 0
 
 

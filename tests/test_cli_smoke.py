@@ -169,6 +169,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             pack = json.loads(out.stdout)
             self.assertEqual(pack["query"], "continue Bun npm migration")
             self.assertTrue(pack["items"])
+            self.assertEqual(pack["items"][0]["backend"], "sqlite_fts5")
             self.assertIn("citations", pack["items"][0])
 
             out = run_cli("--path", str(kb), "export")

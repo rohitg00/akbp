@@ -1583,6 +1583,10 @@
         "score": {
           "type": "number"
         },
+        "backend": {
+          "type": "string",
+          "minLength": 1
+        },
         "citations": {
           "type": "array",
           "items": {

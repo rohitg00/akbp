@@ -40,6 +40,14 @@ agent runtime reads project context
 
 The goal is not to replace model context, repository instructions, tool protocols, vector databases, or second-brain tools. AKBP gives those systems a portable knowledge substrate they can share.
 
+## Honest limits
+
+AKBP is not a research breakthrough claim and it is not a finished memory product. The useful part today is the protocol discipline: files, schemas, source-backed claims, lifecycle states, review-gated writes, search indexes, export bundles, and conformance checks.
+
+The reference implementation still needs larger retrieval-quality benchmarks, broader adapter dogfooding, clearer migration policy, and more long-document ingest proof before it should be treated as mature.
+
+Critique tracking lives in `docs/CRITIQUE_RESPONSE.md` so public feedback turns into fixtures, docs, and implementation work instead of vague positioning.
+
 ## What ships today
 
 | Area | Current support |
@@ -365,6 +373,7 @@ akbp/
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
 - Multi-agent workflow reviewer: run `examples/multi-agent-consistency-demo/run.sh`.
 - Handoff reviewer: inspect `examples/rich-context-artifact/`, then read `docs/RICH_CONTEXT_ARTIFACTS.md`.
+- Skeptical reviewer: read `docs/CRITIQUE_RESPONSE.md`, then run `make benchmark`.
 - Protocol reviewer: read `docs/ARCHITECTURE.md`, `docs/TOOL_CONTRACT.md`, and `schemas/`.
 - Release reviewer: run `make validate`, then read `docs/RELEASE.md` and `docs/PUBLIC_LAUNCH_CHECKLIST.md`.
 - Troubleshooting: read `docs/TROUBLESHOOTING.md`.

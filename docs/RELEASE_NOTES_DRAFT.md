@@ -16,6 +16,7 @@ Release candidate scope:
 - Ships a dependency-free Python reference CLI and JSONL local tool server.
 - Adds conformance checks through Level 3: file convention, structured claims, retrieval/context packs, and lifecycle relations.
 - Adds examples and benchmark fixtures covering preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, invalid parameter rejections, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, and end-to-end agent flow.
+- Documents critique response and current limits so AKBP is positioned as an alpha protocol and reference implementation, not as a breakthrough memory claim.
 
 ## Protocol surface
 
@@ -143,7 +144,7 @@ Included benchmark fixtures:
 - session crystallization
 - write preview crystallize schema
 
-The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, import-apply failure/skipped-existing result shapes, search/index observability, empty FTS query behavior, mixed operator plus prefix FTS search, retrieval/citation bundles, adapter lifecycle operations, lifecycle method `invalid_params` schema refs, `invalid_params` rejection details for type, bounded array-item count and length, range, and enum checks, and `approval_required` rejection details. The install smoke flow now exercises the installed JSONL tool-server entrypoint, including capability discovery and schema-backed invalid-param output.
+The benchmark runner validates fixture shape and can populate a temporary AKBP knowledge base to check real `query` and `context` retrieval behavior across the fixture set. When the local index exists, `context` uses SQLite FTS5 rather than the older term-overlap fallback. Fixtures can also execute JSONL tool-server requests to verify dry-run review metadata, approved write result records, import-apply failure/skipped-existing result shapes, search/index observability, empty FTS query behavior, mixed operator plus prefix FTS search, retrieval/citation bundles, adapter lifecycle operations, lifecycle method `invalid_params` schema refs, `invalid_params` rejection details for type, bounded array-item count and length, range, and enum checks, and `approval_required` rejection details. The install smoke flow now exercises the installed JSONL tool-server entrypoint, including capability discovery and schema-backed invalid-param output.
 
 ## Validation for this release candidate
 

@@ -10,12 +10,13 @@
 - Add JSON schemas for core AKBP records, context packs, tool request/response envelopes, and tool method parameters.
 - Add conformance checks through Level 3, covering file convention, structured claims/evidence, retrieval/context packs, and lifecycle relations.
 - Add SQLite FTS5 local search with incremental indexing, stale entry cleanup, safe query sanitization, and automatic index refresh after write commands when state exists.
+- Use the SQLite FTS5 index for context retrieval when the local index exists, keeping term-overlap retrieval as an unindexed fallback.
 - Add safe local file ingest with common credential redaction, source records, imported wiki pages, lightweight signal extraction, optional claim creation, claim-text redaction, and dry-run previews.
 - Add conservative transcript crystallization for decisions, actions, blockers, preferences, questions, and touched files with citations, duplicate skipping, preview-first CLI flow, and JSONL tool-server access.
 - Add benchmark fixtures and runner for preference recall, supersession, contradiction handling, correction resolution, multi-agent handoff, import safety, import apply success/failure/skipped-record flows, duplicate import-id rejection, invalid parameter rejections, review-gated writes, approved write apply outputs, unapproved write rejections, secret-safety, real AKBP retrieval checks, and JSONL tool-server response checks.
 - Add examples for Level 0, Level 1, Level 3 lifecycle records, coding-agent flow, research/personal templates, end-to-end agent workflow, and JSONL tool-server approval flow.
 - Add adapter templates and docs for runtime-neutral coding-agent startup, retrieval, write, ingest, index, citation loops, and `akbp.session.start` / `akbp.session.end` lifecycle wiring.
-- Add install, schema, benchmark, tool contract, agent flow, release readiness, and release notes draft documentation, including installed JSONL tool-server smoke coverage.
+- Add install, schema, benchmark, tool contract, agent flow, critique response, release readiness, and release notes draft documentation, including installed JSONL tool-server smoke coverage.
 
 ### Validation
 

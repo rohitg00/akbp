@@ -17,6 +17,7 @@
           "type": { "type": "string", "enum": ["claim", "page", "entity", "relation", "source"] },
           "summary": { "type": "string" },
           "score": { "type": "number" },
+          "backend": { "type": "string" },
           "citations": { "type": "array", "items": { "type": "string" } },
           "freshness": { "type": "string", "enum": ["fresh", "unknown", "stale"] }
         }
