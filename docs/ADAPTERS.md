@@ -18,6 +18,14 @@ A complete runtime-neutral example adapter is available at:
 adapters/example-coding-agent/
 ```
 
+A generic git-native agent adapter template is available at:
+
+```text
+adapters/git-native-agent/
+```
+
+Use it for agents that keep runtime state, instructions, or skills in a repository and need AKBP as the durable knowledge layer rather than another private memory folder.
+
 A public-safe OpenClaw workspace adapter is available at:
 
 ```text

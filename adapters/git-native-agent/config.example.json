@@ -1,0 +1,30 @@
+{
+  "adapter": "git-native-agent",
+  "akbp": {
+    "root": ".",
+    "transport": "jsonl-tool-server",
+    "server_command": [
+      "akbp-tool-server"
+    ],
+    "startup_context": {
+      "method": "akbp.context",
+      "limit": 8
+    },
+    "writes": {
+      "default_dry_run": true,
+      "require_user_approval": true
+    },
+    "write_policy": {
+      "default_scope": "project",
+      "dry_run_first": true,
+      "require_review_metadata": true,
+      "apply_requires_approved": true
+    },
+    "lifecycle": {
+      "session_start_method": "akbp.session.start",
+      "session_end_method": "akbp.session.end",
+      "session_end_dry_run_first": true,
+      "session_end_apply_requires_approved": true
+    }
+  }
+}

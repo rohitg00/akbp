@@ -108,6 +108,7 @@ Included examples:
 - `examples/personal/`
 - `adapters/coding-agent-template/`
 - `adapters/example-coding-agent/`
+- `adapters/git-native-agent/`
 - `adapters/terminal-coding-agent/`
 - `adapters/editor-coding-agent/`
 - runtime-specific adapter examples for OpenClaw, Codex, Claude Code, Cursor, and Gemini CLI
