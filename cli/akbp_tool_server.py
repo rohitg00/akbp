@@ -296,6 +296,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
             "request_id_policy": "request ids must be finite strings or numbers; string ids are capped at 512 characters and reject NUL, newline, and carriage return; numeric ids are capped at the JavaScript safe integer range before dispatch",
             "cli_error_output_policy": "CLI error stdout and stderr are redacted first, then capped before being returned in structured error responses",
             "method_schema_parity_policy": "implemented methods, accepted params, and required params are checked against tool-methods.schema.json at server startup when schemas are present; installed single-module packages use the embedded runtime declarations as a fallback",
+            "method_schema_runtime_errors": SCHEMA_RUNTIME_ERRORS,
         },
         "methods": {
             name: {

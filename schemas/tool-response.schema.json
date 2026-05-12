@@ -443,7 +443,8 @@
             "finite_numeric_param_policy",
             "request_id_policy",
             "cli_error_output_policy",
-            "method_schema_parity_policy"
+            "method_schema_parity_policy",
+            "method_schema_runtime_errors"
           ],
           "properties": {
             "transport": {
@@ -510,6 +511,12 @@
             "method_schema_parity_policy": {
               "type": "string",
               "minLength": 1
+            },
+            "method_schema_runtime_errors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "max_request_id_length": {
               "type": "integer",
