@@ -17,6 +17,8 @@ Adapters must use conservative defaults.
 
 ## Write safety
 
-- Default to dry-run for uncertain writes.
+- Default to request-level `dry_run:true` for write-capable calls.
+- Apply only after review with request-level `approved:true`.
+- Never combine `dry_run:true` and `approved:true` in the same request.
 - Ask before increasing scope from project-local to team or public.
 - Supersede stale claims instead of deleting audit history.
