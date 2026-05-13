@@ -122,20 +122,29 @@ Safety rules:
 
 ## 5. Preserve evidence and auditability
 
-When importing source material, prefer source registration plus ingest preview:
+When importing source material, prefer source registration plus ingest preview.
+Both operations are write-capable, so preview them before applying:
 
 ```json
-{"id":"source-1","method":"akbp.source.add","path":".","params":{"locator":"notes/session.md","type":"file","title":"Session notes"}}
+{"id":"source-preview-1","method":"akbp.source.add","path":".","dry_run":true,"params":{"locator":"notes/session.md","type":"file","title":"Session notes"}}
+```
+
+```json
+{"id":"source-apply-1","method":"akbp.source.add","path":".","approved":true,"params":{"locator":"notes/session.md","type":"file","title":"Session notes"}}
 ```
 
 ```json
 {"id":"ingest-preview-1","method":"akbp.ingest","path":".","dry_run":true,"params":{"file":"notes/session.md"}}
 ```
 
+```json
+{"id":"ingest-apply-1","method":"akbp.ingest","path":".","approved":true,"params":{"file":"notes/session.md"}}
+```
+
 Verify local file evidence before depending on it:
 
 ```json
-{"id":"verify-1","method":"akbp.source.verify","path":".","params":{}}
+{"id":"verify-1","method":"akbp.source.verify","path":".","params":{"source_id":"source_..."}}
 ```
 
 Never convert secrets or raw private logs into durable AKBP records.

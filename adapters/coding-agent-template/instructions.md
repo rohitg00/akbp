@@ -14,7 +14,8 @@ Use AKBP as the durable knowledge layer for this project.
 - Prefer citations when relying on prior knowledge.
 - Store decisions, preferences, blockers, workflows, and durable project facts.
 - Keep transient logs out of the knowledge base unless they explain a durable decision.
-- Use dry-run for writes when the user has not clearly approved durable memory changes.
+- Use request-level `dry_run:true` for write-capable calls before applying durable memory changes.
+- Apply writes only by repeating the reviewed request with request-level `approved:true`; do not send both `dry_run:true` and `approved:true` in the same request.
 - Check external JSONL exports with `akbp.import_check` before applying them.
 - Preview accepted JSONL imports with `akbp.import_apply` and `dry_run:true`; apply only after review with request-level `approved:true`.
 - If a dry-run response includes `review_required`, show the planned change and follow `apply_instruction` before applying with `approved:true`.
