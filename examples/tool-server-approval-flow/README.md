@@ -4,10 +4,11 @@ This example shows the safe JSONL write path for local agent integrations.
 
 The rule is simple:
 
-1. preview write-capable calls with request-level `dry_run:true`
-2. render `review_required` and `apply_instruction` to the user or calling runtime
-3. apply only after approval with request-level `approved:true`
-4. expect `approval_required` when a non-dry-run write omits approval
+1. discover capabilities and method parameter schemas first
+2. preview write-capable calls with request-level `dry_run:true`
+3. render `review_required` and `apply_instruction` to the user or calling runtime
+4. apply only after approval with request-level `approved:true`
+5. expect `approval_required` when a non-dry-run write omits approval
 
 ## Setup
 
@@ -17,6 +18,28 @@ Run from the repository root:
 TMP_KB="$(mktemp -d)"
 python3 cli/akbp.py --path "$TMP_KB" init
 ```
+
+## Discover capabilities and schemas
+
+Adapters should start each process or session by asking the server what it
+supports. This keeps clients from hard-coding write policy, schema locations, or
+method names that may drift.
+
+```bash
+printf '%s\n' '{"id":"caps","method":"akbp.capabilities","params":{"client":"approval-flow-example","requires":["method_param_schemas","capability_negotiation","write_apply_requires_approval"]}}' \
+  | python3 tool-server/akbp_tool_server.py
+```
+
+Expected behavior:
+
+- `ok:true`
+- `result.negotiation.satisfied:true`
+- every advertised method includes `write` and, when available, `params_schema`
+- `result.features.method_param_schemas:true`
+- `result.features.write_apply_requires_approval:true`
+
+If `result.negotiation.satisfied:false`, the adapter should gracefully disable
+the flows that depend on the unsupported feature instead of guessing.
 
 ## Preview a write
 
@@ -85,6 +108,26 @@ The response matches the `#/$defs/approval_required_details` shape from `schemas
 }
 ```
 
+## Rejected invalid params before CLI dispatch
+
+Method-specific schemas reject malformed requests before they reach the CLI. The
+caller should repair the request, not retry it with approval.
+
+```bash
+printf '%s\n' '{"id":"remember-bad-type","method":"akbp.remember","path":"'"$TMP_KB"'","dry_run":true,"params":{"text":"Agents need rollback paths before production changes","type":"runbook"}}' \
+  | python3 tool-server/akbp_tool_server.py
+```
+
+Expected behavior:
+
+- `ok:false`
+- `error.code:"invalid_params"`
+- `error.details.schema` references `tool-methods.schema.json#/$defs/akbp.remember.params`
+- the knowledge base is not mutated
+
+Do not convert an `invalid_params` response into an approved write. Fix the
+payload until the dry-run preview succeeds.
+
 ## Apply after approval
 
 ```bash
@@ -96,6 +139,11 @@ Expected behavior:
 
 - `ok:true`
 - the claim is appended to `claims/claims.jsonl`
+
+The approved request should keep the same `method`, `path`, and `params` as the
+reviewed dry-run. Only the request id and envelope policy fields should change:
+remove `dry_run:true` and add request-level `approved:true` after user approval
+or trusted local policy.
 
 
 ## Import a reviewed JSONL export
