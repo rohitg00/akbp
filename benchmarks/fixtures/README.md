@@ -58,6 +58,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `retrieval-citation-bundle`: verify context retrieval and citation lookup return the same evidence-backed claim through JSONL tool calls.
 - `retrieval-ambiguity-ranking`: verify ambiguous adapter lifecycle queries retrieve the direct lifecycle and validation claims with citations.
 - `retrieval-noisy-evidence`: verify direct, cited lifecycle decisions are returned despite noisy adjacent memory and launch-copy claims.
+- `retrieval-structured-jsonl-objects`: verify richer source, claim, entity, and relation JSONL objects retrieve precise AgentMemory operational memory and export graph context.
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
 - `search-query-compatibility`: verify phrase, version, hyphenated, slash-separated, prefix, mixed operator-plus-prefix, empty, and malformed-operator FTS query compatibility.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.

@@ -1,0 +1,267 @@
+{
+  "id": "retrieval-structured-jsonl-objects-001",
+  "task": "Verify retrieval over richer source, claim, entity, and relation JSONL objects returns the precise operational memory with citations and exportable graph context.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_agentmemory_hook_spec",
+        "type": "file",
+        "locator": "docs/agentmemory-hook-spec.md",
+        "title": "AgentMemory hook specification",
+        "metadata": {
+          "component": "hook",
+          "format": "jsonl"
+        }
+      },
+      {
+        "id": "source_recall_benchmark_run",
+        "type": "transcript",
+        "locator": "sessions/recall-benchmark-run.md",
+        "title": "Recall benchmark run",
+        "metadata": {
+          "metric": "R@5",
+          "dataset": "coding-session-observations"
+        }
+      },
+      {
+        "id": "source_launch_copy_draft",
+        "type": "file",
+        "locator": "drafts/agentmemory-launch-copy.md",
+        "title": "AgentMemory launch copy draft",
+        "metadata": {
+          "purpose": "marketing-noise"
+        }
+      }
+    ],
+    "entities": [
+      {
+        "id": "entity_agentmemory",
+        "name": "AgentMemory",
+        "type": "project",
+        "aliases": [
+          "agent memory",
+          "coding agent memory"
+        ],
+        "description": "Durable memory layer for coding agents.",
+        "page": "wiki/entities/entity_agentmemory.md"
+      },
+      {
+        "id": "entity_jsonl_observation_log",
+        "name": "JSONL observation log",
+        "type": "artifact",
+        "aliases": [
+          "observation log",
+          "append-only memory log"
+        ],
+        "description": "Append-only event stream of tool use, files, tests, decisions, and outcomes.",
+        "page": "wiki/entities/entity_jsonl_observation_log.md"
+      },
+      {
+        "id": "entity_hybrid_recall",
+        "name": "Hybrid recall",
+        "type": "capability",
+        "aliases": [
+          "semantic plus keyword recall",
+          "top-K retrieval"
+        ],
+        "description": "Retrieval path that combines semantic, keyword, and recency signals.",
+        "page": "wiki/entities/entity_hybrid_recall.md"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_agentmemory_uses_jsonl_log",
+        "source": "entity_agentmemory",
+        "target": "entity_jsonl_observation_log",
+        "relation": "uses",
+        "confidence": 0.94,
+        "evidence": [
+          "source_agentmemory_hook_spec"
+        ]
+      },
+      {
+        "id": "relation_jsonl_log_feeds_hybrid_recall",
+        "source": "entity_jsonl_observation_log",
+        "target": "entity_hybrid_recall",
+        "relation": "feeds",
+        "confidence": 0.9,
+        "evidence": [
+          "source_recall_benchmark_run"
+        ]
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_observation_log_records_tool_outcomes",
+        "text": "AgentMemory hook adapters should record tool name, target file, command, decision, test result, and outcome into an append-only JSONL observation log.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.91,
+        "evidence": [
+          "source_agentmemory_hook_spec"
+        ],
+        "entities": [
+          "AgentMemory",
+          "JSONL observation log",
+          "hook adapter",
+          "tool outcome"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_hybrid_recall_uses_scored_top_k",
+        "text": "AgentMemory recall should rank memories with semantic, keyword, and recency signals before injecting the top-K memories into the next coding-agent prompt.",
+        "type": "decision",
+        "status": "stable",
+        "confidence": 0.89,
+        "evidence": [
+          "source_recall_benchmark_run",
+          "source_agentmemory_hook_spec"
+        ],
+        "entities": [
+          "AgentMemory",
+          "hybrid recall",
+          "top-K injection",
+          "semantic keyword recency"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_launch_copy_says_infinite_memory",
+        "text": "Launch copy may describe AgentMemory as infinite memory for coding agents when the audience needs a simple hook.",
+        "type": "observation",
+        "status": "working",
+        "confidence": 0.52,
+        "evidence": [
+          "source_launch_copy_draft"
+        ],
+        "entities": [
+          "AgentMemory",
+          "launch copy",
+          "infinite memory"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "context-hybrid-recall-top-k",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "implement AgentMemory hybrid recall top-K injection from JSONL observation log",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_hybrid_recall_uses_scored_top_k",
+            "claim_observation_log_records_tool_outcomes"
+          ]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      },
+      {
+        "id": "search-jsonl-observation-log",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "JSONL observation log tool outcome hook adapter",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "results"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5"
+        },
+        "expected_result_contains": {
+          "results[].id": [
+            "claim_observation_log_records_tool_outcomes"
+          ]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "cite-hybrid-recall-top-k",
+        "method": "akbp.cite",
+        "approved": false,
+        "params": {
+          "claim_id": "claim_hybrid_recall_uses_scored_top_k"
+        },
+        "expected_result_fields": [
+          "claim_id",
+          "text",
+          "evidence",
+          "status"
+        ],
+        "expected_result_values": {
+          "claim_id": "claim_hybrid_recall_uses_scored_top_k",
+          "status": "stable"
+        },
+        "expected_result_contains": {
+          "evidence[]": [
+            "source_recall_benchmark_run",
+            "source_agentmemory_hook_spec"
+          ]
+        },
+        "expected_result_schema": "#/$defs/cite_result"
+      },
+      {
+        "id": "export-agentmemory-graph",
+        "method": "akbp.export",
+        "approved": false,
+        "params": {},
+        "expected_result_fields": [
+          "manifest",
+          "sources",
+          "claims",
+          "entities",
+          "relations"
+        ],
+        "expected_result_contains": {
+          "claims[].id": [
+            "claim_observation_log_records_tool_outcomes",
+            "claim_hybrid_recall_uses_scored_top_k"
+          ],
+          "entities[].id": [
+            "entity_agentmemory",
+            "entity_jsonl_observation_log",
+            "entity_hybrid_recall"
+          ],
+          "relations[].id": [
+            "relation_agentmemory_uses_jsonl_log",
+            "relation_jsonl_log_feeds_hybrid_recall"
+          ]
+        },
+        "expected_result_schema": "#/$defs/export_result"
+      }
+    ]
+  },
+  "query": "How should AgentMemory use a JSONL observation log for hybrid recall and top-K injection?",
+  "expected": {
+    "must_retrieve": [
+      "claim_observation_log_records_tool_outcomes",
+      "claim_hybrid_recall_uses_scored_top_k"
+    ],
+    "must_cite": [
+      "source_agentmemory_hook_spec",
+      "source_recall_benchmark_run"
+    ],
+    "must_cite_in_context": [
+      "source_agentmemory_hook_spec",
+      "source_recall_benchmark_run"
+    ],
+    "answer_should_include": [
+      "JSONL observation log",
+      "semantic, keyword, and recency",
+      "top-K memories"
+    ]
+  }
+}

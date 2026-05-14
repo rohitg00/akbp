@@ -391,6 +391,35 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(cite["expected_result_contains"]["evidence[]"], ["source_release_risk_note", "source_operator_review"])
         self.assertEqual(data["expected"]["must_cite"], ["source_release_risk_note", "source_operator_review"])
 
+    def test_retrieval_structured_jsonl_objects_fixture_covers_graph_context(self):
+        path = FIXTURES / "retrieval-structured-jsonl-objects" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        setup = data["setup"]
+        self.assertEqual(len(setup["sources"]), 3)
+        self.assertEqual(len(setup["entities"]), 3)
+        self.assertEqual(len(setup["relations"]), 2)
+        self.assertIn("claim_hybrid_recall_uses_scored_top_k", data["expected"]["must_retrieve"])
+        self.assertIn("source_recall_benchmark_run", data["expected"]["must_cite_in_context"])
+        requests = {request["id"]: request for request in setup["tool_server_requests"]}
+        self.assertEqual(requests["context-hybrid-recall-top-k"]["expected_result_schema"], "#/$defs/context_result")
+        self.assertEqual(requests["search-jsonl-observation-log"]["expected_result_schema"], "#/$defs/search_result")
+        self.assertEqual(requests["cite-hybrid-recall-top-k"]["expected_result_schema"], "#/$defs/cite_result")
+        export = requests["export-agentmemory-graph"]
+        self.assertEqual(export["expected_result_schema"], "#/$defs/export_result")
+        self.assertEqual(export["expected_result_contains"]["entities[].id"], [
+            "entity_agentmemory",
+            "entity_jsonl_observation_log",
+            "entity_hybrid_recall",
+        ])
+        self.assertEqual(export["expected_result_contains"]["relations[].id"], [
+            "relation_agentmemory_uses_jsonl_log",
+            "relation_jsonl_log_feeds_hybrid_recall",
+        ])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("claim_hybrid_recall_uses_scored_top_k", report["query_result_ids"])
+        self.assertIn("source_recall_benchmark_run", report["context_citation_ids"])
+
     def test_read_method_schema_fixture_covers_read_responses(self):
         path = FIXTURES / "read-method-schema" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
