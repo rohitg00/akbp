@@ -103,6 +103,30 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
 
+    def test_long_document_ingest_fixture_covers_section_level_review(self):
+        path = FIXTURES / "long-document-ingest" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        preview = requests["ingest-runbook-preview"]
+        apply = requests["ingest-runbook-apply"]
+        index = requests["index-after-ingest"]
+        context = requests["context-after-ingest"]
+        self.assertEqual(preview["method"], "akbp.ingest")
+        self.assertTrue(preview["params"]["dry_run"])
+        self.assertEqual(preview["expected_result_schema"], "#/$defs/ingest_dry_run_result")
+        self.assertIn("Compression and recall", preview["expected_result_contains"]["signals[]"])
+        self.assertEqual(apply["expected_result_schema"], "#/$defs/ingest_result")
+        self.assertTrue(apply["approved"])
+        self.assertEqual(index["expected_result_schema"], "#/$defs/index_result")
+        self.assertTrue(index["approved"])
+        self.assertEqual(context["expected_result_schema"], "#/$defs/context_result")
+        source_path = ROOT / preview["params"]["file"]
+        self.assertTrue(source_path.exists())
+        self.assertIn("## Approval gate", source_path.read_text(encoding="utf-8"))
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("context-after-ingest", report["tool_output_ids"])
+
 
     def test_unknown_method_rejection_fixture_covers_available_methods(self):
         path = FIXTURES / "unknown-method-rejection" / "scenario.json"

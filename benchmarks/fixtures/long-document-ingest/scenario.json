@@ -1,0 +1,151 @@
+{
+  "id": "long-document-ingest-001",
+  "task": "Verify long source documents are ingested through review-gated previews and produce section-level signals before durable retrieval.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "ingest-runbook-preview",
+        "method": "akbp.ingest",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/long-document-ingest/agent-runbook.md",
+          "claim": "AgentMemory runbooks should create section-level claims for hook capture, compression recall, and approval gates.",
+          "claim_type": "workflow",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "dry_run",
+          "source_id",
+          "page",
+          "signals",
+          "created_claims",
+          "redacted",
+          "would_write",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": true,
+          "redacted": false,
+          "review_required": true
+        },
+        "expected_result_contains": {
+          "signals[]": [
+            "Capture hooks",
+            "Compression and recall",
+            "Approval gate",
+            "Decision: Hook output should be append-only JSONL so later agents can audit the sequence.",
+            "Decision: Adapters must repeat the same method, path, and params with approved:true after review."
+          ],
+          "would_write[]": [
+            "raw/sources/sources.jsonl",
+            "wiki/imports/agent-runbook.md",
+            "claims/claims.jsonl"
+          ]
+        },
+        "expected_result_schema": "#/$defs/ingest_dry_run_result"
+      },
+      {
+        "id": "ingest-runbook-apply",
+        "method": "akbp.ingest",
+        "approved": true,
+        "params": {
+          "file": "benchmarks/fixtures/long-document-ingest/agent-runbook.md",
+          "claim": "AgentMemory runbooks should create section-level claims for hook capture, compression recall, and approval gates.",
+          "claim_type": "workflow"
+        },
+        "expected_result_fields": [
+          "ok",
+          "source_id",
+          "page",
+          "signals",
+          "created_claims",
+          "redacted"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "redacted": false
+        },
+        "expected_result_contains": {
+          "signals[]": [
+            "Capture hooks",
+            "Compression and recall",
+            "Approval gate"
+          ],
+          "created_claims[]": [
+            "claim_36227255080c15cb"
+          ]
+        },
+        "expected_result_schema": "#/$defs/ingest_result"
+      },
+      {
+        "id": "index-after-ingest",
+        "method": "akbp.index",
+        "approved": true,
+        "params": {
+          "incremental": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "db",
+          "rows",
+          "indexed",
+          "skipped",
+          "removed",
+          "incremental",
+          "indexed_keys",
+          "skipped_keys",
+          "removed_keys"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "incremental": true
+        },
+        "expected_result_contains": {
+          "indexed_keys[]": [
+            "claim:claim_36227255080c15cb",
+            "page:wiki/imports/agent-runbook.md"
+          ]
+        },
+        "expected_result_schema": "#/$defs/index_result"
+      },
+      {
+        "id": "context-after-ingest",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "implement section-level AgentMemory runbook memory for approval gates and compression recall",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_36227255080c15cb"
+          ]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      }
+    ]
+  },
+  "query": "How should a long AgentMemory runbook be ingested for hook capture, compression recall, and approval gates?",
+  "expected": {
+    "answer_should_include": [
+      "Capture hooks",
+      "Compression and recall",
+      "Approval gate",
+      "approved:true"
+    ],
+    "must_apply_tool_methods": [
+      "akbp.ingest",
+      "akbp.index"
+    ],
+    "must_dry_run_tool_methods": [
+      "akbp.ingest"
+    ]
+  }
+}

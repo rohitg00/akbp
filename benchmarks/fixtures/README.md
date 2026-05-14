@@ -44,6 +44,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `correction-resolution`: prefer a newer correction while preserving old conflicting knowledge until explicit resolution.
 - `secret-safety`: reject or redact secret-like text before durable writes.
 - `import-safety`: validate JSONL import objects, normal plus strict `akbp.import_check` responses, and rejected `akbp.import_apply` preview result shapes before durable writes.
+- `long-document-ingest`: verify longer source documents produce section-level ingest signals through dry-run review, approved apply, indexing, and retrieval.
 - `export-bundle-compatibility`: validate portable bundle manifest counts, artifact hash shape, safety flags, and strict failure results.
 - `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, zero-param method unknown, missing and partial missing required method params, file/source verification missing params, wrong-typed, wrong item-typed, out-of-range, boolean flag, oversized string, import/export file-param, source verification id, cite claim id, claim relation id, audit limit, read-method limit, conformance level, lifecycle method params, and unsupported enum method parameters before CLI execution.
 - `import-apply-flow`: validate JSONL `akbp.import_apply` dry-run and approved apply responses before durable writes.
