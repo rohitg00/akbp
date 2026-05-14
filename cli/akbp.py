@@ -207,6 +207,10 @@ def load_relations(base: Path) -> list[dict[str, Any]]:
     return read_jsonl(base / "graph" / "relations.jsonl")
 
 
+def load_entities(base: Path) -> list[dict[str, Any]]:
+    return read_jsonl(base / "graph" / "entities.jsonl")
+
+
 def write_relations(base: Path, rows: list[dict[str, Any]]) -> None:
     write_jsonl(base / "graph" / "relations.jsonl", rows)
 
@@ -388,7 +392,7 @@ def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, An
     try:
         rows = con.execute(
             "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
-            (query_used, limit),
+            (query_used, max(limit, limit * 4)),
         ).fetchall()
     except sqlite3.Error:
         return None
@@ -410,7 +414,7 @@ def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, An
                 "evidence": claim.get("evidence", []),
                 "backend": "sqlite_fts5",
             })
-        else:
+        elif kind == "page":
             results.append({
                 "type": "page",
                 "score": score,
@@ -420,7 +424,21 @@ def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, An
                 "snippet": snippet,
                 "backend": "sqlite_fts5",
             })
-    return results
+        else:
+            citations = [object_id] if kind == "source" else []
+            results.append({
+                "type": kind,
+                "score": score,
+                "rank": rank,
+                "id": object_id,
+                "path": path,
+                "snippet": snippet,
+                "citations": citations,
+                "backend": "sqlite_fts5",
+            })
+    kind_priority = {"claim": 0, "source": 1, "entity": 1, "relation": 1, "page": 2}
+    results.sort(key=lambda item: (kind_priority.get(str(item.get("type")), 3), item.get("rank", 0)))
+    return results[:limit]
 
 
 def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
@@ -446,6 +464,16 @@ def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
             "score": result["score"],
             "backend": result.get("backend", "keyword"),
             "citations": result.get("evidence", []),
+            "freshness": "unknown",
+        }
+    if result["type"] in {"source", "entity", "relation"}:
+        return {
+            "id": result["id"],
+            "type": result["type"],
+            "summary": result["snippet"],
+            "score": result["score"],
+            "backend": result.get("backend", "keyword"),
+            "citations": result.get("citations", [result["id"]]),
             "freshness": "unknown",
         }
     return {
@@ -1215,12 +1243,72 @@ def index_documents(base: Path) -> list[dict[str, str]]:
     docs: list[dict[str, str]] = []
     for claim in load_claims(base):
         cid = str(claim.get("id", ""))
-        text = str(claim.get("text", ""))
+        text = index_text_from_fields(
+            claim.get("text"),
+            claim.get("type"),
+            claim.get("status"),
+            claim.get("scope"),
+            claim.get("evidence"),
+            claim.get("entities"),
+        )
         docs.append({
             "doc_key": f"claim:{cid}",
             "kind": "claim",
             "object_id": cid,
             "path": "claims/claims.jsonl",
+            "text": text,
+            "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        })
+    for source in load_sources(base):
+        sid = str(source.get("id", ""))
+        text = index_text_from_fields(
+            source.get("id"),
+            source.get("type"),
+            source.get("locator"),
+            source.get("title"),
+            source.get("scope"),
+            source.get("hash"),
+        )
+        docs.append({
+            "doc_key": f"source:{sid}",
+            "kind": "source",
+            "object_id": sid,
+            "path": "raw/sources/sources.jsonl",
+            "text": text,
+            "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        })
+    for entity in load_entities(base):
+        eid = str(entity.get("id", ""))
+        text = index_text_from_fields(
+            entity.get("id"),
+            entity.get("name"),
+            entity.get("type"),
+            entity.get("aliases"),
+            entity.get("description"),
+            entity.get("scope"),
+        )
+        docs.append({
+            "doc_key": f"entity:{eid}",
+            "kind": "entity",
+            "object_id": eid,
+            "path": "graph/entities.jsonl",
+            "text": text,
+            "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        })
+    for relation in load_relations(base):
+        rid = str(relation.get("id", ""))
+        text = index_text_from_fields(
+            relation.get("id"),
+            relation.get("source"),
+            relation.get("relation"),
+            relation.get("target"),
+            relation.get("evidence"),
+        )
+        docs.append({
+            "doc_key": f"relation:{rid}",
+            "kind": "relation",
+            "object_id": rid,
+            "path": "graph/relations.jsonl",
             "text": text,
             "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
         })
@@ -1234,6 +1322,20 @@ def index_documents(base: Path) -> list[dict[str, str]]:
             "digest": hashlib.sha256(text.encode("utf-8")).hexdigest(),
         })
     return docs
+
+
+def index_text_from_fields(*values: Any) -> str:
+    parts: list[str] = []
+    for value in values:
+        if value is None:
+            continue
+        if isinstance(value, list):
+            parts.extend(str(item) for item in value if item is not None)
+        elif isinstance(value, dict):
+            parts.append(json.dumps(value, ensure_ascii=False, sort_keys=True))
+        else:
+            parts.append(str(value))
+    return "\n".join(part for part in parts if part)
 
 
 def ensure_search_tables(con: sqlite3.Connection) -> None:

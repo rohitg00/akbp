@@ -94,6 +94,39 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(searched["backend"], "sqlite_fts5")
             self.assertTrue(searched["results"])
 
+            entity = {
+                "id": "entity_agentmemory",
+                "name": "AgentMemory",
+                "type": "tool",
+                "aliases": ["hybrid recall"],
+                "description": "JSONL observation log for durable agent context",
+                "created_at": "2026-05-01T00:00:00Z",
+            }
+            relation = {
+                "id": "relation_agentmemory_references_recall",
+                "source": "entity_agentmemory",
+                "relation": "references",
+                "target": "entity_hybrid_recall",
+                "confidence": 0.8,
+                "evidence": [source["id"]],
+                "created_at": "2026-05-01T00:00:00Z",
+            }
+            (kb / "graph" / "entities.jsonl").write_text(json.dumps(entity) + "\n", encoding="utf-8")
+            (kb / "graph" / "relations.jsonl").write_text(json.dumps(relation) + "\n", encoding="utf-8")
+            run_cli("--path", str(kb), "index")
+
+            out = run_cli("--path", str(kb), "search", "AgentMemory")
+            searched = json.loads(out.stdout)
+            self.assertTrue(any(item["type"] == "entity" and item["id"] == "entity_agentmemory" for item in searched["results"]))
+
+            out = run_cli("--path", str(kb), "search", "Readme")
+            searched = json.loads(out.stdout)
+            self.assertTrue(any(item["type"] == "source" and item["id"] == source["id"] for item in searched["results"]))
+
+            out = run_cli("--path", str(kb), "search", "references hybrid recall")
+            searched = json.loads(out.stdout)
+            self.assertTrue(any(item["type"] == "relation" and item["id"] == "relation_agentmemory_references_recall" for item in searched["results"]))
+
             out = run_cli("--path", str(kb), "search", "Bun: npm OR migration")
             searched = json.loads(out.stdout)
             self.assertEqual(searched["fts_query"], '"Bun" OR "npm" OR "migration"')

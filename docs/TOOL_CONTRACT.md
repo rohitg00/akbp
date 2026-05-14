@@ -353,11 +353,10 @@ Importing a local file through the JSONL server should also start with dry-run w
 
 For `akbp.ingest`, dry-run executes the CLI preview and returns redacted import metadata instead of only argv: `source_id`, page path, extracted signals, claim ids, redaction status, and `would_write` paths. It also includes `review_required:true` and an `apply_instruction` focused on reviewing redaction and planned writes. It does not create source, claim, page, log, audit, or index files. In apply mode, ingested source content, optional claim text, and source titles are redacted before durable writes.
 
-Agents can also manage the local search index and query it. Search supports conservative SQLite FTS5 syntax: plain terms default to OR, quoted phrases are preserved, `AND`/`OR`/`NOT` are accepted, punctuation is sanitized, trailing malformed operators are removed, and trailing `*` enables safe prefix matches for simple word tokens. Queries with no safe searchable terms, including a leading standalone `NOT` or operator-only text, return `sqlite_fts5` with an empty `fts_query` and empty result set instead of falling back to broad text scanning.
+Agents can also manage the local search index and query it. The index covers claims, markdown pages, source records, entity records, and relation records so structured JSONL knowledge can be retrieved without relying on page mirrors. Search supports conservative SQLite FTS5 syntax: plain terms default to OR, quoted phrases are preserved, `AND`/`OR`/`NOT` are accepted, punctuation is sanitized, trailing malformed operators are removed, and trailing `*` enables safe prefix matches for simple word tokens. Queries with no safe searchable terms, including a leading standalone `NOT` or operator-only text, return `sqlite_fts5` with an empty `fts_query` and empty result set instead of falling back to broad text scanning.
 
 ```json
 {"id":"3","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}
 {"id":"4","method":"akbp.search","path":".","params":{"query":"rollback release","limit":5}}
 {"id":"5","method":"akbp.search","path":".","params":{"query":"migrat* AND rollback","limit":5}}
 ```
-
