@@ -40,6 +40,14 @@ The safe first integration is read-only: call capability discovery, run
 `akbp.session.start` or `akbp.context`, and do not enable write methods
 until the host can display dry-run previews and collect explicit approval.
 
+When AKBP is added beside an existing memory server, local index, or tool
+bridge, generate `akbp client-config` and use its `memory_server_bridge`
+section as the install contract. The bridge can cache, translate, or expose
+host-native tools, but durable state should remain in AKBP markdown and JSONL
+artifacts. Disable or warn on integrations that store durable memory only in an
+opaque bridge format, return uncited recalls, or apply writes without
+`dry_run:true` preview followed by explicit `approved:true`.
+
 ## What makes an integration AKBP-compatible
 
 An integration is using AKBP as a protocol when it preserves these properties:

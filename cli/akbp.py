@@ -2226,6 +2226,44 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "path_resolution": "Resolve <AKBP_KB_PATH> during install or first run when portable_template is true.",
             "tool_protocol_hosts": "Use the read-only bridge allowlist until doctor, capabilities, and startup context checks pass.",
         },
+        "memory_server_bridge": {
+            "purpose": "Classify AKBP beside local memory servers, tool-protocol bridges, and runtime caches without letting the bridge become the source of truth.",
+            "safe_default": "read_only_substrate",
+            "durable_state_owner": "AKBP markdown and JSONL artifacts under knowledge_base.path",
+            "bridge_role": "transport_and_policy_glue_only",
+            "integration_modes": [
+                {
+                    "mode": "runtime_cache_plus_akbp",
+                    "use_when": "The host already keeps ephemeral task memory or embeddings for speed.",
+                    "akbp_boundary": "Only reviewed durable facts, decisions, sources, and lifecycle records are promoted into AKBP.",
+                    "required_gate": "dry_run preview before any durable write",
+                },
+                {
+                    "mode": "tool_protocol_bridge",
+                    "use_when": "The host wants native tools but AKBP remains the file-backed knowledge base.",
+                    "akbp_boundary": "Generate read-only host tools from tool_protocol_bridge.host_tool_manifest before exposing write previews.",
+                    "required_gate": "capabilities and doctor preflight must pass",
+                },
+                {
+                    "mode": "migration_review",
+                    "use_when": "Existing memories, notes, or exports need cleanup before reuse.",
+                    "akbp_boundary": "Run import-check and dry-run import-apply, then approve only cited and non-secret records.",
+                    "required_gate": "import-check accepted records and surfaced rejections",
+                },
+            ],
+            "must_preserve": [
+                "AKBP response envelope with ok, result, and error.code",
+                "citations, source ids, source drift warnings, and context budget",
+                "dry-run review metadata before approved writes",
+                "export-checkable artifacts independent of bridge-local metadata",
+            ],
+            "disable_or_warn_when": [
+                "the bridge stores durable memory in its own opaque format",
+                "recalled context has no citations or source ids",
+                "write tools can apply without dry_run preview and explicit approved:true",
+                "export or import checks depend on bridge-local state",
+            ],
+        },
         "multi_client_scope": {
             "purpose": "Let several coding-agent, editor, or local-assistant clients share one reviewed knowledge base without creating hidden per-client memory stores.",
             "shared_kb_path": kb_path,

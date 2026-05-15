@@ -78,6 +78,19 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             self.assertIn("AKBP artifacts", config["runtime_requirements"]["durable_state_owner"])
             self.assertIn("read-only bridge allowlist", config["runtime_requirements"]["tool_protocol_hosts"])
+            memory_bridge = config["memory_server_bridge"]
+            self.assertEqual(memory_bridge["safe_default"], "read_only_substrate")
+            self.assertEqual(memory_bridge["bridge_role"], "transport_and_policy_glue_only")
+            self.assertIn("AKBP markdown and JSONL artifacts", memory_bridge["durable_state_owner"])
+            modes = {mode["mode"]: mode for mode in memory_bridge["integration_modes"]}
+            self.assertIn("runtime_cache_plus_akbp", modes)
+            self.assertIn("tool_protocol_bridge", modes)
+            self.assertIn("migration_review", modes)
+            self.assertIn("dry_run preview", modes["runtime_cache_plus_akbp"]["required_gate"])
+            self.assertIn("host_tool_manifest", modes["tool_protocol_bridge"]["akbp_boundary"])
+            self.assertIn("import-check", modes["migration_review"]["required_gate"])
+            self.assertIn("error.code", " ".join(memory_bridge["must_preserve"]))
+            self.assertIn("opaque format", " ".join(memory_bridge["disable_or_warn_when"]))
             multi_client = config["multi_client_scope"]
             self.assertIn("share one reviewed knowledge base", multi_client["purpose"])
             self.assertEqual(multi_client["shared_kb_path"], str(kb.resolve()))

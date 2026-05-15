@@ -113,6 +113,11 @@ caches into hidden durable memory.
 It includes `scope_selection` so installers can show the first-run trust
 question before creating or reusing durable memory: repo-local, team-shared,
 personal-assistant, or migration KB.
+It includes `memory_server_bridge` for hosts that already have a tool-protocol
+memory server, local cache, or tool bridge. That block classifies the bridge as
+transport and policy glue only, keeps AKBP markdown and JSONL artifacts as the
+durable source of truth, and lists the fields a host must preserve before it
+can claim AKBP-compatible memory.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.
@@ -137,6 +142,11 @@ or reuse multiple knowledge bases. The safe default is a repo-local, read-only
 KB; team-shared, personal-assistant, and migration scopes require an explicit
 trust boundary so private notes, chat transcripts, or stale exports do not
 silently become project memory.
+
+Use `memory_server_bridge` when AKBP sits beside an existing memory server or
+tool host. Keep the bridge read-only until capability and doctor preflights
+pass, preserve citations and `error.code`, and warn or disable the integration
+when durable memory is stored in an opaque bridge-owned format.
 
 Use `first_run_sequence.steps` as the adapter install checklist. Stop at the
 first failed required step, show its structured failure, and keep the
