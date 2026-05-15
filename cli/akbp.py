@@ -1987,6 +1987,27 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "on_failure": "Continue without recalled context and surface the structured error.",
             },
         ],
+        "quality_gates": {
+            "startup_context": {
+                "required_before_planning": requested_profile in {"startup_context", "read_only", "reviewed_write"},
+                "minimum_items": 1,
+                "require_citations": True,
+                "warning_policy": "surface result.context.warnings before relying on recalled context",
+                "empty_context_policy": "continue without recalled memory; do not invent prior decisions",
+                "uncited_context_policy": "treat uncited recalled claims as setup output, not trusted planning input",
+                "recommended_harness": "examples/session-start-harness/run.sh",
+            },
+            "reviewed_writes": {
+                "required_for_apply": requested_profile == "reviewed_write",
+                "preview_fields": [
+                    "review_required",
+                    "apply_instruction",
+                    "would_write",
+                    "warnings",
+                ],
+                "apply_policy": "repeat the exact reviewed method, path, and params with approved:true only after approval outside the model-generated tool call",
+            },
+        },
         "safety": {
             "profile": requested_profile,
             "write_policy": "dry_run_then_approved" if requested_profile == "reviewed_write" else "no_writes",

@@ -41,7 +41,9 @@ python3 cli/akbp.py --path ./my-kb init
 python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile read-only
 ```
 
-The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, verification expectations, and safety rules. Paste that into the host runtime, then run the config's `verification` steps before adding write flows.
+The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, verification expectations, quality gates, and safety rules. Paste that into the host runtime, then run the config's `verification` steps before adding write flows.
+
+Use the config's `quality_gates.startup_context` block as the adapter stop condition before planning from recalled memory. A runtime should require cited context items, surface warnings, and continue without recalled memory when startup context is empty or uncited instead of inventing prior decisions.
 
 For adapter packages, docs, or installer templates that may be committed to a
 public repository, generate a placeholder-based config instead of embedding a

@@ -62,6 +62,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             self.assertEqual(config["verification"][1]["expect"]["result.summary.errors"], 0)
             self.assertEqual(config["verification"][2]["expect"]["result.context.items"], "array")
+            self.assertEqual(config["quality_gates"]["startup_context"]["minimum_items"], 1)
+            self.assertTrue(config["quality_gates"]["startup_context"]["require_citations"])
+            self.assertIn("session-start-harness", config["quality_gates"]["startup_context"]["recommended_harness"])
+            self.assertTrue(config["quality_gates"]["reviewed_writes"]["required_for_apply"])
+            self.assertIn("apply_instruction", config["quality_gates"]["reviewed_writes"]["preview_fields"])
             self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
             self.assertEqual(
                 config["safety"]["host_trust_boundary"]["hosted_autonomous_tools"],
@@ -89,6 +94,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["tool_protocol_bridge"]["mode"], "read_only")
             self.assertIn("akbp.import_check", read_only["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
+            self.assertFalse(read_only["quality_gates"]["reviewed_writes"]["required_for_apply"])
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
             portable = json.loads(
@@ -110,6 +116,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertNotIn("write_apply_requires_approval", startup_context["startup"]["params"]["requires"])
             self.assertTrue(startup_context["verification"][1]["expect"]["result.adapter_readiness.startup_context_ready"])
             self.assertEqual(startup_context["session_start"]["method"], "akbp.session.start")
+            self.assertTrue(startup_context["quality_gates"]["startup_context"]["required_before_planning"])
             self.assertEqual(startup_context["safety"]["profile"], "startup_context")
             self.assertEqual(startup_context["safety"]["write_policy"], "no_writes")
 
