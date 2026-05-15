@@ -300,6 +300,10 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "examples" / "tool-error-handling" / "README.md").read_text(encoding="utf-8")
         for required in [
             "error.code",
+            "Adapter action matrix",
+            "Adapter action",
+            "Retry policy",
+            "User-visible state",
             "invalid_json",
             "invalid_request",
             "unknown_method",
@@ -309,6 +313,8 @@ class RepoQualityTest(unittest.TestCase):
             "internal_error",
             "dry_run",
             "approved",
+            "trusted local policy",
+            "method, path, and params match the reviewed request",
         ]:
             self.assertIn(required, text)
 

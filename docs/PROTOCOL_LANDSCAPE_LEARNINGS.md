@@ -77,6 +77,14 @@ Every public demo should include one safe failure:
 - CLI error details are redacted/truncated
 - source verification flags missing or changed evidence
 
+Recent lightweight research reinforced a practical adapter gap: many adjacent
+agent-memory projects expose a server or bridge surface, but client guidance
+often stops at transport setup. AKBP should keep showing adapter authors the
+control-flow contract: discover capabilities, branch on `ok` and
+`error.code`, preview write-capable calls with `dry_run:true`, stop on
+`approval_required`, and only repeat the same reviewed method, path, and params
+with `approved:true` after approval or trusted local policy.
+
 ### 6. Users like high-level memory features, but protocol users need exact artifacts
 
 Common features in the landscape:

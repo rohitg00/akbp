@@ -16,6 +16,29 @@ so a coding-agent adapter can recover safely:
 - `cli_error`: show the redacted CLI failure and avoid writing partial memory.
 - `internal_error`: stop and surface the bug; do not retry as a write.
 
+## Adapter action matrix
+
+Use this matrix when translating AKBP JSONL responses into a host runtime, tool
+bridge, editor extension, or task-runner wrapper. The client should make these
+decisions from `ok` and `error.code`, not from `error.message`.
+
+| Response | Adapter action | Retry policy | User-visible state |
+|----------|----------------|--------------|--------------------|
+| `ok:true` read response | Use `result` and preserve citations, warnings, and budget fields. | No retry. | Show retrieved context or capability state. |
+| `ok:true` `dry_run` write preview | Render `result.review_required`, `result.apply_instruction`, and planned writes for review. | Retry only as the same request with `approved:true` after approval or trusted local policy. | Show pending review, not committed memory. |
+| `invalid_json` | Repair JSON serialization before sending another line. | Retry after local encoder fix. | Show adapter bug or malformed request. |
+| `invalid_request` | Repair the request envelope and remove unknown request-level fields. | Retry after envelope fix. | Show adapter bug or incompatible client. |
+| `unknown_method` | Refresh `akbp.capabilities`; disable unavailable flow if still missing. | Retry only after capability refresh. | Show unsupported method. |
+| `invalid_params` | Use `error.details.params_schema`, missing fields, unknown fields, and type errors to repair `params`. | Retry after parameter fix. | Show invalid input. |
+| `approval_required` | Stop the apply path; require a reviewed preview before applying. | Retry only with `approved:true` after approval or trusted local policy. | Show approval needed. |
+| `cli_error` | Surface redacted CLI stdout/stderr and avoid assuming any durable write happened. | Retry only after the underlying CLI issue is fixed. | Show operation failed. |
+| `internal_error` | Stop the flow and report a server defect. | Do not auto-retry writes. | Show integration failure. |
+
+For write methods, an adapter should only move from preview to apply when the
+method, path, and params match the reviewed request. The request id may change,
+but changing the write payload after review should send the user back through a
+new `dry_run:true` preview.
+
 Run from the repository root:
 
 ```bash

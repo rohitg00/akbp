@@ -66,6 +66,18 @@ assert missing_cite["error"]["code"] == "cli_error", missing_cite
 assert missing_cite["error"]["details"]["exit_code"] != 0, missing_cite
 assert "redacted" in missing_cite["error"]["details"], missing_cite
 
+actions = {
+    "invalid_json": "repair JSON serialization",
+    "invalid_request": "repair request envelope",
+    "unknown_method": "refresh capabilities and disable unavailable flow",
+    "invalid_params": "repair params from advertised schema",
+    "approval_required": "stop apply path until reviewed approval",
+    "cli_error": "surface redacted CLI failure",
+}
+for code, action in actions.items():
+    assert code in by_code, code
+    assert action, action
+
 print("structured error handling ok")
 PY
 
