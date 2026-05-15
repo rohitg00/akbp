@@ -17,6 +17,8 @@ doctor contract ok
 startup context contract ok
 dry-run review contract ok
 approval-required contract ok
+approved apply contract ok
+approved recall contract ok
 AKBP structured output harness example passed
 ```
 
@@ -28,6 +30,8 @@ AKBP structured output harness example passed
 - startup context includes cited records before the adapter uses memory in a plan
 - dry-run write previews include `review_required`, `apply_instruction`, and `would_write`
 - unapproved writes return the structured `approval_required` stop signal
+- approved writes return a schema-backed claim only after the review gate is
+  crossed, and indexed recall can cite the approved memory
 
 Use this as a starting harness before wiring AKBP into an editor command, local coding agent, or tool bridge. The adapter should branch on fields and error codes, not on free-form text.
 
@@ -44,6 +48,8 @@ An adapter should stay read-only or setup-only when this harness cannot prove:
 - startup context includes cited items before the runtime plans from memory
 - write previews expose review metadata and planned durable changes
 - unapproved apply attempts stop with `error.code:"approval_required"`
+- approved apply plus index refresh returns cited recall for the same reviewed
+  durable claim
 
 These checks keep AKBP as a reviewable knowledge contract instead of an opaque
 memory sidecar.

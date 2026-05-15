@@ -92,12 +92,35 @@ assert details["dry_run"] is False, blocked
 assert details["review_required"] is True, blocked
 assert details["apply_instruction"], blocked
 print("approval-required contract ok")
+
+approved = envelope("remember-approved")
+assert approved["ok"], approved
+claim = approved["result"]
+assert claim["type"] == "workflow", approved
+assert claim["text"] == "Adapter harnesses should fail closed when AKBP response shape validation fails.", approved
+assert len(claim["evidence"]) == 1 and claim["evidence"][0].endswith("harness-note.md"), approved
+print("approved apply contract ok")
+
+index = envelope("index-approved")
+assert index["ok"], index
+assert index["result"]["ok"], index
+
+recall = envelope("recall-approved")
+assert recall["ok"], recall
+recall_items = recall["result"]["items"]
+assert recall_items, recall
+assert any("response shape validation fails" in item["summary"] for item in recall_items), recall
+assert any(item["citations"] for item in recall_items), recall
+print("approved recall contract ok")
 '
 {"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"structured-output-harness-example","requires":["method_param_schemas","structured_errors","write_apply_requires_approval"],"requires_profiles":["startup_context","reviewed_write"]}}
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":500}}
 {"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Unapproved adapter harness writes must fail closed.","type":"workflow","evidence":["$NOTE"]}}
+{"id":"remember-approved","method":"akbp.remember","path":"$KB","approved":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
+{"id":"index-approved","method":"akbp.index","path":"$KB","approved":true,"params":{"incremental":true}}
+{"id":"recall-approved","method":"akbp.context","path":"$KB","params":{"task":"response shape validation fails","limit":5,"max_chars":500}}
 JSONL
 
 echo "AKBP structured output harness example passed"

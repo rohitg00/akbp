@@ -131,6 +131,25 @@
           "dry_run": false,
           "review_required": true
         }
+      },
+      {
+        "id": "remember-approved-structured-harness",
+        "method": "akbp.remember",
+        "approved": true,
+        "params": {
+          "text": "Adapter harnesses should fail closed when response shape validation fails.",
+          "type": "workflow",
+          "evidence": ["source_tool_contract_harness"]
+        },
+        "expected_result_schema": "#/$defs/claim_result",
+        "expected_result_fields": ["id", "text", "type", "status", "confidence", "evidence", "entities", "scope", "created_at", "updated_at"],
+        "expected_result_values": {
+          "text": "Adapter harnesses should fail closed when response shape validation fails.",
+          "type": "workflow"
+        },
+        "expected_result_contains": {
+          "evidence[]": ["source_tool_contract_harness"]
+        }
       }
     ]
   },
@@ -155,6 +174,7 @@
       "approval_required"
     ],
     "must_dry_run_tool_methods": ["akbp.remember"],
-    "must_reject_tool_methods": ["akbp.remember"]
+    "must_reject_tool_methods": ["akbp.remember"],
+    "must_apply_tool_methods": ["akbp.remember"]
   }
 }
