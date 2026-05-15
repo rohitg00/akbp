@@ -74,7 +74,19 @@ This page maps the public examples to real use cases people can understand quick
 - AKBP remains the source of truth
 - proposed updates still pass import-check and approval gates
 
-## 6. Adapter integration
+## 6. Knowledge base health snapshot
+
+**Problem:** users and adapters need a fast way to see whether a knowledge base is useful, stale, indexed, and source-backed.
+
+**AKBP use case:** run `akbp status` or `akbp.status` to get counts, latest claims, source verification health, index presence, audit count, and conformance level.
+
+**What it proves:**
+
+- memory health can be inspected without reading raw JSONL first
+- dashboards and adapters can use one stable status payload
+- source drift is visible before agents trust stale knowledge
+
+## 7. Adapter integration
 
 **Problem:** agent runtimes need a predictable way to request context, propose writes, and close sessions without inventing their own memory format.
 
@@ -88,7 +100,7 @@ This page maps the public examples to real use cases people can understand quick
 - write safety is protocol-level behavior
 - session memory becomes portable files
 
-## 7. Portable knowledge bundles
+## 8. Portable knowledge bundles
 
 **Problem:** memory is trapped in one tool or workspace.
 

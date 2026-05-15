@@ -1225,6 +1225,27 @@ def cmd_status(args: argparse.Namespace) -> int:
     claims = read_jsonl(base / "claims" / "claims.jsonl")
     pages = list((base / "wiki").rglob("*.md")) if (base / "wiki").exists() else []
     sources = read_jsonl(base / "raw" / "sources" / "sources.jsonl")
+    entities = load_entities(base)
+    relations = load_relations(base)
+    audit_events = read_jsonl(base / ".akbp" / "audit.log.jsonl")
+    source_check = verify_sources(base)
+    latest_claims = sorted(
+        claims,
+        key=lambda claim: str(claim.get("updated_at") or claim.get("created_at") or ""),
+        reverse=True,
+    )[: args.limit]
+    status_counts: dict[str, int] = {}
+    type_counts: dict[str, int] = {}
+    for claim in claims:
+        status = str(claim.get("status") or "unknown")
+        claim_type = str(claim.get("type") or "unknown")
+        status_counts[status] = status_counts.get(status, 0) + 1
+        type_counts[claim_type] = type_counts.get(claim_type, 0) + 1
+    conformance_level = "none"
+    for level in ["3", "2", "1", "0"]:
+        if conformance_issues(base, level)["ok"]:
+            conformance_level = level
+            break
     print(json.dumps({
         "path": str(base),
         "claims": len(claims),
@@ -1233,6 +1254,44 @@ def cmd_status(args: argparse.Namespace) -> int:
         "initialized": (base / ".akbp/config.json").exists(),
         "card": (base / "akbp.json").exists(),
         "entrypoint": (base / "AKBP.md").exists(),
+        "counts": {
+            "claims": len(claims),
+            "sources": len(sources),
+            "pages": len(pages),
+            "entities": len(entities),
+            "relations": len(relations),
+            "audit_events": len(audit_events),
+        },
+        "claim_summary": {
+            "by_status": status_counts,
+            "by_type": type_counts,
+            "latest": [
+                {
+                    "id": claim.get("id"),
+                    "type": claim.get("type"),
+                    "status": claim.get("status"),
+                    "text": claim.get("text"),
+                    "evidence": claim.get("evidence", []),
+                    "updated_at": claim.get("updated_at") or claim.get("created_at"),
+                }
+                for claim in latest_claims
+            ],
+        },
+        "source_health": {
+            "ok": source_check["ok"],
+            "counts": source_check["counts"],
+            "attention": {
+                "changed": source_check["changed"][: args.limit],
+                "missing": source_check["missing"][: args.limit],
+                "unchecked": source_check["unchecked"][: args.limit],
+            },
+        },
+        "index": {
+            "present": (base / ".akbp" / "state.db").exists(),
+        },
+        "conformance": {
+            "highest_passing_level": conformance_level,
+        },
     }, indent=2))
     return 0
 
@@ -1929,6 +1988,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.set_defaults(func=cmd_conformance)
 
     s = sub.add_parser("status")
+    s.add_argument("--limit", type=int, default=5, help="number of recent claims and source issues to include")
     s.set_defaults(func=cmd_status)
     return p
 

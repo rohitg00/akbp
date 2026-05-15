@@ -130,8 +130,9 @@ AKBP should avoid overpromising runtime features. It should emphasize artifacts 
 ### Medium priority
 
 6. **Dashboard-ready summary output**
-   - Add a command or example that prints object counts, latest claims, unverified sources, conformance level, and audit count.
-   - Users should be able to screenshot the KB state.
+   - Shipped in `akbp status` and `akbp.status`.
+   - Prints object counts, latest claims, source verification health, conformance level, index presence, and audit count.
+   - Gives adapters and future dashboards a stable payload before building a hosted UI.
 
 7. **Import from common memory shapes**
    - Add examples converting simple tool-memory records, markdown notes, or JSONL memories into AKBP claims/sources.

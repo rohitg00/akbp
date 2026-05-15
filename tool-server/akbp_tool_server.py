@@ -74,7 +74,7 @@ WRITE_METHODS = {
 
 METHODS: dict[str, dict[str, Any]] = {
     "akbp.capabilities": {"write": False, "params": ["client", "requires"]},
-    "akbp.status": {"write": False, "params": []},
+    "akbp.status": {"write": False, "params": ["limit"]},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
     "akbp.context": {"write": False, "params": ["task", "limit"]},
     "akbp.index": {"write": True, "params": ["incremental", "dry_run"]},
@@ -327,7 +327,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
 
 def build_argv(method: str, params: dict[str, Any]) -> list[str]:
     mapping = {
-        "akbp.status": ["status"],
+        "akbp.status": ["status", "--limit", str(params.get("limit", 5))],
         "akbp.query": ["query", params.get("query", ""), "--limit", str(params.get("limit", 10))],
         "akbp.context": ["context", params.get("task", ""), "--limit", str(params.get("limit", 10))],
         "akbp.index": ["index"],
