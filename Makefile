@@ -35,6 +35,7 @@ examples:
 	./examples/multi-agent-consistency-demo/run.sh
 	./examples/portable-bundle/run.sh
 	./examples/existing-memory-migration/run.sh
+	./examples/read-only-adapter/run.sh
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score

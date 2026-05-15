@@ -128,6 +128,20 @@ This page maps the public examples to real use cases people can understand quick
 - missing evidence is rejected before import
 - migration stays review-gated instead of becoming a memory dump
 
+## 10. Read-only adapter rollout
+
+**Problem:** new adapters often need safe retrieval first, before they have enough UI to review durable writes.
+
+**AKBP use case:** discover `akbp.capabilities`, use `result.profiles.read_only` as the method allowlist, retrieve cited context, and block write methods locally until review UX exists.
+
+**Demo:** `examples/read-only-adapter/`
+
+**What it proves:**
+
+- adapters can ship context retrieval before write support
+- read-only methods are discoverable instead of hand-maintained
+- write-capable calls stay blocked until `dry_run`, `review_required`, `apply_instruction`, and `approved:true` are wired
+
 ## Good launch framing
 
 > AKBP is not another chat memory. It is a local-first protocol for reviewed project knowledge: cited claims, source hashes, lifecycle history, dry-run writes, conformance checks, and portable bundles.
@@ -143,6 +157,7 @@ examples/repo-memory-demo/run.sh
 examples/memory-ci/run.sh
 examples/multi-agent-consistency-demo/run.sh
 examples/existing-memory-migration/run.sh
+examples/read-only-adapter/run.sh
 ```
 
-That path shows the protocol, the benchmark, the repo use case, the CI gate, cross-agent consistency, and reviewed migration from existing memory.
+That path shows the protocol, the benchmark, the repo use case, the CI gate, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.

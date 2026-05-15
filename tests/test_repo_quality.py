@@ -104,6 +104,24 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, text + script)
         self.assertIn("./examples/portable-bundle/run.sh", makefile)
 
+    def test_read_only_adapter_example_documents_allowlist_flow(self):
+        text = (ROOT / "examples" / "read-only-adapter" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "read-only-adapter" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        for required in [
+            "AKBP read-only adapter example",
+            "AKBP read-only adapter example passed",
+            "akbp.capabilities",
+            "result.profiles.read_only",
+            "akbp.session.start",
+            "akbp.import_check",
+            "akbp.remember",
+            "adapter_read_only_block",
+            "no read-only write occurred",
+        ]:
+            self.assertIn(required, text + script)
+        self.assertIn("./examples/read-only-adapter/run.sh", makefile)
+
     def test_cli_readme_documents_search_query_syntax(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
         for required in [
