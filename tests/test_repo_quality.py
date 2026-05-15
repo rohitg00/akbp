@@ -291,6 +291,29 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, combined)
 
+    def test_existing_memory_migration_documents_opaque_host_promotion_gate(self):
+        text = (ROOT / "examples" / "existing-memory-migration" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "existing-memory-migration" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script
+        for required in [
+            "AKBP existing memory migration example",
+            "hosted coding-agent memory",
+            "tool memory servers",
+            "opaque-host export",
+            "runtime scratch",
+            "review.ready_for_reviewed_apply:true",
+            "claims_without_evidence",
+            "claims_without_source_evidence",
+            "opaque host summary needs source review",
+            "import-check",
+            "import-apply",
+            "--dry-run",
+            "--approved",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/existing-memory-migration/run.sh", makefile)
+
     def test_github_copilot_adapter_documents_cloud_agent_read_only_boundary(self):
         readme = (ROOT / "adapters" / "github-copilot" / "README.md").read_text(encoding="utf-8")
         instructions = (ROOT / "adapters" / "github-copilot" / "instructions.md").read_text(encoding="utf-8")
