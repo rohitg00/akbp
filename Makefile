@@ -33,6 +33,7 @@ examples:
 	./examples/repo-memory-demo/run.sh
 	./examples/memory-ci/run.sh
 	./examples/multi-agent-consistency-demo/run.sh
+	./examples/portable-bundle/run.sh
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score

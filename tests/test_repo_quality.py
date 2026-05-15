@@ -85,17 +85,24 @@ class RepoQualityTest(unittest.TestCase):
 
     def test_portable_bundle_example_documents_review_flow(self):
         text = (ROOT / "examples" / "portable-bundle" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "portable-bundle" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         for required in [
+            "AKBP portable bundle example",
+            "AKBP portable bundle example passed",
             "akbp-portable-bundle",
             "excludes_local_state",
             "excludes_indexes",
+            "export-check",
             "import-check",
             "import-apply",
             "--dry-run",
             "--approved",
             "secret-like values",
+            "context",
         ]:
-            self.assertIn(required, text)
+            self.assertIn(required, text + script)
+        self.assertIn("./examples/portable-bundle/run.sh", makefile)
 
     def test_cli_readme_documents_search_query_syntax(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")

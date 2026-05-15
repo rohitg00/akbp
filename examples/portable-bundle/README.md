@@ -2,6 +2,20 @@
 
 This example shows how an agent should move AKBP knowledge between environments without trusting opaque state.
 
+## Run
+
+From the repository root:
+
+```bash
+examples/portable-bundle/run.sh
+```
+
+Expected success marker:
+
+```text
+AKBP portable bundle example passed
+```
+
 ## Producer
 
 ```bash
@@ -43,3 +57,12 @@ akbp --path ./target-kb import-apply incoming.jsonl --approved
 ```
 
 The dry run is the contract boundary. Agents should not apply durable writes until the accepted ids, rejected ids, planned write ids, and skipped-existing ids have been reviewed by the runtime or user policy.
+
+After approval, rebuild retrieval state and query the target knowledge base:
+
+```bash
+akbp --path ./target-kb index --incremental
+akbp --path ./target-kb context "continue the handoff"
+```
+
+The target should recall only reviewed portable claims. Local indexes, caches, and engine-owned files are intentionally excluded from the producer bundle and rebuilt by the consumer.
