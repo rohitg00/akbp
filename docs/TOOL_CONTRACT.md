@@ -135,6 +135,10 @@ planning or before exposing reviewed-write flows. The harness contract requires
 the bridge to preserve the response envelope, citations, context quality fields,
 dry-run review metadata, and structured `approval_required` errors; failure
 means the integration stays read-only and continues without recalled memory.
+The same block lists the preflight methods that must survive translation
+(`akbp.capabilities`, `akbp.doctor`, and `akbp.session.start`) plus the two
+trust boundaries where the harness is required: planning from recalled context
+and exposing reviewed-write tools.
 
 ```json
 {

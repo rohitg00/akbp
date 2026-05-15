@@ -234,7 +234,7 @@ class ToolServerTest(unittest.TestCase):
             "method": "akbp.capabilities",
             "params": {
                 "client": "profile-negotiation-test",
-                "requires": ["method_param_schemas", "features.capability_negotiation"],
+                "requires": ["method_param_schemas", "features.capability_negotiation", "adapter_contract_harness"],
                 "requires_profiles": ["read_only", "missing_profile"],
                 "requires_methods": ["akbp.context", "akbp.future"],
             },
@@ -244,7 +244,7 @@ class ToolServerTest(unittest.TestCase):
         assert_response_envelope(self, line)
         negotiation = line["result"]["negotiation"]
         self.assertEqual(negotiation["client"], "profile-negotiation-test")
-        self.assertEqual(negotiation["supported_features"], ["method_param_schemas", "features.capability_negotiation"])
+        self.assertEqual(negotiation["supported_features"], ["method_param_schemas", "features.capability_negotiation", "adapter_contract_harness"])
         self.assertEqual(negotiation["unsupported_features"], [])
         self.assertEqual(negotiation["supported_profiles"], ["read_only"])
         self.assertEqual(negotiation["unsupported_profiles"], ["missing_profile"])
@@ -369,6 +369,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("bounded_context", capabilities["properties"]["features"]["required"])
         self.assertIn("session_lifecycle_entrypoints", capabilities["properties"]["features"]["required"])
         self.assertIn("session_boundary_contract", capabilities["properties"]["features"]["required"])
+        self.assertIn("adapter_contract_harness", capabilities["properties"]["features"]["required"])
         self.assertIn("cli_error_output_truncation", capabilities["properties"]["features"]["required"])
         self.assertIn("request_id_numeric_bounds", capabilities["properties"]["features"]["required"])
         self.assertIn("capability_negotiation", capabilities["properties"]["features"]["required"])
@@ -400,6 +401,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(knowledge_capability["properties"]["session_boundary"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["portability"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["adapter_quality"]["additionalProperties"])
+        adapter_quality = knowledge_capability["properties"]["adapter_quality"]
+        self.assertIn("preflight_methods", adapter_quality["required"])
+        self.assertIn("required_before", adapter_quality["required"])
         negotiation = capabilities["properties"]["negotiation"]
         self.assertFalse(negotiation["additionalProperties"])
         self.assertIn("requested_features", negotiation["required"])

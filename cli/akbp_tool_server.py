@@ -239,6 +239,8 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
     "adapter_quality": {
         "harness": "examples/structured-output-harness/run.sh",
         "contract": "preserve_structured_envelope_citations_review_metadata_and_errors",
+        "preflight_methods": ["akbp.capabilities", "akbp.doctor", "akbp.session.start"],
+        "required_before": ["planning_from_recalled_context", "exposing_reviewed_write_tools"],
         "must_preserve_fields": [
             "ok",
             "error.code",
@@ -364,6 +366,7 @@ def capability_features() -> dict[str, bool]:
             "bounded_context": True,
             "session_lifecycle_entrypoints": True,
             "session_boundary_contract": True,
+            "adapter_contract_harness": True,
             "method_schema_runtime_parity": not SCHEMA_RUNTIME_ERRORS,
             "unknown_request_field_rejection": True,
             "unknown_param_rejection": True,
