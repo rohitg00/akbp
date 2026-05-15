@@ -268,8 +268,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             proof_names = {step["name"] for step in ten_minute["proof_steps"]}
             self.assertIn("retrieve_cited_context", proof_names)
             self.assertIn("block_unapproved_apply", proof_names)
+            self.assertIn("validate_adapter_response_contract", proof_names)
             self.assertIn("export_checked_bundle", proof_names)
+            self.assertIn("adapter_contract_harness", json.dumps(ten_minute["proof_steps"]))
             self.assertIn("approval_required", " ".join(ten_minute["success_markers"]))
+            self.assertIn("adapter_contract_harness", " ".join(ten_minute["success_markers"]))
             self.assertIn("read-only", ten_minute["fallback"])
             self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
@@ -569,9 +572,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("create_visible_artifacts", proof_steps)
             self.assertIn("retrieve_cited_context", proof_steps)
             self.assertIn("block_unapproved_apply", proof_steps)
+            self.assertIn("validate_adapter_response_contract", proof_steps)
             self.assertIn("export_portable_bundle", proof_steps)
             self.assertIn("--require-citations", proof_steps["retrieve_cited_context"]["command"])
+            self.assertIn("structured-output-harness", proof_steps["validate_adapter_response_contract"]["command"])
             self.assertIn("approval_required", " ".join(ten_minute["success_markers"]))
+            self.assertIn("structured-output harness", " ".join(ten_minute["success_markers"]))
             self.assertEqual(
                 discovered["first_run_proof"]["recommended_harness"]["command"],
                 "./examples/structured-output-harness/run.sh",
@@ -591,7 +597,9 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("retrieve_startup_context", proof_steps)
             self.assertIn("preview_before_write", proof_steps)
             self.assertIn("block_unapproved_write", proof_steps)
+            self.assertIn("validate_adapter_response_contract", proof_steps)
             self.assertIn("approval_required", proof_steps["block_unapproved_write"]["expect"])
+            self.assertIn("structured-output-harness", proof_steps["validate_adapter_response_contract"]["command"])
             self.assertIn("dry-run preview", " ".join(discovered["first_run_proof"]["enable_reviewed_writes_when"]))
             self.assertIn("doctor --profile read-only", discovered["recommended_commands"]["doctor"])
             self.assertEqual(discovered["missing_artifacts"], [])

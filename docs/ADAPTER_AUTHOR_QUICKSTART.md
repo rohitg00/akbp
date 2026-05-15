@@ -49,7 +49,8 @@ continue without durable memory instead of creating hidden state.
 Discovery also returns `ten_minute_proof` for installer UIs. It turns the
 first-run value proposition into structured checks: no Docker, no cloud account,
 no secrets, visible AKBP artifacts, cited startup context, dry-run review,
-`approval_required` for unapproved applies, and export-checkable portability.
+`approval_required` for unapproved applies, adapter response-contract validation,
+and export-checkable portability.
 Discovery also returns `adapter_prompt_contract`, a compact set of runtime
 instructions for the first trusted memory call. Use it when the host needs
 pasteable system rules: call `akbp.session.start` before planning from memory,
@@ -70,7 +71,8 @@ The generated config includes the server command, knowledge-base path, startup `
 The generated config also includes `ten_minute_proof` so setup UIs can show the
 smallest verified AKBP value proof instead of vague memory claims: local-first
 artifacts, no Docker or cloud requirement, cited startup context, review-gated
-writes, and export-checkable portability.
+writes, structured response-contract validation, and export-checkable
+portability.
 
 Use the config's `quality_gates.startup_context` block as the adapter stop condition before planning from recalled memory. A runtime should require cited context items, surface warnings, and continue without recalled memory when startup context is empty or uncited instead of inventing prior decisions.
 Use `adapter_prompt_contract.system_rules` as the host-facing memory prompt and

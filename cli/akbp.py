@@ -524,9 +524,15 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "command": "repeat the write request without approved:true",
                 "expect": "Tool server returns error.code approval_required.",
             },
+            {
+                "name": "validate_adapter_response_contract",
+                "command": "./examples/structured-output-harness/run.sh",
+                "expect": "Harness proves the adapter can preserve envelopes, citations, budget metadata, dry-run review fields, and approval stop signals before trusting memory.",
+            },
         ],
         "enable_reviewed_writes_when": [
             "doctor --profile reviewed-writes passes",
+            "the structured-output harness passes against the adapter response boundary",
             "the adapter shows dry-run preview fields to the user",
             "approved apply repeats the reviewed method, path, and params",
             "scratchpads, private logs, and raw transcripts stay outside AKBP unless promoted through review",
@@ -571,6 +577,11 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "proves": "The tool server returns approval_required instead of silently writing memory.",
             },
             {
+                "name": "validate_adapter_response_contract",
+                "command": "./examples/structured-output-harness/run.sh",
+                "proves": "The runtime preserves structured envelopes, citations, budget metadata, dry-run review fields, and approval stop signals instead of relying on prompt-shaped summaries.",
+            },
+            {
                 "name": "export_portable_bundle",
                 "command": f"akbp --path {kb_arg} export --output bundle.json && akbp --path {kb_arg} export-check bundle.json --fail-on-issues",
                 "proves": "Reviewed knowledge can be checked and carried across tools without local runtime state.",
@@ -579,6 +590,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "success_markers": [
             "doctor reports the requested profile ready",
             "context results either carry citations or the adapter continues without recalled AKBP memory",
+            "structured-output harness passes before recalled context influences planning",
             "write previews include review metadata and would-write paths",
             "unapproved writes fail with approval_required",
             "export-check passes without secret or manifest issues",
@@ -2964,6 +2976,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "proves": "The server returns approval_required instead of silently writing memory.",
                 },
                 {
+                    "name": "validate_adapter_response_contract",
+                    "run": "adapter_contract_harness",
+                    "proves": "The host preserves structured response envelopes, citations, budget metadata, dry-run review fields, and approval stop signals before trusting memory.",
+                },
+                {
                     "name": "export_checked_bundle",
                     "run": "akbp export followed by akbp export-check --fail-on-issues",
                     "proves": "Reviewed knowledge is portable without bridge-owned or index-only state.",
@@ -2972,6 +2989,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "success_markers": [
                 "health_check reports requested_profile_ready",
                 "session_start returns cited items or the host continues without recalled memory",
+                "adapter_contract_harness passes before recalled context influences planning",
                 "dry-run preview returns review metadata and would-write paths",
                 "unapproved writes fail with approval_required",
                 "export-check passes before sharing or importing knowledge",

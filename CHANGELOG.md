@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added adapter response-contract validation to generated ten-minute proofs so
+  installers run the structured-output harness before recalled memory can
+  influence planning.
 - Added an AKBP-vs-memory-server decision table to the adoption guide so users
   can keep fast runtime memory as scratchpad while promoting only cited,
   reviewed project facts into portable AKBP artifacts.
