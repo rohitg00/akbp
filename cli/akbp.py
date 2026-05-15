@@ -1642,6 +1642,40 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "ready_field": "ready_for_adapter",
             "blocking_field": "summary.errors",
         },
+        "verification": [
+            {
+                "id": "capabilities-1",
+                "run": "startup",
+                "expect": {
+                    "ok": True,
+                    "result.negotiation.satisfied": True,
+                    "result.features.method_param_schemas": True,
+                    "result.features.method_schema_runtime_parity": True,
+                    "result.runtime.method_schema_runtime_errors": [],
+                },
+                "on_failure": "Disable unsupported flows and show result.negotiation.unsupported_features or unsupported_profiles.",
+            },
+            {
+                "id": "doctor-1",
+                "run": "health_check",
+                "expect": {
+                    "ok": True,
+                    "result.ready_for_adapter": True,
+                    "result.summary.errors": 0,
+                },
+                "on_failure": "Show result.next_steps and keep the adapter in read-only setup mode.",
+            },
+            {
+                "id": "session-start-1",
+                "run": "session_start",
+                "expect": {
+                    "ok": True,
+                    "result.context.items": "array",
+                    "result.context.warnings": "array",
+                },
+                "on_failure": "Continue without recalled context and surface the structured error.",
+            },
+        ],
         "safety": {
             "profile": requested_profile,
             "write_policy": "dry_run_then_approved" if requested_profile == "reviewed_write" else "no_writes",

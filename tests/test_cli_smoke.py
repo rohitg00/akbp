@@ -42,6 +42,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["session_start"]["path"], str(kb.resolve()))
             self.assertEqual(config["health_check"]["id"], "doctor-1")
             self.assertEqual(config["health_check"]["path"], str(kb.resolve()))
+            self.assertEqual([step["run"] for step in config["verification"]], ["startup", "health_check", "session_start"])
+            self.assertTrue(config["verification"][0]["expect"]["result.negotiation.satisfied"])
+            self.assertEqual(config["verification"][1]["expect"]["result.summary.errors"], 0)
+            self.assertEqual(config["verification"][2]["expect"]["result.context.items"], "array")
             self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
             self.assertTrue(config["safety"]["never_auto_apply_session_end"])
 
@@ -58,6 +62,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
+            self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
     def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):

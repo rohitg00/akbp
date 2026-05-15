@@ -25,6 +25,10 @@ assert config["health_check"]["id"] == "doctor-1", config
 assert config["health_check"]["path"] == config["knowledge_base"]["path"], config
 assert config["health_check"]["method"] == "akbp.doctor", config
 assert config["health_check"]["ready_field"] == "ready_for_adapter", config
+assert [step["run"] for step in config["verification"]] == ["startup", "health_check", "session_start"], config
+assert config["verification"][0]["expect"]["result.negotiation.satisfied"] is True, config
+assert config["verification"][1]["expect"]["result.summary.errors"] == 0, config
+assert config["verification"][2]["expect"]["result.context.items"] == "array", config
 assert config["safety"]["write_policy"] == "no_writes", config
 assert config["safety"]["require_adapter_ready"] is True, config
 assert config["session_start"]["id"] == "session-start-1", config
@@ -47,6 +51,9 @@ assert "write_apply_requires_approval" in config["startup"]["params"]["requires"
 assert config["health_check"]["id"] == "doctor-1", config
 assert config["health_check"]["path"] == config["knowledge_base"]["path"], config
 assert config["health_check"]["blocking_field"] == "summary.errors", config
+assert config["verification"][0]["run"] == "startup", config
+assert config["verification"][1]["run"] == "health_check", config
+assert config["verification"][2]["run"] == "session_start", config
 assert config["safety"]["write_policy"] == "dry_run_then_approved", config
 assert config["safety"]["require_adapter_ready"] is True, config
 assert config["safety"]["require_review_metadata"] is True, config
