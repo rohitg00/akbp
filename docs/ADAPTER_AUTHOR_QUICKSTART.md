@@ -130,6 +130,17 @@ examples/adapter-lifecycle/run.sh
 
 It verifies the complete adapter loop: capability negotiation, startup context, `akbp.session.end` dry-run preview, unapproved write rejection, approved apply, index refresh, and recalled context after the write.
 
+Treat these examples as the adapter output quality harness, not just smoke
+tests. A structured prompt can ask an agent to return citations, review
+metadata, or write decisions, but the harness proves the runtime actually
+received schema-backed JSONL responses with the fields the adapter depends on.
+For a new adapter, wire the runtime so it blocks planning when startup context
+is empty or uncited, blocks writes when `akbp.doctor` recommends read-only mode,
+and blocks apply flows unless the dry-run preview contains the expected
+`review_required`, `apply_instruction`, and write summary fields. Add a
+benchmark fixture with `expected_result_schema`, `expected_result_fields`, and
+`expected_error_code` for every response shape the adapter treats as trusted.
+
 ## 4. Retrieve context at session start
 
 Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.

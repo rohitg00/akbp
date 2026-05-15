@@ -145,6 +145,27 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/session-start-harness/run.sh", makefile)
 
+    def test_docs_define_adapter_output_quality_harness(self):
+        benchmark = (ROOT / "docs" / "BENCHMARK.md").read_text(encoding="utf-8")
+        quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = benchmark + quickstart + readme
+        for required in [
+            "agent output quality harness",
+            "structured prompts",
+            "schema-backed JSONL responses",
+            "akbp.capabilities",
+            "akbp.doctor",
+            "akbp.session.start",
+            "dry-run write previews",
+            "expected_result_schema",
+            "expected_result_fields",
+            "expected_error_code",
+            "review_required",
+            "apply_instruction",
+        ]:
+            self.assertIn(required, combined)
+
     def test_stdio_client_config_example_documents_negotiated_setup(self):
         text = (ROOT / "examples" / "stdio-client-config" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "stdio-client-config" / "run.sh").read_text(encoding="utf-8")

@@ -6,6 +6,23 @@ AKBP needs an evaluation harness so the protocol does not become vibes.
 
 The benchmark stance is deliberately skeptical: AKBP should prove repeated-session recall, citation quality, contradiction handling, and retrieval behavior against fixtures before claiming broad memory quality. See `docs/CRITIQUE_RESPONSE.md` for the critique-to-work mapping.
 
+Recent agent-output discussions keep circling the same practical pattern:
+structured prompts help, but teams still need a harness that proves the
+runtime used the structure correctly. For AKBP, that harness is not a separate
+scoring product. It is the combination of:
+
+- capability negotiation that advertises the available method schemas
+- `akbp.doctor` checks that stop adapters before unsafe writes
+- `akbp.session.start` checks that cited startup context exists before planning
+- dry-run write previews with schema-backed result shapes
+- benchmark fixtures that assert exact response fields, nested values, and error
+  codes instead of relying on prose
+
+Use this as the agent output quality harness when you are testing a new adapter:
+the agent is allowed to continue only when the JSONL responses satisfy the
+fixture contract. If the response shape drifts, the adapter should fail the
+harness before a user trusts the memory.
+
 ## Benchmark tasks
 
 ### 1. Preference recall
