@@ -47,7 +47,7 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 `akbp ingest notes.md` imports a local file into `wiki/imports/`, records a source in `raw/sources/sources.jsonl`, extracts lightweight signals from headings and decision-like lines, and redacts common token/key patterns from the imported page. Use `--claim` to create one evidence-backed claim while importing; claim text is redacted with the same safety filter before durable write. Use `akbp ingest notes.md --dry-run` to preview source, page, claim ids, signals, redaction status, and would-write paths without changing the knowledge base.
 
-`akbp import-check export.jsonl` validates imported JSONL objects before durable writes. It reports accepted ids and rejected ids without echoing secret-like raw values, rejects claims that cite unknown `source_...` evidence ids, and lets agents review exports before using `ingest`, `remember`, or `import-apply`. Add `--fail-on-rejected` in automation when any rejected object should fail the gate.
+`akbp import-check export.jsonl` validates imported JSONL objects before durable writes. It reports accepted ids and rejected ids without echoing secret-like raw values, rejects claims that cite unknown `source_...` evidence ids, flags accepted claims whose evidence does not link to a registered source id, and lets agents review exports before using `ingest`, `remember`, or `import-apply`. Add `--fail-on-rejected` in automation when any rejected object should fail the gate.
 
 `akbp import-apply export.jsonl --dry-run` previews accepted source and claim records that would be written. Apply with `akbp import-apply export.jsonl --approved` only after reviewing `import-check` and the dry-run output. Rejected, malformed, or unsupported objects block the apply path.
 
@@ -55,6 +55,7 @@ Import apply review checklist:
 
 - Run `akbp import-check export.jsonl --fail-on-rejected` when automation must stop on any rejected object.
 - Confirm `accepted_count`, `rejected_count`, and `error_count` before applying.
+- Stop when `review.claims_without_evidence` or `review.claims_without_source_evidence` is non-empty.
 - Review `would_write.sources` and `would_write.claims` from the dry-run output.
 - Do not apply when rejected objects, parse errors, unsupported kinds, or secret-like values appear.
 - Treat `--approved` as the durable write boundary, not as a validation shortcut.

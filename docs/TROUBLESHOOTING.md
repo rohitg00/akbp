@@ -85,6 +85,7 @@ For changed sources, add a new source record or update the durable claim only af
 Inspect the reported issues before import/apply. Common causes:
 
 - Unknown `source_...` evidence ids.
+- Claim evidence that points at paths or notes instead of registered source ids.
 - Secret-like values in JSONL objects.
 - Missing manifest fields.
 - Artifact hashes that do not match the exported files.

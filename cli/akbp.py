@@ -1099,11 +1099,17 @@ def import_review_summary(
         for record in claims
         if not record.get("evidence")
     ]
+    claims_without_source_evidence = [
+        str(record.get("id"))
+        for record in claims
+        if record.get("evidence")
+        and not any(isinstance(evidence, str) and evidence in source_ids for evidence in record.get("evidence") or [])
+    ]
     rejected_reasons: dict[str, int] = {}
     for item in rejected:
         reason = str(item.get("reason") or "rejected")
         rejected_reasons[reason] = rejected_reasons.get(reason, 0) + 1
-    ready = not errors and not rejected and not claims_without_evidence
+    ready = not errors and not rejected and not claims_without_evidence and not claims_without_source_evidence
     next_actions = []
     if errors:
         next_actions.append("Fix malformed JSON before review.")
@@ -1111,6 +1117,8 @@ def import_review_summary(
         next_actions.append("Resolve rejected records before import-apply.")
     if claims_without_evidence:
         next_actions.append("Add source evidence for every durable claim before trusting the import.")
+    if claims_without_source_evidence:
+        next_actions.append("Link imported claims to registered source ids before treating the import as reviewed memory.")
     if ready:
         next_actions.append("Run import-apply --dry-run, review would_write ids, then repeat with --approved.")
     return {
@@ -1118,6 +1126,7 @@ def import_review_summary(
         "source_count": len(source_ids),
         "claim_count": len(claims),
         "claims_without_evidence": claims_without_evidence,
+        "claims_without_source_evidence": claims_without_source_evidence,
         "rejected_reasons": rejected_reasons,
         "next_actions": next_actions,
     }

@@ -1086,6 +1086,7 @@
         "source_count",
         "claim_count",
         "claims_without_evidence",
+        "claims_without_source_evidence",
         "rejected_reasons",
         "next_actions"
       ],
@@ -1102,6 +1103,13 @@
           "minimum": 0
         },
         "claims_without_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "claims_without_source_evidence": {
           "type": "array",
           "items": {
             "type": "string",

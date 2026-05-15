@@ -176,6 +176,7 @@ class RealWorldFlowTest(unittest.TestCase):
             self.assertGreaterEqual(import_check["review"]["source_count"], 1)
             self.assertGreaterEqual(import_check["review"]["claim_count"], 1)
             self.assertEqual(import_check["review"]["claims_without_evidence"], [])
+            self.assertEqual(import_check["review"]["claims_without_source_evidence"], [])
 
             apply_preview = cli_json(consumer, "import-apply", str(exchange_jsonl), "--dry-run")
             self.assertTrue(apply_preview["dry_run"])
@@ -239,6 +240,38 @@ class RealWorldFlowTest(unittest.TestCase):
             self.assertFalse(import_check["review"]["ready_for_reviewed_apply"])
             self.assertEqual(import_check["review"]["claims_without_evidence"], ["claim_uncited_runtime_fact"])
             self.assertIn("Add source evidence", " ".join(import_check["review"]["next_actions"]))
+
+    def test_import_review_flags_claims_without_registered_source_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            kb = base / "kb"
+            incoming = base / "incoming.jsonl"
+
+            cli(kb, "init")
+            incoming.write_text(
+                json.dumps(
+                    {
+                        "kind": "claim",
+                        "id": "claim_file_path_only_evidence",
+                        "text": "Decision: imported claims should cite registered source ids.",
+                        "type": "decision",
+                        "status": "working",
+                        "confidence": 0.72,
+                        "evidence": ["notes/session.md"],
+                        "scope": "project",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            import_check = cli_json(kb, "import-check", str(incoming), "--fail-on-rejected")
+            self.assertTrue(import_check["ok"])
+            self.assertEqual(import_check["rejected_count"], 0)
+            self.assertFalse(import_check["review"]["ready_for_reviewed_apply"])
+            self.assertEqual(import_check["review"]["claims_without_evidence"], [])
+            self.assertEqual(import_check["review"]["claims_without_source_evidence"], ["claim_file_path_only_evidence"])
+            self.assertIn("registered source ids", " ".join(import_check["review"]["next_actions"]))
 
 
 if __name__ == "__main__":
