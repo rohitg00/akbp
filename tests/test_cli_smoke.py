@@ -99,6 +99,24 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(doctor["adapter_readiness"]["startup_context_missing"], [])
             self.assertIn("index", doctor["adapter_readiness"]["read_only_missing"])
 
+            read_only = subprocess.run(
+                [sys.executable, str(CLI), "--path", str(kb), "doctor", "--profile", "read-only"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(read_only.returncode, 1)
+            read_only_doctor = json.loads(read_only.stdout)
+            self.assertEqual(read_only_doctor["requested_profile"], "read_only")
+            self.assertFalse(read_only_doctor["requested_profile_ready"])
+            self.assertFalse(read_only_doctor["adapter_readiness"]["read_only_ready"])
+
+            startup_context = json.loads(
+                run_cli("--path", str(kb), "doctor", "--profile", "startup-context").stdout
+            )
+            self.assertEqual(startup_context["requested_profile"], "startup_context")
+            self.assertTrue(startup_context["requested_profile_ready"])
+
     def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

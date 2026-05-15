@@ -96,6 +96,14 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rev
 
 The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
 
+For scripts or adapter installers, run a profile-specific preflight before wiring a host:
+
+```bash
+python3 cli/akbp.py --path ./my-kb doctor --profile read-only
+```
+
+`doctor --profile` returns the same JSON health report and exits non-zero when the requested workflow profile is not ready, even if the knowledge base has no hard setup errors. Use this to avoid enabling a read-only, startup-context, or reviewed-write adapter against a KB that still needs indexing, evidence, or review readiness work.
+
 ## Conformance
 
 `akbp conformance --level 0` checks the minimal file convention: `AKBP.md`, `akbp.json`, portable artifact paths, and required card capabilities.

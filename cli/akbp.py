@@ -1637,21 +1637,37 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     checks = doctor_checks(base)
     failing = [check for check in checks if not check["ok"]]
     blocking = [check for check in failing if check["severity"] == "error"]
+    profile_key = None
+    profile_ready = None
+    profile_map = {
+        "startup-context": "startup_context",
+        "read-only": "read_only",
+        "reviewed-writes": "reviewed_write",
+    }
+    adapter_readiness = doctor_adapter_readiness(checks)
+    if args.profile:
+        profile_key = profile_map[args.profile]
+        profile_ready = bool(adapter_readiness[f"{profile_key}_ready"])
     print(json.dumps({
         "path": str(base),
         "ok": not blocking,
         "ready_for_adapter": not blocking and not failing,
+        **({"requested_profile": profile_key, "requested_profile_ready": profile_ready} if profile_key else {}),
         "summary": {
             "passed": len(checks) - len(failing),
             "warnings": sum(1 for check in failing if check["severity"] == "warning"),
             "errors": len(blocking),
         },
-        "adapter_readiness": doctor_adapter_readiness(checks),
+        "adapter_readiness": adapter_readiness,
         "workflow": doctor_workflow(base, checks),
         "checks": checks,
         "next_steps": [check["next_step"] for check in failing if check.get("next_step")][: args.limit],
     }, indent=2, ensure_ascii=False))
-    return 1 if blocking else 0
+    if blocking:
+        return 1
+    if profile_key and not profile_ready:
+        return 1
+    return 0
 
 
 def cmd_client_config(args: argparse.Namespace) -> int:
@@ -2510,6 +2526,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("doctor")
     s.add_argument("--limit", type=int, default=5, help="number of next steps to include")
+    s.add_argument(
+        "--profile",
+        choices=["startup-context", "read-only", "reviewed-writes"],
+        help="also fail when the requested adapter workflow profile is not ready",
+    )
     s.set_defaults(func=cmd_doctor)
 
     s = sub.add_parser("client-config", help="print a stdio JSONL client configuration for the AKBP tool server")
