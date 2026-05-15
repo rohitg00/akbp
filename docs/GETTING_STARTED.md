@@ -42,6 +42,7 @@ The trust boundary is just as important as the layout:
 
 If a tool hides these artifacts or applies writes without the preview/approval step, it is bypassing the main AKBP value.
 The generated `AKBP.md` now makes that policy visible on first run, so adapters and humans have a shared local rule sheet before any memory is written.
+If a project needs a stricter starter policy, copy or merge `templates/project-memory-rules/AKBP.md` and use `docs/TEMPLATES.md` as the setup guide.
 
 ## Fast path
 

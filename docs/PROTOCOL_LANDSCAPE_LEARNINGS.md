@@ -282,6 +282,23 @@ High-value, low-risk docs/examples:
 5. `benchmarks/fixtures/knowledge-gap-to-task/`
    - Converts missing evidence, contested claims, or stale sources into actionable tasks.
 
+## Shipped artifact: project memory rules template
+
+`templates/project-memory-rules/AKBP.md` now gives new repositories a copyable local rule file before agents start writing durable memory.
+
+It covers:
+
+- durable knowledge criteria
+- acceptable evidence
+- `dry_run:true` preview and `approved:true` apply requirements
+- approval policy
+- secret and private-data exclusions
+- lifecycle handling for superseded or contradicted knowledge
+- validation commands
+- adapter boundaries
+
+`docs/TEMPLATES.md` explains when to use the template and how to adopt it after `akbp init`.
+
 ### Positioning update
 
 Spec-driven agent workflows are proving that users want explicit durable artifacts and checkpoints. AKBP should borrow that packaging:

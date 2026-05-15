@@ -274,6 +274,30 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("demo:", text)
         self.assertIn("examples/quickstart-demo/run.sh", text)
 
+    def test_project_memory_rules_template_documents_review_boundary(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        getting_started = (ROOT / "docs" / "GETTING_STARTED.md").read_text(encoding="utf-8")
+        guide = (ROOT / "docs" / "TEMPLATES.md").read_text(encoding="utf-8")
+        template = (ROOT / "templates" / "project-memory-rules" / "AKBP.md").read_text(encoding="utf-8")
+        combined = guide + template
+        for required in [
+            "templates/project-memory-rules/AKBP.md",
+            "what counts as durable project knowledge",
+            "dry_run:true",
+            "approved:true",
+            "review-gated",
+            "Never store",
+            "superseded or contradicted",
+            "akbp doctor",
+            "akbp source verify",
+            "akbp conformance --level 2",
+            "must not create another durable memory format",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("templates/project-memory-rules/AKBP.md", readme)
+        self.assertIn("docs/TEMPLATES.md", readme)
+        self.assertIn("templates/project-memory-rules/AKBP.md", getting_started)
+
     def test_troubleshooting_covers_common_dx_failures(self):
         text = (ROOT / "docs" / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
         for required in [

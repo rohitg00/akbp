@@ -139,7 +139,7 @@ AKBP is designed for short, repeated agent sessions where the next runtime must 
 
 The core rule: agents can propose memory, but durable writes are review-gated.
 
-See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, and `examples/tool-server-approval-flow/`.
+See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, and `examples/tool-server-approval-flow/`.
 
 ## Knowledge base layout
 
@@ -162,6 +162,8 @@ raw/sources/           optional copied source material
 ```
 
 Local runtime state lives under `.akbp/`, including the rebuildable SQLite FTS5 index. Markdown and JSONL artifacts are the source of truth.
+
+For new repositories, `templates/project-memory-rules/AKBP.md` is a copyable starter rule file. It defines durable knowledge, evidence, approval, secret-handling, lifecycle, validation, and adapter rules before any write-capable integration is enabled.
 
 ## Tool server contract
 
