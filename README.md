@@ -345,6 +345,7 @@ The repo includes:
 - `examples/adoption-preflight/` for the first-run trust gate before an adapter or host treats AKBP as memory
 - `examples/jsonl-quickstart/` for the canonical tool-server sequence: capabilities, session start, dry-run write, approval gate, approved apply, index, context, and export
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
+- `examples/structured-output-harness/` for adapter response-contract checks before trusting recalled context or enabling reviewed writes
 - `examples/git-native-agent-handoff/` for repo-backed agent handoffs with cited context and review-gated shutdown memory
 - `examples/multi-agent-consistency-demo/` for cross-agent retrieval and supersession
 - `examples/rich-context-artifact/` for a static review surface backed by JSONL proposals
@@ -426,8 +427,9 @@ akbp/
 - CI reviewer: run `examples/memory-ci/run.sh`.
 - Adoption reviewer: run `examples/adoption-preflight/run.sh`.
 - JSONL tool author: run `examples/jsonl-quickstart/run.sh`.
+- Adapter quality reviewer: run `examples/structured-output-harness/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
-- Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
+- Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/` and `examples/structured-output-harness/`.
 - Session-memory reviewer: read `docs/SESSION_MEMORY_BOUNDARY.md`.
 - Git-native adapter reviewer: run `examples/git-native-agent-handoff/run.sh`.
 - Multi-agent workflow reviewer: run `examples/multi-agent-consistency-demo/run.sh`.
