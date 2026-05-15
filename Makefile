@@ -36,6 +36,7 @@ examples:
 	./examples/tool-server-approval-flow/run.sh
 	./examples/tool-error-handling/run.sh
 	./examples/session-start-harness/run.sh
+	./examples/structured-output-harness/run.sh
 	./examples/adapter-lifecycle/run.sh
 	./examples/multi-agent-consistency-demo/run.sh
 	./examples/portable-bundle/run.sh

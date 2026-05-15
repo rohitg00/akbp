@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added a runnable structured output harness example for adapter authors, including validation for JSONL envelopes, capability negotiation, cited startup context, dry-run review metadata, and approval-gated write rejection.
 - Added a runnable JSONL quickstart example that verifies the canonical tool-server adoption sequence from capability discovery through reviewed write, cited recall, and portable export.
 - Added an adapter structured-output harness benchmark fixture for capability negotiation, doctor/security posture, bounded startup context, dry-run preview metadata, and approval-gated write rejection.
 - Added a runnable adapter lifecycle example that verifies capability negotiation, session-start retrieval, session-end dry-run review, unapproved write rejection, approved apply, index refresh, and recalled context.

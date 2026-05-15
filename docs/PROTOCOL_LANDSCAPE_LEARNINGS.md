@@ -217,6 +217,22 @@ runnable sequence for adapter authors:
 This addresses the low-friction setup lesson from adjacent memory tools without
 weakening AKBP's review-gated protocol boundary.
 
+## Shipped artifact: structured output harness example
+
+Recent adapter discussions keep pointing at a practical gap: structured output
+is only useful when clients actively validate it. AKBP now ships
+`examples/structured-output-harness/` as a runnable quality gate for adapter
+authors.
+
+The example checks the JSONL response envelope, capability negotiation,
+`akbp.doctor` readiness, cited startup context, dry-run review metadata, and
+the structured `approval_required` error before any adapter trusts memory or
+enables durable writes.
+
+This turns the benchmark fixture into a user-facing adoption path: copy the
+harness, keep read paths strict, and fail closed on response shape or approval
+contract drift.
+
 ## Shipped artifact: KB scope guidance
 
 Recent local and tool-compatible memory projects keep converging on shared
