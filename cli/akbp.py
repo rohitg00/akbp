@@ -489,6 +489,45 @@ def cmd_discover(args: argparse.Namespace) -> int:
         ],
         "adapter_default": "read_only_until_doctor_and_capabilities_pass",
     }
+    adoption_triage = {
+        "format": "akbp-adoption-triage-v1",
+        "purpose": "Help first-run installers choose the right AKBP path when a team already has fast runtime memory, search, or tool-host context.",
+        "research_signal": "Recent agent-memory tools emphasize silent capture, shared tool-host memory, and low-friction setup; AKBP should answer with a fast trust proof, not a larger setup essay.",
+        "questions": [
+            {
+                "id": "need_durable_project_truth",
+                "ask": "Do later agents need inspectable project facts, decisions, or lifecycle records that survive outside one runtime?",
+                "yes": "Use AKBP as the durable source of truth.",
+                "no": "Keep the existing runtime memory as scratch and skip durable promotion.",
+            },
+            {
+                "id": "can_preserve_citations",
+                "ask": "Can the adapter preserve source ids, citations, warnings, and response envelopes?",
+                "yes": "Enable read-only cited recall after doctor and startup preflight pass.",
+                "no": "Do not plan from recalled memory; keep AKBP disabled or show the structured failure.",
+            },
+            {
+                "id": "has_review_surface",
+                "ask": "Can a human review dry-run metadata outside the model-generated tool call?",
+                "yes": "Allow reviewed-write previews and approved:true replay.",
+                "no": "Stay read-only and route durable promotion through import-check or local review.",
+            },
+        ],
+        "recommended_path": [
+            "start read-only",
+            "prove cited startup context",
+            "keep existing memory as ephemeral hints",
+            "promote only source-backed durable claims after dry-run review",
+            "export-check before sharing or migrating knowledge",
+        ],
+        "fail_closed_when": [
+            "context has no citations",
+            "adapter drops error.code or warnings",
+            "writes cannot be previewed with dry_run:true",
+            "approval happens inside autonomous tool execution",
+            "durable state would live only in bridge-local cache",
+        ],
+    }
     first_run_proof = {
         "goal": "prove cited, review-gated recall before enabling durable writes",
         "safe_default": "read_only",
@@ -731,6 +770,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "adapter_rule": "Run doctor --profile before enabling a workflow profile.",
         },
         "positioning": positioning,
+        "adoption_triage": adoption_triage,
         "profile_selection": profile_selection,
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added first-run adoption triage to discovery output so installers can choose
+  read-only recall, reviewed promotion, or scratch-only fallback based on
+  citations, response preservation, and review-surface support.
 - Tightened context budget schemas so adapter validators require clipped,
   omitted, and before/after item diagnostics whenever a budget object is
   returned.

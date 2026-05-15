@@ -618,6 +618,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             compared_layers = {item["layer"] for item in discovered["positioning"]["use_with"]}
             self.assertIn("memory_server_or_runtime_cache", compared_layers)
             self.assertIn("tool_protocol_host", compared_layers)
+            triage = discovered["adoption_triage"]
+            self.assertEqual(triage["format"], "akbp-adoption-triage-v1")
+            self.assertIn("silent capture", triage["research_signal"])
+            self.assertEqual([question["id"] for question in triage["questions"]], [
+                "need_durable_project_truth",
+                "can_preserve_citations",
+                "has_review_surface",
+            ])
+            self.assertIn("prove cited startup context", triage["recommended_path"])
+            self.assertIn("adapter drops error.code or warnings", triage["fail_closed_when"])
             selection = discovered["profile_selection"]
             self.assertEqual(selection["format"], "akbp-adapter-profile-selection-v1")
             self.assertEqual(selection["safe_default"], "read_only")
