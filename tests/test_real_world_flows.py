@@ -172,10 +172,15 @@ class RealWorldFlowTest(unittest.TestCase):
             import_check = cli_json(consumer, "import-check", str(exchange_jsonl), "--fail-on-rejected")
             self.assertTrue(import_check["ok"])
             self.assertEqual(import_check["rejected"], [])
+            self.assertTrue(import_check["review"]["ready_for_reviewed_apply"])
+            self.assertGreaterEqual(import_check["review"]["source_count"], 1)
+            self.assertGreaterEqual(import_check["review"]["claim_count"], 1)
+            self.assertEqual(import_check["review"]["claims_without_evidence"], [])
 
             apply_preview = cli_json(consumer, "import-apply", str(exchange_jsonl), "--dry-run")
             self.assertTrue(apply_preview["dry_run"])
             self.assertTrue(apply_preview["would_write"])
+            self.assertTrue(apply_preview["review"]["ready_for_reviewed_apply"])
             applied = cli_json(consumer, "import-apply", str(exchange_jsonl), "--approved")
             self.assertGreaterEqual(applied["accepted_count"], 1)
             self.assertEqual(applied["rejected_count"], 0)
@@ -204,6 +209,36 @@ class RealWorldFlowTest(unittest.TestCase):
             self.assertEqual(bad_param["error"]["code"], "invalid_params")
             self.assertTrue(bad_secret["ok"])
             self.assertNotIn("ghp_demo", json.dumps(bad_secret))
+
+    def test_import_review_flags_claims_without_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            kb = base / "kb"
+            incoming = base / "incoming.jsonl"
+
+            cli(kb, "init")
+            incoming.write_text(
+                json.dumps(
+                    {
+                        "kind": "claim",
+                        "id": "claim_uncited_runtime_fact",
+                        "text": "Decision: runtime facts need review metadata before apply.",
+                        "type": "decision",
+                        "status": "working",
+                        "confidence": 0.72,
+                        "scope": "project",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            import_check = cli_json(kb, "import-check", str(incoming), "--fail-on-rejected")
+            self.assertTrue(import_check["ok"])
+            self.assertEqual(import_check["rejected_count"], 0)
+            self.assertFalse(import_check["review"]["ready_for_reviewed_apply"])
+            self.assertEqual(import_check["review"]["claims_without_evidence"], ["claim_uncited_runtime_fact"])
+            self.assertIn("Add source evidence", " ".join(import_check["review"]["next_actions"]))
 
 
 if __name__ == "__main__":

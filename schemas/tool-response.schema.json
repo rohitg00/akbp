@@ -868,6 +868,52 @@
         }
       }
     },
+    "import_review_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ready_for_reviewed_apply",
+        "source_count",
+        "claim_count",
+        "claims_without_evidence",
+        "rejected_reasons",
+        "next_actions"
+      ],
+      "properties": {
+        "ready_for_reviewed_apply": {
+          "type": "boolean"
+        },
+        "source_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "claim_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "claims_without_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rejected_reasons": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
     "import_check_result": {
       "type": "object",
       "additionalProperties": false,
@@ -881,7 +927,8 @@
         "fail_on_rejected",
         "accepted",
         "rejected",
-        "errors"
+        "errors",
+        "review"
       ],
       "properties": {
         "ok": {
@@ -927,6 +974,9 @@
           "items": {
             "$ref": "#/$defs/import_check_error"
           }
+        },
+        "review": {
+          "$ref": "#/$defs/import_review_summary"
         }
       }
     },
@@ -1042,6 +1092,9 @@
         },
         "apply_instruction": {
           "type": "string"
+        },
+        "review": {
+          "$ref": "#/$defs/import_review_summary"
         }
       }
     },

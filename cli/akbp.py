@@ -997,6 +997,42 @@ def public_import_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [{"id": item["id"], "kind": item["kind"], "line": item["line"], **({"reason": item["reason"]} if "reason" in item else {})} for item in items]
 
 
+def import_review_summary(
+    normalized: list[tuple[str, dict[str, Any], int]],
+    rejected: list[dict[str, Any]],
+    errors: list[dict[str, Any]],
+) -> dict[str, Any]:
+    source_ids = {str(record.get("id")) for kind, record, _line in normalized if kind == "source"}
+    claims = [record for kind, record, _line in normalized if kind == "claim"]
+    claims_without_evidence = [
+        str(record.get("id"))
+        for record in claims
+        if not record.get("evidence")
+    ]
+    rejected_reasons: dict[str, int] = {}
+    for item in rejected:
+        reason = str(item.get("reason") or "rejected")
+        rejected_reasons[reason] = rejected_reasons.get(reason, 0) + 1
+    ready = not errors and not rejected and not claims_without_evidence
+    next_actions = []
+    if errors:
+        next_actions.append("Fix malformed JSON before review.")
+    if rejected:
+        next_actions.append("Resolve rejected records before import-apply.")
+    if claims_without_evidence:
+        next_actions.append("Add source evidence for every durable claim before trusting the import.")
+    if ready:
+        next_actions.append("Run import-apply --dry-run, review would_write ids, then repeat with --approved.")
+    return {
+        "ready_for_reviewed_apply": ready,
+        "source_count": len(source_ids),
+        "claim_count": len(claims),
+        "claims_without_evidence": claims_without_evidence,
+        "rejected_reasons": rejected_reasons,
+        "next_actions": next_actions,
+    }
+
+
 def normalize_import_object(item: dict[str, Any]) -> tuple[str | None, dict[str, Any] | None, str | None]:
     if not isinstance(item, dict):
         return None, None, "object must be a JSON object"
@@ -1096,6 +1132,8 @@ def cmd_import_check(args: argparse.Namespace) -> int:
         rejected.append(item)
         accepted_by_line.pop(item["line"], None)
     accepted_public = public_import_items(list(accepted_by_line.values()))
+    accepted_lines = {item["line"] for item in accepted_public}
+    reviewed_normalized = [item for item in normalized if item[2] in accepted_lines]
     failed = bool(errors) or (bool(rejected) and bool(getattr(args, "fail_on_rejected", False)))
     print(json.dumps({
         "ok": not failed,
@@ -1108,6 +1146,7 @@ def cmd_import_check(args: argparse.Namespace) -> int:
         "accepted": accepted_public,
         "rejected": public_import_items(rejected),
         "errors": errors,
+        "review": import_review_summary(reviewed_normalized, rejected, errors),
     }, indent=2, ensure_ascii=False))
     return 1 if failed else 0
 
@@ -1178,6 +1217,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             ],
             "rejected": public_import_items(rejected),
             "errors": errors,
+            "review": import_review_summary(normalized, rejected, errors),
         }
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 1
@@ -1204,6 +1244,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             "sources": [item["id"] for item in sources if item.get("id") in source_existing],
             "claims": [item["id"] for item in claims if item.get("id") in claim_existing],
         },
+        "review": import_review_summary(normalized, [], []),
     }
     if args.dry_run:
         result["review_required"] = True

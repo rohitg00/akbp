@@ -35,6 +35,12 @@ Before applying it:
 4. Apply with `akbp import-apply incoming.jsonl --approved`.
 5. Rebuild the index and query context for the next agent session.
 
+`import-check` and `import-apply --dry-run` include a `review` section for
+adapter UIs and CI logs. Treat `review.ready_for_reviewed_apply:true` as the
+minimum green light before presenting an approval button. If
+`claims_without_evidence` is non-empty, the import may still be syntactically
+valid, but it has not met AKBP's trust bar for durable project memory.
+
 ## Reject instead of importing
 
 Stop the migration when the export has:
