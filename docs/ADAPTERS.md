@@ -89,6 +89,21 @@ Integration style:
 - tool protocol config where supported
 - project-local `.akbp/` discovery
 
+## GitHub Copilot
+
+Reference adapter:
+
+```text
+adapters/github-copilot/
+```
+
+Integration style:
+
+- repository instruction and terminal-assisted workflow
+- project-local AKBP discovery from the checkout
+- cited startup context before planning
+- review-gated session crystallization after durable work
+
 ## OpenClaw
 
 Reference adapter:

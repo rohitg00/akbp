@@ -216,6 +216,7 @@ adapters/terminal-coding-agent/
 adapters/editor-coding-agent/
 adapters/openclaw/
 adapters/codex/
+adapters/github-copilot/
 adapters/claude-code/
 adapters/cursor/
 adapters/gemini-cli/

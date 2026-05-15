@@ -1,0 +1,27 @@
+{
+  "adapter": {
+    "name": "github-copilot",
+    "type": "ide-agent",
+    "version": "0.1.0"
+  },
+  "akbp": {
+    "path": ".",
+    "tool_server": {
+      "command": "akbp-tool-server",
+      "transport": "jsonl"
+    },
+    "startup_context_limit": 8,
+    "write_policy": {
+      "default_scope": "project",
+      "dry_run_first": true,
+      "require_review_metadata": true,
+      "apply_requires_approved": true
+    },
+    "lifecycle": {
+      "session_start_method": "akbp.session.start",
+      "session_end_method": "akbp.session.end",
+      "session_end_dry_run_first": true,
+      "session_end_apply_requires_approved": true
+    }
+  }
+}
