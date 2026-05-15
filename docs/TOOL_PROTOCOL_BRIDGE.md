@@ -40,6 +40,13 @@ adapter should run before exposing tools: capability negotiation, doctor, and
 bounded startup context. Use these generated JSONL requests as the executable
 harness contract instead of reconstructing preflight calls from prose.
 
+For managed tool-protocol hosts, use the generated `managed_tool_host_bridge` section instead
+of hand-writing a separate memory-server contract. It reuses the same local
+stdio command, knowledge-base path, read-only wrapper list, blocked write
+methods, and preflight requests while making the fallback explicit: if the
+host cannot preserve citations, warnings, structured errors, and dry-run
+review metadata, expose AKBP as read-only startup context only.
+
 For a runnable preflight, use `examples/tool-protocol-bridge/run.sh`. It checks
 that the generated wrapper map stays read-only, that blocked write methods are
 not exposed as direct bridge tools, that startup context returns cited items,
@@ -100,6 +107,9 @@ Required behavior:
   first-class capability records, so write-capable flows stay disabled until a
   review surface exists.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
+- For managed tool-protocol hosts, generate the local server entry and read-only tool
+  exposure from `managed_tool_host_bridge` so the host config cannot drift from AKBP
+  capabilities, preflight requests, and write blocking policy.
 - Run `tool_protocol_bridge.host_tool_manifest.preflight_requests` before exposing host tools, and branch on the structured `expect` fields.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.

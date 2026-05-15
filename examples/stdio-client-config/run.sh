@@ -87,6 +87,22 @@ assert config["safety"]["require_adapter_ready"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "read_only", config
 assert "akbp.session.start" in config["tool_protocol_bridge"]["read_only_allowlist"], config
 assert "akbp.remember" in config["tool_protocol_bridge"]["blocked_write_methods"], config
+managed_bridge = config["managed_tool_host_bridge"]
+assert managed_bridge["format"] == "akbp-managed-tool-host-bridge-v1", config
+assert managed_bridge["server_config"]["transport"] == "stdio", config
+assert managed_bridge["server_config"]["knowledge_base_path"] == config["knowledge_base"]["path"], config
+assert managed_bridge["safe_default_profile"] == "read_only", config
+assert managed_bridge["startup_profile"] == "read_only", config
+assert "akbp_session_start" in managed_bridge["tool_exposure"]["read_only_tools"], config
+assert managed_bridge["tool_exposure"]["forwards_to"]["akbp_session_start"] == "akbp.session.start", config
+assert "akbp.remember" in managed_bridge["tool_exposure"]["blocked_write_methods"], config
+assert "approved:true" in managed_bridge["tool_exposure"]["enable_write_tools_only_when"][3], config
+assert managed_bridge["preflight_requests"] == config["tool_protocol_bridge"]["host_tool_manifest"]["preflight_requests"], config
+assert managed_bridge["response_requirements"]["preserve_envelope"] is True, config
+assert "error.code" in managed_bridge["response_requirements"]["branch_on"], config
+assert "citations" in managed_bridge["response_requirements"]["surface"], config
+assert "uncited summaries" in managed_bridge["response_requirements"]["do_not_store"], config
+assert "read-only startup context" in managed_bridge["fallback"], config
 first_tool = config["tool_protocol_bridge"]["forward_tools"][0]
 assert "Discover supported AKBP methods" in first_tool["description"], config
 assert first_tool["safety"]["writes"] is False, config
@@ -176,6 +192,8 @@ assert config["safety"]["never_auto_apply_session_end"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "reviewed_write", config
 assert config["tool_protocol_bridge"]["client_tool_manifest"]["default_mode"] == "read_only", config
 assert "akbp.ingest" in config["tool_protocol_bridge"]["client_tool_manifest"]["blocked_write_methods"], config
+assert config["managed_tool_host_bridge"]["startup_profile"] == "reviewed_write", config
+assert "adapter_readiness.reviewed_write_ready" in config["managed_tool_host_bridge"]["tool_exposure"]["enable_write_tools_only_when"][1], config
 assert config["tool_protocol_bridge"]["reviewed_write_tools"][0]["required_flags"] == {"dry_run": True}, config
 reviewed_tools = {tool["tool"]: tool for tool in config["tool_protocol_bridge"]["reviewed_write_tools"]}
 assert reviewed_tools["akbp_ingest_preview"]["method"] == "akbp.ingest", config

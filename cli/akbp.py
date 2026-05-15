@@ -2458,6 +2458,38 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "enable_writes_after": "migration or promotion flow passes import-check or dry-run preview without secret or citation warnings",
             },
         ],
+        "managed_tool_host_bridge": {
+            "format": "akbp-managed-tool-host-bridge-v1",
+            "purpose": "Let tool-protocol-compatible hosts launch AKBP as a local stdio knowledge tool while preserving AKBP's cited, review-gated memory boundary.",
+            "server_config": {
+                "command": command,
+                "args": command_args,
+                "env": {},
+                "transport": "stdio",
+                "knowledge_base_path": kb_path,
+            },
+            "safe_default_profile": "read_only",
+            "startup_profile": requested_profile,
+            "tool_exposure": {
+                "read_only_tools": [entry["tool"] for entry in read_only_bridge_tools],
+                "forwards_to": {entry["tool"]: entry["method"] for entry in read_only_bridge_tools},
+                "blocked_write_methods": client_tool_manifest["blocked_write_methods"],
+                "enable_write_tools_only_when": [
+                    "akbp.capabilities negotiation passes for reviewed_write",
+                    "akbp.doctor reports adapter_readiness.reviewed_write_ready",
+                    "the host shows dry-run review metadata outside model tool execution",
+                    "approved apply repeats the exact reviewed method, path, and params with approved:true",
+                ],
+            },
+            "preflight_requests": host_tool_manifest["preflight_requests"],
+            "response_requirements": {
+                "preserve_envelope": True,
+                "branch_on": "ok and error.code",
+                "surface": ["citations", "source ids", "warnings", "budget", "review_required", "would_write"],
+                "do_not_store": ["raw transcripts", "scratchpads", "private chat logs", "secrets", "uncited summaries"],
+            },
+            "fallback": "If the host cannot preserve citations, warnings, structured errors, and dry-run review metadata, expose AKBP as read-only startup context only.",
+        },
         "memory_server_bridge": {
             "purpose": "Classify AKBP beside local memory servers, tool-protocol bridges, and runtime caches without letting the bridge become the source of truth.",
             "safe_default": "read_only_substrate",

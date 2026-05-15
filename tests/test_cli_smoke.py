@@ -99,6 +99,25 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("separate human approval", host_profiles["managed_tool_protocol_host"]["enable_writes_after"])
             self.assertEqual(host_profiles["existing_memory_server"]["first_tool"], "akbp_context")
             self.assertIn("ephemeral cache", host_profiles["existing_memory_server"]["setup_commands"][0])
+            managed_bridge = config["managed_tool_host_bridge"]
+            self.assertEqual(managed_bridge["format"], "akbp-managed-tool-host-bridge-v1")
+            self.assertEqual(managed_bridge["server_config"]["transport"], "stdio")
+            self.assertEqual(managed_bridge["server_config"]["knowledge_base_path"], str(kb.resolve()))
+            self.assertEqual(managed_bridge["safe_default_profile"], "read_only")
+            self.assertEqual(managed_bridge["startup_profile"], "reviewed_write")
+            self.assertIn("akbp_session_start", managed_bridge["tool_exposure"]["read_only_tools"])
+            self.assertEqual(
+                managed_bridge["tool_exposure"]["forwards_to"]["akbp_session_start"],
+                "akbp.session.start",
+            )
+            self.assertIn("akbp.remember", managed_bridge["tool_exposure"]["blocked_write_methods"])
+            self.assertIn("adapter_readiness.reviewed_write_ready", managed_bridge["tool_exposure"]["enable_write_tools_only_when"][1])
+            self.assertEqual(managed_bridge["preflight_requests"], config["tool_protocol_bridge"]["host_tool_manifest"]["preflight_requests"])
+            self.assertTrue(managed_bridge["response_requirements"]["preserve_envelope"])
+            self.assertIn("error.code", managed_bridge["response_requirements"]["branch_on"])
+            self.assertIn("citations", managed_bridge["response_requirements"]["surface"])
+            self.assertIn("uncited summaries", managed_bridge["response_requirements"]["do_not_store"])
+            self.assertIn("read-only startup context", managed_bridge["fallback"])
             memory_bridge = config["memory_server_bridge"]
             self.assertEqual(memory_bridge["safe_default"], "read_only_substrate")
             self.assertEqual(memory_bridge["bridge_role"], "transport_and_policy_glue_only")

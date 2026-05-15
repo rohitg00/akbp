@@ -21,6 +21,8 @@ The generated config makes the trust boundary visible:
   `approval_required`, `cli_error`, and `internal_error` without parsing prose
 - include a verification plan with expected pass fields for startup, doctor, and session-start calls
 - include a tool-protocol bridge allowlist and blocked write methods
+- include a managed tool-host bridge contract for stdio-compatible hosts
+  without turning AKBP into an opaque memory store
 - include manifest-level `preflight_requests` that adapters can execute before exposing host tools
 - retrieve context with `akbp.session.start`
 - keep durable writes blocked unless the adapter implements dry-run review and `approved:true`
@@ -61,6 +63,10 @@ AKBP stdio client config example passed
 - the config exposes `response_contract.error_actions` so adapters can map each
   structured failure to a retry and write-safety policy
 - the config exposes `tool_protocol_bridge` so tool-protocol hosts can start with read-only allowlists
+- the config exposes `managed_tool_host_bridge` so tool-protocol-compatible hosts can launch the
+  same local stdio server, run preflight requests, preserve structured
+  responses, and keep writes blocked until reviewed-write readiness and a
+  separate approval surface exist
 - host install profiles include managed tool-protocol hosts where read-only startup context is safe but durable writes stay disabled until a separate approval UI exists
 - host-tool manifests include descriptions and safety metadata for each generated read-only wrapper
 - host-tool and client-tool manifests include executable preflight requests for capability negotiation, doctor, and bounded startup context
