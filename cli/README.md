@@ -82,6 +82,7 @@ Use `--max-chars` when an adapter has a fixed startup prompt budget. The returne
 ## Discovery
 
 akbp discover finds the nearest akbp.json from --path or its parent directories and prints a JSON preflight payload for adapter installers. It reports the resolved KB path, card metadata, default scope, artifact presence, trust-boundary rules, AKBP's role relative to memory servers, repository instruction files, tool-protocol hosts, and search indexes, plus recommended doctor, client-config, and context commands. The payload also includes `first_run_proof`, a machine-readable checklist for proving read-only setup, cited startup context, dry-run write preview, and the `approval_required` stop signal before enabling reviewed writes.
+`first_run_proof.recommended_harness` points adapter authors at the structured-output harness when they need a concrete fail-closed contract test instead of a prose checklist.
 
 Use it before wiring a runtime that starts from an arbitrary workspace subdirectory:
 
@@ -129,6 +130,7 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rev
 ```
 
 The generated config includes the server command, knowledge-base path, knowledge capability descriptor, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, bounded session-start method, structured response contract, quality gates, tool-protocol bridge allowlists, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
+`adapter_contract_harness` recommends `./examples/structured-output-harness/run.sh` as a machine-checkable preflight for response envelopes, capability negotiation, cited startup context, review metadata, `approval_required` stops, and approved recall before write-capable host tools are exposed.
 
 Use `scope_selection` before capability negotiation when an adapter can create
 or reuse multiple knowledge bases. The safe default is a repo-local, read-only

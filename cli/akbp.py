@@ -422,6 +422,12 @@ def cmd_discover(args: argparse.Namespace) -> int:
     first_run_proof = {
         "goal": "prove cited, review-gated recall before enabling durable writes",
         "safe_default": "read_only",
+        "recommended_harness": {
+            "name": "structured_output_harness",
+            "command": "./examples/structured-output-harness/run.sh",
+            "purpose": "Machine-check response envelopes, capability negotiation, cited startup context, dry-run review metadata, approval_required stop signals, and approved recall before enabling reviewed writes.",
+            "stop_policy": "Treat any harness failure as an adapter-contract failure and keep the integration read-only.",
+        },
         "steps": [
             {
                 "name": "doctor_read_only",
@@ -2340,6 +2346,21 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "on_failure": "Keep write-capable tools disabled and use the read-only allowlist.",
                 },
             ],
+        },
+        "adapter_contract_harness": {
+            "recommended": True,
+            "command": "./examples/structured-output-harness/run.sh",
+            "run_after": ["session-start-harness", "generated preflight_requests"],
+            "proves": [
+                "stable response envelope with id, ok, result, and error",
+                "capability negotiation disables unsupported features and profiles",
+                "doctor exposes adapter readiness and reviewed-write posture",
+                "startup context returns cited items before planning from memory",
+                "dry-run write previews expose review_required, apply_instruction, and would_write",
+                "unapproved writes stop with error.code approval_required",
+                "approved apply plus index refresh returns cited recall for the reviewed claim",
+            ],
+            "stop_policy": "Fail closed: keep write-capable host tools disabled and continue read-only until the harness passes.",
         },
         "startup": {
             "id": "capabilities-1",

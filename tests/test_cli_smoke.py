@@ -269,6 +269,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertFalse(read_only["quality_gates"]["reviewed_writes"]["required_for_apply"])
             self.assertFalse(read_only["first_run_sequence"]["steps"][4]["required"])
+            self.assertTrue(read_only["adapter_contract_harness"]["recommended"])
+            self.assertEqual(read_only["adapter_contract_harness"]["command"], "./examples/structured-output-harness/run.sh")
+            self.assertIn("approval_required", " ".join(read_only["adapter_contract_harness"]["proves"]))
+            self.assertIn("read-only", read_only["adapter_contract_harness"]["stop_policy"])
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
             portable = json.loads(
@@ -321,6 +325,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("memory_server_or_runtime_cache", compared_layers)
             self.assertIn("tool_protocol_host", compared_layers)
             self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
+            self.assertEqual(
+                discovered["first_run_proof"]["recommended_harness"]["command"],
+                "./examples/structured-output-harness/run.sh",
+            )
+            self.assertIn("approval_required", discovered["first_run_proof"]["recommended_harness"]["purpose"])
+            self.assertIn("read-only", discovered["first_run_proof"]["recommended_harness"]["stop_policy"])
             proof_steps = {item["name"]: item for item in discovered["first_run_proof"]["steps"]}
             self.assertIn("doctor_read_only", proof_steps)
             self.assertIn("retrieve_startup_context", proof_steps)
