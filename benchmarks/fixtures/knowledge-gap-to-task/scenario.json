@@ -1,0 +1,87 @@
+{
+  "id": "knowledge-gap-to-task-001",
+  "task": "Verify AKBP can turn a cited adoption gap into a concrete next product task without losing evidence.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_recent_memory_scan",
+        "type": "research",
+        "locator": "research/agent-memory-scan-2026-05-15.md",
+        "title": "Recent agent-memory adoption scan"
+      },
+      {
+        "id": "source_adapter_review",
+        "type": "file",
+        "locator": "docs/ADAPTER_REVIEW_CHECKLIST.md",
+        "title": "Adapter review checklist"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_memory_tools_pitch_easy_setup",
+        "text": "Recent agent-memory tools emphasize one-line setup, shared context, visible project scope, and immediate retrieval value.",
+        "type": "observation",
+        "status": "working",
+        "confidence": 0.72,
+        "evidence": [
+          "source_recent_memory_scan"
+        ],
+        "entities": [
+          "agent memory",
+          "one-line setup",
+          "project scope",
+          "retrieval"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_akbp_gap_needs_reviewable_task",
+        "text": "AKBP should convert adoption research into a cited, reviewable product task before adding adapter glue or write-capable transports.",
+        "type": "decision",
+        "status": "stable",
+        "confidence": 0.86,
+        "evidence": [
+          "source_recent_memory_scan",
+          "source_adapter_review"
+        ],
+        "entities": [
+          "AKBP",
+          "adoption research",
+          "reviewable product task",
+          "adapter glue",
+          "write-capable transports"
+        ],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "rel_adoption_scan_implies_reviewable_task",
+        "source": "claim_memory_tools_pitch_easy_setup",
+        "target": "claim_akbp_gap_needs_reviewable_task",
+        "relation": "supports",
+        "confidence": 0.8,
+        "evidence": [
+          "source_recent_memory_scan",
+          "source_adapter_review"
+        ]
+      }
+    ]
+  },
+  "query": "What product task should AKBP do next after recent agent-memory adoption research?",
+  "expected": {
+    "must_retrieve": [
+      "claim_akbp_gap_needs_reviewable_task"
+    ],
+    "must_cite": [
+      "source_recent_memory_scan",
+      "source_adapter_review"
+    ],
+    "answer_should_include": [
+      "reviewable product task",
+      "adoption research",
+      "adapter glue",
+      "write-capable transports"
+    ]
+  }
+}

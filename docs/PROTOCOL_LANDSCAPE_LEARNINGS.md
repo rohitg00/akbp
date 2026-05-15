@@ -355,6 +355,23 @@ It covers:
 
 `docs/TEMPLATES.md` explains when to use the template and how to adopt it after `akbp init`.
 
+## Shipped artifact: knowledge-gap-to-task fixture
+
+Lightweight research on recent agent-memory tooling again showed that adoption
+depends on visible setup, project scope, shared context, and immediate retrieval
+value. AKBP should not answer that only with more adapter glue. The stronger
+move is to keep product decisions evidence-backed:
+
+- cite the research or user signal
+- name the concrete AKBP gap
+- choose the next smallest product task
+- preserve the evidence chain for later review
+
+`benchmarks/fixtures/knowledge-gap-to-task/` now captures that loop as a
+repeatable fixture. It verifies that a research-backed adoption gap can become a
+cited, reviewable product task before write-capable transports or runtime-specific
+adapter work expands the surface area.
+
 ### Positioning update
 
 Spec-driven agent workflows are proving that users want explicit durable artifacts and checkpoints. AKBP should borrow that packaging:
