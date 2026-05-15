@@ -170,9 +170,10 @@ examples/akbp-bench/run.sh
 examples/repo-memory-demo/run.sh
 examples/session-start-harness/run.sh
 examples/memory-ci/run.sh
+examples/git-native-agent-handoff/run.sh
 examples/multi-agent-consistency-demo/run.sh
 examples/existing-memory-migration/run.sh
 examples/read-only-adapter/run.sh
 ```
 
-That path shows the protocol, the benchmark, the repo use case, inherited-repo intake, the CI gate, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.
+That path shows the protocol, the benchmark, the repo use case, inherited-repo intake, the CI gate, repo-backed agent handoff, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.

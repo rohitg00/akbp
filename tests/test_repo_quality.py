@@ -1244,6 +1244,7 @@ class RepoQualityTest(unittest.TestCase):
         transcript = (ROOT / "examples" / "git-native-agent-handoff" / "session-summary.md").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         for required in [
             "akbp.capabilities",
             "akbp.session.start",
@@ -1261,6 +1262,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("Use `akbp.session.end`", transcript)
         self.assertIn("examples/git-native-agent-handoff/", readme)
         self.assertIn("examples/git-native-agent-handoff/", release_notes)
+        self.assertIn("./examples/git-native-agent-handoff/run.sh", makefile)
 
     def test_readme_lists_tracked_adapter_directories(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
