@@ -113,6 +113,18 @@ Run the focused adapter quality gate with:
 make adapter-quality
 ```
 
+Run the full adapter structured-output harness gate with:
+
+```bash
+make adapter-harness
+```
+
+`make adapter-harness` first runs the runnable
+`examples/structured-output-harness/` flow, then runs the focused
+`adapter-quality` benchmark profile against the real CLI and JSONL tool server.
+Use it as the preflight before a new runtime trusts AKBP startup context or
+enables reviewed writes.
+
 The first runner validates scenario shape, citations, relation targets, supersession links, tool-server request ids, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, dry-run/apply/rejection coverage, and safe-secret outcomes against fixture data.
 
 `make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, approval-rejection response shapes, plus optional `expected_result_schema` and `expected_error_schema` conformance against `schemas/tool-response.schema.json` defs. Requests can also use `expected_result_contains` and `expected_error_contains` with paths like `entities[].id` or `type_errors[]` to assert nested result or error-detail values. Escape literal dots in object keys with `\\.`, for example `methods.akbp\\.search.params_schema`.

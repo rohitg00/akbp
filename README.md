@@ -154,6 +154,16 @@ machine-check response envelopes, capability negotiation, cited startup context,
 dry-run review metadata, and the `approval_required` stop signal before a
 runtime trusts AKBP memory or enables writes.
 
+To run the adapter harness as a single adoption gate:
+
+```bash
+make adapter-harness
+```
+
+Use this before enabling AKBP in a new coding-agent adapter. It runs the
+runnable structured-output example and the focused adapter-quality benchmark
+against the real CLI and JSONL tool server.
+
 ## Knowledge base layout
 
 A minimal AKBP knowledge base starts with two files:

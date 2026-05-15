@@ -15,6 +15,12 @@ tool server, use:
 make adapter-quality
 ```
 
+To run both the example and the focused benchmark as one adapter preflight, use:
+
+```bash
+make adapter-harness
+```
+
 Expected success markers:
 
 ```text
