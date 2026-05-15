@@ -1586,7 +1586,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 def cmd_client_config(args: argparse.Namespace) -> int:
     base = root(args.path)
-    requested_profile = "read_only" if args.profile == "read-only" else "write_review"
+    requested_profile = "read_only" if args.profile == "read-only" else "reviewed_write"
     if args.command == "python-module":
         command = "python3"
         command_args = ["-m", "akbp_tool_server"]
@@ -1610,7 +1610,9 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "card": str(base / "akbp.json"),
         },
         "startup": {
+            "id": "capabilities-1",
             "method": "akbp.capabilities",
+            "path": str(base),
             "params": {
                 "client": args.name,
                 "requires": [
@@ -1622,14 +1624,18 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             },
         },
         "session_start": {
+            "id": "session-start-1",
             "method": "akbp.session.start",
+            "path": str(base),
             "params": {
                 "task": "current task goals and constraints",
                 "limit": 5,
             },
         },
         "health_check": {
+            "id": "doctor-1",
             "method": "akbp.doctor",
+            "path": str(base),
             "params": {
                 "limit": 5,
             },
@@ -1638,11 +1644,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         },
         "safety": {
             "profile": requested_profile,
-            "write_policy": "dry_run_then_approved" if requested_profile == "write_review" else "no_writes",
+            "write_policy": "dry_run_then_approved" if requested_profile == "reviewed_write" else "no_writes",
             "require_capability_negotiation": True,
             "require_method_param_schemas": True,
             "require_adapter_ready": True,
-            "require_review_metadata": requested_profile == "write_review",
+            "require_review_metadata": requested_profile == "reviewed_write",
             "never_auto_apply_session_end": True,
         },
         "notes": [

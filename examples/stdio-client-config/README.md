@@ -6,7 +6,8 @@ The generated config makes the trust boundary visible:
 
 - call `akbp.capabilities` before assuming methods or schemas
 - run `akbp.doctor` before trusting startup retrieval or write flows
-- request either `read_only` or `write_review`
+- request either `read_only` or `reviewed_write`
+- include request ids and the knowledge-base path in startup checks
 - retrieve context with `akbp.session.start`
 - keep durable writes blocked unless the adapter implements dry-run review and `approved:true`
 

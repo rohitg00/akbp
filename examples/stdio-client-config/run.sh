@@ -17,13 +17,19 @@ import json, sys
 
 config = json.load(sys.stdin)
 assert config["transport"] == "stdio-jsonl", config
+assert config["startup"]["id"] == "capabilities-1", config
 assert config["startup"]["method"] == "akbp.capabilities", config
+assert config["startup"]["path"] == config["knowledge_base"]["path"], config
 assert config["startup"]["params"]["requires_profiles"] == ["read_only"], config
+assert config["health_check"]["id"] == "doctor-1", config
+assert config["health_check"]["path"] == config["knowledge_base"]["path"], config
 assert config["health_check"]["method"] == "akbp.doctor", config
 assert config["health_check"]["ready_field"] == "ready_for_adapter", config
 assert config["safety"]["write_policy"] == "no_writes", config
 assert config["safety"]["require_adapter_ready"] is True, config
+assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
+assert config["session_start"]["path"] == config["knowledge_base"]["path"], config
 print("read-only config ok")
 '
 
@@ -34,8 +40,12 @@ import json, sys
 config = json.load(sys.stdin)
 assert config["server"]["command"] == "python3", config
 assert config["server"]["args"], config
-assert config["startup"]["params"]["requires_profiles"] == ["write_review"], config
+assert config["startup"]["id"] == "capabilities-1", config
+assert config["startup"]["path"] == config["knowledge_base"]["path"], config
+assert config["startup"]["params"]["requires_profiles"] == ["reviewed_write"], config
 assert "write_apply_requires_approval" in config["startup"]["params"]["requires"], config
+assert config["health_check"]["id"] == "doctor-1", config
+assert config["health_check"]["path"] == config["knowledge_base"]["path"], config
 assert config["health_check"]["blocking_field"] == "summary.errors", config
 assert config["safety"]["write_policy"] == "dry_run_then_approved", config
 assert config["safety"]["require_adapter_ready"] is True, config

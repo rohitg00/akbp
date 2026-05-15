@@ -31,13 +31,30 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["server"]["command"], "python3")
             self.assertEqual(config["server"]["args"], ["-m", "akbp_tool_server"])
             self.assertEqual(config["knowledge_base"]["path"], str(kb.resolve()))
+            self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
+            self.assertEqual(config["startup"]["path"], str(kb.resolve()))
             self.assertEqual(config["startup"]["params"]["client"], "stdio-adapter-test")
             self.assertIn("capability_negotiation", config["startup"]["params"]["requires"])
-            self.assertEqual(config["startup"]["params"]["requires_profiles"], ["write_review"])
+            self.assertEqual(config["startup"]["params"]["requires_profiles"], ["reviewed_write"])
+            self.assertEqual(config["session_start"]["id"], "session-start-1")
             self.assertEqual(config["session_start"]["method"], "akbp.session.start")
+            self.assertEqual(config["session_start"]["path"], str(kb.resolve()))
+            self.assertEqual(config["health_check"]["id"], "doctor-1")
+            self.assertEqual(config["health_check"]["path"], str(kb.resolve()))
             self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
             self.assertTrue(config["safety"]["never_auto_apply_session_end"])
+
+            caps = subprocess.run(
+                [sys.executable, str(SERVER)],
+                input=json.dumps(config["startup"]) + "\n",
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            negotiated = json.loads(caps.stdout)
+            self.assertTrue(negotiated["result"]["negotiation"]["satisfied"])
+            self.assertEqual(negotiated["result"]["negotiation"]["supported_profiles"], ["reviewed_write"])
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
