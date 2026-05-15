@@ -596,32 +596,22 @@ class RepoQualityTest(unittest.TestCase):
 
     def test_tool_contract_lists_supported_jsonl_methods(self):
         text = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")
+        methods = json.loads((ROOT / "schemas" / "tool-methods.schema.json").read_text(encoding="utf-8"))
+        schema_methods = sorted(
+            name.removesuffix(".params")
+            for name in methods["$defs"]
+            if name.startswith("akbp.") and name.endswith(".params")
+        )
         self.assertNotIn("akbp.get_context", text)
         self.assertNotIn("### akbp.archive", text)
-        methods_block = text.split("Supported methods in the first server slice:", 1)[1].split("The CLI also has local-only commands", 1)[0]
+        methods_block = text.split("Supported JSONL methods:", 1)[1].split("The CLI also has local-only commands", 1)[0]
         listed_methods = [line.strip()[3:-1] for line in methods_block.splitlines() if line.strip().startswith("- `akbp.")]
         self.assertEqual(len(listed_methods), len(set(listed_methods)), listed_methods)
-        for method in [
-            "akbp.capabilities",
-            "akbp.status",
-            "akbp.query",
-            "akbp.context",
-            "akbp.index",
-            "akbp.search",
-            "akbp.remember",
-            "akbp.conformance",
-            "akbp.export",
-            "akbp.export_check",
-            "akbp.audit",
-            "akbp.cite",
-            "akbp.source.add",
-            "akbp.source.verify",
-            "akbp.ingest",
-            "akbp.supersede",
-            "akbp.contradict",
-            "akbp.crystallize_session",
-        ]:
-            self.assertIn(method, text)
+        self.assertEqual(sorted(listed_methods), schema_methods)
+        contracts_block = text.split("Supported method contracts include:", 1)[1].split("Every response uses the same envelope:", 1)[0]
+        contract_methods = [line.strip()[3:-1] for line in contracts_block.splitlines() if line.strip().startswith("- `akbp.")]
+        self.assertEqual(len(contract_methods), len(set(contract_methods)), contract_methods)
+        self.assertEqual(sorted(contract_methods), schema_methods)
 
     def test_agent_flow_starts_writes_with_dry_run(self):
         text = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")

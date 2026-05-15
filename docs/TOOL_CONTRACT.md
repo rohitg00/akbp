@@ -200,7 +200,7 @@ Return recent audit events, optionally filtered by event type.
 
 `tool-server/akbp_tool_server.py` is a dependency-free JSONL server for local agent integrations. It reads one JSON request per line and writes one JSON response per line.
 
-Supported methods in the first server slice:
+Supported JSONL methods:
 
 - `akbp.capabilities`
 - `akbp.status`
@@ -255,6 +255,7 @@ Supported method contracts include:
 
 - `akbp.capabilities`
 - `akbp.status`
+- `akbp.doctor`
 - `akbp.query`
 - `akbp.context`
 - `akbp.index`
@@ -262,6 +263,7 @@ Supported method contracts include:
 - `akbp.remember`
 - `akbp.conformance`
 - `akbp.export`
+- `akbp.export_check`
 - `akbp.audit`
 - `akbp.cite`
 - `akbp.source.add`
