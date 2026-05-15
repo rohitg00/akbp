@@ -139,7 +139,7 @@ AKBP is designed for short, repeated agent sessions where the next runtime must 
 
 The core rule: agents can propose memory, but durable writes are review-gated.
 
-See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `docs/BENCHMARK.md`, `examples/session-start-harness/`, and `examples/tool-server-approval-flow/`.
+See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/DEVELOPER_PROTOCOL_FIT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `docs/BENCHMARK.md`, `examples/session-start-harness/`, and `examples/tool-server-approval-flow/`.
 
 ## Knowledge base layout
 

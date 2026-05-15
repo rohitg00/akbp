@@ -164,6 +164,9 @@ Adapter responsibilities:
 - keep durable output in AKBP artifacts
 
 See `docs/ADAPTER_AUTHOR_QUICKSTART.md` and `docs/ADAPTER_REVIEW_CHECKLIST.md`.
+For a developer-facing map of how AKBP fits under tool/context protocols,
+agent-to-agent handoffs, and agent UI surfaces, see
+`docs/DEVELOPER_PROTOCOL_FIT.md`.
 
 ## Build and validation architecture
 
