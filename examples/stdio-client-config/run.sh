@@ -157,6 +157,14 @@ assert config["session_start"]["method"] == "akbp.session.start", config
 assert config["session_start"]["path"] == config["knowledge_base"]["path"], config
 assert config["session_start"]["params"]["min_items"] == 1, config
 assert config["session_start"]["params"]["require_citations"] is True, config
+context_use = config["adapter_prompt_contract"]["context_use_report"]
+assert context_use["format"] == "akbp-context-use-report-v1", config
+assert "used_akbp_context" in context_use["required_fields"], config
+assert "akbp_citation_ids" in context_use["required_fields"], config
+assert "fallback_reason" in context_use["required_fields"], config
+assert "trace back to result.context.items" in " ".join(context_use["rules"]), config
+assert "budget_truncated" in context_use["fallback_reason_values"], config
+assert "adapter_prompt_contract.context_use_report" in config["adapter_prompt_contract"]["validation"]["preserve_fields"], config
 assert config["response_contract"]["envelope"]["required"] == ["id", "ok", "result", "error"], config
 assert config["response_contract"]["envelope"]["ok"] == "boolean", config
 assert config["response_contract"]["schemas"]["response"] == "schemas/tool-response.schema.json", config

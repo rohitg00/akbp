@@ -79,6 +79,13 @@ Use `adapter_prompt_contract.system_rules` as the host-facing memory prompt and
 `adapter_prompt_contract.validation` as the response fields the bridge must
 preserve. This keeps structured prompts tied to the same JSONL response contract
 that the harness verifies.
+Use `adapter_prompt_contract.context_use_report` as the host's memory-use audit
+shape before planning from recalled context. The host should record whether
+AKBP context was used, which context item ids and citation ids supported the
+plan, whether warnings were surfaced, and the fallback reason when it continues
+without recalled memory. This prevents adapters from compressing cited AKBP
+items into an uncited prose summary and then treating that summary as durable
+project memory.
 
 For adapter packages, docs, or installer templates that may be committed to a
 public repository, generate a placeholder-based config instead of embedding a

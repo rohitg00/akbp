@@ -2257,6 +2257,32 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "fallback": "Proceed without recalled AKBP memory and do not invent prior decisions.",
         },
+        "context_use_report": {
+            "format": "akbp-context-use-report-v1",
+            "purpose": "Make memory-assisted planning auditable by requiring the host to report whether AKBP context was used, which citations supported it, and why it was ignored.",
+            "emit_when": "after akbp.session.start and before any plan, code edit, or durable write that claims to use recalled AKBP context",
+            "required_fields": [
+                "used_akbp_context",
+                "akbp_context_item_ids",
+                "akbp_citation_ids",
+                "warnings_surfaced",
+                "fallback_reason",
+            ],
+            "rules": [
+                "Set used_akbp_context to false when startup_trust_gate fails, context is empty, citations are missing, or warnings cannot be surfaced.",
+                "When used_akbp_context is true, akbp_context_item_ids and akbp_citation_ids must be non-empty and trace back to result.context.items.",
+                "Keep fallback_reason non-empty when continuing without recalled AKBP memory.",
+                "Do not compress cited items into an uncited prose summary before planning.",
+            ],
+            "fallback_reason_values": [
+                "no_context",
+                "uncited_context",
+                "warnings_not_surfaced",
+                "budget_truncated",
+                "preflight_failed",
+                "not_applicable",
+            ],
+        },
         "startup_trust_gate": {
             "format": "akbp-startup-trust-gate-v1",
             "purpose": "Give adapter harnesses deterministic checks before they let recalled AKBP context influence planning.",
@@ -2306,7 +2332,15 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "validation": {
             "recommended_harness": "./examples/structured-output-harness/run.sh",
             "branch_on": ["ok", "error.code"],
-            "preserve_fields": ["result.context.items", "result.context.warnings", "result.context.budget", "error.details"],
+            "preserve_fields": [
+                "result.context.items",
+                "result.context.warnings",
+                "result.context.budget",
+                "result.quality",
+                "error.code",
+                "error.details",
+                "adapter_prompt_contract.context_use_report",
+            ],
         },
     }
     read_only_bridge_tools = [

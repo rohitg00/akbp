@@ -480,6 +480,23 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("result.context.items is empty", trust_gate["fail_closed_on"])
             self.assertIn("budget.truncated", " ".join(trust_gate["fail_closed_on"]))
             self.assertIn("Continue without recalled AKBP memory", trust_gate["fallback_action"])
+            context_use = prompt_contract["context_use_report"]
+            self.assertEqual(context_use["format"], "akbp-context-use-report-v1")
+            self.assertIn("memory-assisted planning", context_use["purpose"])
+            self.assertIn("before any plan", context_use["emit_when"])
+            self.assertEqual(
+                context_use["required_fields"],
+                [
+                    "used_akbp_context",
+                    "akbp_context_item_ids",
+                    "akbp_citation_ids",
+                    "warnings_surfaced",
+                    "fallback_reason",
+                ],
+            )
+            self.assertIn("used_akbp_context to false", context_use["rules"][0])
+            self.assertIn("trace back to result.context.items", context_use["rules"][1])
+            self.assertIn("budget_truncated", context_use["fallback_reason_values"])
             self.assertFalse(prompt_contract["write_gate"]["required_for_apply"])
             provenance_gate = prompt_contract["source_provenance_gate"]
             self.assertEqual(provenance_gate["format"], "akbp-source-provenance-gate-v1")
@@ -488,6 +505,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("model summary", " ".join(provenance_gate["reject_when"]))
             self.assertEqual(prompt_contract["write_gate"]["preview_flags"], {"dry_run": True})
             self.assertIn("error.code", prompt_contract["validation"]["branch_on"])
+            self.assertIn("result.quality", prompt_contract["validation"]["preserve_fields"])
+            self.assertIn("adapter_prompt_contract.context_use_report", prompt_contract["validation"]["preserve_fields"])
             self.assertEqual(
                 read_only["quality_gates"]["startup_context"]["trust_gate_ref"],
                 "adapter_prompt_contract.startup_trust_gate",

@@ -177,6 +177,11 @@ The generated config includes the server command, knowledge-base path, knowledge
 Use `adapter_prompt_contract.system_rules` as the runtime's memory instructions
 and `adapter_prompt_contract.validation` as the minimum response fields to
 preserve when translating JSONL methods into host-native tools.
+Use `adapter_prompt_contract.context_use_report` before planning from recalled
+memory so the host records whether AKBP context was used, which item and
+citation ids supported the plan, whether warnings were surfaced, and why the
+adapter fell back when context was empty, uncited, truncated, or failed
+preflight.
 
 Use `scope_selection` before capability negotiation when an adapter can create
 or reuse multiple knowledge bases. The safe default is a repo-local, read-only
