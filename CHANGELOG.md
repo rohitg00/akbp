@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a compaction handoff recall benchmark fixture so adapter authors can
+  prove cited, lifecycle-aware handoff snapshots beat stale relative-date memory
+  before trusting recalled context after compaction.
 - Added optional JSONL trace capture to the quickstart example so adapter
   authors can inspect exact request and response envelopes while preserving the
   normal pass/fail smoke output.

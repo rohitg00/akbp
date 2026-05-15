@@ -1,0 +1,108 @@
+{
+  "id": "compaction-handoff-recall-001",
+  "task": "Verify compaction handoffs retrieve the current cited decision instead of stale relative-date memory.",
+  "profiles": ["retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_compaction_review",
+        "type": "transcript",
+        "locator": "sessions/compaction-review.md",
+        "title": "Compaction handoff review"
+      },
+      {
+        "id": "source_stale_relative_date_note",
+        "type": "note",
+        "locator": "notes/stale-relative-date-memory.md",
+        "title": "Stale relative-date memory note"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_compaction_handoff_requires_cited_snapshot",
+        "text": "After a context compaction, adapters should retrieve a cited AKBP handoff snapshot with absolute dates, source ids, lifecycle status, and review-gated next actions before planning.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.92,
+        "evidence": ["source_compaction_review"],
+        "entities": [
+          "context-compaction",
+          "handoff",
+          "absolute-dates",
+          "citations",
+          "lifecycle",
+          "review-gated-actions"
+        ],
+        "scope": "project",
+        "last_confirmed_at": "2026-05-15T00:00:00Z"
+      },
+      {
+        "id": "claim_stale_compaction_memory_relative_dates",
+        "text": "After compaction, agents can continue from yesterday's memory note without citations because the chat transcript still has enough context.",
+        "type": "workflow",
+        "status": "superseded",
+        "confidence": 0.38,
+        "evidence": ["source_stale_relative_date_note"],
+        "entities": [
+          "context-compaction",
+          "relative-dates",
+          "uncited-memory"
+        ],
+        "scope": "project",
+        "superseded_by": "claim_compaction_handoff_requires_cited_snapshot"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_cited_compaction_handoff_supersedes_relative_dates",
+        "source": "claim_compaction_handoff_requires_cited_snapshot",
+        "target": "claim_stale_compaction_memory_relative_dates",
+        "relation": "supersedes",
+        "confidence": 0.9,
+        "evidence": ["source_compaction_review"]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "compaction-startup-context",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "resume after context compaction with cited handoff snapshot absolute dates lifecycle",
+          "limit": 5,
+          "max_chars": 600
+        },
+        "expected_result_fields": [
+          "session_id",
+          "task",
+          "context"
+        ],
+        "expected_result_values": {
+          "task": "resume after context compaction with cited handoff snapshot absolute dates lifecycle"
+        },
+        "expected_result_contains": {
+          "context.items[].id": ["claim_compaction_handoff_requires_cited_snapshot"],
+          "context.items[].citations[]": ["source_compaction_review"],
+          "context.items[].freshness": ["stable"],
+          "context.quality.ok": [true],
+          "context.budget.truncated": [false]
+        },
+        "expected_result_schema": "#/$defs/session_start_result"
+      }
+    ]
+  },
+  "query": "resume after context compaction with cited handoff snapshot absolute dates lifecycle",
+  "expected": {
+    "must_retrieve": ["claim_compaction_handoff_requires_cited_snapshot"],
+    "must_cite": ["source_compaction_review"],
+    "must_cite_in_context": ["source_compaction_review"],
+    "must_preserve": ["claim_stale_compaction_memory_relative_dates"],
+    "must_not_answer_from": ["claim_stale_compaction_memory_relative_dates"],
+    "answer_should_include": [
+      "context compaction",
+      "cited",
+      "absolute dates",
+      "lifecycle",
+      "review-gated"
+    ]
+  }
+}

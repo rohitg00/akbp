@@ -239,6 +239,16 @@ trusts recalled context, it can show which AKBP path is selected, what belongs
 there, what must stay out, and why write-capable flows remain blocked until
 dry-run review and approval exist.
 
+## Shipped artifact: compaction handoff recall proof
+
+Recent agent-memory discussions keep circling the same failure mode: long coding
+sessions get compacted, then the next agent resumes from stale or uncited memory.
+AKBP now has a focused benchmark fixture for that gap:
+`benchmarks/fixtures/compaction-handoff-recall/`. It proves a startup handoff can
+retrieve the current cited snapshot with absolute dates, lifecycle status, and a
+review-gated write policy while preserving the superseded relative-date memory as
+history instead of answer material.
+
 ## Shipped artifact: structured output harness example
 
 Recent adapter discussions keep pointing at a practical gap: structured output
