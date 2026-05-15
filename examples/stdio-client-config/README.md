@@ -61,6 +61,7 @@ AKBP stdio client config example passed
 - the config exposes `response_contract.error_actions` so adapters can map each
   structured failure to a retry and write-safety policy
 - the config exposes `tool_protocol_bridge` so tool-protocol hosts can start with read-only allowlists
+- host install profiles include managed tool-protocol hosts where read-only startup context is safe but durable writes stay disabled until a separate approval UI exists
 - host-tool manifests include descriptions and safety metadata for each generated read-only wrapper
 - host-tool and client-tool manifests include executable preflight requests for capability negotiation, doctor, and bounded startup context
 - the config tells adapter authors which calls to run and which result fields must pass before trusting setup

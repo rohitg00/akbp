@@ -2351,6 +2351,19 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "enable_writes_after": "separate review UI exists outside the model-generated tool call",
             },
             {
+                "host_type": "managed_tool_protocol_host",
+                "use_when": "A hosted or managed tool runtime can expose AKBP-backed tools but may not have a local human review surface.",
+                "safe_default_profile": "read_only",
+                "setup_commands": [
+                    "mount or resolve an explicit AKBP knowledge_base.path before startup",
+                    "publish only the read-only tools from tool_protocol_bridge.host_tool_manifest",
+                    "run akbp.capabilities, akbp.doctor, and bounded akbp.session.start as preflight checks",
+                    "keep durable writes disabled unless the host provides a separate approval UI",
+                ],
+                "first_tool": "akbp_session_start",
+                "enable_writes_after": "managed host proves dry-run preview, separate human approval, and exact approved:true replay outside autonomous tool execution",
+            },
+            {
                 "host_type": "existing_memory_server",
                 "use_when": "A runtime already has a memory server, cache, or graph store and wants AKBP-compatible durable artifacts.",
                 "safe_default_profile": "read_only",

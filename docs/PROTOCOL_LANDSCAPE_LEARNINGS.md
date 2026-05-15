@@ -535,9 +535,15 @@ Adapter installers need host-specific copy without weakening the trust model:
 ### Shipped artifact: host install profiles
 
 `akbp client-config` now includes `host_install_profiles` for terminal agents,
-editor agents, and existing memory-server runtimes. Each profile states the safe
-default profile, concrete setup commands or manifest steps, first AKBP tool to
-call, and the condition required before writes can be enabled.
+editor agents, managed tool-protocol hosts, and existing memory-server runtimes.
+Each profile states the safe default profile, concrete setup commands or
+manifest steps, first AKBP tool to call, and the condition required before
+writes can be enabled.
+
+Recent managed tool-runtime signals make that extra profile useful: a hosted
+environment can expose familiar tools quickly, but AKBP should still start with
+read-only cited context and keep durable writes blocked until the host proves a
+separate approval surface outside autonomous tool execution.
 
 Success criteria:
 

@@ -79,7 +79,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("AKBP artifacts", config["runtime_requirements"]["durable_state_owner"])
             self.assertIn("read-only bridge allowlist", config["runtime_requirements"]["tool_protocol_hosts"])
             host_profiles = {profile["host_type"]: profile for profile in config["host_install_profiles"]}
-            self.assertEqual(set(host_profiles), {"terminal_agent", "editor_agent", "existing_memory_server"})
+            self.assertEqual(set(host_profiles), {"terminal_agent", "editor_agent", "managed_tool_protocol_host", "existing_memory_server"})
             self.assertEqual(host_profiles["terminal_agent"]["safe_default_profile"], "read_only")
             self.assertIn("client-config --profile read-only", host_profiles["terminal_agent"]["setup_commands"][2])
             self.assertEqual(host_profiles["terminal_agent"]["first_tool"], "akbp_session_start")
@@ -88,6 +88,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 "host_tool_manifest",
                 " ".join(host_profiles["editor_agent"]["setup_commands"]),
             )
+            self.assertEqual(host_profiles["managed_tool_protocol_host"]["safe_default_profile"], "read_only")
+            self.assertEqual(host_profiles["managed_tool_protocol_host"]["first_tool"], "akbp_session_start")
+            self.assertIn("read-only tools", " ".join(host_profiles["managed_tool_protocol_host"]["setup_commands"]))
+            self.assertIn("separate human approval", host_profiles["managed_tool_protocol_host"]["enable_writes_after"])
             self.assertEqual(host_profiles["existing_memory_server"]["first_tool"], "akbp_context")
             self.assertIn("ephemeral cache", host_profiles["existing_memory_server"]["setup_commands"][0])
             memory_bridge = config["memory_server_bridge"]
