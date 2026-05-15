@@ -288,6 +288,27 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/adoption-preflight/run.sh", makefile)
 
+    def test_inherited_repo_intake_documents_source_drift_gate(self):
+        text = (ROOT / "examples" / "inherited-repo-intake" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "inherited-repo-intake" / "run.sh").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script + readme
+        for required in [
+            "AKBP inherited repo intake example",
+            "read-only inherited repo startup ok",
+            "unapproved inherited repo write blocked ok",
+            "cited inherited repo context ok",
+            "source verify --fail-on-issue",
+            "stale inherited repo evidence requires review ok",
+            "stale inherited repo context blocked ok",
+            "review_affected_claims",
+            "source-drifted context",
+            "AKBP inherited repo intake example passed",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/inherited-repo-intake/run.sh", makefile)
+
     def test_tool_protocol_bridge_example_documents_read_only_preflight(self):
         text = (ROOT / "examples" / "tool-protocol-bridge" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "tool-protocol-bridge" / "run.sh").read_text(encoding="utf-8")

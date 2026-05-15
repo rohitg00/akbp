@@ -9,6 +9,8 @@ KB="$TMP/kb"
 ISSUE="$TMP/issue-17.md"
 PR="$TMP/pr-42.md"
 RELEASE="$TMP/release-note.md"
+STALE_KB="$TMP/stale-kb"
+STALE_NOTE="$TMP/stale-issue.md"
 
 echo "AKBP inherited repo intake example"
 
@@ -40,6 +42,7 @@ python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Release fixes must include a 
 python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Payment retry changes need unit coverage and a cited release note before another agent continues." --type workflow --confidence 0.9 --evidence "$PR_SOURCE" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Deployment is paused until source verification and read-only startup context pass." --type warning --confidence 0.9 --evidence "$RELEASE_SOURCE" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" index --incremental >/dev/null
+python3 "$ROOT/cli/akbp.py" --path "$KB" source verify --fail-on-issue >/dev/null
 
 python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name inherited-repo-agent --profile read-only | python3 -c '
 import json, sys
@@ -102,5 +105,42 @@ assert all(item["citations"] for item in data["items"]), data
 assert "rollback checklist" in json.dumps(data), data
 print("cited inherited repo context ok")
 '
+
+python3 "$ROOT/cli/akbp.py" --path "$STALE_KB" init >/dev/null
+printf '%s\n' "Decision: inherited repo fixes require a rollback checklist." > "$STALE_NOTE"
+STALE_SOURCE="$(python3 "$ROOT/cli/akbp.py" --path "$STALE_KB" source add "$STALE_NOTE" --type file --title "Stale inherited repo note" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
+python3 "$ROOT/cli/akbp.py" --path "$STALE_KB" remember "Inherited repo fixes require a rollback checklist." --type workflow --confidence 0.9 --evidence "$STALE_SOURCE" >/dev/null
+python3 "$ROOT/cli/akbp.py" --path "$STALE_KB" index --incremental >/dev/null
+printf '%s\n' "Decision: inherited repo fixes can skip rollback checklists." > "$STALE_NOTE"
+
+python3 "$ROOT/cli/akbp.py" --path "$STALE_KB" source verify --fail-on-issue > "$TMP/stale-source-verify.json" || true
+python3 - "$TMP/stale-source-verify.json" <<'PY'
+import json
+import sys
+
+data = json.loads(open(sys.argv[1], encoding="utf-8").read())
+assert not data["ok"], data
+assert data["counts"]["changed"] == 1, data
+assert data["attention"]["requires_review"], data
+assert data["attention"]["recommended_action"] == "review_affected_claims", data
+assert data["attention"]["affected_claims"], data
+print("stale inherited repo evidence requires review ok")
+PY
+
+STALE_CONTEXT_JSON="$TMP/stale-context.json"
+if python3 "$ROOT/cli/akbp.py" --path "$STALE_KB" context "inherited repo rollback checklist" --limit 5 --min-items 1 --require-citations --fail-on-warnings > "$STALE_CONTEXT_JSON"; then
+  echo "expected stale inherited repo context to fail on source drift" >&2
+  exit 1
+fi
+python3 - "$STALE_CONTEXT_JSON" <<'PY'
+import json
+import sys
+
+data = json.loads(open(sys.argv[1], encoding="utf-8").read())
+assert data["warnings"], data
+assert data["quality"]["failed"] == ["warnings:1"], data
+assert "Cited source" in data["warnings"][0], data
+print("stale inherited repo context blocked ok")
+PY
 
 echo "AKBP inherited repo intake example passed"

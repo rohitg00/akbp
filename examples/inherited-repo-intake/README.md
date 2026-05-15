@@ -19,16 +19,20 @@ builds the index, then proves the safe startup path:
 3. Run `akbp.doctor --profile read-only`.
 4. Retrieve cited context through `akbp.session.start`.
 5. Reject an unapproved write with `approval_required`.
+6. Treat changed source evidence as a review blocker before trusting recalled
+   context.
 
 ## Rules
 
 - Start with `akbp discover` or an explicit `--path`; do not guess the KB.
 - Run `akbp doctor --profile read-only` before planning from recalled context.
 - Use `akbp.session.start` with a bounded task and require citations.
+- Run `akbp source verify --fail-on-issue` before trusting old inherited-repo
+  claims.
 - Keep write tools disabled until the host can show dry-run previews and collect
   explicit approval.
-- Treat empty or uncited context as a setup gap, not permission to invent repo
-  history.
+- Treat empty, uncited, or source-drifted context as a setup gap, not permission
+  to invent repo history.
 
 Expected success markers:
 
@@ -37,5 +41,7 @@ AKBP inherited repo intake example
 read-only inherited repo startup ok
 unapproved inherited repo write blocked ok
 cited inherited repo context ok
+stale inherited repo evidence requires review ok
+stale inherited repo context blocked ok
 AKBP inherited repo intake example passed
 ~~~
