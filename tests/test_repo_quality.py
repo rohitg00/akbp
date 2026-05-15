@@ -292,6 +292,26 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, guide)
 
+    def test_adoption_decision_guide_documents_protocol_fit(self):
+        guide = (ROOT / "docs" / "ADOPTION_DECISION_GUIDE.md").read_text(encoding="utf-8")
+        getting_started = (ROOT / "docs" / "GETTING_STARTED.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = guide + getting_started + readme
+        for required in [
+            "Adoption decision guide",
+            "portable, reviewable knowledge layer",
+            "memory server",
+            "local context database",
+            "Repo-local AKBP knowledge base plus read-only startup context",
+            "akbp.session.start",
+            "dry_run:true",
+            "approved:true",
+            "superseded or contradicted",
+            "export and import checks",
+            "docs/ADOPTION_DECISION_GUIDE.md",
+        ]:
+            self.assertIn(required, combined)
+
     def test_makefile_exposes_demo_target(self):
         text = (ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("demo:", text)

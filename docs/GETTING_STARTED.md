@@ -162,6 +162,7 @@ This is the adapter contract in one minute: retrieve before planning, dry-run be
 ## Choose your next path
 
 - New user: run `make demo`, then read `docs/AKBP_WORKFLOW.md`.
+- Choosing an architecture: read `docs/ADOPTION_DECISION_GUIDE.md` before deciding whether AKBP should sit beside an existing memory server, local index, or agent adapter.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
 - Protocol reviewer: read `docs/ARCHITECTURE.md`, `docs/TOOL_CONTRACT.md`, and `schemas/`.
 - Skeptical reviewer: run `make benchmark`, then read `docs/CRITIQUE_RESPONSE.md`.
