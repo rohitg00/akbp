@@ -24,6 +24,30 @@ AKBP should not be the hidden memory behind an agent. The user should be able to
 open the knowledge base, inspect the claims, verify the sources, and see how a
 claim changed over time.
 
+## AKBP vs a memory server
+
+Recent agent-memory projects make persistent recall feel cheap: start a local
+server, point the agent at it, and let the runtime save or search memories.
+That is useful, but it answers a different question from AKBP. A memory server
+optimizes runtime access. AKBP optimizes durable project knowledge that can be
+reviewed, cited, exported, and moved across runtimes.
+
+Use this split when choosing the first integration:
+
+| Need | Prefer AKBP | Prefer a memory server or local index |
+| --- | --- | --- |
+| Startup context for a repo | Reviewed decisions, constraints, incidents, and architecture facts should be cited before planning | The agent only needs fast recall from one local runtime cache |
+| Automatic session memory | Session summaries must be promoted through `dry_run:true`, review, and `approved:true` | The user accepts product-native or server-native memory as scratchpad context |
+| Cross-agent portability | Multiple runtimes need the same inspectable files, source hashes, lifecycle states, and export checks | One host owns the agent workflow and no other tool needs to inspect the state |
+| Migration from existing memory | Exports need redaction, citation review, `import-check`, and `import-apply --dry-run` before trust | The old system remains an ephemeral cache and no durable project claim is created |
+| Trust after compaction | Recalled context must carry citations, lifecycle state, and budget diagnostics | A compact summary is enough and stale recall is low risk |
+
+The practical default is not either-or. Keep fast runtime memory as a cache or
+scratchpad, then promote only source-backed project facts into AKBP. If an
+adapter cannot show citations, review metadata, or the exact approved write, it
+should stay read-only against AKBP even if the memory server itself supports
+writes.
+
 ## What useful memory looks like
 
 Many agent-memory integrations are easy to install but hard to trust later:

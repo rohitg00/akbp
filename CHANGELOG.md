@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added an AKBP-vs-memory-server decision table to the adoption guide so users
+  can keep fast runtime memory as scratchpad while promoting only cited,
+  reviewed project facts into portable AKBP artifacts.
 - Changed generated adapter startup preflight requests to require at least one
   cited context item, so hosts prove the citation gate in machine-readable
   config instead of relying only on prompt guidance.

@@ -586,6 +586,22 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, combined)
 
+    def test_adoption_decision_guide_compares_memory_servers(self):
+        guide = (ROOT / "docs" / "ADOPTION_DECISION_GUIDE.md").read_text(encoding="utf-8")
+        for required in [
+            "## AKBP vs a memory server",
+            "optimizes runtime access",
+            "AKBP optimizes durable project knowledge",
+            "Startup context for a repo",
+            "Automatic session memory",
+            "Cross-agent portability",
+            "Migration from existing memory",
+            "Trust after compaction",
+            "fast runtime memory",
+            "stay read-only against AKBP",
+        ]:
+            self.assertIn(required, guide)
+
     def test_makefile_exposes_demo_target(self):
         text = (ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("demo:", text)
