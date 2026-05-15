@@ -462,6 +462,44 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "scratchpads, private logs, and raw transcripts stay outside AKBP unless promoted through review",
         ],
     }
+    adapter_prompt_contract = {
+        "format": "akbp-adapter-prompt-contract-v1",
+        "purpose": "Give a runtime concrete prompt rules for preserving AKBP's cited, review-gated knowledge contract instead of relying on vague memory instructions.",
+        "system_rules": [
+            "Before planning from project memory, call akbp.session.start with the current task and a bounded max_chars value.",
+            "Use only cited context items as recalled project knowledge; surface warnings and continue without recalled memory when context is empty or uncited.",
+            "Do not treat runtime scratchpads, chat transcripts, private logs, or cache entries as durable AKBP knowledge.",
+            "For durable writes, first call the write method with dry_run:true and show review_required, apply_instruction, warnings, and would_write.",
+            "Apply a durable write only by repeating the exact reviewed method, path, and params with approved:true after approval outside the model-generated tool call.",
+            "Branch on the response envelope's ok field and error.code; never parse prose as the success signal.",
+        ],
+        "required_startup_call": {
+            "id": "session-start-1",
+            "method": "akbp.session.start",
+            "path": str(kb_root),
+            "params": {
+                "task": "current task goals and constraints",
+                "limit": 5,
+                "max_chars": 4000,
+            },
+        },
+        "planning_gate": {
+            "trusted_when": [
+                "ok is true",
+                "result.context.items is not empty",
+                "each trusted item carries citations or source identifiers",
+                "result.context.warnings has been surfaced to the user or adapter log",
+            ],
+            "fallback": "Proceed without recalled AKBP memory and do not invent prior decisions.",
+        },
+        "write_gate": {
+            "preview_flags": {"dry_run": True},
+            "apply_flags": {"approved": True},
+            "required_preview_fields": ["review_required", "apply_instruction", "would_write", "warnings"],
+            "approval_boundary": "Approval must happen outside the model-generated tool call.",
+        },
+        "recommended_harness": "./examples/structured-output-harness/run.sh",
+    }
 
     print(json.dumps({
         "start_path": str(start),
@@ -487,6 +525,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         },
         "positioning": positioning,
         "first_run_proof": first_run_proof,
+        "adapter_prompt_contract": adapter_prompt_contract,
         "recommended_commands": {
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
             "client_config": f"akbp --path {kb_arg} client-config --profile read-only",
@@ -1928,6 +1967,51 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         command_args = []
     kb_path = "<AKBP_KB_PATH>" if args.portable else str(base)
     card_path = f"{kb_path}/akbp.json" if args.portable else str(base / "akbp.json")
+    adapter_prompt_contract = {
+        "format": "akbp-adapter-prompt-contract-v1",
+        "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
+        "profile": requested_profile,
+        "system_rules": [
+            "Before planning from project memory, call akbp.session.start with the current task and a bounded max_chars value.",
+            "Use only cited context items as recalled project knowledge; surface warnings and continue without recalled memory when context is empty or uncited.",
+            "Do not treat runtime scratchpads, chat transcripts, private logs, or cache entries as durable AKBP knowledge.",
+            "For durable writes, first call the write method with dry_run:true and show review_required, apply_instruction, warnings, and would_write.",
+            "Apply a durable write only by repeating the exact reviewed method, path, and params with approved:true after approval outside the model-generated tool call.",
+            "Branch on the response envelope's ok field and error.code; never parse prose as the success signal.",
+        ],
+        "startup_request": {
+            "id": "session-start-1",
+            "method": "akbp.session.start",
+            "path": kb_path,
+            "params": {
+                "task": "current task goals and constraints",
+                "limit": 5,
+                "max_chars": 4000,
+            },
+        },
+        "planning_gate": {
+            "required_before_planning": requested_profile in {"startup_context", "read_only", "reviewed_write"},
+            "trusted_when": [
+                "ok is true",
+                "result.context.items is not empty",
+                "each trusted item carries citations or source identifiers",
+                "result.context.warnings has been surfaced to the user or adapter log",
+            ],
+            "fallback": "Proceed without recalled AKBP memory and do not invent prior decisions.",
+        },
+        "write_gate": {
+            "required_for_apply": requested_profile == "reviewed_write",
+            "preview_flags": {"dry_run": True},
+            "apply_flags": {"approved": True},
+            "required_preview_fields": ["review_required", "apply_instruction", "would_write", "warnings"],
+            "approval_boundary": "Approval must happen outside the model-generated tool call.",
+        },
+        "validation": {
+            "recommended_harness": "./examples/structured-output-harness/run.sh",
+            "branch_on": ["ok", "error.code"],
+            "preserve_fields": ["result.context.items", "result.context.warnings", "result.context.budget", "error.details"],
+        },
+    }
     read_only_bridge_tools = [
         {
             "tool": "akbp_capabilities",
@@ -2438,6 +2522,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "stop_policy": "Fail closed: keep write-capable host tools disabled and continue read-only until the harness passes.",
         },
+        "adapter_prompt_contract": adapter_prompt_contract,
         "startup": {
             "id": "capabilities-1",
             "method": "akbp.capabilities",

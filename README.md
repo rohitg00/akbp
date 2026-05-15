@@ -153,6 +153,11 @@ For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,
 dry-run review metadata, and the `approval_required` stop signal before a
 runtime trusts AKBP memory or enables writes.
+`akbp discover` and `akbp client-config` also emit an
+`adapter_prompt_contract` block so adapters can turn that harness into concrete
+runtime instructions: retrieve bounded cited context before planning, continue
+without recalled memory when context is empty or uncited, and keep durable
+writes behind dry-run preview plus approved apply.
 
 To run the adapter harness as a single adoption gate:
 

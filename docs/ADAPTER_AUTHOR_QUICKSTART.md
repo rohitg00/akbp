@@ -46,6 +46,12 @@ tool-protocol hosts, and rebuildable search indexes. It also includes
 startup context, dry-run preview, and the `approval_required` stop signal before
 reviewed writes are enabled. If discovery fails,
 continue without durable memory instead of creating hidden state.
+Discovery also returns `adapter_prompt_contract`, a compact set of runtime
+instructions for the first trusted memory call. Use it when the host needs
+pasteable system rules: call `akbp.session.start` before planning from memory,
+trust only cited items, continue without recalled memory when context is empty
+or uncited, preview writes with `dry_run:true`, apply only the exact reviewed
+request with `approved:true`, and branch on `ok` plus `error.code`.
 
 ## 1. Generate a read-only client config first
 
@@ -59,6 +65,10 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rea
 The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, verification expectations, quality gates, and safety rules. Paste that into the host runtime, then run the config's `verification` steps before adding write flows.
 
 Use the config's `quality_gates.startup_context` block as the adapter stop condition before planning from recalled memory. A runtime should require cited context items, surface warnings, and continue without recalled memory when startup context is empty or uncited instead of inventing prior decisions.
+Use `adapter_prompt_contract.system_rules` as the host-facing memory prompt and
+`adapter_prompt_contract.validation` as the response fields the bridge must
+preserve. This keeps structured prompts tied to the same JSONL response contract
+that the harness verifies.
 
 For adapter packages, docs, or installer templates that may be committed to a
 public repository, generate a placeholder-based config instead of embedding a

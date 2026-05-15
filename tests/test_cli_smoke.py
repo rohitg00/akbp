@@ -298,6 +298,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["adapter_contract_harness"]["command"], "./examples/structured-output-harness/run.sh")
             self.assertIn("approval_required", " ".join(read_only["adapter_contract_harness"]["proves"]))
             self.assertIn("read-only", read_only["adapter_contract_harness"]["stop_policy"])
+            prompt_contract = read_only["adapter_prompt_contract"]
+            self.assertEqual(prompt_contract["format"], "akbp-adapter-prompt-contract-v1")
+            self.assertEqual(prompt_contract["profile"], "read_only")
+            self.assertEqual(prompt_contract["startup_request"]["method"], "akbp.session.start")
+            self.assertEqual(prompt_contract["startup_request"]["path"], str(kb.resolve()))
+            self.assertEqual(prompt_contract["startup_request"]["params"]["max_chars"], 4000)
+            self.assertTrue(prompt_contract["planning_gate"]["required_before_planning"])
+            self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
+            self.assertFalse(prompt_contract["write_gate"]["required_for_apply"])
+            self.assertEqual(prompt_contract["write_gate"]["preview_flags"], {"dry_run": True})
+            self.assertIn("error.code", prompt_contract["validation"]["branch_on"])
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
             portable = json.loads(
@@ -312,6 +323,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["adapter_prompt_contract"]["startup_request"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["multi_client_scope"]["shared_kb_path"], "<AKBP_KB_PATH>")
             self.assertTrue(portable["multi_client_scope"]["safe_for_public_templates"])
             self.assertTrue(portable["distribution"]["safe_to_commit"])
@@ -325,6 +337,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(startup_context["verification"][1]["expect"]["result.adapter_readiness.startup_context_ready"])
             self.assertEqual(startup_context["session_start"]["method"], "akbp.session.start")
             self.assertTrue(startup_context["quality_gates"]["startup_context"]["required_before_planning"])
+            self.assertTrue(startup_context["adapter_prompt_contract"]["planning_gate"]["required_before_planning"])
             self.assertEqual(startup_context["safety"]["profile"], "startup_context")
             self.assertEqual(startup_context["safety"]["write_policy"], "no_writes")
 
@@ -356,6 +369,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             self.assertIn("approval_required", discovered["first_run_proof"]["recommended_harness"]["purpose"])
             self.assertIn("read-only", discovered["first_run_proof"]["recommended_harness"]["stop_policy"])
+            prompt_contract = discovered["adapter_prompt_contract"]
+            self.assertEqual(prompt_contract["format"], "akbp-adapter-prompt-contract-v1")
+            self.assertEqual(prompt_contract["required_startup_call"]["method"], "akbp.session.start")
+            self.assertEqual(prompt_contract["required_startup_call"]["path"], str(kb.resolve()))
+            self.assertEqual(prompt_contract["required_startup_call"]["params"]["max_chars"], 4000)
+            self.assertIn("dry_run:true", " ".join(prompt_contract["system_rules"]))
+            self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
+            self.assertEqual(prompt_contract["write_gate"]["apply_flags"], {"approved": True})
             proof_steps = {item["name"]: item for item in discovered["first_run_proof"]["steps"]}
             self.assertIn("doctor_read_only", proof_steps)
             self.assertIn("retrieve_startup_context", proof_steps)
