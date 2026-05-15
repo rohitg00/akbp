@@ -13,7 +13,7 @@ python3 cli/akbp.py --path ./my-kb init
 python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile read-only
 ```
 
-The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, session-start method, and safety rules. Paste that into the host runtime, then confirm the adapter can call `akbp.capabilities` and `akbp.session.start` before adding write flows.
+The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, and safety rules. Paste that into the host runtime, then confirm the adapter can call `akbp.capabilities`, `akbp.doctor`, and `akbp.session.start` before adding write flows.
 
 Use reviewed writes only after the runtime can show a preview and collect approval:
 
@@ -71,9 +71,10 @@ Minimum startup gate:
 1. Call `akbp.capabilities`.
 2. Confirm `result.negotiation.satisfied` is `true` for required features.
 3. Confirm required workflow profiles such as `read_only` or `startup_context` are present in `result.negotiation.supported_profiles`.
-4. Confirm `result.features.method_schema_runtime_parity` is `true`.
-5. Confirm `result.runtime.method_schema_runtime_errors` is empty.
-6. Confirm the write method you plan to call advertises `review_required:true`.
+4. Call `akbp.doctor` and show `next_steps` if `ready_for_adapter` is `false`.
+5. Confirm `result.features.method_schema_runtime_parity` is `true`.
+6. Confirm `result.runtime.method_schema_runtime_errors` is empty.
+7. Confirm the write method you plan to call advertises `review_required:true`.
 
 If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
 

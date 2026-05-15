@@ -1598,17 +1598,27 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "limit": 5,
             },
         },
+        "health_check": {
+            "method": "akbp.doctor",
+            "params": {
+                "limit": 5,
+            },
+            "ready_field": "ready_for_adapter",
+            "blocking_field": "summary.errors",
+        },
         "safety": {
             "profile": requested_profile,
             "write_policy": "dry_run_then_approved" if requested_profile == "write_review" else "no_writes",
             "require_capability_negotiation": True,
             "require_method_param_schemas": True,
+            "require_adapter_ready": True,
             "require_review_metadata": requested_profile == "write_review",
             "never_auto_apply_session_end": True,
         },
         "notes": [
             "Call startup.method before any other method.",
             "Disable flows when result.negotiation.satisfied is false.",
+            "Run health_check.method and show next_steps when ready_field is false.",
             "For write-capable flows, preview with dry_run:true and repeat unchanged with approved:true only after review.",
             "Branch on error.code, not free-form error text.",
         ],
