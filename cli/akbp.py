@@ -1350,6 +1350,37 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
         }
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 1
+    review = import_review_summary(normalized, [], [])
+    if not review["ready_for_reviewed_apply"]:
+        result = {
+            "ok": False,
+            "file": str(source),
+            "dry_run": bool(args.dry_run),
+            "applied": False,
+            "checked": checked_count,
+            "accepted_count": len(normalized),
+            "rejected_count": 0,
+            "error_count": 1,
+            "would_write": {
+                "sources": [],
+                "claims": [],
+            },
+            "skipped_existing": {
+                "sources": [],
+                "claims": [],
+            },
+            "accepted": [
+                {"id": record["id"], "kind": kind, "line": line}
+                for kind, record, line in normalized
+            ],
+            "rejected": [],
+            "errors": [{"line": 1, "error": "import review is not ready for durable apply"}],
+            "review": review,
+            "review_required": True,
+            "apply_instruction": "Fix review.next_actions, then rerun import-check and import-apply --dry-run before approved apply.",
+        }
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 1
     sources = [record for kind, record, _line in normalized if kind == "source"]
     claims = [record for kind, record, _line in normalized if kind == "claim"]
     source_existing = {item.get("id") for item in load_sources(base)}
@@ -1373,7 +1404,7 @@ def cmd_import_apply(args: argparse.Namespace) -> int:
             "sources": [item["id"] for item in sources if item.get("id") in source_existing],
             "claims": [item["id"] for item in claims if item.get("id") in claim_existing],
         },
-        "review": import_review_summary(normalized, [], []),
+        "review": review,
     }
     if args.dry_run:
         result["review_required"] = True

@@ -240,6 +240,16 @@ class RealWorldFlowTest(unittest.TestCase):
             self.assertFalse(import_check["review"]["ready_for_reviewed_apply"])
             self.assertEqual(import_check["review"]["claims_without_evidence"], ["claim_uncited_runtime_fact"])
             self.assertIn("Add source evidence", " ".join(import_check["review"]["next_actions"]))
+            apply_preview = json.loads(cli(kb, "import-apply", str(incoming), "--dry-run", check=False).stdout)
+            self.assertFalse(apply_preview["ok"])
+            self.assertFalse(apply_preview["applied"])
+            self.assertTrue(apply_preview["review_required"])
+            self.assertEqual(apply_preview["would_write"], {"sources": [], "claims": []})
+            self.assertEqual(apply_preview["review"]["claims_without_evidence"], ["claim_uncited_runtime_fact"])
+            apply_approved = json.loads(cli(kb, "import-apply", str(incoming), "--approved", check=False).stdout)
+            self.assertFalse(apply_approved["ok"])
+            self.assertFalse(apply_approved["applied"])
+            self.assertEqual(apply_approved["review"]["claims_without_evidence"], ["claim_uncited_runtime_fact"])
 
     def test_import_review_flags_claims_without_registered_source_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -272,6 +282,12 @@ class RealWorldFlowTest(unittest.TestCase):
             self.assertEqual(import_check["review"]["claims_without_evidence"], [])
             self.assertEqual(import_check["review"]["claims_without_source_evidence"], ["claim_file_path_only_evidence"])
             self.assertIn("registered source ids", " ".join(import_check["review"]["next_actions"]))
+            apply_preview = json.loads(cli(kb, "import-apply", str(incoming), "--dry-run", check=False).stdout)
+            self.assertFalse(apply_preview["ok"])
+            self.assertFalse(apply_preview["applied"])
+            self.assertTrue(apply_preview["review_required"])
+            self.assertEqual(apply_preview["would_write"], {"sources": [], "claims": []})
+            self.assertEqual(apply_preview["review"]["claims_without_source_evidence"], ["claim_file_path_only_evidence"])
 
 
 if __name__ == "__main__":

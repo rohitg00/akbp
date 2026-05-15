@@ -49,11 +49,12 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 
 `akbp import-check export.jsonl` validates imported JSONL objects before durable writes. It reports accepted ids and rejected ids without echoing secret-like raw values, rejects claims that cite unknown `source_...` evidence ids, flags accepted claims whose evidence does not link to a registered source id, and lets agents review exports before using `ingest`, `remember`, or `import-apply`. Add `--fail-on-rejected` in automation when any rejected object should fail the gate.
 
-`akbp import-apply export.jsonl --dry-run` previews accepted source and claim records that would be written. Apply with `akbp import-apply export.jsonl --approved` only after reviewing `import-check` and the dry-run output. Rejected, malformed, or unsupported objects block the apply path.
+`akbp import-apply export.jsonl --dry-run` previews accepted source and claim records that would be written. Apply with `akbp import-apply export.jsonl --approved` only after reviewing `import-check` and the dry-run output. Rejected, malformed, unsupported, uncited, or non-source-backed claim objects block the apply path.
 
 Import apply review checklist:
 
 - Run `akbp import-check export.jsonl --fail-on-rejected` when automation must stop on any rejected object.
+- Treat `review.ready_for_reviewed_apply:false` as a hard stop: `import-apply` will not write those records, even with `--approved`.
 - Confirm `accepted_count`, `rejected_count`, and `error_count` before applying.
 - Stop when `review.claims_without_evidence` or `review.claims_without_source_evidence` is non-empty.
 - Review `would_write.sources` and `would_write.claims` from the dry-run output.

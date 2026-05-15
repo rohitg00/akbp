@@ -51,6 +51,7 @@ Reject the intake when:
 - a line is invalid JSON
 - an object has a secret-like value
 - a claim cites an unknown `source_...` evidence id
+- `review.ready_for_reviewed_apply` is false because a claim is uncited or only points at non-source evidence
 - the dry run shows writes that do not match the reviewed plan
 
 ## Review checklist
