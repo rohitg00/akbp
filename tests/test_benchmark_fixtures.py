@@ -492,6 +492,20 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("methods.akbp\\.search.params_schema", contains)
         self.assertIn("methods.akbp\\.import_apply.params_schema", contains)
 
+    def test_read_only_adapter_profile_fixture_covers_allowlist(self):
+        path = FIXTURES / "read-only-adapter-profile" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        capabilities = requests["caps-read-only-adapter"]
+        contains = capabilities["expected_result_contains"]
+        self.assertIn("profiles.read_only[]", contains)
+        self.assertIn("akbp.import_check", contains["profiles.read_only[]"])
+        self.assertIn("profiles.reviewed_write[]", contains)
+        self.assertIn("methods.akbp\\.remember.write", contains)
+        self.assertEqual(requests["session-start-read-only-adapter"]["method"], "akbp.session.start")
+        self.assertEqual(requests["search-read-only-adapter"]["method"], "akbp.search")
+        self.assertIn("claim_read_only_adapters_block_writes_locally", data["expected"]["must_retrieve"])
+
     def test_review_gated_writes_fixture_covers_review_metadata(self):
         path = FIXTURES / "review-gated-writes" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

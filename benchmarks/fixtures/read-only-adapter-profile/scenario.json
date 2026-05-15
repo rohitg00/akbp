@@ -1,0 +1,110 @@
+{
+  "id": "read-only-adapter-profile-001",
+  "task": "Verify that a new adapter can use the advertised read_only capability profile as a safe allowlist before implementing reviewed writes.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_read_only_adapter_example",
+        "type": "file",
+        "locator": "examples/read-only-adapter/README.md",
+        "title": "Read-only adapter rollout example"
+      },
+      {
+        "id": "source_tool_contract_profiles",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract capability profiles"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_adapters_can_start_read_only",
+        "text": "New AKBP adapters can start with result.profiles.read_only to retrieve cited context and run validation before they implement reviewed write UX.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_read_only_adapter_example", "source_tool_contract_profiles"],
+        "entities": ["adapter", "read_only", "akbp.capabilities", "akbp.session.start", "akbp.search", "akbp.import_check"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_read_only_adapters_block_writes_locally",
+        "text": "Read-only adapters should block akbp.remember and akbp.import_apply locally until they can render dry_run, review_required, apply_instruction, and approved:true.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_read_only_adapter_example"],
+        "entities": ["adapter", "read_only", "akbp.remember", "akbp.import_apply", "dry_run", "review_required", "apply_instruction", "approved:true"],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "caps-read-only-adapter",
+        "method": "akbp.capabilities",
+        "params": {
+          "client": "read-only-adapter-fixture",
+          "requires": ["method_param_schemas", "capability_negotiation"]
+        },
+        "expected_result_schema": "#/$defs/capabilities_result",
+        "expected_result_fields": ["protocol", "features", "profiles", "methods", "negotiation"],
+        "expected_result_contains": {
+          "profiles.read_only[]": ["akbp.capabilities", "akbp.session.start", "akbp.search", "akbp.import_check"],
+          "profiles.reviewed_write[]": ["akbp.remember", "akbp.session.end"],
+          "profiles.portability[]": ["akbp.import_apply"],
+          "methods.akbp\\.search.write": [false],
+          "methods.akbp\\.import_check.write": [false],
+          "methods.akbp\\.session\\.start.write": [false],
+          "methods.akbp\\.remember.write": [true],
+          "methods.akbp\\.import_apply.write": [true],
+          "negotiation.satisfied": [true]
+        }
+      },
+      {
+        "id": "session-start-read-only-adapter",
+        "method": "akbp.session.start",
+        "approved": false,
+        "params": {
+          "task": "plan a read-only AKBP adapter rollout",
+          "limit": 5
+        },
+        "expected_result_schema": "#/$defs/session_start_result",
+        "expected_result_fields": ["session_id", "task", "context"]
+      },
+      {
+        "id": "search-read-only-adapter",
+        "method": "akbp.search",
+        "approved": false,
+        "params": {
+          "query": "read_only adapter allowlist",
+          "limit": 5
+        },
+        "expected_result_schema": "#/$defs/search_result",
+        "expected_result_fields": ["query", "backend", "results", "warnings"]
+      }
+    ]
+  },
+  "query": "How should a new adapter use AKBP before it has write review UX?",
+  "expected": {
+    "must_retrieve": [
+      "claim_adapters_can_start_read_only",
+      "claim_read_only_adapters_block_writes_locally"
+    ],
+    "must_cite": [
+      "source_read_only_adapter_example",
+      "source_tool_contract_profiles"
+    ],
+    "must_cite_in_context": [
+      "source_read_only_adapter_example"
+    ],
+    "answer_should_include": [
+      "read_only",
+      "akbp.capabilities",
+      "akbp.session.start",
+      "akbp.import_check",
+      "akbp.remember",
+      "akbp.import_apply",
+      "approved:true"
+    ]
+  }
+}

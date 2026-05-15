@@ -56,6 +56,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 - `multi-agent-handoff`: retrieve cited context from prior agent sessions before continuing adapter work.
 - `review-gated-writes`: require agents to honor dry-run review metadata before applying durable writes.
 - `read-method-schema`: verify read-only JSONL methods, including capability discovery and audit, return schema-backed response shapes without write approval, including advertised enforcement flags and method schema references.
+- `read-only-adapter-profile`: verify new adapters can use `result.profiles.read_only` as a safe allowlist before implementing reviewed write UX.
 - `retrieval-citation-bundle`: verify context retrieval and citation lookup return the same evidence-backed claim through JSONL tool calls.
 - `retrieval-ambiguity-ranking`: verify ambiguous adapter lifecycle queries retrieve the direct lifecycle and validation claims with citations.
 - `retrieval-noisy-evidence`: verify direct, cited lifecycle decisions are returned despite noisy adjacent memory and launch-copy claims.
