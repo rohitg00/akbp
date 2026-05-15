@@ -122,6 +122,29 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, text + script)
         self.assertIn("./examples/read-only-adapter/run.sh", makefile)
 
+    def test_session_start_harness_documents_startup_context_gate(self):
+        text = (ROOT / "examples" / "session-start-harness" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "session-start-harness" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = text + script + quickstart + readme
+        for required in [
+            "AKBP session-start harness example",
+            "AKBP session-start harness example passed",
+            "akbp.capabilities",
+            "akbp.doctor",
+            "akbp.session.start",
+            "read_only",
+            "startup_context",
+            "ready_for_adapter",
+            "session_id",
+            "citations",
+            "first trusted context call",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/session-start-harness/run.sh", makefile)
+
     def test_stdio_client_config_example_documents_negotiated_setup(self):
         text = (ROOT / "examples" / "stdio-client-config" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "stdio-client-config" / "run.sh").read_text(encoding="utf-8")
