@@ -44,6 +44,22 @@ assert config["response_contract"]["schemas"]["response"] == "schemas/tool-respo
 print("read-only config ok")
 '
 
+python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name stdio-portable-example --portable |
+  python3 -c '
+import json, sys
+
+config = json.load(sys.stdin)
+assert config["knowledge_base"]["path"] == "<AKBP_KB_PATH>", config
+assert config["knowledge_base"]["card"] == "<AKBP_KB_PATH>/akbp.json", config
+assert config["knowledge_base"]["portable_template"] is True, config
+assert config["startup"]["path"] == "<AKBP_KB_PATH>", config
+assert config["health_check"]["path"] == "<AKBP_KB_PATH>", config
+assert config["session_start"]["path"] == "<AKBP_KB_PATH>", config
+assert config["distribution"]["safe_to_commit"] is True, config
+assert config["distribution"]["replace_before_run"] == ["<AKBP_KB_PATH>"], config
+print("portable config ok")
+'
+
 python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name stdio-reviewed-example --profile reviewed-writes --command repo-script |
   python3 -c '
 import json, sys

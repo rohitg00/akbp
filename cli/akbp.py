@@ -1839,6 +1839,8 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     else:
         command = "akbp-tool-server"
         command_args = []
+    kb_path = "<AKBP_KB_PATH>" if args.portable else str(base)
+    card_path = f"{kb_path}/akbp.json" if args.portable else str(base / "akbp.json")
 
     config = {
         "name": args.name,
@@ -1849,13 +1851,14 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "env": {},
         },
         "knowledge_base": {
-            "path": str(base),
-            "card": str(base / "akbp.json"),
+            "path": kb_path,
+            "card": card_path,
+            "portable_template": bool(args.portable),
         },
         "startup": {
             "id": "capabilities-1",
             "method": "akbp.capabilities",
-            "path": str(base),
+            "path": kb_path,
             "params": {
                 "client": args.name,
                 "requires": required_features,
@@ -1865,7 +1868,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "session_start": {
             "id": "session-start-1",
             "method": "akbp.session.start",
-            "path": str(base),
+            "path": kb_path,
             "params": {
                 "task": "current task goals and constraints",
                 "limit": 5,
@@ -1898,7 +1901,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "health_check": {
             "id": "doctor-1",
             "method": "akbp.doctor",
-            "path": str(base),
+            "path": kb_path,
             "params": {
                 "limit": 5,
             },
@@ -2008,6 +2011,12 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "Use response_contract to validate envelopes and branch on error.code, not free-form error text.",
         ],
     }
+    if args.portable:
+        config["distribution"] = {
+            "replace_before_run": ["<AKBP_KB_PATH>"],
+            "safe_to_commit": True,
+            "path_rule": "Keep published adapter templates placeholder-based; resolve the local AKBP path during install or first run.",
+        }
     print(json.dumps(config, indent=2))
     return 0
 
@@ -2729,6 +2738,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--name", default="akbp-client", help="client name to use during capability negotiation")
     s.add_argument("--profile", choices=["startup-context", "read-only", "reviewed-writes"], default="read-only")
     s.add_argument("--command", choices=["console", "python-module", "repo-script"], default="console")
+    s.add_argument("--portable", action="store_true", help="emit a commit-safe template with <AKBP_KB_PATH> instead of an absolute path")
     s.set_defaults(func=cmd_client_config)
     return p
 

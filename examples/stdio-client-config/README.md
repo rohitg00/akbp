@@ -14,6 +14,7 @@ The generated config makes the trust boundary visible:
 - retrieve context with `akbp.session.start`
 - keep durable writes blocked unless the adapter implements dry-run review and `approved:true`
 - keep hosted or autonomous tool integrations read-only unless a separate human approval step exists outside the tool call
+- emit a `--portable` template with `<AKBP_KB_PATH>` so adapter examples can be committed without leaking machine-local paths
 
 ## Run
 
@@ -32,6 +33,7 @@ AKBP stdio client config example passed
 ## What it proves
 
 - `akbp client-config` emits valid JSON for both read-only and reviewed-write adapters
+- `akbp client-config --portable` emits a commit-safe template that installers can resolve at first run
 - the config starts with capability negotiation instead of hard-coded assumptions
 - the config exposes a health check that adapters can map to setup warnings and next steps
 - the config exposes the response envelope and schema paths adapter authors should validate against

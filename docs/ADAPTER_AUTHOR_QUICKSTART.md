@@ -43,6 +43,19 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rea
 
 The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, verification expectations, and safety rules. Paste that into the host runtime, then run the config's `verification` steps before adding write flows.
 
+For adapter packages, docs, or installer templates that may be committed to a
+public repository, generate a placeholder-based config instead of embedding a
+machine-local absolute path:
+
+```bash
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile read-only --portable
+```
+
+The portable config marks `knowledge_base.portable_template:true` and uses
+`<AKBP_KB_PATH>` for every request path. Resolve that placeholder during
+install or first run, then run the same verification steps against the local
+path.
+
 For installer scripts or setup checks, use the profile-aware doctor preflight:
 
 ```bash

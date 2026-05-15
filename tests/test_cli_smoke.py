@@ -84,11 +84,24 @@ class AkbpCliSmokeTest(unittest.TestCase):
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
             self.assertNotIn("write_apply_requires_approval", read_only["startup"]["params"]["requires"])
+            self.assertFalse(read_only["knowledge_base"]["portable_template"])
             self.assertEqual(read_only["response_contract"]["envelope"]["ok"], "boolean")
             self.assertEqual(read_only["tool_protocol_bridge"]["mode"], "read_only")
             self.assertIn("akbp.import_check", read_only["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
+
+            portable = json.loads(
+                run_cli("--path", str(kb), "client-config", "--name", "portable-adapter", "--portable").stdout
+            )
+            self.assertEqual(portable["knowledge_base"]["path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["knowledge_base"]["card"], "<AKBP_KB_PATH>/akbp.json")
+            self.assertTrue(portable["knowledge_base"]["portable_template"])
+            self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")
+            self.assertTrue(portable["distribution"]["safe_to_commit"])
+            self.assertEqual(portable["distribution"]["replace_before_run"], ["<AKBP_KB_PATH>"])
 
             startup_context = json.loads(
                 run_cli("--path", str(kb), "client-config", "--profile", "startup-context").stdout
