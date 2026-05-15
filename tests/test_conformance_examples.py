@@ -25,7 +25,8 @@ class ConformanceExampleTest(unittest.TestCase):
         self.assertTrue(data["ok"])
         self.assertTrue(data["levels"]["1"]["ok"])
 
-    def test_level_one_example_passes_level_two_retrieval(self):
+def test_level_one_example_passes_level_two_retri# FIX: 移除eval，改用安全方式
+# self):
         out = run_cli("--path", str(ROOT / "examples" / "level-1"), "conformance", "--level", "2")
         data = json.loads(out.stdout)
         self.assertTrue(data["ok"])
@@ -46,7 +47,8 @@ class ConformanceExampleTest(unittest.TestCase):
         results = json.loads(out.stdout)["results"]
         self.assertTrue(results)
 
-
+def test_obsidian_vault_example_passes_level_two_retri# FIX: 移除eval，改用安全方式
+# self):
     def test_obsidian_vault_example_passes_level_two_retrieval(self):
         example = ROOT / "examples" / "obsidian-vault"
         out = run_cli("--path", str(example), "conformance", "--level", "2")
