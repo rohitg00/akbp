@@ -62,7 +62,7 @@ Definition of done:
 Commands:
 
 ```bash
-akbp init
+akbp init --level 0
 akbp remember "..."
 akbp query "..."
 akbp crystallize transcript.md
@@ -80,7 +80,7 @@ Implementation scope:
 
 Definition of done:
 
-- Run `akbp init` and get a valid Level 0 knowledge base.
+- Run `akbp init --level 0` and get a valid Level 0 knowledge base.
 - Run `akbp remember` and produce a claim with evidence/status.
 - Run `akbp crystallize` on a transcript and update wiki pages plus claims.
 - Run `akbp query` and return a context pack.
@@ -200,7 +200,7 @@ Those can come later. The first win is interoperability.
 2. Define evidence schema.
 3. Define entity/relation schema.
 4. Define context pack output format.
-5. Build `akbp init`.
+5. Build `akbp init --level 0`.
 6. Build `akbp remember`.
 7. Build `akbp crystallize`.
 8. Build tool protocol tool contract.

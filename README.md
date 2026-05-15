@@ -96,7 +96,7 @@ AKBP quickstart demo passed
 Direct CLI path:
 
 ```bash
-python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb init --level 0
 python3 cli/akbp.py --path ./my-kb source add notes.md --type file --title "Project notes"
 python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Capture the durable decision from this note." --claim-type decision
 python3 cli/akbp.py --path ./my-kb source verify --fail-on-issue
@@ -118,7 +118,7 @@ Installed console scripts:
 
 ```bash
 python3 -m pip install .
-akbp --path ./my-kb init
+akbp --path ./my-kb init --level 0
 akbp-tool-server < requests.jsonl
 ```
 
@@ -215,7 +215,7 @@ If the host speaks a tool protocol, read `docs/TOOL_PROTOCOL_BRIDGE.md` before e
 Fastest read-only setup:
 
 ```bash
-python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb init --level 0
 python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile read-only
 ```
 

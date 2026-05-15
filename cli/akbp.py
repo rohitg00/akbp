@@ -332,6 +332,7 @@ def write_if_missing(path: Path, content: str) -> None:
 
 def cmd_init(args: argparse.Namespace) -> int:
     base = root(args.path)
+    level = getattr(args, "level", "0")
     ensure_dirs(base)
     card = default_card(base)
     write_if_missing(base / "akbp.json", json.dumps(card, indent=2) + "\n")
@@ -349,8 +350,8 @@ def cmd_init(args: argparse.Namespace) -> int:
     write_if_missing(base / "raw" / "sources" / "sources.jsonl", "")
     write_if_missing(base / "graph" / "entities.jsonl", "")
     write_if_missing(base / "graph" / "relations.jsonl", "")
-    audit(base, "init", {"path": str(base)})
-    print(f"Initialized AKBP knowledge base at {base}")
+    audit(base, "init", {"path": str(base), "level": level})
+    print(f"Initialized AKBP Level {level} knowledge base at {base}")
     return 0
 
 
@@ -2785,6 +2786,12 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("init")
+    s.add_argument(
+        "--level",
+        default="0",
+        choices=["0"],
+        help="initialize a Level 0 AKBP file-convention knowledge base",
+    )
     s.set_defaults(func=cmd_init)
 
     s = sub.add_parser("discover", help="find the nearest AKBP knowledge base from --path or its parents")

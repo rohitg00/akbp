@@ -265,9 +265,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
     def test_init_remember_query_lint(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
-            run_cli("--path", str(kb), "init")
+            out = run_cli("--path", str(kb), "init", "--level", "0")
+            self.assertIn("Initialized AKBP Level 0 knowledge base", out.stdout)
             self.assertTrue((kb / "wiki" / "index.md").exists())
             self.assertTrue((kb / "AKBP.md").exists())
+            conformance = json.loads(run_cli("--path", str(kb), "conformance", "--level", "0").stdout)
+            self.assertTrue(conformance["levels"]["0"]["ok"])
+            audit_log = (kb / ".akbp" / "audit.log.jsonl").read_text(encoding="utf-8")
+            self.assertIn('"level": "0"', audit_log)
             entrypoint = (kb / "AKBP.md").read_text(encoding="utf-8")
             self.assertIn("## Memory rules", entrypoint)
             self.assertIn("Use `akbp.context` or `akbp.session.start` before planning", entrypoint)

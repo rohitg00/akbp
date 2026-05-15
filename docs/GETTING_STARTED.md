@@ -101,7 +101,7 @@ Use the manual path when you want to see the files AKBP creates.
 
 ```bash
 TMP_KB="$(mktemp -d)/akbp-first-run"
-python3 cli/akbp.py --path "$TMP_KB" init
+python3 cli/akbp.py --path "$TMP_KB" init --level 0
 printf '%s\n' "Release work should stay small, reviewed, and evidence-backed." > "$TMP_KB/session-note.md"
 python3 cli/akbp.py --path "$TMP_KB" source add "$TMP_KB/session-note.md" --type file --title "Session note"
 python3 cli/akbp.py --path "$TMP_KB" ingest "$TMP_KB/session-note.md" --claim "Release work should stay small, reviewed, and evidence-backed." --claim-type decision
@@ -138,7 +138,7 @@ Use the JSONL tool server to see how an adapter should behave.
 
 ```bash
 TMP_KB="$(mktemp -d)/akbp-tool-first-run"
-python3 cli/akbp.py --path "$TMP_KB" init
+python3 cli/akbp.py --path "$TMP_KB" init --level 0
 
 printf '%s\n' \
   '{"id":"preview","method":"akbp.remember","path":"'"$TMP_KB"'","dry_run":true,"params":{"text":"Decision: release notes must link to validation evidence.","type":"decision"}}' \

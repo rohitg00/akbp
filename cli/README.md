@@ -22,7 +22,7 @@ See `../docs/INSTALL.md` for the full install and smoke-test flow.
 ## Usage
 
 ```bash
-python3 cli/akbp.py init --path ./my-kb
+python3 cli/akbp.py --path ./my-kb init --level 0
 python3 cli/akbp.py --path ./my-kb remember "This project uses Bun instead of npm" --type decision --evidence README.md
 python3 cli/akbp.py --path ./my-kb query "Bun npm"
 python3 cli/akbp.py --path ./my-kb index
