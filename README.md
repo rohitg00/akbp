@@ -150,6 +150,10 @@ startup context ready only after evidence and indexing, proves nested
 `akbp discover` exposes profile selection and the ten-minute proof for adapter
 installers, emits portable client config without local paths, and rejects
 unapproved writes.
+For inherited or older agent-written repositories, `examples/inherited-repo-intake/`
+adds the takeover-specific gate: verify source freshness before trusting cited
+startup context, and keep stale or changed handoffs as review blockers instead
+of planning from outdated memory.
 
 For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,

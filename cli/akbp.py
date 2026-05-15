@@ -515,6 +515,11 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "expect": "Adapter receives bounded context with citations, warnings, and budget metadata.",
             },
             {
+                "name": "verify_source_freshness",
+                "command": f"akbp --path {kb_arg} source verify --fail-on-issue",
+                "expect": "Inherited or stale repository notes are checked for source drift before recalled context influences planning.",
+            },
+            {
                 "name": "preview_before_write",
                 "command": "akbp.remember or akbp.session.end with dry_run:true",
                 "expect": "Runtime shows review metadata and would-write paths without changing durable artifacts.",
@@ -567,6 +572,11 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "proves": "Startup recall is bounded and citation-aware instead of an uncited summary.",
             },
             {
+                "name": "verify_inherited_sources",
+                "command": f"akbp --path {kb_arg} source verify --fail-on-issue",
+                "proves": "Old handoffs, issue notes, and repo summaries are rechecked before an agent treats them as current project truth.",
+            },
+            {
                 "name": "preview_reviewed_write",
                 "command": "akbp.remember, akbp.ingest, or akbp.session.end with dry_run:true",
                 "proves": "Durable knowledge can be proposed without writing artifacts.",
@@ -590,6 +600,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "success_markers": [
             "doctor reports the requested profile ready",
             "context results either carry citations or the adapter continues without recalled AKBP memory",
+            "source verification passes before inherited-repo context is trusted",
             "structured-output harness passes before recalled context influences planning",
             "write previews include review metadata and would-write paths",
             "unapproved writes fail with approval_required",
