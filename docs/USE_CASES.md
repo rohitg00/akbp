@@ -114,6 +114,20 @@ This page maps the public examples to real use cases people can understand quick
 - bundles can be checked before trust
 - import is review-gated
 
+## 9. Existing memory migration
+
+**Problem:** useful facts already live in notes, agent memory exports, and prior tool stores, but bulk-importing them blindly creates stale or uncited memory.
+
+**AKBP use case:** convert a reviewed line-oriented export into source and claim records, reject unsupported or uncited records, preview the write, then apply only after approval.
+
+**Demo:** `examples/existing-memory-migration/`
+
+**What it proves:**
+
+- existing memory can become portable AKBP artifacts
+- missing evidence is rejected before import
+- migration stays review-gated instead of becoming a memory dump
+
 ## Good launch framing
 
 > AKBP is not another chat memory. It is a local-first protocol for reviewed project knowledge: cited claims, source hashes, lifecycle history, dry-run writes, conformance checks, and portable bundles.
@@ -128,6 +142,7 @@ examples/akbp-bench/run.sh
 examples/repo-memory-demo/run.sh
 examples/memory-ci/run.sh
 examples/multi-agent-consistency-demo/run.sh
+examples/existing-memory-migration/run.sh
 ```
 
-That path shows the protocol, the benchmark, the repo use case, the CI gate, and cross-agent consistency.
+That path shows the protocol, the benchmark, the repo use case, the CI gate, cross-agent consistency, and reviewed migration from existing memory.
