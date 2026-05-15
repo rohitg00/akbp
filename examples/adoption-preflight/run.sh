@@ -44,6 +44,12 @@ import sys
 rows = [json.loads(line) for line in sys.stdin if line.strip()]
 by_id = {row["id"]: row for row in rows}
 
+caps = by_id["caps"]
+assert caps["ok"], caps
+assert caps["result"]["negotiation"]["satisfied"], caps
+assert caps["result"]["features"]["approval_required_errors"], caps
+assert "read_only" in caps["result"]["negotiation"]["supported_profiles"], caps
+
 doctor = by_id["doctor"]
 assert doctor["ok"], doctor
 assert doctor["result"]["adapter_readiness"]["startup_context_ready"], doctor
@@ -57,6 +63,7 @@ assert items, start
 assert any(item.get("citations") for item in items), start
 assert "startup context" in " ".join(item.get("summary", "") for item in items), start
 print("cited startup context becomes ready ok")
+print("capability negotiation read-only profile ok")
 
 blocked = by_id["write-blocked"]
 assert not blocked["ok"], blocked
@@ -64,6 +71,7 @@ assert blocked["error"]["code"] == "approval_required", blocked
 assert blocked["error"]["details"]["review_required"], blocked
 print("unapproved write rejection ok")
 '
+{"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"adoption-preflight","requires":["method_param_schemas","capability_negotiation","approval_required_errors"],"requires_profiles":["read_only"]}}
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adopt AKBP with cited startup context","limit":5}}
 {"id":"write-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Unapproved adoption writes must remain blocked.","type":"workflow"}}
@@ -82,7 +90,11 @@ assert "akbp.remember" in config["tool_protocol_bridge"]["blocked_write_methods"
 assert config["safety"]["write_policy"] == "no_writes", config
 assert config["runtime_requirements"]["local_first"], config
 assert not config["runtime_requirements"]["network_required"], config
+assert config["response_contract"]["envelope"]["required"] == ["id", "ok", "result", "error"], config
+assert config["response_contract"]["error_actions"]["approval_required"]["adapter_action"].startswith("stop"), config
+assert config["response_contract"]["error_actions"]["approval_required"]["write_policy"] == "approval must happen outside the model-generated tool call", config
 print("portable client config hides local paths ok")
+print("response contract approval stop action ok")
 PY
 
 echo "AKBP adoption preflight example passed"
