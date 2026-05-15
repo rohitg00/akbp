@@ -844,6 +844,8 @@ class RepoQualityTest(unittest.TestCase):
 
     def test_tool_server_approval_example_is_complete(self):
         text = (ROOT / "examples" / "tool-server-approval-flow" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "tool-server-approval-flow" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("dry_run:true", text)
         self.assertIn("review_required", text)
         self.assertIn("apply_instruction", text)
@@ -853,6 +855,20 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("#/$defs/dry_run_review_result", text)
         self.assertIn("#/$defs/approval_required_details", text)
         self.assertIn("schemas/tool-response.schema.json", text)
+        for required in [
+            "AKBP tool-server approval flow",
+            "capabilities ok",
+            "reviewed remember flow ok",
+            "reviewed import flow ok",
+            "AKBP tool-server approval flow passed",
+            "akbp.capabilities",
+            "akbp.remember",
+            "akbp.import_apply",
+            "akbp.context",
+            "conformance --level 2",
+        ]:
+            self.assertIn(required, text + script)
+        self.assertIn("./examples/tool-server-approval-flow/run.sh", makefile)
         release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
         self.assertIn("examples/tool-server-approval-flow/", release_notes)
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
