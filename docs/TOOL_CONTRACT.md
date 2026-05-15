@@ -226,6 +226,7 @@ Request and response envelopes are specified in:
 
 `result.profiles` is a discovery shortcut for adapters that need workflow intent instead of a flat method list:
 
+- `read_only`: discovery, status, retrieval, validation, export checks, audit, citation, source verification, import checks, and session-start context methods that do not mutate the knowledge base.
 - `startup_context`: capability discovery, status, session start, context, and search methods for startup retrieval.
 - `reviewed_write`: write methods that should be previewed with `dry_run:true` before approved application.
 - `lifecycle`: supersession, contradiction, crystallization, audit, and citation methods for maintaining memory over time.

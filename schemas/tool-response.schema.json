@@ -576,6 +576,7 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
+            "read_only",
             "startup_context",
             "reviewed_write",
             "lifecycle",
@@ -583,6 +584,9 @@
             "maintenance"
           ],
           "properties": {
+            "read_only": {
+              "$ref": "#/$defs/capability_profile_methods"
+            },
             "startup_context": {
               "$ref": "#/$defs/capability_profile_methods"
             },

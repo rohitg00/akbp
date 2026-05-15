@@ -266,6 +266,22 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
     params = params or {}
     features = capability_features()
     profiles = {
+        "read_only": [
+            "akbp.capabilities",
+            "akbp.status",
+            "akbp.doctor",
+            "akbp.query",
+            "akbp.context",
+            "akbp.search",
+            "akbp.conformance",
+            "akbp.export",
+            "akbp.export_check",
+            "akbp.audit",
+            "akbp.cite",
+            "akbp.source.verify",
+            "akbp.import_check",
+            "akbp.session.start",
+        ],
         "startup_context": ["akbp.capabilities", "akbp.status", "akbp.session.start", "akbp.context", "akbp.search"],
         "reviewed_write": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
         "lifecycle": ["akbp.supersede", "akbp.contradict", "akbp.crystallize_session", "akbp.audit", "akbp.cite"],

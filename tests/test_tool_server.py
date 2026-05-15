@@ -314,7 +314,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("method_schema_runtime_errors", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["profiles"]["additionalProperties"])
-        for profile in ["startup_context", "reviewed_write", "lifecycle", "portability", "maintenance"]:
+        for profile in ["read_only", "startup_context", "reviewed_write", "lifecycle", "portability", "maintenance"]:
             self.assertIn(profile, capabilities["properties"]["profiles"]["required"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
@@ -559,6 +559,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
             profiles = lines[0]["result"]["profiles"]
+            self.assertIn("akbp.search", profiles["read_only"])
+            self.assertIn("akbp.import_check", profiles["read_only"])
             self.assertIn("akbp.session.start", profiles["startup_context"])
             self.assertIn("akbp.remember", profiles["reviewed_write"])
             self.assertIn("akbp.supersede", profiles["lifecycle"])
@@ -567,6 +569,8 @@ class ToolServerTest(unittest.TestCase):
             for group in profiles.values():
                 for method in group:
                     self.assertIn(method, lines[0]["result"]["methods"])
+            for method in profiles["read_only"]:
+                self.assertFalse(lines[0]["result"]["methods"][method]["write"], method)
             self.assertTrue(lines[0]["result"]["methods"]["akbp.remember"]["review_required"])
             self.assertFalse(lines[0]["result"]["methods"]["akbp.query"]["review_required"])
             examples = lines[0]["result"]["examples"]
