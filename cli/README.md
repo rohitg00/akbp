@@ -36,6 +36,7 @@ python3 cli/akbp.py --path ./my-kb conformance --level 3
 python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "The project ships small verified batches." --claim-type decision
 python3 cli/akbp.py --path ./my-kb crystallize transcript.md
 python3 cli/akbp.py --path ./my-kb crystallize transcript.md --apply
+python3 cli/akbp.py --path ./my-kb client-config --profile read-only
 python3 cli/akbp.py --path ./my-kb lint
 ```
 
@@ -74,6 +75,24 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 ## Context packs
 
 `akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of a local context retrieval call.
+
+## Client config
+
+`akbp client-config` prints a pasteable stdio JSONL tool-server configuration for coding agents, editor agents, task runners, or local assistants.
+
+The default profile is read-only:
+
+```bash
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter
+```
+
+Use reviewed writes only when the adapter has review UI or a trusted local approval policy:
+
+```bash
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile reviewed-writes
+```
+
+The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, session-start method, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false.
 
 ## Conformance
 

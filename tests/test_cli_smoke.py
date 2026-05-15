@@ -15,6 +15,34 @@ def run_cli(*args):
 
 
 class AkbpCliSmokeTest(unittest.TestCase):
+    def test_client_config_generates_negotiated_stdio_profile(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            out = run_cli(
+                "--path", str(kb),
+                "client-config",
+                "--name", "stdio-adapter-test",
+                "--profile", "reviewed-writes",
+                "--command", "python-module",
+            )
+            config = json.loads(out.stdout)
+            self.assertEqual(config["transport"], "stdio-jsonl")
+            self.assertEqual(config["server"]["command"], "python3")
+            self.assertEqual(config["server"]["args"], ["-m", "akbp_tool_server"])
+            self.assertEqual(config["knowledge_base"]["path"], str(kb.resolve()))
+            self.assertEqual(config["startup"]["method"], "akbp.capabilities")
+            self.assertEqual(config["startup"]["params"]["client"], "stdio-adapter-test")
+            self.assertIn("capability_negotiation", config["startup"]["params"]["requires"])
+            self.assertEqual(config["startup"]["params"]["requires_profiles"], ["write_review"])
+            self.assertEqual(config["session_start"]["method"], "akbp.session.start")
+            self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
+            self.assertTrue(config["safety"]["never_auto_apply_session_end"])
+
+            read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
+            self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
+            self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
+
     def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

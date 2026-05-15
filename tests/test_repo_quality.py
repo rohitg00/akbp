@@ -122,6 +122,27 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, text + script)
         self.assertIn("./examples/read-only-adapter/run.sh", makefile)
 
+    def test_stdio_client_config_example_documents_negotiated_setup(self):
+        text = (ROOT / "examples" / "stdio-client-config" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "stdio-client-config" / "run.sh").read_text(encoding="utf-8")
+        cli_readme = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script + cli_readme
+        for required in [
+            "Stdio client config",
+            "AKBP stdio client config example passed",
+            "akbp client-config",
+            "akbp.capabilities",
+            "read_only",
+            "write_review",
+            "akbp.session.start",
+            "dry_run",
+            "approved:true",
+            "result.negotiation.satisfied",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/stdio-client-config/run.sh", makefile)
+
     def test_github_copilot_adapter_documents_cloud_agent_read_only_boundary(self):
         readme = (ROOT / "adapters" / "github-copilot" / "README.md").read_text(encoding="utf-8")
         instructions = (ROOT / "adapters" / "github-copilot" / "instructions.md").read_text(encoding="utf-8")

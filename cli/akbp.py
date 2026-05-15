@@ -1554,6 +1554,69 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 1 if blocking else 0
 
 
+def cmd_client_config(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    requested_profile = "read_only" if args.profile == "read-only" else "write_review"
+    if args.command == "python-module":
+        command = "python3"
+        command_args = ["-m", "akbp_tool_server"]
+    elif args.command == "repo-script":
+        command = "python3"
+        command_args = [str(Path(__file__).resolve().with_name("akbp_tool_server.py"))]
+    else:
+        command = "akbp-tool-server"
+        command_args = []
+
+    config = {
+        "name": args.name,
+        "transport": "stdio-jsonl",
+        "server": {
+            "command": command,
+            "args": command_args,
+            "env": {},
+        },
+        "knowledge_base": {
+            "path": str(base),
+            "card": str(base / "akbp.json"),
+        },
+        "startup": {
+            "method": "akbp.capabilities",
+            "params": {
+                "client": args.name,
+                "requires": [
+                    "method_param_schemas",
+                    "capability_negotiation",
+                    "write_apply_requires_approval",
+                ],
+                "requires_profiles": [requested_profile],
+            },
+        },
+        "session_start": {
+            "method": "akbp.session.start",
+            "params": {
+                "task": "current task goals and constraints",
+                "limit": 5,
+            },
+        },
+        "safety": {
+            "profile": requested_profile,
+            "write_policy": "dry_run_then_approved" if requested_profile == "write_review" else "no_writes",
+            "require_capability_negotiation": True,
+            "require_method_param_schemas": True,
+            "require_review_metadata": requested_profile == "write_review",
+            "never_auto_apply_session_end": True,
+        },
+        "notes": [
+            "Call startup.method before any other method.",
+            "Disable flows when result.negotiation.satisfied is false.",
+            "For write-capable flows, preview with dry_run:true and repeat unchanged with approved:true only after review.",
+            "Branch on error.code, not free-form error text.",
+        ],
+    }
+    print(json.dumps(config, indent=2))
+    return 0
+
+
 def index_documents(base: Path) -> list[dict[str, str]]:
     docs: list[dict[str, str]] = []
     for claim in load_claims(base):
@@ -2256,6 +2319,12 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("doctor")
     s.add_argument("--limit", type=int, default=5, help="number of next steps to include")
     s.set_defaults(func=cmd_doctor)
+
+    s = sub.add_parser("client-config", help="print a stdio JSONL client configuration for the AKBP tool server")
+    s.add_argument("--name", default="akbp-client", help="client name to use during capability negotiation")
+    s.add_argument("--profile", choices=["read-only", "reviewed-writes"], default="read-only")
+    s.add_argument("--command", choices=["console", "python-module", "repo-script"], default="console")
+    s.set_defaults(func=cmd_client_config)
     return p
 
 

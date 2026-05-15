@@ -37,6 +37,7 @@ examples:
 	./examples/portable-bundle/run.sh
 	./examples/existing-memory-migration/run.sh
 	./examples/read-only-adapter/run.sh
+	./examples/stdio-client-config/run.sh
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score
