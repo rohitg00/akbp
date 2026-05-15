@@ -665,6 +665,48 @@ def cmd_discover(args: argparse.Namespace) -> int:
         },
         "recommended_harness": "./examples/structured-output-harness/run.sh",
     }
+    response_contract = {
+        "format": "akbp-discovery-response-contract-v1",
+        "purpose": "Let installer UIs and adapter generators fail closed on AKBP JSONL responses before using recalled memory or enabling write-capable tools.",
+        "research_gap": "Recent agent-memory setup patterns emphasize fast server connection, but adapters still need deterministic response validation so structured output survives the host boundary.",
+        "envelope": {
+            "required": ["id", "ok", "result", "error"],
+            "success": "ok is true, result is present, and error is null",
+            "failure": "ok is false, result is null, and error.code decides the adapter action",
+        },
+        "startup_context_gate": {
+            "required_before_planning": True,
+            "trust_conditions": [
+                "result.context.items is non-empty",
+                "trusted items include citations or source identifiers",
+                "result.context.budget is preserved",
+                "result.context.warnings are surfaced before use",
+            ],
+            "fail_closed_on": [
+                "empty context",
+                "missing citations",
+                "budget.truncated is true and the adapter cannot surface the warning",
+                "schema validation or doctor readiness fails",
+            ],
+            "fallback": "Continue without recalled AKBP memory and keep writes disabled.",
+        },
+        "write_gate": {
+            "preview_required": "dry_run:true",
+            "apply_required": "approved:true after external review",
+            "required_preview_fields": ["review_required", "apply_instruction", "would_write", "would_write_paths", "preview_fingerprint"],
+            "approval_required_action": "stop instead of retrying with approved:true automatically",
+        },
+        "harness": {
+            "command": "./examples/structured-output-harness/run.sh",
+            "passes_when": [
+                "capability negotiation preserves required features and profiles",
+                "invalid params return schema-backed field errors",
+                "startup context carries citations and budget metadata",
+                "dry-run previews expose review metadata",
+                "unapproved writes return error.code approval_required",
+            ],
+        },
+    }
 
     print(json.dumps({
         "start_path": str(start),
@@ -693,6 +735,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
+        "response_contract": response_contract,
         "recommended_commands": {
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
             "client_config": f"akbp --path {kb_arg} client-config --profile read-only",

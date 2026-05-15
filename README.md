@@ -167,6 +167,10 @@ base before mapping it into tool-protocol or host-native memory surfaces.
 runtime instructions: retrieve bounded cited context before planning, continue
 without recalled memory when context is empty or uncited, and keep durable
 writes behind dry-run preview plus approved apply.
+`akbp discover` also emits `response_contract`, a compact machine-readable
+gate for installer UIs: preserve the JSONL response envelope, fail closed on
+uncited or truncated startup context, stop on `approval_required`, and run the
+structured-output harness before exposing write-capable tools.
 
 To run the adapter harness as a single adoption gate:
 

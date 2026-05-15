@@ -640,6 +640,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(provenance_gate["required_before_preview"])
             self.assertIn("source ids", " ".join(provenance_gate["accepted_provenance"]))
             self.assertIn("runtime scratch", provenance_gate["fallback"])
+            response_contract = discovered["response_contract"]
+            self.assertEqual(response_contract["format"], "akbp-discovery-response-contract-v1")
+            self.assertEqual(response_contract["envelope"]["required"], ["id", "ok", "result", "error"])
+            self.assertTrue(response_contract["startup_context_gate"]["required_before_planning"])
+            self.assertIn("missing citations", response_contract["startup_context_gate"]["fail_closed_on"])
+            self.assertEqual(response_contract["write_gate"]["preview_required"], "dry_run:true")
+            self.assertIn("preview_fingerprint", response_contract["write_gate"]["required_preview_fields"])
+            self.assertIn("structured-output-harness", response_contract["harness"]["command"])
             proof_steps = {item["name"]: item for item in discovered["first_run_proof"]["steps"]}
             self.assertIn("doctor_read_only", proof_steps)
             self.assertIn("retrieve_startup_context", proof_steps)
