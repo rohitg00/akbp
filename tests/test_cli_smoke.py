@@ -15,6 +15,44 @@ def run_cli(*args):
 
 
 class AkbpCliSmokeTest(unittest.TestCase):
+    def test_source_add_url_requires_http_locator(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            bad = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLI),
+                    "--path",
+                    str(kb),
+                    "source",
+                    "add",
+                    "docs.example.com/release",
+                    "--type",
+                    "url",
+                ],
+                text=True,
+                capture_output=True,
+            )
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertIn("http:// or https://", bad.stderr)
+
+            out = run_cli(
+                "--path",
+                str(kb),
+                "source",
+                "add",
+                "https://docs.example.com/release",
+                "--type",
+                "url",
+                "--title",
+                "Release docs",
+            )
+            source = json.loads(out.stdout)
+            self.assertEqual(source["type"], "url")
+            self.assertEqual(source["locator"], "https://docs.example.com/release")
+            self.assertIsNone(source["hash"])
+
     def test_client_config_generates_negotiated_stdio_profile(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

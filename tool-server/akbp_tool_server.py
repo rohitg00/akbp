@@ -713,6 +713,10 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "type" in params and method in {"akbp.source.add", "akbp.ingest"} and params.get("type") not in SOURCE_TYPES:
         errors.append("type must be one of: " + ", ".join(sorted(SOURCE_TYPES)))
+    if method == "akbp.source.add" and params.get("type") == "url":
+        locator = params.get("locator")
+        if isinstance(locator, str) and not locator.lower().startswith(("http://", "https://")):
+            errors.append("locator must start with http:// or https:// for url sources")
     if "claim_type" in params and method == "akbp.ingest" and params.get("claim_type") not in CLAIM_TYPES:
         errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "level" in params and method == "akbp.conformance" and params.get("level") not in CONFORMANCE_LEVELS:

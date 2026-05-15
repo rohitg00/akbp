@@ -3647,6 +3647,15 @@ def cmd_source_add(args: argparse.Namespace) -> int:
     base = root(args.path)
     ensure_dirs(base)
     locator = args.locator.strip()
+    if not locator:
+        print(json.dumps({"ok": False, "error": "source locator is required"}, indent=2), file=sys.stderr)
+        return 1
+    if args.type == "url" and not locator.lower().startswith(("http://", "https://")):
+        print(json.dumps({
+            "ok": False,
+            "error": "url sources must use an http:// or https:// locator",
+        }, indent=2), file=sys.stderr)
+        return 1
     source_hash = args.hash
     if source_hash is None and args.type == "file":
         source_hash = file_hash((base / locator).resolve()) or file_hash(Path(locator).resolve())

@@ -1406,16 +1406,18 @@ class ToolServerTest(unittest.TestCase):
         requests = "\n".join([
             json.dumps({"id": "blank-session-query", "method": "akbp.session.start", "params": {"query": "   "}}),
             json.dumps({"id": "blank-session-task", "method": "akbp.session.start", "params": {"task": ""}}),
+            json.dumps({"id": "bad-url-source", "method": "akbp.source.add", "params": {"locator": "docs.example.com/release", "type": "url"}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual(len(lines), 2)
+        self.assertEqual(len(lines), 3)
         for line in lines:
             self.assertFalse(line["ok"])
             self.assertEqual(line["error"]["code"], "invalid_params")
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
         self.assertIn("query must not be empty", lines[0]["error"]["details"]["type_errors"])
         self.assertIn("task must not be empty", lines[1]["error"]["details"]["type_errors"])
+        self.assertIn("locator must start with http:// or https:// for url sources", lines[2]["error"]["details"]["type_errors"])
 
     def test_evidence_and_entity_arrays_are_bounded_before_cli(self):
         requests = "\n".join([

@@ -167,6 +167,14 @@ Output:
 
 Return evidence for a claim or answer.
 
+### akbp.source.add
+
+Register source material before durable claims cite it. File sources may record
+a SHA-256 hash when the referenced path is available locally. URL sources are
+accepted as locators only when they start with `http://` or `https://`; the
+reference implementation does not fetch, scrape, or hash remote pages during
+source registration.
+
 ### akbp.supersede
 
 Mark an old claim as replaced by a newer claim.
