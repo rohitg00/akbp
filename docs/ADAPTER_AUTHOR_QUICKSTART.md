@@ -127,6 +127,7 @@ JSONL request:
 ```
 
 The response includes `result.negotiation.satisfied`. If it is `false`, disable or degrade the flows named in `unsupported_features` or `unsupported_profiles` instead of guessing.
+It also includes `result.profile_contracts`, a machine-readable map from workflow profiles to their purpose, risk level, write policy, review-surface requirement, and matching doctor readiness field. Use that map in installers and setup screens so users can see why a host starts read-only and what must change before reviewed writes are enabled.
 
 Adapter checks:
 
@@ -143,11 +144,12 @@ Minimum startup gate:
 1. Call `akbp.capabilities`.
 2. Confirm `result.negotiation.satisfied` is `true` for required features.
 3. Confirm required workflow profiles such as `read_only` or `startup_context` are present in `result.negotiation.supported_profiles`.
-4. Call `akbp.doctor` and show `next_steps` if `ready_for_adapter` is `false`; use `adapter_readiness.recommended_profile` to decide whether the host should stay in setup-only, read-only, or reviewed-write mode.
-5. Read `security_posture` from the doctor report and keep writes disabled unless `write_boundary` is `dry_run_preview_then_approved_apply`, the approval field is `approved`, and the host can follow the listed adapter rules.
-6. Confirm `result.features.method_schema_runtime_parity` is `true`.
-7. Confirm `result.runtime.method_schema_runtime_errors` is empty.
-8. Confirm the write method you plan to call advertises `review_required:true`.
+4. Read `result.profile_contracts[profile].ready_field` for the requested profile and use that field as the bridge between capability discovery and `akbp.doctor`.
+5. Call `akbp.doctor` and show `next_steps` if `ready_for_adapter` is `false`; use `adapter_readiness.recommended_profile` to decide whether the host should stay in setup-only, read-only, or reviewed-write mode.
+6. Read `security_posture` from the doctor report and keep writes disabled unless `write_boundary` is `dry_run_preview_then_approved_apply`, the approval field is `approved`, and the host can follow the listed adapter rules.
+7. Confirm `result.features.method_schema_runtime_parity` is `true`.
+8. Confirm `result.runtime.method_schema_runtime_errors` is empty.
+9. Confirm the write method you plan to call advertises `review_required:true`.
 
 If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
 If `akbp.doctor` returns `adapter_readiness.reviewed_write_ready:false`, keep write flows disabled even when capability negotiation succeeded. Capability discovery tells you what the server supports; doctor tells you whether this specific knowledge base is ready to trust.

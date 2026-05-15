@@ -118,6 +118,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             negotiated = json.loads(caps.stdout)
             self.assertTrue(negotiated["result"]["negotiation"]["satisfied"])
             self.assertEqual(negotiated["result"]["negotiation"]["supported_profiles"], ["reviewed_write"])
+            contracts = negotiated["result"]["profile_contracts"]
+            self.assertEqual(contracts["read_only"]["write_policy"], "no_writes")
+            self.assertEqual(contracts["read_only"]["ready_field"], "adapter_readiness.read_only_ready")
+            self.assertTrue(contracts["reviewed_write"]["requires_review_surface"])
+            self.assertEqual(contracts["reviewed_write"]["write_policy"], "dry_run_preview_then_approved_apply")
+            self.assertEqual(contracts["startup_context"]["ready_field"], "adapter_readiness.startup_context_ready")
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])

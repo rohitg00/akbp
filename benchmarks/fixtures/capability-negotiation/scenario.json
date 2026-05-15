@@ -11,7 +11,7 @@
           "requires": ["method_param_schemas", "features.capability_negotiation", "future_feature"]
         },
         "expected_result_schema": "#/$defs/capabilities_result",
-        "expected_result_fields": ["protocol", "features", "negotiation", "schemas", "methods", "profiles"],
+        "expected_result_fields": ["protocol", "features", "negotiation", "schemas", "methods", "profiles", "profile_contracts"],
         "expected_result_values": {
           "protocol": "akbp-jsonl-tool-server"
         },
@@ -31,7 +31,10 @@
           "methods.akbp\\.remember.params[]": ["text", "dry_run"],
           "profiles.read_only[]": ["akbp.search", "akbp.import_check", "akbp.session.start"],
           "profiles.reviewed_write[]": ["akbp.remember", "akbp.session.end"],
-          "profiles.portability[]": ["akbp.import_apply"]
+          "profiles.portability[]": ["akbp.import_apply"],
+          "profile_contracts.read_only.write_policy": ["no_writes"],
+          "profile_contracts.reviewed_write.requires_review_surface": [true],
+          "profile_contracts.reviewed_write.ready_field": ["adapter_readiness.reviewed_write_ready"]
         }
       }
     ]

@@ -259,6 +259,7 @@
         "runtime",
         "methods",
         "profiles",
+        "profile_contracts",
         "examples"
       ],
       "properties": {
@@ -617,6 +618,38 @@
             }
           }
         },
+        "profile_contracts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "read_only",
+            "startup_context",
+            "reviewed_write",
+            "lifecycle",
+            "portability",
+            "maintenance"
+          ],
+          "properties": {
+            "read_only": {
+              "$ref": "#/$defs/capability_profile_contract"
+            },
+            "startup_context": {
+              "$ref": "#/$defs/capability_profile_contract"
+            },
+            "reviewed_write": {
+              "$ref": "#/$defs/capability_profile_contract"
+            },
+            "lifecycle": {
+              "$ref": "#/$defs/capability_profile_contract"
+            },
+            "portability": {
+              "$ref": "#/$defs/capability_profile_contract"
+            },
+            "maintenance": {
+              "$ref": "#/$defs/capability_profile_contract"
+            }
+          }
+        },
         "examples": {
           "type": "array",
           "items": {
@@ -721,6 +754,50 @@
       "items": {
         "type": "string",
         "pattern": "^akbp\\."
+      }
+    },
+    "capability_profile_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "default_for",
+        "risk",
+        "requires_review_surface",
+        "write_policy",
+        "ready_field"
+      ],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default_for": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "risk": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "requires_review_surface": {
+          "type": "boolean"
+        },
+        "write_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready_field": {
+          "type": "string",
+          "pattern": "^adapter_readiness\\."
+        }
       }
     },
     "ingest_dry_run_result": {

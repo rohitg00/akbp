@@ -331,6 +331,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("capability_negotiation", capabilities["properties"]["features"]["required"])
         self.assertIn("negotiation", capabilities["required"])
         self.assertIn("profiles", capabilities["required"])
+        self.assertIn("profile_contracts", capabilities["required"])
         negotiation = capabilities["properties"]["negotiation"]
         self.assertFalse(negotiation["additionalProperties"])
         self.assertIn("requested_features", negotiation["required"])
@@ -353,8 +354,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("method_schema_runtime_errors", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
         self.assertFalse(capabilities["properties"]["profiles"]["additionalProperties"])
+        self.assertFalse(capabilities["properties"]["profile_contracts"]["additionalProperties"])
         for profile in ["read_only", "startup_context", "reviewed_write", "lifecycle", "portability", "maintenance"]:
             self.assertIn(profile, capabilities["properties"]["profiles"]["required"])
+            self.assertIn(profile, capabilities["properties"]["profile_contracts"]["required"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
         self.assertIn("methods", capabilities["required"])

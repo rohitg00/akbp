@@ -528,6 +528,7 @@ class RepoQualityTest(unittest.TestCase):
             "client-config --name my-adapter --profile read-only",
             "client-config --name my-adapter --profile reviewed-writes",
             "akbp.capabilities",
+            "result.profile_contracts",
             "akbp.session.start",
             "akbp.context",
             "akbp.search",

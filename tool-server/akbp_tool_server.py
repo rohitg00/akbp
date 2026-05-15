@@ -140,6 +140,57 @@ CAPABILITY_PROFILES: dict[str, list[str]] = {
     "maintenance": ["akbp.doctor", "akbp.index", "akbp.source.verify", "akbp.conformance"],
 }
 
+PROFILE_CONTRACTS: dict[str, dict[str, Any]] = {
+    "startup_context": {
+        "purpose": "Fetch bounded cited context at session start without enabling durable writes.",
+        "default_for": ["new adapters", "fresh sessions", "hosts without write review UI"],
+        "risk": "low",
+        "requires_review_surface": False,
+        "write_policy": "no_writes",
+        "ready_field": "adapter_readiness.startup_context_ready",
+    },
+    "read_only": {
+        "purpose": "Expose retrieval, citation, source verification, and import/export checks while keeping writes disabled.",
+        "default_for": ["hosted tools", "remote bridges", "first integration pass"],
+        "risk": "low",
+        "requires_review_surface": False,
+        "write_policy": "no_writes",
+        "ready_field": "adapter_readiness.read_only_ready",
+    },
+    "reviewed_write": {
+        "purpose": "Allow durable memory proposals only through dry-run previews followed by exact approved apply calls.",
+        "default_for": ["local interactive adapters with visible review", "trusted setup scripts with external approval"],
+        "risk": "medium",
+        "requires_review_surface": True,
+        "write_policy": "dry_run_preview_then_approved_apply",
+        "ready_field": "adapter_readiness.reviewed_write_ready",
+    },
+    "lifecycle": {
+        "purpose": "Represent supersession, contradiction, crystallization, audit, and citation lifecycle operations.",
+        "default_for": ["maintenance tools", "advanced adapters after reviewed-write readiness"],
+        "risk": "medium",
+        "requires_review_surface": True,
+        "write_policy": "dry_run_preview_then_approved_apply_for_write_methods",
+        "ready_field": "adapter_readiness.reviewed_write_ready",
+    },
+    "portability": {
+        "purpose": "Check, export, import-check, and reviewed import-apply portable knowledge bundles.",
+        "default_for": ["migration helpers", "bundle sharing", "adapter installers"],
+        "risk": "medium",
+        "requires_review_surface": True,
+        "write_policy": "import_check_before_import_apply",
+        "ready_field": "adapter_readiness.read_only_ready",
+    },
+    "maintenance": {
+        "purpose": "Keep sources, indexes, conformance, and adapter readiness healthy before relying on recalled memory.",
+        "default_for": ["release checks", "adapter setup checks", "scheduled local maintenance"],
+        "risk": "low",
+        "requires_review_surface": False,
+        "write_policy": "index_requires_approved_apply_when_dispatched_through_tool_server",
+        "ready_field": "adapter_readiness.recommended_profile",
+    },
+}
+
 
 def fallback_method_schema_defs() -> dict[str, Any]:
     return {
@@ -342,6 +393,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
             for name, meta in METHODS.items()
         },
         "profiles": CAPABILITY_PROFILES,
+        "profile_contracts": PROFILE_CONTRACTS,
         "examples": [
             {"id": "status-1", "method": "akbp.status", "path": "."},
             {"id": "doctor-1", "method": "akbp.doctor", "path": "."},
