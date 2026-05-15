@@ -419,6 +419,43 @@ def cmd_discover(args: argparse.Namespace) -> int:
         ],
         "adapter_default": "read_only_until_doctor_and_capabilities_pass",
     }
+    first_run_proof = {
+        "goal": "prove cited, review-gated recall before enabling durable writes",
+        "safe_default": "read_only",
+        "steps": [
+            {
+                "name": "doctor_read_only",
+                "command": f"akbp --path {kb_arg} doctor --profile read-only",
+                "expect": "KB files are valid enough for read-only adapter setup.",
+            },
+            {
+                "name": "generate_client_config",
+                "command": f"akbp --path {kb_arg} client-config --profile read-only",
+                "expect": "Installer receives local stdio command, capability request, safety rules, and quality gates.",
+            },
+            {
+                "name": "retrieve_startup_context",
+                "command": f"akbp --path {kb_arg} context '<task>' --max-chars 4000",
+                "expect": "Adapter receives bounded context with citations, warnings, and budget metadata.",
+            },
+            {
+                "name": "preview_before_write",
+                "command": "akbp.remember or akbp.session.end with dry_run:true",
+                "expect": "Runtime shows review metadata and would-write paths without changing durable artifacts.",
+            },
+            {
+                "name": "block_unapproved_write",
+                "command": "repeat the write request without approved:true",
+                "expect": "Tool server returns error.code approval_required.",
+            },
+        ],
+        "enable_reviewed_writes_when": [
+            "doctor --profile reviewed-writes passes",
+            "the adapter shows dry-run preview fields to the user",
+            "approved apply repeats the reviewed method, path, and params",
+            "scratchpads, private logs, and raw transcripts stay outside AKBP unless promoted through review",
+        ],
+    }
 
     print(json.dumps({
         "start_path": str(start),
@@ -443,6 +480,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "adapter_rule": "Run doctor --profile before enabling a workflow profile.",
         },
         "positioning": positioning,
+        "first_run_proof": first_run_proof,
         "recommended_commands": {
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
             "client_config": f"akbp --path {kb_arg} client-config --profile read-only",

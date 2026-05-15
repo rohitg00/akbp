@@ -81,13 +81,14 @@ Use `--max-chars` when an adapter has a fixed startup prompt budget. The returne
 
 ## Discovery
 
-akbp discover finds the nearest akbp.json from --path or its parent directories and prints a JSON preflight payload for adapter installers. It reports the resolved KB path, card metadata, default scope, artifact presence, trust-boundary rules, AKBP's role relative to memory servers, repository instruction files, tool-protocol hosts, and search indexes, plus recommended doctor, client-config, and context commands.
+akbp discover finds the nearest akbp.json from --path or its parent directories and prints a JSON preflight payload for adapter installers. It reports the resolved KB path, card metadata, default scope, artifact presence, trust-boundary rules, AKBP's role relative to memory servers, repository instruction files, tool-protocol hosts, and search indexes, plus recommended doctor, client-config, and context commands. The payload also includes `first_run_proof`, a machine-readable checklist for proving read-only setup, cited startup context, dry-run write preview, and the `approval_required` stop signal before enabling reviewed writes.
 
 Use it before wiring a runtime that starts from an arbitrary workspace subdirectory:
 
     python3 cli/akbp.py --path ./my-kb/subdir discover
     python3 cli/akbp.py --path ./my-kb/subdir discover | jq .trust_boundary
     python3 cli/akbp.py --path ./my-kb/subdir discover | jq .positioning
+    python3 cli/akbp.py --path ./my-kb/subdir discover | jq .first_run_proof
 
 If no Knowledge Base Card is found, the command exits non-zero and suggests akbp init instead of inventing durable memory state.
 

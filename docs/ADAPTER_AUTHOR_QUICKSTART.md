@@ -41,7 +41,10 @@ resolved KB path, default scope, artifact presence, trust-boundary rules, and
 the next `doctor --profile` and `client-config` commands. The discovery payload
 also includes `positioning` so installers can show that AKBP is the portable,
 reviewable artifact layer beside memory servers, repository instruction files,
-tool-protocol hosts, and rebuildable search indexes. If discovery fails,
+tool-protocol hosts, and rebuildable search indexes. It also includes
+`first_run_proof`, an ordered checklist for proving read-only setup, cited
+startup context, dry-run preview, and the `approval_required` stop signal before
+reviewed writes are enabled. If discovery fails,
 continue without durable memory instead of creating hidden state.
 
 ## 1. Generate a read-only client config first

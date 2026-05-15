@@ -320,6 +320,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             compared_layers = {item["layer"] for item in discovered["positioning"]["use_with"]}
             self.assertIn("memory_server_or_runtime_cache", compared_layers)
             self.assertIn("tool_protocol_host", compared_layers)
+            self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
+            proof_steps = {item["name"]: item for item in discovered["first_run_proof"]["steps"]}
+            self.assertIn("doctor_read_only", proof_steps)
+            self.assertIn("retrieve_startup_context", proof_steps)
+            self.assertIn("preview_before_write", proof_steps)
+            self.assertIn("block_unapproved_write", proof_steps)
+            self.assertIn("approval_required", proof_steps["block_unapproved_write"]["expect"])
+            self.assertIn("dry-run preview", " ".join(discovered["first_run_proof"]["enable_reviewed_writes_when"]))
             self.assertIn("doctor --profile read-only", discovered["recommended_commands"]["doctor"])
             self.assertEqual(discovered["missing_artifacts"], [])
 
