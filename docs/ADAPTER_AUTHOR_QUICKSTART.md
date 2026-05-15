@@ -4,6 +4,25 @@ Use this when adding AKBP support to a coding agent, IDE agent, task runner, or 
 
 The adapter's job is translation only. It should connect runtime events to AKBP reads and review-gated writes without creating a separate durable memory format.
 
+## 0. Pick the KB scope and trust boundary
+
+Before wiring tools, decide which AKBP folder the runtime may trust. This keeps
+adapter behavior predictable when users also have personal assistants, team
+profiles, transcript watchers, or migration imports.
+
+| Adapter scenario | Recommended KB scope | First mode | Write rule |
+|------------------|----------------------|------------|------------|
+| Coding agent in one repo | Repo-local project KB | Read-only startup context | Preview `akbp.session.end`, `akbp.remember`, or `akbp.ingest`; apply only after explicit approval |
+| Editor agent across several repos | One KB per repo checkout | Read-only per workspace | Never write to a different repo's KB unless the user selected it |
+| Local desktop assistant | Personal KB outside public repos | Read-only | Require a local review surface before any durable preference or workflow write |
+| Team automation or CI | Team/project KB | Dry-run by default | Treat CI output as a proposal unless a trusted policy approves the exact request |
+| Transcript sidecar or hook | Same repo-local KB as the session | Dry-run session crystallization | Summarize durable claims only; do not ingest raw private transcripts wholesale |
+| Migration helper | Temporary staging KB, then reviewed import | Import-check first | Reject unsafe or uncited records before applying to the target KB |
+
+If a runtime cannot tell the user which KB it is reading or writing, keep it
+read-only. AKBP's durable value comes from reviewable scope, citations, and
+auditability, not from silently accumulating more memory.
+
 ## 1. Generate a read-only client config first
 
 Start with a read-only config when you are evaluating a runtime or wiring a new host. It proves startup retrieval and capability negotiation without granting durable write access.

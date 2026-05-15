@@ -194,6 +194,25 @@ The matrix keeps the user-value lesson concrete:
 - require an explicit approval surface before `approved:true`
 - keep hosted or autonomous bridges read-only until their trust boundary is documented
 
+## Shipped artifact: KB scope guidance
+
+Recent local and tool-compatible memory projects keep converging on shared
+profiles, sidecar transcript ingestion, graph-backed memory, and hosted or local
+runtime bridges. The practical AKBP lesson is that users need to choose the
+trusted knowledge-base scope before they connect an adapter.
+
+`docs/GETTING_STARTED.md` and `docs/ADAPTER_AUTHOR_QUICKSTART.md` now describe
+safe defaults for repo-local, team-shared, personal assistant, transcript
+sidecar, and migration use cases.
+
+The guidance keeps AKBP's distinction clear:
+
+- repo-local KBs are the default for project work
+- personal KBs stay outside public repos
+- team KBs require approved, cited knowledge
+- transcript sidecars propose reviewed claims instead of importing raw logs
+- migrations use import checks and staging before writes
+
 ## Added research track: spec-driven agent development kits
 
 Spec-driven development kits are adjacent to AKBP even when they are not memory systems. The reusable pattern is that agent work improves when intent, constraints, plans, and tasks become durable reviewable artifacts before code or automation runs.

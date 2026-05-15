@@ -44,6 +44,24 @@ If a tool hides these artifacts or applies writes without the preview/approval s
 The generated `AKBP.md` now makes that policy visible on first run, so adapters and humans have a shared local rule sheet before any memory is written.
 If a project needs a stricter starter policy, copy or merge `templates/project-memory-rules/AKBP.md` and use `docs/TEMPLATES.md` as the setup guide.
 
+## Choose the knowledge-base scope first
+
+Recent agent-memory tools often start with a server, profile, or sidecar watcher.
+AKBP should start with a simpler question: which durable knowledge base should
+future agents trust?
+
+| Scope | Use when | Safe default | Avoid |
+|-------|----------|--------------|-------|
+| Repo-local KB | A coding agent needs project decisions, release rules, incidents, or architecture context for one repository | Keep `AKBP.md`, `akbp.json`, claims, sources, and graph records in or beside the repo, then retrieve context at session start | Mixing unrelated personal memory or private chat exports into the project KB |
+| Team-shared KB | Multiple people or agents need the same reviewed project knowledge | Store only approved team knowledge with citations, run verification in CI, and export bundles for review | Treating one person's unreviewed local notes as team truth |
+| Personal assistant KB | A local assistant needs user preferences or recurring workflow context across projects | Keep it outside public repos, use read-only adapters first, and require review before durable writes | Committing personal preferences, DMs, credentials, or private logs into a public project |
+| Transcript sidecar KB | A watcher or hook summarizes agent session transcripts after work finishes | Preview `akbp.session.end` or `akbp.crystallize_session` with `dry_run:true`, then apply only reviewed claims | Automatically converting every transcript line into durable memory |
+| Migration KB | Existing notes or memory exports need cleanup before reuse | Run `import-check` and dry-run `import-apply`, reject uncited or unsafe records, then approve only the clean subset | Bulk-loading stale, uncited, or secret-bearing memory because it is available |
+
+The default recommendation is one repo-local KB per active project. Add a
+team-shared or personal KB only when the trust boundary is explicit and the
+adapter knows which KB it is reading from.
+
 ## Fast path
 
 From a clean checkout:
