@@ -44,14 +44,22 @@ assert proof["format"] == "akbp-ten-minute-proof-v1", proof
 assert not proof["setup_claims"]["requires_docker"], proof
 assert not proof["setup_claims"]["requires_cloud_account"], proof
 assert not proof["setup_claims"]["requires_secrets"], proof
-assert [step["name"] for step in proof["proof_steps"]] == [
+proof_step_names = [step["name"] for step in proof["proof_steps"]]
+required_proof_steps = [
     "create_visible_artifacts",
     "check_readiness",
     "retrieve_cited_context",
+    "verify_inherited_sources",
     "preview_reviewed_write",
     "block_unapproved_apply",
+    "validate_adapter_response_contract",
     "export_portable_bundle",
-], proof
+]
+for required_step in required_proof_steps:
+    assert required_step in proof_step_names, proof
+assert [proof_step_names.index(step) for step in required_proof_steps] == sorted(
+    proof_step_names.index(step) for step in required_proof_steps
+), proof
 
 harness = discover["first_run_proof"]["recommended_harness"]
 assert harness["command"] == "./examples/structured-output-harness/run.sh", harness
