@@ -1965,6 +1965,48 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             for entry in read_only_bridge_tools
         ],
     }
+    client_tool_manifest = {
+        "format": "akbp-client-tool-manifest-v1",
+        "purpose": "Generate host-compatible read-only tools from AKBP JSONL methods while preserving citations, structured errors, and the reviewed-write boundary.",
+        "server": {
+            "name": args.name,
+            "command": command,
+            "args": command_args,
+            "env": {},
+        },
+        "knowledge_base_path": kb_path,
+        "default_mode": "read_only",
+        "transport_adapter": "stdio-jsonl-to-host-tools",
+        "response_contract": {
+            "preserve_envelope": True,
+            "branch_on": "error.code",
+            "surface_warnings": True,
+            "surface_citations": True,
+        },
+        "tools": [
+            {
+                "name": entry["tool"],
+                "description": f"Forward to {entry['method']} and preserve AKBP response fields.",
+                "akbp_method": entry["method"],
+                "mode": entry["mode"],
+                "input_schema_ref": entry["params_schema"],
+                "preserve_response_fields": entry["surface_fields"],
+            }
+            for entry in read_only_bridge_tools
+        ],
+        "blocked_write_methods": [
+            "akbp.remember",
+            "akbp.source.add",
+            "akbp.ingest",
+            "akbp.import_apply",
+            "akbp.index",
+            "akbp.session.end",
+            "akbp.crystallize_session",
+            "akbp.supersede",
+            "akbp.contradict",
+        ],
+        "approval_boundary": "Do not expose write methods as host tools until the host can render dry-run previews and collect approval outside the model-generated tool call.",
+    }
 
     config = {
         "name": args.name,
@@ -2178,6 +2220,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "mode": "reviewed_write" if requested_profile == "reviewed_write" else "read_only",
             "forward_tools": read_only_bridge_tools,
             "host_tool_manifest": host_tool_manifest,
+            "client_tool_manifest": client_tool_manifest,
             "read_only_allowlist": [
                 "akbp.capabilities",
                 "akbp.doctor",

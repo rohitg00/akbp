@@ -61,6 +61,14 @@ assert config["safety"]["require_adapter_ready"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "read_only", config
 assert "akbp.session.start" in config["tool_protocol_bridge"]["read_only_allowlist"], config
 assert "akbp.remember" in config["tool_protocol_bridge"]["blocked_write_methods"], config
+client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
+assert client_manifest["format"] == "akbp-client-tool-manifest-v1", config
+assert client_manifest["transport_adapter"] == "stdio-jsonl-to-host-tools", config
+assert client_manifest["response_contract"]["branch_on"] == "error.code", config
+assert client_manifest["response_contract"]["surface_citations"] is True, config
+assert [tool["akbp_method"] for tool in client_manifest["tools"]] == config["tool_protocol_bridge"]["read_only_allowlist"], config
+assert "akbp.remember" in client_manifest["blocked_write_methods"], config
+assert "dry-run previews" in client_manifest["approval_boundary"], config
 assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
 assert config["session_start"]["path"] == config["knowledge_base"]["path"], config
@@ -123,6 +131,8 @@ assert config["safety"]["require_human_review_surface"] is True, config
 assert config["safety"]["require_review_metadata"] is True, config
 assert config["safety"]["never_auto_apply_session_end"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "reviewed_write", config
+assert config["tool_protocol_bridge"]["client_tool_manifest"]["default_mode"] == "read_only", config
+assert "akbp.ingest" in config["tool_protocol_bridge"]["client_tool_manifest"]["blocked_write_methods"], config
 assert config["tool_protocol_bridge"]["reviewed_write_tools"][0]["required_flags"] == {"dry_run": True}, config
 reviewed_tools = {tool["tool"]: tool for tool in config["tool_protocol_bridge"]["reviewed_write_tools"]}
 assert reviewed_tools["akbp_ingest_preview"]["method"] == "akbp.ingest", config

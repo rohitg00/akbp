@@ -110,6 +110,23 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(manifest["tools"][0]["name"], "akbp_capabilities")
             self.assertEqual(manifest["tools"][0]["input_schema"], forward_tools[0]["params_schema"])
             self.assertEqual(manifest["tools"][0]["preserve_response_fields"], forward_tools[0]["surface_fields"])
+            client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
+            self.assertEqual(client_manifest["format"], "akbp-client-tool-manifest-v1")
+            self.assertEqual(client_manifest["server"], {"name": "stdio-adapter-test", **config["server"]})
+            self.assertEqual(client_manifest["knowledge_base_path"], str(kb.resolve()))
+            self.assertEqual(client_manifest["default_mode"], "read_only")
+            self.assertEqual(client_manifest["transport_adapter"], "stdio-jsonl-to-host-tools")
+            self.assertTrue(client_manifest["response_contract"]["preserve_envelope"])
+            self.assertEqual(client_manifest["response_contract"]["branch_on"], "error.code")
+            self.assertTrue(client_manifest["response_contract"]["surface_citations"])
+            self.assertEqual(
+                [tool["akbp_method"] for tool in client_manifest["tools"]],
+                config["tool_protocol_bridge"]["read_only_allowlist"],
+            )
+            self.assertEqual(client_manifest["tools"][0]["name"], "akbp_capabilities")
+            self.assertEqual(client_manifest["tools"][0]["input_schema_ref"], forward_tools[0]["params_schema"])
+            self.assertIn("akbp.remember", client_manifest["blocked_write_methods"])
+            self.assertIn("dry-run previews", client_manifest["approval_boundary"])
             self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertIn("akbp.remember", config["tool_protocol_bridge"]["blocked_write_methods"])
