@@ -37,6 +37,24 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("source_backed_claims", config["knowledge_capability"]["guarantees"])
             self.assertIn("uncited vector cache", config["knowledge_capability"]["not_a"])
             self.assertIn("approved:true", config["knowledge_capability"]["host_mapping"]["apply"])
+            descriptor = config["host_capability_descriptor"]
+            self.assertEqual(descriptor["format"], "akbp-host-capability-descriptor-v1")
+            self.assertEqual(descriptor["capability_type"], "durable_agent_knowledge")
+            self.assertEqual(descriptor["transport"], "stdio-jsonl")
+            self.assertEqual(descriptor["default_profile"], "reviewed_write")
+            self.assertEqual(descriptor["safe_default_profile"], "read_only")
+            self.assertEqual(descriptor["profile_contracts"]["read_only"]["write_policy"], "no_writes")
+            self.assertFalse(descriptor["profile_contracts"]["read_only"]["requires_review_surface"])
+            self.assertTrue(descriptor["profile_contracts"]["reviewed_write"]["requires_review_surface"])
+            self.assertEqual(
+                descriptor["profile_contracts"]["reviewed_write"]["write_policy"],
+                "dry_run_preview_then_approved_apply",
+            )
+            self.assertIn("akbp.session.start", descriptor["profile_contracts"]["startup_context"]["methods"])
+            self.assertIn("akbp.context", descriptor["read_only_methods"])
+            self.assertIn("akbp.remember", descriptor["blocked_until_review_surface"])
+            self.assertIn("schemas/tool-methods.schema.json", descriptor["schema_refs"]["methods"])
+            self.assertIn("requires_profiles", descriptor["host_integration_rules"][0])
             self.assertTrue(config["runtime_requirements"]["local_first"])
             self.assertFalse(config["runtime_requirements"]["network_required"])
             self.assertFalse(config["runtime_requirements"]["cloud_account_required"])
@@ -194,6 +212,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
+            self.assertEqual(read_only["host_capability_descriptor"]["default_profile"], "read_only")
             self.assertNotIn("write_apply_requires_approval", read_only["startup"]["params"]["requires"])
             self.assertFalse(read_only["knowledge_base"]["portable_template"])
             self.assertEqual(read_only["response_contract"]["envelope"]["ok"], "boolean")

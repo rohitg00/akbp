@@ -2007,6 +2007,48 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         ],
         "approval_boundary": "Do not expose write methods as host tools until the host can render dry-run previews and collect approval outside the model-generated tool call.",
     }
+    host_capability_descriptor = {
+        "format": "akbp-host-capability-descriptor-v1",
+        "purpose": "Let tool hosts classify AKBP as a durable, cited knowledge capability before mapping methods into host-native tools.",
+        "capability_type": "durable_agent_knowledge",
+        "transport": "stdio-jsonl",
+        "default_profile": requested_profile,
+        "safe_default_profile": "read_only",
+        "profile_contracts": {
+            "startup_context": {
+                "mode": "read_only",
+                "requires_review_surface": False,
+                "write_policy": "no_writes",
+                "methods": ["akbp.capabilities", "akbp.status", "akbp.session.start", "akbp.context", "akbp.search"],
+            },
+            "read_only": {
+                "mode": "read_only",
+                "requires_review_surface": False,
+                "write_policy": "no_writes",
+                "methods": [entry["method"] for entry in read_only_bridge_tools],
+            },
+            "reviewed_write": {
+                "mode": "reviewed_write",
+                "requires_review_surface": True,
+                "write_policy": "dry_run_preview_then_approved_apply",
+                "preview_methods": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
+                "apply_requires": {"approved": True, "same_method_path_and_params": True},
+            },
+        },
+        "host_integration_rules": [
+            "Run akbp.capabilities with requires_profiles before enabling profile-specific flows.",
+            "Keep host-generated tools read-only unless the host has a visible review surface outside the model tool call.",
+            "Preserve AKBP response envelopes so callers can branch on ok and error.code.",
+            "Surface citations, source warnings, and context budget warnings before using recalled context for planning.",
+        ],
+        "read_only_methods": [entry["method"] for entry in read_only_bridge_tools],
+        "blocked_until_review_surface": client_tool_manifest["blocked_write_methods"],
+        "schema_refs": {
+            "request": "schemas/tool-request.schema.json",
+            "response": "schemas/tool-response.schema.json",
+            "methods": "schemas/tool-methods.schema.json",
+        },
+    }
 
     config = {
         "name": args.name,
@@ -2050,6 +2092,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "automatic background write sink",
             ],
         },
+        "host_capability_descriptor": host_capability_descriptor,
         "runtime_requirements": {
             "local_first": True,
             "network_required": False,

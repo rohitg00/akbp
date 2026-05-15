@@ -19,6 +19,15 @@ export-checkable. Do not advertise it as a chat transcript store, runtime
 scratchpad, uncited vector cache, bridge-owned memory format, or automatic
 background write sink.
 
+For hosts that maintain their own capability registry, use
+`host_capability_descriptor` from `akbp client-config`. It is a compact,
+machine-readable profile map for tool-protocol clients and other tool hosts:
+`startup_context` and `read_only` are safe without a review surface, while
+`reviewed_write` requires visible dry-run previews and an `approved:true`
+apply of the exact reviewed request. This descriptor is intentionally about the
+knowledge capability and trust boundary, not a claim that AKBP is a separate
+host protocol.
+
 The generated `tool_protocol_bridge.host_tool_manifest` is the smallest
 host-facing manifest for tool-protocol bridges. It repeats the stdio command,
 local knowledge-base path, read-only tool names, AKBP method targets, parameter
@@ -73,6 +82,9 @@ Required behavior:
 
 - Call `akbp.capabilities` at startup and require `read_only` plus `startup_context` for the first bridge.
 - Preserve `knowledge_capability.type`, `guarantees`, and `not_a` when the host has its own capability registry or marketplace metadata.
+- Preserve `host_capability_descriptor.profile_contracts` when the host has
+  first-class capability records, so write-capable flows stay disabled until a
+  review surface exists.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
