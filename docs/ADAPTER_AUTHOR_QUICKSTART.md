@@ -125,13 +125,13 @@ It validates `akbp.capabilities`, `akbp.doctor`, and `akbp.session.start` togeth
 Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.
 
 ```json
-{"id":"session-start-1","method":"akbp.session.start","path":".","params":{"task":"current task goals and constraints","limit":5}}
+{"id":"session-start-1","method":"akbp.session.start","path":".","params":{"task":"current task goals and constraints","limit":5,"max_chars":4000}}
 ```
 
 Lower-level context request:
 
 ```json
-{"id":"ctx-1","method":"akbp.context","path":".","params":{"task":"current task goals and constraints","limit":5}}
+{"id":"ctx-1","method":"akbp.context","path":".","params":{"task":"current task goals and constraints","limit":5,"max_chars":4000}}
 ```
 
 ```json

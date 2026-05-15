@@ -55,7 +55,8 @@ Input:
 ```json
 {
   "task": "string",
-  "limit": 10
+  "limit": 10,
+  "max_chars": 4000
 }
 ```
 
@@ -65,6 +66,12 @@ Output:
 {
   "task": "string",
   "items": [],
+  "budget": {
+    "max_chars": 4000,
+    "summary_chars": 0,
+    "original_summary_chars": 0,
+    "truncated_items": 0
+  },
   "warnings": []
 }
 ```
@@ -94,7 +101,7 @@ Adapter-level session entrypoint. It returns a stable `session_id` and a cited c
   "id": "session-start-1",
   "method": "akbp.session.start",
   "path": ".",
-  "params": {"task": "continue the release", "limit": 5}
+  "params": {"task": "continue the release", "limit": 5, "max_chars": 4000}
 }
 ```
 

@@ -10,6 +10,12 @@
       "maximum": 100,
       "default": 10
     },
+    "maxChars": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65536,
+      "description": "Optional cap for total context item summary characters returned to the client."
+    },
     "evidenceList": {
       "type": "array",
       "maxItems": 64,
@@ -61,6 +67,9 @@
         },
         "limit": {
           "$ref": "#/$defs/limit"
+        },
+        "max_chars": {
+          "$ref": "#/$defs/maxChars"
         }
       }
     },
@@ -535,6 +544,9 @@
         },
         "limit": {
           "$ref": "#/$defs/limit"
+        },
+        "max_chars": {
+          "$ref": "#/$defs/maxChars"
         }
       }
     },

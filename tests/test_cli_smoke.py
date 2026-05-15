@@ -265,6 +265,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(pack["items"][0]["backend"], "sqlite_fts5")
             self.assertIn("citations", pack["items"][0])
 
+            out = run_cli("--path", str(kb), "context", "continue Bun npm migration", "--max-chars", "40")
+            budgeted = json.loads(out.stdout)
+            self.assertLessEqual(budgeted["budget"]["summary_chars"], 40)
+            self.assertGreaterEqual(budgeted["budget"]["truncated_items"], 1)
+            self.assertTrue(any("Context budget truncated" in warning for warning in budgeted["warnings"]))
+
             out = run_cli("--path", str(kb), "export")
             exported = json.loads(out.stdout)
             self.assertTrue(exported["claims"])

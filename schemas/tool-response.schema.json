@@ -1286,6 +1286,34 @@
             "$ref": "#/$defs/context_item"
           }
         },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_chars",
+            "summary_chars",
+            "original_summary_chars",
+            "truncated_items"
+          ],
+          "properties": {
+            "max_chars": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "summary_chars": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "original_summary_chars": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "truncated_items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
         "warnings": {
           "type": "array",
           "items": {

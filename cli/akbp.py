@@ -572,6 +572,41 @@ def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[str, Any]:
+    if max_chars is None:
+        return pack
+    remaining = max_chars
+    budgeted_items: list[dict[str, Any]] = []
+    truncated = 0
+    original_chars = sum(len(str(item.get("summary", ""))) for item in pack["items"])
+    for item in pack["items"]:
+        summary = str(item.get("summary", ""))
+        if remaining <= 0:
+            truncated += 1
+            continue
+        if len(summary) > remaining:
+            if remaining > 3:
+                clipped = summary[: remaining - 3].rstrip()
+                clipped = f"{clipped}..." if clipped else "..."[:remaining]
+            else:
+                clipped = summary[:remaining]
+            item = {**item, "summary": clipped}
+            truncated += 1
+        budgeted_items.append(item)
+        remaining -= len(str(item.get("summary", "")))
+    pack["items"] = budgeted_items
+    final_chars = sum(len(str(item.get("summary", ""))) for item in pack["items"])
+    pack["budget"] = {
+        "max_chars": max_chars,
+        "summary_chars": final_chars,
+        "original_summary_chars": original_chars,
+        "truncated_items": truncated,
+    }
+    if truncated:
+        pack["warnings"].append(f"Context budget truncated or omitted {truncated} item(s); increase max_chars or lower limit for more detail.")
+    return pack
+
+
 def cmd_context(args: argparse.Namespace) -> int:
     base = root(args.path)
     results = collect_results(base, args.task, args.limit)
@@ -587,6 +622,7 @@ def cmd_context(args: argparse.Namespace) -> int:
         "items": [result_to_context_item(r) for r in results],
         "warnings": warnings,
     }
+    pack = apply_context_budget(pack, args.max_chars)
     if args.markdown:
         print(f"# AKBP Context Pack\n\nQuery: {pack['query']}\nGenerated: {pack['generated_at']}\n")
         for item in pack["items"]:
@@ -2301,6 +2337,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("context")
     s.add_argument("task")
     s.add_argument("--limit", type=int, default=10)
+    s.add_argument("--max-chars", type=int, help="cap total context item summary characters")
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
 

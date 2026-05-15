@@ -76,7 +76,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.status": {"write": False, "params": ["limit"]},
     "akbp.doctor": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
-    "akbp.context": {"write": False, "params": ["task", "limit"]},
+    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars"]},
     "akbp.index": {"write": True, "params": ["incremental", "dry_run"]},
     "akbp.search": {"write": False, "params": ["query", "limit"]},
     "akbp.remember": {"write": True, "params": ["text", "type", "evidence", "entity", "dry_run"]},
@@ -93,7 +93,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
-    "akbp.session.start": {"write": False, "params": ["task", "query", "limit"]},
+    "akbp.session.start": {"write": False, "params": ["task", "query", "limit", "max_chars"]},
     "akbp.session.end": {"write": True, "params": ["transcript", "apply", "dry_run"]},
 }
 
@@ -351,7 +351,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
             {"id": "import-check-1", "method": "akbp.import_check", "path": ".", "params": {"file": "export.jsonl", "fail_on_rejected": True}},
             {"id": "import-apply-1", "method": "akbp.import_apply", "path": ".", "dry_run": True, "params": {"file": "export.jsonl"}},
             {"id": "crystallize-1", "method": "akbp.crystallize_session", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
-            {"id": "session-start-1", "method": "akbp.session.start", "path": ".", "params": {"task": "continue the release", "limit": 5}},
+            {"id": "session-start-1", "method": "akbp.session.start", "path": ".", "params": {"task": "continue the release", "limit": 5, "max_chars": 4000}},
             {"id": "session-end-1", "method": "akbp.session.end", "path": ".", "dry_run": True, "params": {"transcript": "session-summary.md", "apply": True}},
         ],
     }
@@ -383,6 +383,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.session.end": ["crystallize", params.get("transcript", "")],
     }
     argv = [str(a) for a in mapping[method] if a != ""]
+    if method in {"akbp.context", "akbp.session.start"} and "max_chars" in params:
+        argv.extend(["--max-chars", str(params["max_chars"])])
     if method == "akbp.index" and params.get("incremental"):
         argv.append("--incremental")
     for evidence in params.get("evidence", []) or []:
@@ -650,6 +652,12 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
             errors.append("limit must be an integer")
         elif limit < 1 or limit > 100:
             errors.append("limit must be between 1 and 100")
+    if "max_chars" in params:
+        max_chars = params.get("max_chars")
+        if not isinstance(max_chars, int) or isinstance(max_chars, bool):
+            errors.append("max_chars must be an integer")
+        elif max_chars < 1 or max_chars > 65536:
+            errors.append("max_chars must be between 1 and 65536")
     if "confidence" in params:
         confidence = params.get("confidence")
         if not is_finite_number(confidence):

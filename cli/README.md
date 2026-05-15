@@ -28,7 +28,7 @@ python3 cli/akbp.py --path ./my-kb query "Bun npm"
 python3 cli/akbp.py --path ./my-kb index
 python3 cli/akbp.py --path ./my-kb index --incremental
 python3 cli/akbp.py --path ./my-kb search "Bun npm"
-python3 cli/akbp.py --path ./my-kb context "continue the package manager migration"
+python3 cli/akbp.py --path ./my-kb context "continue the package manager migration" --max-chars 4000
 python3 cli/akbp.py --path ./my-kb cite claim_123
 python3 cli/akbp.py --path ./my-kb supersede claim_123 "Use the stdlib CLI until package metadata exists" --type decision --evidence cli/akbp.py
 python3 cli/akbp.py --path ./my-kb contradict claim_123 claim_456 --evidence source_123
@@ -75,6 +75,8 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 ## Context packs
 
 `akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of a local context retrieval call.
+
+Use `--max-chars` when an adapter has a fixed startup prompt budget. The returned context pack includes a `budget` object with the requested cap, final summary characters, original summary characters, and the number of truncated or omitted items.
 
 ## Client config
 
