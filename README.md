@@ -203,8 +203,27 @@ See `docs/TOOL_CONTRACT.md` and `examples/tool-error-handling/`.
 
 Start here if you want AKBP inside a coding agent, IDE agent, task runner, local assistant, or research workflow:
 
+Fastest read-only setup:
+
+```bash
+python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile read-only
+```
+
+That prints a pasteable stdio JSONL config with the server command, knowledge-base path, startup capability request, required workflow profile, session-start method, and safety rules. Use read-only first when the host runtime cannot show a write preview or collect explicit approval.
+
+Reviewed-write setup:
+
+```bash
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile reviewed-writes
+```
+
+Enable that only when the adapter can surface `dry_run:true` previews, warnings, would-write paths, and the approval step. The apply request should repeat the reviewed method/path/params with `approved:true`.
+
+Adapter implementation checklist:
+
 1. Read `docs/ADAPTER_AUTHOR_QUICKSTART.md`.
-2. Copy `adapters/coding-agent-template/`.
+2. Copy `adapters/coding-agent-template/` when you need a full adapter package.
 3. Call `akbp.capabilities` at startup.
 4. Retrieve context before planning.
 5. Preview writes with `dry_run:true`.

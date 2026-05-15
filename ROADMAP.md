@@ -65,12 +65,13 @@ Goal: make compatibility testable.
 Goal: give agents a standard tool interface.
 
 - `akbp.search`
-- `akbp.get_context`
+- `akbp.context`
+- `akbp.session.start`
 - `akbp.remember`
 - `akbp.crystallize_session`
-- `akbp.cite`, currently available in the CLI
-- `akbp.supersede`, currently available in the CLI
-- `akbp.lint`
+- `akbp.cite`
+- `akbp.supersede`
+- `akbp.contradict`
 - capability negotiation
 - structured errors
 

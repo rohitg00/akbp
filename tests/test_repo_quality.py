@@ -359,6 +359,9 @@ class RepoQualityTest(unittest.TestCase):
     def test_adapter_author_quickstart_covers_integration_contract(self):
         text = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
         for required in [
+            "Generate a read-only client config first",
+            "client-config --name my-adapter --profile read-only",
+            "client-config --name my-adapter --profile reviewed-writes",
             "akbp.capabilities",
             "akbp.session.start",
             "akbp.context",
@@ -369,6 +372,21 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.source.verify",
             "error.code",
             "make validate",
+        ]:
+            self.assertIn(required, text)
+
+    def test_readme_documents_low_friction_adapter_setup(self):
+        text = (ROOT / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "Fastest read-only setup",
+            "client-config --name my-adapter --profile read-only",
+            "Reviewed-write setup",
+            "client-config --name my-adapter --profile reviewed-writes",
+            "Use read-only first",
+            "startup capability request",
+            "session-start method",
+            "would-write paths",
+            "approved:true",
         ]:
             self.assertIn(required, text)
 

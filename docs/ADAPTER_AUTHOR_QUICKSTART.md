@@ -4,7 +4,26 @@ Use this when adding AKBP support to a coding agent, IDE agent, task runner, or 
 
 The adapter's job is translation only. It should connect runtime events to AKBP reads and review-gated writes without creating a separate durable memory format.
 
-## 1. Start from the template
+## 1. Generate a read-only client config first
+
+Start with a read-only config when you are evaluating a runtime or wiring a new host. It proves startup retrieval and capability negotiation without granting durable write access.
+
+```bash
+python3 cli/akbp.py --path ./my-kb init
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile read-only
+```
+
+The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, session-start method, and safety rules. Paste that into the host runtime, then confirm the adapter can call `akbp.capabilities` and `akbp.session.start` before adding write flows.
+
+Use reviewed writes only after the runtime can show a preview and collect approval:
+
+```bash
+python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile reviewed-writes
+```
+
+That profile still requires review-gated writes. The adapter must surface `dry_run:true` previews, warnings, would-write paths, and the `apply_instruction`, then repeat the same method/path/params with `approved:true` after approval.
+
+## 2. Start from the template
 
 Copy the runtime-neutral template:
 
@@ -25,7 +44,7 @@ privacy.md
 
 Keep examples public-safe. Do not include local usernames, private paths, tokens, cookies, auth headers, screenshots, private chat text, or production logs.
 
-## 2. Discover capabilities before calling methods
+## 3. Discover capabilities before calling methods
 
 An adapter should call `akbp.capabilities` at startup and cache the response for the session. Adapter config examples expose a `lifecycle` block that maps runtime hooks to `akbp.session.start` and `akbp.session.end`; keep that mapping explicit so users can audit what writes may happen at shutdown.
 
@@ -58,7 +77,7 @@ Minimum startup gate:
 
 If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
 
-## 3. Retrieve context at session start
+## 4. Retrieve context at session start
 
 Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.
 
@@ -78,7 +97,7 @@ Lower-level context request:
 
 The adapter should show citations or source ids when prior knowledge affects a plan or answer.
 
-## 4. Preview writes before applying
+## 5. Preview writes before applying
 
 All write-capable calls must start as previews.
 
@@ -121,7 +140,7 @@ Safety rules:
 - Treat `approval_required` as a stop signal, not a warning.
 - Show redacted CLI output as redacted; do not retry with raw secrets.
 
-## 5. Preserve evidence and auditability
+## 6. Preserve evidence and auditability
 
 When importing source material, prefer source registration plus ingest preview.
 Both operations are write-capable, so preview them before applying:
@@ -150,7 +169,7 @@ Verify local file evidence before depending on it:
 
 Never convert secrets or raw private logs into durable AKBP records.
 
-## 6. Handle structured errors
+## 7. Handle structured errors
 
 Branch on `error.code`, not free-form messages.
 
@@ -163,7 +182,7 @@ Common codes an adapter should handle:
 
 See `examples/tool-error-handling/README.md`.
 
-## 7. Validate the adapter before publishing
+## 8. Validate the adapter before publishing
 
 Run:
 
