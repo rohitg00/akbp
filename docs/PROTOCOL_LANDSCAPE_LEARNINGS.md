@@ -575,3 +575,21 @@ Success criteria:
 - adapter installers can show a clear under-ten-minute setup path
 - read-only cited context remains the first enabled capability
 - write-capable flows stay gated on dry-run review or migration checks
+
+## Shipped artifact: verified rich context artifact gate
+
+Recent scans continue to show memory tools competing on quick setup and shared
+recall. AKBP's stronger product story is that durable knowledge can also power
+human review surfaces without letting those surfaces become hidden write paths.
+
+`examples/rich-context-artifact/run.sh` now turns that story into a runnable
+gate. It validates the static handoff artifact's JSONL proposals, previews the
+import, applies only with explicit approval, verifies the source hash, recalls
+the claims with required citations, and checks an export bundle.
+
+This keeps the rich artifact path honest:
+
+- HTML is a generated review surface
+- JSONL proposals remain the write boundary
+- source hashes and citations survive the apply path
+- portable exports still validate without artifact-local state

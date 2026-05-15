@@ -43,6 +43,7 @@ examples:
 	./examples/tool-protocol-bridge/run.sh
 	./examples/multi-agent-consistency-demo/run.sh
 	./examples/portable-bundle/run.sh
+	./examples/rich-context-artifact/run.sh
 	./examples/existing-memory-migration/run.sh
 	./examples/source-intake/run.sh
 	./examples/read-only-adapter/run.sh

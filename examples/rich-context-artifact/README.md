@@ -17,11 +17,7 @@ The HTML is intentionally not the write path. It is a navigable human artifact g
 From the repository root:
 
 ```bash
-TMP=$(mktemp -d)
-python3 cli/akbp.py --path "$TMP/kb" init
-python3 cli/akbp.py --path "$TMP/kb" import-check examples/rich-context-artifact/updates.jsonl --fail-on-rejected
-python3 cli/akbp.py --path "$TMP/kb" import-apply examples/rich-context-artifact/updates.jsonl --dry-run
-python3 cli/akbp.py --path "$TMP/kb" import-apply examples/rich-context-artifact/updates.jsonl --approved
+./examples/rich-context-artifact/run.sh
 ```
 
 Expected behavior:
@@ -29,6 +25,9 @@ Expected behavior:
 - `import-check` accepts one source and two claims.
 - `import-apply --dry-run` previews the objects that would be written.
 - `import-apply --approved` writes only after explicit approval.
+- `source verify` confirms the reviewed source hash.
+- `context --require-citations` recalls the applied claims with citations.
+- `export-check --fail-on-issues` verifies the portable bundle.
 
 ## Pattern
 
