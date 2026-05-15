@@ -1668,6 +1668,30 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "limit": 5,
             },
         },
+        "response_contract": {
+            "envelope": {
+                "required": ["id", "ok", "result", "error"],
+                "id": "matches request id",
+                "ok": "boolean",
+                "result": "object when ok is true",
+                "error": "object when ok is false",
+            },
+            "success_rules": [
+                "Only treat a call as successful when ok is true.",
+                "Read structured fields from result instead of parsing stdout prose.",
+                "Surface result.context.warnings before relying on retrieved context.",
+            ],
+            "error_rules": [
+                "Branch on error.code, not free-form error.message.",
+                "Show error.details when present; it is already redacted by the reference server.",
+                "Keep the adapter in read-only mode after capability, doctor, or schema validation failures.",
+            ],
+            "schemas": {
+                "request": "schemas/tool-request.schema.json",
+                "response": "schemas/tool-response.schema.json",
+                "methods": "schemas/tool-methods.schema.json",
+            },
+        },
         "health_check": {
             "id": "doctor-1",
             "method": "akbp.doctor",
@@ -1733,7 +1757,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "Run health_check.method and show next_steps when ready_field is false.",
             "Keep hosted or autonomous tool integrations read-only unless a separate human approval step exists outside the tool call.",
             "For write-capable flows, preview with dry_run:true and repeat unchanged with approved:true only after review.",
-            "Branch on error.code, not free-form error text.",
+            "Use response_contract to validate envelopes and branch on error.code, not free-form error text.",
         ],
     }
     print(json.dumps(config, indent=2))

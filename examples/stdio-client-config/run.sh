@@ -35,6 +35,9 @@ assert config["safety"]["require_adapter_ready"] is True, config
 assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
 assert config["session_start"]["path"] == config["knowledge_base"]["path"], config
+assert config["response_contract"]["envelope"]["required"] == ["id", "ok", "result", "error"], config
+assert config["response_contract"]["envelope"]["ok"] == "boolean", config
+assert config["response_contract"]["schemas"]["response"] == "schemas/tool-response.schema.json", config
 print("read-only config ok")
 '
 
@@ -55,6 +58,8 @@ assert config["health_check"]["blocking_field"] == "summary.errors", config
 assert config["verification"][0]["run"] == "startup", config
 assert config["verification"][1]["run"] == "health_check", config
 assert config["verification"][2]["run"] == "session_start", config
+assert "Branch on error.code" in config["response_contract"]["error_rules"][0], config
+assert config["response_contract"]["schemas"]["methods"] == "schemas/tool-methods.schema.json", config
 assert config["safety"]["write_policy"] == "dry_run_then_approved", config
 assert config["safety"]["host_trust_boundary"]["hosted_autonomous_tools"] == "use_read_only_unless_a_separate_human_approval_step_exists", config
 assert config["safety"]["require_adapter_ready"] is True, config

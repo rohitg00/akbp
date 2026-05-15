@@ -94,7 +94,7 @@ Use reviewed writes only when the adapter has review UI or a trusted local appro
 python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile reviewed-writes
 ```
 
-The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, and should show `doctor.next_steps` when `ready_for_adapter` is false.
+The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
 
 ## Conformance
 

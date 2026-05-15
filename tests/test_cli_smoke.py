@@ -40,6 +40,9 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["session_start"]["id"], "session-start-1")
             self.assertEqual(config["session_start"]["method"], "akbp.session.start")
             self.assertEqual(config["session_start"]["path"], str(kb.resolve()))
+            self.assertEqual(config["response_contract"]["envelope"]["required"], ["id", "ok", "result", "error"])
+            self.assertIn("Branch on error.code", config["response_contract"]["error_rules"][0])
+            self.assertEqual(config["response_contract"]["schemas"]["response"], "schemas/tool-response.schema.json")
             self.assertEqual(config["health_check"]["id"], "doctor-1")
             self.assertEqual(config["health_check"]["path"], str(kb.resolve()))
             self.assertEqual([step["run"] for step in config["verification"]], ["startup", "health_check", "session_start"])
@@ -67,6 +70,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
+            self.assertEqual(read_only["response_contract"]["envelope"]["ok"], "boolean")
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
