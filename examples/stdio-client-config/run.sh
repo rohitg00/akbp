@@ -87,7 +87,12 @@ assert config["safety"]["require_review_metadata"] is True, config
 assert config["safety"]["never_auto_apply_session_end"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "reviewed_write", config
 assert config["tool_protocol_bridge"]["reviewed_write_tools"][0]["required_flags"] == {"dry_run": True}, config
-assert config["tool_protocol_bridge"]["reviewed_write_tools"][2]["required_flags"] == {"approved": True}, config
+reviewed_tools = {tool["tool"]: tool for tool in config["tool_protocol_bridge"]["reviewed_write_tools"]}
+assert reviewed_tools["akbp_ingest_preview"]["method"] == "akbp.ingest", config
+assert reviewed_tools["akbp_ingest_preview"]["required_flags"] == {"dry_run": True}, config
+assert reviewed_tools["akbp_apply_reviewed"]["required_flags"] == {"approved": True}, config
+assert reviewed_tools["akbp_index_apply"]["method"] == "akbp.index", config
+assert reviewed_tools["akbp_index_apply"]["required_flags"] == {"approved": True}, config
 assert "exact reviewed method" in config["tool_protocol_bridge"]["apply_rule"], config
 print("reviewed-write config ok")
 '

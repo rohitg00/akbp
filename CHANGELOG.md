@@ -4,6 +4,7 @@
 
 - Added a runnable JSONL quickstart example that verifies the canonical tool-server adoption sequence from capability discovery through reviewed write, cited recall, and portable export.
 - Added a runnable adapter lifecycle example that verifies capability negotiation, session-start retrieval, session-end dry-run review, unapproved write rejection, approved apply, index refresh, and recalled context.
+- Expanded generated client configs so reviewed-write bridges advertise ingest preview and approved index refresh wrappers, while blocking every direct write method by default.
 
 ### Added
 

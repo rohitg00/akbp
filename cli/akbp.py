@@ -2026,8 +2026,10 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "blocked_write_methods": [
                 "akbp.remember",
+                "akbp.source.add",
                 "akbp.ingest",
                 "akbp.import_apply",
+                "akbp.index",
                 "akbp.session.end",
                 "akbp.crystallize_session",
                 "akbp.supersede",
@@ -2045,8 +2047,18 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "required_flags": {"dry_run": True},
                 },
                 {
+                    "tool": "akbp_ingest_preview",
+                    "method": "akbp.ingest",
+                    "required_flags": {"dry_run": True},
+                },
+                {
                     "tool": "akbp_apply_reviewed",
                     "method": "same reviewed method/path/params",
+                    "required_flags": {"approved": True},
+                },
+                {
+                    "tool": "akbp_index_apply",
+                    "method": "akbp.index",
                     "required_flags": {"approved": True},
                 },
             ],
