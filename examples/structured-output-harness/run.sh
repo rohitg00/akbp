@@ -171,13 +171,16 @@ assert prompt_contract["startup_request"]["method"] == "akbp.session.start", pro
 assert prompt_contract["startup_request"]["params"]["max_chars"] == 4000, prompt_contract
 assert prompt_contract["startup_request"]["params"]["min_items"] == 1, prompt_contract
 assert prompt_contract["startup_request"]["params"]["require_citations"] is True, prompt_contract
+assert prompt_contract["startup_request"]["params"]["fail_on_warnings"] is True, prompt_contract
 assert prompt_contract["planning_gate"]["required_before_planning"], prompt_contract
 trust_gate = prompt_contract["startup_trust_gate"]
 assert trust_gate["format"] == "akbp-startup-trust-gate-v1", trust_gate
 assert trust_gate["required_before_planning"], trust_gate
 assert trust_gate["trust_conditions"]["minimum_items"] == 1, trust_gate
 assert trust_gate["trust_conditions"]["require_citations"], trust_gate
+assert trust_gate["trust_conditions"]["warnings_allowed"] is False, trust_gate
 assert "result.context.items is empty" in trust_gate["fail_closed_on"], trust_gate
+assert "fail_on_warnings" in " ".join(trust_gate["fail_closed_on"]), trust_gate
 assert "Continue without recalled AKBP memory" in trust_gate["fallback_action"], trust_gate
 assert "ok" in prompt_contract["validation"]["branch_on"], prompt_contract
 assert "error.code" in prompt_contract["validation"]["branch_on"], prompt_contract

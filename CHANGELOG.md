@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Tightened generated adapter startup trust gates so discovery, client configs,
+  host-tool manifests, and verification plans request `fail_on_warnings:true`
+  before recalled context can influence planning.
 - Added first-run adoption triage to discovery output so installers can choose
   read-only recall, reviewed promotion, or scratch-only fallback based on
   citations, response preservation, and review-surface support.
