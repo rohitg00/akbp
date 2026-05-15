@@ -49,12 +49,17 @@
           "requires_profiles": ["startup_context", "reviewed_write"]
         },
         "expected_result_schema": "#/$defs/capabilities_result",
-        "expected_result_fields": ["protocol", "features", "profiles", "profile_contracts", "methods", "negotiation"],
+        "expected_result_fields": ["protocol", "features", "knowledge_capability", "profiles", "profile_contracts", "methods", "negotiation"],
         "expected_result_contains": {
           "features.method_param_schemas": [true],
           "features.structured_errors": [true],
           "features.capability_negotiation": [true],
           "features.write_apply_requires_approval": [true],
+          "knowledge_capability.kind": ["agent_knowledge_base"],
+          "knowledge_capability.trust_model": ["cited_review_gated_memory"],
+          "knowledge_capability.retrieval.startup_method": ["akbp.session.start"],
+          "knowledge_capability.writes.policy": ["dry_run_preview_then_approved_apply"],
+          "knowledge_capability.writes.approval_required_error": ["approval_required"],
           "negotiation.satisfied": [true],
           "profiles.startup_context[]": ["akbp.session.start", "akbp.context"],
           "profiles.reviewed_write[]": ["akbp.remember", "akbp.session.end"],

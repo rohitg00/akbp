@@ -54,7 +54,7 @@ Critique tracking lives in `docs/CRITIQUE_RESPONSE.md` so public feedback turns 
 |------|-----------------|
 | Knowledge base | `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, sources, and audit log |
 | CLI | `init`, `source add`, `ingest`, `remember`, `crystallize`, `index`, `search`, `context`, `doctor`, `export`, `export-check`, `import-check`, `import-apply`, `conformance` |
-| JSONL tool server | `akbp.capabilities`, `akbp.status`, retrieval methods, write methods, lifecycle methods, structured responses, and structured errors |
+| JSONL tool server | `akbp.capabilities`, knowledge-capability descriptor, `akbp.status`, retrieval methods, write methods, lifecycle methods, structured responses, and structured errors |
 | Schemas | Request envelope, response envelope, method params, claims, sources, entities, relations, pages, evidence, audit events, and context packs |
 | Write safety | `dry_run:true`, `approved:true`, `approval_required`, review-gated writes, redaction, request limits, path validation, and schema-backed param checks |
 | Retrieval | SQLite FTS5 search, context packs, citations, source verification, and retrieval benchmark fixtures |
@@ -153,6 +153,9 @@ For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,
 dry-run review metadata, and the `approval_required` stop signal before a
 runtime trusts AKBP memory or enables writes.
+The `akbp.capabilities` response includes a `knowledge_capability` descriptor so
+tool hosts can classify AKBP as a local, cited, review-gated agent knowledge
+base before mapping it into tool-protocol or host-native memory surfaces.
 `akbp discover` and `akbp client-config` also emit an
 `adapter_prompt_contract` block so adapters can turn that harness into concrete
 runtime instructions: retrieve bounded cited context before planning, continue
