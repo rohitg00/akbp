@@ -142,6 +142,11 @@ memory server, local cache, or tool bridge. That block classifies the bridge as
 transport and policy glue only, keeps AKBP markdown and JSONL artifacts as the
 durable source of truth, and lists the fields a host must preserve before it
 can claim AKBP-compatible memory.
+It includes `memory_landscape_fit` so installer UIs can position AKBP beside
+fast tool-protocol memory servers, local SQLite memories, graph memories, context
+reducers, and product-native agent memory. Use it to explain the split: adjacent
+memory tools can handle speed and runtime UX, while AKBP owns cited, reviewed,
+export-checkable project knowledge.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.
@@ -183,6 +188,11 @@ Use `memory_server_bridge` when AKBP sits beside an existing memory server or
 tool host. Keep the bridge read-only until capability and doctor preflights
 pass, preserve citations and `error.code`, and warn or disable the integration
 when durable memory is stored in an opaque bridge-owned format.
+Use `memory_landscape_fit` when users are comparing AKBP with tool-protocol memory
+servers, local memory databases, graph-memory tools, or product-native agent
+memory. The generated checks keep the explanation concrete: inspectable
+artifacts, citations, dry-run preview, approved apply, lifecycle updates, and
+export or import checks.
 
 Use `host_install_profiles` when an adapter needs host-specific install copy.
 The terminal-agent profile emits pasteable `akbp discover`, `doctor`, and

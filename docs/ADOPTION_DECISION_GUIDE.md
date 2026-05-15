@@ -53,6 +53,13 @@ also use `native_memory_interop` from `akbp client-config`. The safe default is
 to read cited AKBP context before planning, treat native memory as unreviewed
 hints, and promote only sourced durable project facts through dry-run review.
 
+Recent memory tools often optimize for fast setup, local SQLite or graph recall,
+tool-protocol exposure, context-window savings, or product-native agent memory. AKBP should
+not fight those layers for runtime UX. Use `memory_landscape_fit` from
+`akbp client-config` to explain the split: adjacent tools can stay ephemeral or
+serve low-latency recall, while AKBP remains the cited, reviewed, exportable
+project-knowledge substrate.
+
 ## What makes an integration AKBP-compatible
 
 An integration is using AKBP as a protocol when it preserves these properties:
