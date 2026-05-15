@@ -532,8 +532,17 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     return issues
 
 
-def run(fixtures: Path, *, score: bool = False, real_akbp: bool = False) -> dict[str, Any]:
+def scenario_profiles(data: dict[str, Any]) -> set[str]:
+    profiles = data.get("profiles", []) or []
+    if not isinstance(profiles, list):
+        return set()
+    return {str(profile) for profile in profiles}
+
+
+def run(fixtures: Path, *, score: bool = False, real_akbp: bool = False, profile: str | None = None) -> dict[str, Any]:
     scenarios = load_scenarios(fixtures)
+    if profile:
+        scenarios = [(path, data) for path, data in scenarios if profile in scenario_profiles(data)]
     results = []
     for path, data in scenarios:
         issues = check_scenario(data)
@@ -553,6 +562,7 @@ def run(fixtures: Path, *, score: bool = False, real_akbp: bool = False) -> dict
         "mode": "akbp-score" if real_akbp else ("score" if score else "validate"),
         "count": len(results),
         "fixtures": str(fixtures.relative_to(ROOT) if fixtures.is_relative_to(ROOT) else fixtures),
+        "profile": profile,
         "results": results,
     }
 
@@ -562,8 +572,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fixtures", default=str(DEFAULT_FIXTURES), help="Fixture directory containing */scenario.json files.")
     parser.add_argument("--score", action="store_true", help="Run deterministic fixture scoring checks.")
     parser.add_argument("--akbp", action="store_true", help="Populate a temporary AKBP knowledge base and check real query/context results.")
+    parser.add_argument("--profile", help="Run only fixtures tagged with this profile, for example adapter-quality.")
     args = parser.parse_args(argv)
-    report = run(Path(args.fixtures).resolve(), score=args.score or args.akbp, real_akbp=args.akbp)
+    report = run(Path(args.fixtures).resolve(), score=args.score or args.akbp, real_akbp=args.akbp, profile=args.profile)
     print(json.dumps(report, indent=2, ensure_ascii=False))
     return 0 if report["ok"] else 1
 

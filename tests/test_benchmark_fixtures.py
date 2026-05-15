@@ -693,7 +693,10 @@ class BenchmarkFixtureTest(unittest.TestCase):
         path = FIXTURES / "adapter-structured-output-harness" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("adapter-structured-output-harness", fixture_readme)
+        self.assertEqual(data["profiles"], ["adapter-quality"])
+        self.assertIn("adapter-quality:", makefile)
         requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
         capabilities = requests["caps-structured-harness"]
         self.assertEqual(capabilities["method"], "akbp.capabilities")
@@ -717,6 +720,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         report = benchmark_runner.score_real_akbp(data)
         self.assertTrue(report["ok"], report)
         self.assertIn("claim_adapter_harness_checks_shapes", report["query_result_ids"])
+
+    def test_runner_filters_fixtures_by_profile(self):
+        report = benchmark_runner.run(FIXTURES, score=True, real_akbp=True, profile="adapter-quality")
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(report["profile"], "adapter-quality")
+        self.assertEqual(report["count"], 1)
+        self.assertEqual(report["results"][0]["id"], "adapter-structured-output-harness-001")
 
     def test_git_native_agent_handoff_fixture_covers_context_and_write_policy(self):
         path = FIXTURES / "git-native-agent-handoff" / "scenario.json"

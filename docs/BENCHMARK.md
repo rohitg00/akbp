@@ -107,9 +107,17 @@ Run real AKBP retrieval scoring with:
 make benchmark
 ```
 
+Run the focused adapter quality gate with:
+
+```bash
+make adapter-quality
+```
+
 The first runner validates scenario shape, citations, relation targets, supersession links, tool-server request ids, and fake-secret safety. `make benchmark-score` runs deterministic `--score` mode, which checks expected retrieval, citations, conflict flags, supersession behavior, dry-run/apply/rejection coverage, and safe-secret outcomes against fixture data.
 
 `make benchmark` runs `--akbp` mode. This populates a temporary AKBP knowledge base from each fixture, checks real `akbp query` and `akbp context` retrieval against expected claim ids, and executes declared JSONL tool-server requests to validate write-apply, dry-run review, approval-rejection response shapes, plus optional `expected_result_schema` and `expected_error_schema` conformance against `schemas/tool-response.schema.json` defs. Requests can also use `expected_result_contains` and `expected_error_contains` with paths like `entities[].id` or `type_errors[]` to assert nested result or error-detail values. Escape literal dots in object keys with `\\.`, for example `methods.akbp\\.search.params_schema`.
+
+`make adapter-quality` runs `python3 benchmarks/run_benchmarks.py --profile adapter-quality --akbp`. Use that smaller gate while developing an adapter: it executes only fixtures tagged for adapter output quality, then still uses the real CLI, JSONL tool server, response schemas, nested field checks, and approval-error checks.
 
 When a fixture builds the local index, `akbp context` uses the same SQLite FTS5 retrieval path as `akbp search`. The older term-overlap retrieval remains only as an unindexed fallback. This keeps the public benchmark from accidentally measuring a weaker path than the tool server advertises.
 

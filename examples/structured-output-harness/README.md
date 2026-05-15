@@ -8,6 +8,13 @@ Run it from the repository root:
 ./examples/structured-output-harness/run.sh
 ```
 
+To run the same contract as a benchmark slice against the real CLI and JSONL
+tool server, use:
+
+```bash
+make adapter-quality
+```
+
 Expected success markers:
 
 ```text

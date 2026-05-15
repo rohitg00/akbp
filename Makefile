@@ -1,4 +1,4 @@
-.PHONY: test guard smoke install-smoke demo examples benchmark-score benchmark validate build clean
+.PHONY: test guard smoke install-smoke demo examples benchmark-score benchmark adapter-quality validate build clean
 
 test:
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -52,6 +52,9 @@ benchmark-score:
 
 benchmark:
 	python3 benchmarks/run_benchmarks.py --akbp
+
+adapter-quality:
+	python3 benchmarks/run_benchmarks.py --profile adapter-quality --akbp
 
 validate: guard test smoke examples benchmark-score benchmark install-smoke
 

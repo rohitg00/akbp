@@ -1,5 +1,6 @@
 {
   "id": "adapter-structured-output-harness-001",
+  "profiles": ["adapter-quality"],
   "task": "Verify that adapter authors can use AKBP responses as a structured output harness before trusting recalled memory or applying writes.",
   "setup": {
     "sources": [

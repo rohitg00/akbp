@@ -33,6 +33,11 @@ The scenario file includes:
 
 Any field checked in `expected_result_values` or `expected_error_values` must also be listed in the corresponding field list, so fixtures document the complete contract they validate.
 
+Scenarios may include `profiles` to opt into focused benchmark slices. For
+example, `profiles: ["adapter-quality"]` lets adapter authors run only the
+quality-gate fixtures with `make adapter-quality` while they are wiring a new
+runtime.
+
 ## Current fixtures
 
 - `adapter-write-safety`: require runtime adapters to share the same dry-run, review metadata, approved write, and privacy boundary.
