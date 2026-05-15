@@ -1083,6 +1083,39 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("examples/adapter-lifecycle/", release_notes)
         self.assertIn("./examples/adapter-lifecycle/run.sh", makefile)
 
+    def test_jsonl_quickstart_example_is_complete(self):
+        text = (ROOT / "examples" / "jsonl-quickstart" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "jsonl-quickstart" / "run.sh").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
+        landscape = (ROOT / "docs" / "PROTOCOL_LANDSCAPE_LEARNINGS.md").read_text(encoding="utf-8")
+        release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script + readme + quickstart + landscape
+        for required in [
+            "AKBP JSONL quickstart example",
+            "AKBP JSONL quickstart example passed",
+            "akbp.capabilities",
+            "akbp.session.start",
+            "akbp.remember",
+            "dry_run:true",
+            "approval_required",
+            "approved:true",
+            "akbp.index",
+            "akbp.context",
+            "akbp.export",
+            "portable export ok",
+            "cited recall ok",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("examples/jsonl-quickstart/", readme)
+        self.assertIn("examples/jsonl-quickstart/", quickstart)
+        self.assertIn("examples/jsonl-quickstart/", landscape)
+        self.assertIn("examples/jsonl-quickstart/", release_notes)
+        self.assertIn("JSONL quickstart example", changelog)
+        self.assertIn("./examples/jsonl-quickstart/run.sh", makefile)
+
     def test_git_native_agent_handoff_example_is_complete(self):
         text = (ROOT / "examples" / "git-native-agent-handoff" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "git-native-agent-handoff" / "run.sh").read_text(encoding="utf-8")

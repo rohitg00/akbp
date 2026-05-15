@@ -329,6 +329,7 @@ The repo includes:
 - `examples/akbp-bench/` for a small scorecard covering cited writes, retrieval, supersession, export, and conformance
 - `examples/repo-memory-demo/` for turning issue, PR, and release-note fixtures into later-session context
 - `examples/memory-ci/` for CI gates around lint, source verification, conformance, export-check, import-check, and dry-run apply
+- `examples/jsonl-quickstart/` for the canonical tool-server sequence: capabilities, session start, dry-run write, approval gate, approved apply, index, context, and export
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
 - `examples/git-native-agent-handoff/` for repo-backed agent handoffs with cited context and review-gated shutdown memory
 - `examples/multi-agent-consistency-demo/` for cross-agent retrieval and supersession
@@ -409,6 +410,7 @@ akbp/
 - Benchmark reviewer: run `examples/akbp-bench/run.sh`.
 - Repo-memory reviewer: run `examples/repo-memory-demo/run.sh`.
 - CI reviewer: run `examples/memory-ci/run.sh`.
+- JSONL tool author: run `examples/jsonl-quickstart/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
 - Git-native adapter reviewer: run `examples/git-native-agent-handoff/run.sh`.

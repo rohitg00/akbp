@@ -140,6 +140,16 @@ examples/session-start-harness/run.sh
 
 It validates `akbp.capabilities`, `akbp.doctor`, and `akbp.session.start` together so adapter authors can test the first trusted context call before enabling write-capable flows.
 
+For the shortest complete JSONL sequence, use:
+
+```bash
+examples/jsonl-quickstart/run.sh
+```
+
+It verifies capability discovery, cited startup context, `dry_run:true` write
+preview, `approval_required` rejection, `approved:true` apply, approved
+index refresh, cited recall, and portable export in one script.
+
 When the runtime also has a shutdown hook, run the lifecycle example next:
 
 ```bash

@@ -101,6 +101,7 @@ Included examples:
 - `examples/level-1/`
 - `examples/level-3/`
 - `examples/end-to-end-agent-flow/`
+- `examples/jsonl-quickstart/`
 - `examples/tool-server-approval-flow/`
 - `examples/adapter-lifecycle/`
 - `examples/adapter-lifecycle/run.sh`

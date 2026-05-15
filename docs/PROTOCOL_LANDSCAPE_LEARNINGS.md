@@ -194,6 +194,21 @@ The matrix keeps the user-value lesson concrete:
 - require an explicit approval surface before `approved:true`
 - keep hosted or autonomous bridges read-only until their trust boundary is documented
 
+## Shipped artifact: canonical JSONL quickstart
+
+`examples/jsonl-quickstart/` turns the tool-server adoption story into one
+runnable sequence for adapter authors:
+
+- discover capabilities and required profiles
+- retrieve cited startup context before planning
+- preview a durable write with `dry_run:true`
+- reject an unapproved write with `approval_required`
+- apply the same memory only with `approved:true`
+- refresh retrieval, recall cited context, and export a portable bundle
+
+This addresses the low-friction setup lesson from adjacent memory tools without
+weakening AKBP's review-gated protocol boundary.
+
 ## Shipped artifact: KB scope guidance
 
 Recent local and tool-compatible memory projects keep converging on shared
