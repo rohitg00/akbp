@@ -340,6 +340,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
+            self.assertEqual(read_only["profile_selection"]["format"], "akbp-adapter-profile-selection-v1")
+            self.assertEqual(read_only["profile_selection"]["safe_default"], "read_only")
+            profile_names = [profile["profile"] for profile in read_only["profile_selection"]["profiles"]]
+            self.assertEqual(profile_names, ["startup_context", "read_only", "reviewed_write"])
+            reviewed_profile = read_only["profile_selection"]["profiles"][2]
+            self.assertIn("approved:true", " ".join(reviewed_profile["required_preflight"]))
+            self.assertIn("read-only", read_only["profile_selection"]["fallback"])
             self.assertEqual(read_only["host_capability_descriptor"]["default_profile"], "read_only")
             self.assertNotIn("write_apply_requires_approval", read_only["startup"]["params"]["requires"])
             self.assertFalse(read_only["knowledge_base"]["portable_template"])
@@ -373,6 +380,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 run_cli("--path", str(kb), "client-config", "--name", "portable-adapter", "--portable").stdout
             )
             self.assertEqual(portable["knowledge_base"]["path"], "<AKBP_KB_PATH>")
+            self.assertIn(
+                "akbp --path <AKBP_KB_PATH> doctor --profile read-only",
+                portable["profile_selection"]["profiles"][1]["required_preflight"],
+            )
             self.assertEqual(portable["knowledge_base"]["card"], "<AKBP_KB_PATH>/akbp.json")
             self.assertTrue(portable["knowledge_base"]["portable_template"])
             self.assertEqual(portable["first_run_sequence"]["steps"][0]["expect"]["knowledge_base.path"], "<AKBP_KB_PATH>")
@@ -427,6 +438,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             compared_layers = {item["layer"] for item in discovered["positioning"]["use_with"]}
             self.assertIn("memory_server_or_runtime_cache", compared_layers)
             self.assertIn("tool_protocol_host", compared_layers)
+            selection = discovered["profile_selection"]
+            self.assertEqual(selection["format"], "akbp-adapter-profile-selection-v1")
+            self.assertEqual(selection["safe_default"], "read_only")
+            self.assertEqual([profile["profile"] for profile in selection["profiles"]], ["startup_context", "read_only", "reviewed_write"])
+            self.assertIn("doctor --profile read-only", selection["profiles"][1]["required_preflight"][0])
+            self.assertIn("approved:true", " ".join(selection["profiles"][2]["allowed_methods"]))
+            self.assertIn("keep the integration read-only", selection["fallback"])
             self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
             ten_minute = discovered["ten_minute_proof"]
             self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")

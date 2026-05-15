@@ -166,6 +166,75 @@ raw/sources/         immutable source material
 ```
 """
 
+
+def adapter_profile_selection(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-adapter-profile-selection-v1",
+        "purpose": "Help installers pick the least-privileged AKBP workflow profile before exposing memory tools.",
+        "safe_default": "read_only",
+        "decision_order": [
+            "Use startup_context when the host only needs bounded cited recall before planning.",
+            "Use read_only when the host can expose search, citation, source verification, and import checks but has no review UI.",
+            "Use reviewed_write only when a separate review surface can show dry-run metadata and collect approval outside the model-generated tool call.",
+        ],
+        "profiles": [
+            {
+                "profile": "startup_context",
+                "use_when": "The runtime only needs cited startup context and should not expose search or write tools yet.",
+                "required_preflight": [
+                    f"akbp --path {kb_path} doctor --profile startup-context",
+                    "akbp.capabilities with requires_profiles:[\"startup_context\"]",
+                    "akbp.session.start returns a bounded context envelope",
+                ],
+                "allowed_methods": ["akbp.capabilities", "akbp.status", "akbp.doctor", "akbp.session.start", "akbp.context"],
+                "blocked_methods": ["akbp.remember", "akbp.ingest", "akbp.import_apply", "akbp.session.end"],
+                "promotion_rule": "Upgrade to read_only only after doctor and capability negotiation pass.",
+            },
+            {
+                "profile": "read_only",
+                "use_when": "The host can preserve citations, warnings, structured errors, and context budgets but cannot safely review writes.",
+                "required_preflight": [
+                    f"akbp --path {kb_path} doctor --profile read-only",
+                    "akbp.capabilities with requires_profiles:[\"read_only\"]",
+                    "akbp.session.start returns cited items or the host continues without recalled memory",
+                ],
+                "allowed_methods": [
+                    "akbp.capabilities",
+                    "akbp.status",
+                    "akbp.doctor",
+                    "akbp.session.start",
+                    "akbp.context",
+                    "akbp.search",
+                    "akbp.cite",
+                    "akbp.source.verify",
+                    "akbp.import_check",
+                ],
+                "blocked_methods": ["akbp.remember", "akbp.ingest", "akbp.import_apply", "akbp.session.end"],
+                "promotion_rule": "Upgrade to reviewed_write only after a visible dry-run review and approval flow exists outside autonomous tool execution.",
+            },
+            {
+                "profile": "reviewed_write",
+                "use_when": "The host has a separate review surface and can replay the exact reviewed request with approved:true.",
+                "required_preflight": [
+                    f"akbp --path {kb_path} doctor --profile reviewed-writes",
+                    "akbp.capabilities with requires_profiles:[\"reviewed_write\"] and write_apply_requires_approval",
+                    "structured-output harness proves dry-run preview, approval_required rejection, approved:true apply, and recalled citations",
+                ],
+                "allowed_methods": [
+                    "read_only methods",
+                    "akbp.remember with dry_run:true before approved:true",
+                    "akbp.ingest with dry_run:true before approved:true",
+                    "akbp.session.end with dry_run:true before approved:true",
+                    "akbp.import_apply with prior import_check",
+                    "akbp.index after reviewed writes",
+                ],
+                "blocked_methods": [],
+                "promotion_rule": "Do not auto-promote; require explicit installer or user action because this profile can mutate durable knowledge.",
+            },
+        ],
+        "fallback": "When profile readiness, capability negotiation, citations, or review metadata are missing, keep the integration read-only and show the structured failure.",
+    }
+
 def append_jsonl(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -391,6 +460,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     if missing_artifacts:
         warnings.append("Some artifact paths from akbp.json are missing; run doctor before trusting this KB.")
     kb_arg = shlex.quote(str(kb_root))
+    profile_selection = adapter_profile_selection(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -577,6 +647,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "adapter_rule": "Run doctor --profile before enabling a workflow profile.",
         },
         "positioning": positioning,
+        "profile_selection": profile_selection,
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
@@ -2107,6 +2178,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         command_args = []
     kb_path = "<AKBP_KB_PATH>" if args.portable else str(base)
     card_path = f"{kb_path}/akbp.json" if args.portable else str(base / "akbp.json")
+    profile_selection = adapter_profile_selection(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -2437,6 +2509,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
         },
         "host_capability_descriptor": host_capability_descriptor,
+        "profile_selection": profile_selection,
         "runtime_requirements": {
             "local_first": True,
             "network_required": False,
