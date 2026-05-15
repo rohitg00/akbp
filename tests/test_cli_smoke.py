@@ -107,6 +107,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("import-check", modes["migration_review"]["required_gate"])
             self.assertIn("error.code", " ".join(memory_bridge["must_preserve"]))
             self.assertIn("opaque format", " ".join(memory_bridge["disable_or_warn_when"]))
+            promotion = memory_bridge["promotion_contract"]
+            self.assertIn("reviewed durable knowledge", promotion["purpose"])
+            self.assertIn("source-backed facts", promotion["candidate_records"])
+            self.assertIn("uncited summaries", promotion["reject_records"])
+            self.assertIn("source id or citation", promotion["required_review_fields"])
+            self.assertIn("akbp.import_check", " ".join(promotion["preflight_requests"]))
+            self.assertIn("approved:true", promotion["apply_rule"])
+            self.assertIn("read-only", promotion["fallback"])
             multi_client = config["multi_client_scope"]
             self.assertIn("share one reviewed knowledge base", multi_client["purpose"])
             self.assertEqual(multi_client["shared_kb_path"], str(kb.resolve()))

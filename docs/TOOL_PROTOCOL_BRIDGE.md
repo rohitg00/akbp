@@ -75,6 +75,15 @@ Use this adoption checklist before enabling a bridge:
 | Error handling | The bridge preserves `ok`, `error.code`, warnings, and budget fields | Hosts can branch on `approval_required`, `invalid_params`, and source drift |
 | Portability | Export and import checks still work without bridge-local metadata | Knowledge can move across runtimes instead of being trapped in one server |
 
+For hosts that already have a memory server, read
+`memory_server_bridge.promotion_contract` from `akbp client-config`. It gives a
+machine-readable promotion rule: only durable project decisions, source-backed
+facts, workflow constraints, and lifecycle records should move into AKBP; runtime
+scratchpads, uncited summaries, private logs, secret-like values, and bridge-only
+cache metadata should stay out. The bridge should run capability and doctor
+preflights, then use `akbp.import_check` or a dry-run `akbp.remember` preview
+before applying the exact reviewed record with `approved:true`.
+
 If a bridge only stores memories behind a tool call and cannot show citations,
 artifact paths, dry-run review metadata, or export-checkable bundles, treat it
 as an integration experiment rather than a durable AKBP memory path.

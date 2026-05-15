@@ -2411,6 +2411,37 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "safe_default": "read_only_substrate",
             "durable_state_owner": "AKBP markdown and JSONL artifacts under knowledge_base.path",
             "bridge_role": "transport_and_policy_glue_only",
+            "promotion_contract": {
+                "purpose": "Let an existing memory server promote only reviewed durable knowledge into AKBP instead of bulk-copying opaque runtime memory.",
+                "candidate_records": [
+                    "durable project decisions",
+                    "source-backed facts",
+                    "workflow constraints",
+                    "supersession or contradiction records",
+                ],
+                "reject_records": [
+                    "runtime scratchpad notes",
+                    "uncited summaries",
+                    "private chat logs",
+                    "secret-like values",
+                    "bridge-only embeddings or cache metadata",
+                ],
+                "required_review_fields": [
+                    "record text",
+                    "record type",
+                    "source id or citation",
+                    "lifecycle status",
+                    "dry-run warnings",
+                    "would-write artifact paths",
+                ],
+                "preflight_requests": [
+                    "akbp.capabilities with read_only or reviewed_write profile requirements",
+                    "akbp.doctor for adapter readiness",
+                    "akbp.import_check or dry_run akbp.remember before applying promoted records",
+                ],
+                "apply_rule": "Apply only the exact reviewed record with approved:true after the host shows the dry-run preview outside the model tool call.",
+                "fallback": "Keep the bridge read-only when citations, review metadata, or explicit approval are missing.",
+            },
             "integration_modes": [
                 {
                     "mode": "runtime_cache_plus_akbp",
