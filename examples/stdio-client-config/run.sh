@@ -87,6 +87,19 @@ assert config["safety"]["require_adapter_ready"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "read_only", config
 assert "akbp.session.start" in config["tool_protocol_bridge"]["read_only_allowlist"], config
 assert "akbp.remember" in config["tool_protocol_bridge"]["blocked_write_methods"], config
+bridge_snippets = config["tool_protocol_bridge_snippets"]
+assert bridge_snippets["format"] == "akbp-tool-protocol-bridge-snippets-v1", config
+assert bridge_snippets["direct_host_native_server"] is False, config
+assert bridge_snippets["bridge_required"] is True, config
+assert "without claiming" in bridge_snippets["purpose"], config
+assert bridge_snippets["safe_default_profile"] == "read_only", config
+assert bridge_snippets["requested_profile"] == "read_only", config
+assert bridge_snippets["server_process"]["transport"] == "stdio-jsonl", config
+assert bridge_snippets["server_process"]["env"]["AKBP_KB_PATH"] == config["knowledge_base"]["path"], config
+assert bridge_snippets["host_server_template"]["toolServers"]["akbp"]["command"] == "<AKBP_TOOL_BRIDGE_COMMAND>", config
+assert bridge_snippets["preflight_requests"] == config["tool_protocol_bridge"]["host_tool_manifest"]["preflight_requests"], config
+assert "separate reviewed-write surface" in " ".join(bridge_snippets["required_bridge_behavior"]), config
+assert bridge_snippets["tool_manifest_ref"] == "tool_protocol_bridge.host_tool_manifest", config
 managed_bridge = config["managed_tool_host_bridge"]
 assert managed_bridge["format"] == "akbp-managed-tool-host-bridge-v1", config
 assert managed_bridge["server_config"]["transport"] == "stdio", config
@@ -155,6 +168,8 @@ assert config["startup"]["path"] == "<AKBP_KB_PATH>", config
 assert config["health_check"]["path"] == "<AKBP_KB_PATH>", config
 assert config["session_start"]["path"] == "<AKBP_KB_PATH>", config
 assert config["multi_client_scope"]["shared_kb_path"] == "<AKBP_KB_PATH>", config
+assert config["tool_protocol_bridge_snippets"]["server_process"]["env"]["AKBP_KB_PATH"] == "<AKBP_KB_PATH>", config
+assert config["tool_protocol_bridge_snippets"]["host_server_template"]["toolServers"]["akbp"]["args"][3] == "<AKBP_KB_PATH>", config
 assert config["multi_client_scope"]["safe_for_public_templates"] is True, config
 assert config["scope_selection"]["selected_kb_path"] == "<AKBP_KB_PATH>", config
 assert config["distribution"]["safe_to_commit"] is True, config

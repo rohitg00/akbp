@@ -23,6 +23,9 @@ The generated config makes the trust boundary visible:
 - include a tool-protocol bridge allowlist and blocked write methods
 - include a managed tool-host bridge contract for stdio-compatible hosts
   without turning AKBP into an opaque memory store
+- include tool-protocol bridge snippets that are explicit about requiring a
+  bridge rather than claiming the JSONL reference server is a direct host-native
+  tool server
 - include manifest-level `preflight_requests` that adapters can execute before exposing host tools
 - retrieve context with `akbp.session.start`
 - keep durable writes blocked unless the adapter implements dry-run review and `approved:true`
@@ -69,6 +72,9 @@ AKBP stdio client config example passed
   separate approval surface exist
 - host install profiles include managed tool-protocol hosts where read-only startup context is safe but durable writes stay disabled until a separate approval UI exists
 - host-tool manifests include descriptions and safety metadata for each generated read-only wrapper
+- tool-protocol-capable hosts get copyable bridge inputs while the safe default
+  stays read-only and write apply remains blocked without a separate review
+  surface
 - host-tool and client-tool manifests include executable preflight requests for capability negotiation, doctor, and bounded startup context
 - the config tells adapter authors which calls to run and which result fields must pass before trusting setup
 - reviewed-write configs keep the dry-run and approval boundary explicit

@@ -2454,6 +2454,51 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "methods": "schemas/tool-methods.schema.json",
         },
     }
+    tool_protocol_bridge_snippets = {
+        "format": "akbp-tool-protocol-bridge-snippets-v1",
+        "purpose": "Give tool-protocol-capable hosts copyable bridge inputs without claiming the reference JSONL server is itself a host-native tool server.",
+        "direct_host_native_server": False,
+        "bridge_required": True,
+        "bridge_rule": "A host bridge must translate host tool calls to AKBP JSONL requests and preserve ok, result, error.code, citations, warnings, and budget fields.",
+        "safe_default_profile": "read_only",
+        "requested_profile": requested_profile,
+        "server_process": {
+            "transport": "stdio-jsonl",
+            "command": command,
+            "args": command_args,
+            "env": {
+                "AKBP_KB_PATH": kb_path,
+            },
+        },
+        "host_server_template": {
+            "toolServers": {
+                "akbp": {
+                    "command": "<AKBP_TOOL_BRIDGE_COMMAND>",
+                    "args": [
+                        "--stdio-jsonl-command",
+                        command,
+                        "--knowledge-base",
+                        kb_path,
+                        "--profile",
+                        requested_profile,
+                    ],
+                    "env": {
+                        "AKBP_KB_PATH": kb_path,
+                    },
+                },
+            },
+        },
+        "required_bridge_behavior": [
+            "run preflight_requests before exposing tools",
+            "publish only read-only tools until doctor and capability negotiation pass",
+            "map host tool input to the advertised AKBP method params schema",
+            "return AKBP structured errors without converting them to prose-only failures",
+            "keep durable write apply disabled unless a separate reviewed-write surface exists",
+        ],
+        "preflight_requests": host_tool_manifest["preflight_requests"],
+        "tool_manifest_ref": "tool_protocol_bridge.host_tool_manifest",
+        "fallback": "If no bridge is available, use the stdio JSONL adapter path directly and keep the integration read-only.",
+    }
 
     config = {
         "name": args.name,
@@ -2509,6 +2554,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
         },
         "host_capability_descriptor": host_capability_descriptor,
+        "tool_protocol_bridge_snippets": tool_protocol_bridge_snippets,
         "profile_selection": profile_selection,
         "runtime_requirements": {
             "local_first": True,

@@ -60,6 +60,28 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.remember", descriptor["blocked_until_review_surface"])
             self.assertIn("schemas/tool-methods.schema.json", descriptor["schema_refs"]["methods"])
             self.assertIn("requires_profiles", descriptor["host_integration_rules"][0])
+            bridge_snippets = config["tool_protocol_bridge_snippets"]
+            self.assertEqual(bridge_snippets["format"], "akbp-tool-protocol-bridge-snippets-v1")
+            self.assertFalse(bridge_snippets["direct_host_native_server"])
+            self.assertTrue(bridge_snippets["bridge_required"])
+            self.assertIn("without claiming", bridge_snippets["purpose"])
+            self.assertEqual(bridge_snippets["safe_default_profile"], "read_only")
+            self.assertEqual(bridge_snippets["requested_profile"], "reviewed_write")
+            self.assertEqual(bridge_snippets["server_process"]["transport"], "stdio-jsonl")
+            self.assertEqual(bridge_snippets["server_process"]["command"], "python3")
+            self.assertEqual(bridge_snippets["server_process"]["args"], ["-m", "akbp_tool_server"])
+            self.assertEqual(bridge_snippets["server_process"]["env"]["AKBP_KB_PATH"], str(kb.resolve()))
+            self.assertEqual(
+                bridge_snippets["host_server_template"]["toolServers"]["akbp"]["command"],
+                "<AKBP_TOOL_BRIDGE_COMMAND>",
+            )
+            self.assertEqual(
+                bridge_snippets["host_server_template"]["toolServers"]["akbp"]["env"]["AKBP_KB_PATH"],
+                str(kb.resolve()),
+            )
+            self.assertEqual(bridge_snippets["preflight_requests"][0]["method"], "akbp.capabilities")
+            self.assertIn("separate reviewed-write surface", " ".join(bridge_snippets["required_bridge_behavior"]))
+            self.assertEqual(bridge_snippets["tool_manifest_ref"], "tool_protocol_bridge.host_tool_manifest")
             self.assertTrue(config["runtime_requirements"]["local_first"])
             self.assertFalse(config["runtime_requirements"]["network_required"])
             self.assertFalse(config["runtime_requirements"]["cloud_account_required"])
@@ -394,6 +416,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["adapter_prompt_contract"]["startup_request"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["multi_client_scope"]["shared_kb_path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["tool_protocol_bridge_snippets"]["server_process"]["env"]["AKBP_KB_PATH"], "<AKBP_KB_PATH>")
+            self.assertEqual(
+                portable["tool_protocol_bridge_snippets"]["host_server_template"]["toolServers"]["akbp"]["args"][3],
+                "<AKBP_KB_PATH>",
+            )
             self.assertTrue(portable["multi_client_scope"]["safe_for_public_templates"])
             self.assertTrue(portable["distribution"]["safe_to_commit"])
             self.assertEqual(portable["distribution"]["replace_before_run"], ["<AKBP_KB_PATH>"])
