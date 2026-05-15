@@ -9,6 +9,7 @@ KB="$TMP/kb"
 NOTE="$TMP/adapter-note.md"
 REQUESTS="$TMP/jsonl-quickstart-requests.jsonl"
 RESPONSES="$TMP/jsonl-quickstart-responses.jsonl"
+BUNDLE="$TMP/jsonl-export-bundle.json"
 TRACE_DIR="${AKBP_JSONL_QUICKSTART_TRACE_DIR:-}"
 
 echo "AKBP JSONL quickstart example"
@@ -33,6 +34,7 @@ JSONL
 python3 "$ROOT/tool-server/akbp_tool_server.py" < "$REQUESTS" | tee "$RESPONSES" | python3 -c '
 import json
 import sys
+from pathlib import Path
 
 rows = [json.loads(line) for line in sys.stdin if line.strip()]
 by_id = {row["id"]: row for row in rows}
@@ -97,7 +99,24 @@ assert bundle["manifest"]["format"] == "akbp-portable-bundle", bundle
 assert bundle["manifest"]["safety"]["excludes_local_state"], bundle
 assert bundle["manifest"]["safety"]["excludes_indexes"], bundle
 assert bundle["manifest"]["counts"]["claims"] >= 2, bundle
+Path("'"$BUNDLE"'").write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 print("portable export ok")
+'
+
+printf '%s\n' '{"id":"export-check","method":"akbp.export_check","path":"'"$KB"'","params":{"file":"'"$BUNDLE"'","fail_on_issues":true}}' \
+  | python3 "$ROOT/tool-server/akbp_tool_server.py" \
+  | tee -a "$RESPONSES" \
+  | python3 -c '
+import json
+import sys
+
+row = json.loads(sys.stdin.readline())
+assert row["id"] == "export-check", row
+assert row["ok"], row
+result = row["result"]
+assert result["ok"], result
+assert result["issues"] == [], result
+print("portable export-check ok")
 '
 
 if [[ -n "$TRACE_DIR" ]]; then

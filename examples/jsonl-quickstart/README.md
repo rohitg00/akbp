@@ -19,8 +19,8 @@ sed -n '1,120p' /tmp/akbp-jsonl-trace/responses.jsonl
 
 The trace is useful when wiring a new host because it shows the concrete
 envelope shape, `dry_run:true` preview, `approval_required` stop, `approved:true`
-apply, index refresh, cited recall, and portable export in the order an adapter
-should preserve.
+apply, index refresh, cited recall, portable export, and `export-check`
+verification in the order an adapter should preserve.
 
 Expected success markers:
 
@@ -34,6 +34,7 @@ approved write apply ok
 index refresh ok
 cited recall ok
 portable export ok
+portable export-check ok
 AKBP JSONL quickstart example passed
 ```
 
@@ -49,5 +50,6 @@ The script verifies the sequence a new adapter should implement before exposing 
 6. Refresh retrieval with approved `akbp.index`.
 7. Call `akbp.context` again and check the approved claim is recallable.
 8. Call `akbp.export` and verify the portable bundle excludes local indexes.
+9. Call `akbp.export_check` with `fail_on_issues:true` before another tool trusts the bundle.
 
 This is the shortest adapter contract AKBP needs to make visible: retrieve before planning, preview before writing, require approval before durable memory, then recall cited context and export portable artifacts.
