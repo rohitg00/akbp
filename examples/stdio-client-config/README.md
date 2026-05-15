@@ -9,6 +9,8 @@ The generated config makes the trust boundary visible:
 - request either `read_only` or `reviewed_write`
 - expose local-first install requirements, including no network, cloud account,
   or secrets required for the reference stdio flow
+- expose a multi-client scope contract so several runtimes can share one
+  selected KB while keeping private scratchpads and caches outside AKBP
 - expose a first-run sequence that orders path resolution, capability negotiation, doctor readiness, cited startup context, and reviewed-write gating
 - include request ids and the knowledge-base path in startup checks
 - include a structured response contract so adapters branch on `ok` and `error.code`
@@ -44,6 +46,8 @@ AKBP stdio client config example passed
 - the config exposes `first_run_sequence` so adapter installers have one ordered checklist with explicit stop conditions before trusting recalled memory
 - the config exposes `runtime_requirements` so adapter installers can show the
   local-first/no-cloud/no-secret setup boundary before asking for trust
+- the config exposes `multi_client_scope` so adapter installers can wire
+  multiple clients to one reviewed KB without hidden per-client memory stores
 - the config exposes `knowledge_capability` so host registries can label AKBP
   as durable, cited, review-gated agent knowledge instead of opaque memory
 - the config starts with capability negotiation instead of hard-coded assumptions

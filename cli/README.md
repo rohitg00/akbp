@@ -100,6 +100,9 @@ network connection, cloud account, or secrets.
 It also includes `first_run_sequence`, an ordered setup path that resolves the
 knowledge-base path, negotiates capabilities, checks doctor readiness, retrieves
 cited startup context, and keeps writes disabled until a review surface exists.
+It includes `multi_client_scope` so several clients can share one selected
+knowledge base without turning per-client scratchpads, private logs, or runtime
+caches into hidden durable memory.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.

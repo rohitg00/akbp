@@ -61,6 +61,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["runtime_requirements"]["secrets_required"], [])
             self.assertIn("AKBP artifacts", config["runtime_requirements"]["durable_state_owner"])
             self.assertIn("read-only bridge allowlist", config["runtime_requirements"]["tool_protocol_hosts"])
+            multi_client = config["multi_client_scope"]
+            self.assertIn("share one reviewed knowledge base", multi_client["purpose"])
+            self.assertEqual(multi_client["shared_kb_path"], str(kb.resolve()))
+            self.assertEqual(multi_client["client_identity_field"], "startup.params.client")
+            self.assertEqual(multi_client["default_mode"], "read_only")
+            self.assertIn("same selected knowledge_base.path", multi_client["scope_rule"])
+            self.assertIn("Runtime scratchpads", multi_client["isolation_rule"])
+            self.assertIn("supersede or contradict", multi_client["conflict_policy"])
+            self.assertIn("append audit records", multi_client["audit_policy"])
+            self.assertFalse(multi_client["safe_for_public_templates"])
             first_run = config["first_run_sequence"]
             self.assertIn("ordered setup path", first_run["purpose"])
             self.assertIn("keep the integration read-only", first_run["stop_policy"])
@@ -256,6 +266,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["multi_client_scope"]["shared_kb_path"], "<AKBP_KB_PATH>")
+            self.assertTrue(portable["multi_client_scope"]["safe_for_public_templates"])
             self.assertTrue(portable["distribution"]["safe_to_commit"])
             self.assertEqual(portable["distribution"]["replace_before_run"], ["<AKBP_KB_PATH>"])
 

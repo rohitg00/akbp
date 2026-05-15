@@ -23,6 +23,13 @@ If a runtime cannot tell the user which KB it is reading or writing, keep it
 read-only. AKBP's durable value comes from reviewable scope, citations, and
 auditability, not from silently accumulating more memory.
 
+When several clients should share memory, point them at the same explicit
+knowledge-base path and use `client-config.multi_client_scope` as the contract.
+Each client keeps its own scratchpads and private logs outside AKBP, reads
+reviewed context from the shared KB, and applies durable writes only through the
+same dry-run and approved-apply boundary. Stale shared claims should be
+superseded or contradicted, not overwritten by whichever client ran last.
+
 For runtimes that already keep scratchpads, chat summaries, local caches, or
 private memory, apply `docs/SESSION_MEMORY_BOUNDARY.md`: keep transient session
 state in the runtime, then promote only reviewed durable candidates through

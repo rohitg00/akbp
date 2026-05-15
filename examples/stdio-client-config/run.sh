@@ -43,6 +43,14 @@ assert config["knowledge_capability"]["write_mode"] == "reviewed_write_only", co
 assert "source_backed_claims" in config["knowledge_capability"]["guarantees"], config
 assert "automatic background write sink" in config["knowledge_capability"]["not_a"], config
 assert "approved:true" in config["knowledge_capability"]["host_mapping"]["apply"], config
+multi_client = config["multi_client_scope"]
+assert multi_client["shared_kb_path"] == config["knowledge_base"]["path"], config
+assert multi_client["client_identity_field"] == "startup.params.client", config
+assert multi_client["default_mode"] == "read_only", config
+assert "same selected knowledge_base.path" in multi_client["scope_rule"], config
+assert "Runtime scratchpads" in multi_client["isolation_rule"], config
+assert "supersede or contradict" in multi_client["conflict_policy"], config
+assert multi_client["safe_for_public_templates"] is False, config
 assert config["startup"]["id"] == "capabilities-1", config
 assert config["startup"]["method"] == "akbp.capabilities", config
 assert config["startup"]["path"] == config["knowledge_base"]["path"], config
@@ -112,6 +120,8 @@ assert "<AKBP_KB_PATH>" in config["runtime_requirements"]["path_resolution"], co
 assert config["startup"]["path"] == "<AKBP_KB_PATH>", config
 assert config["health_check"]["path"] == "<AKBP_KB_PATH>", config
 assert config["session_start"]["path"] == "<AKBP_KB_PATH>", config
+assert config["multi_client_scope"]["shared_kb_path"] == "<AKBP_KB_PATH>", config
+assert config["multi_client_scope"]["safe_for_public_templates"] is True, config
 assert config["distribution"]["safe_to_commit"] is True, config
 assert config["distribution"]["replace_before_run"] == ["<AKBP_KB_PATH>"], config
 print("portable config ok")

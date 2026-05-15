@@ -2167,6 +2167,17 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "path_resolution": "Resolve <AKBP_KB_PATH> during install or first run when portable_template is true.",
             "tool_protocol_hosts": "Use the read-only bridge allowlist until doctor, capabilities, and startup context checks pass.",
         },
+        "multi_client_scope": {
+            "purpose": "Let several coding-agent, editor, or local-assistant clients share one reviewed knowledge base without creating hidden per-client memory stores.",
+            "shared_kb_path": kb_path,
+            "client_identity_field": "startup.params.client",
+            "default_mode": "read_only",
+            "scope_rule": "All clients read from the same selected knowledge_base.path; durable writes use dry-run previews and approved applies against that same path.",
+            "isolation_rule": "Runtime scratchpads, private chat logs, and per-client caches stay outside AKBP until promoted through a reviewed write.",
+            "conflict_policy": "Use lifecycle methods such as supersede or contradict for stale claims; never overwrite or delete another client's reviewed claim silently.",
+            "audit_policy": "Durable writes append audit records so maintainers can see which approved operation changed shared knowledge.",
+            "safe_for_public_templates": bool(args.portable),
+        },
         "first_run_sequence": {
             "purpose": "Give adapter installers an ordered setup path before any runtime trusts or writes memory.",
             "stop_policy": "Stop at the first failed required step, show the structured failure, and keep the integration read-only.",
