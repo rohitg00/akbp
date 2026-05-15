@@ -1036,6 +1036,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn(claim["id"], status["source_health"]["attention"]["changed"][0]["affected_claims"])
             self.assertTrue(status["index"]["present"])
             self.assertEqual(status["conformance"]["highest_passing_level"], "3")
+            self.assertEqual(status["adapter_readiness"]["recommended_profile"], "setup_only")
+            self.assertFalse(status["adapter_readiness"]["read_only_ready"])
+            self.assertFalse(status["adapter_readiness"]["reviewed_write_ready"])
+            self.assertIn("source_health", status["adapter_readiness"]["blocking_checks"])
 
             out = run_cli("--path", str(kb), "context", "Bun runtime decision")
             drift_pack = json.loads(out.stdout)

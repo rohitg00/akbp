@@ -92,13 +92,14 @@ This page maps the public examples to real use cases people can understand quick
 
 **Problem:** users and adapters need a fast way to see whether a knowledge base is useful, stale, indexed, and source-backed.
 
-**AKBP use case:** run `akbp status` or `akbp.status` to get counts, latest claims, source verification health, index presence, audit count, and conformance level.
+**AKBP use case:** run `akbp status` or `akbp.status` to get counts, latest claims, source verification health, index presence, audit count, conformance level, and the recommended adapter readiness profile.
 
 **What it proves:**
 
 - memory health can be inspected without reading raw JSONL first
 - dashboards and adapters can use one stable status payload
 - source drift is visible before agents trust stale knowledge
+- setup UIs can keep hosts read-only until the status payload reports a safe adapter profile
 
 ## 8. Adapter integration
 

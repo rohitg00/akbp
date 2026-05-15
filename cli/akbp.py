@@ -1893,6 +1893,7 @@ def cmd_status(args: argparse.Namespace) -> int:
     relations = load_relations(base)
     audit_events = read_jsonl(base / ".akbp" / "audit.log.jsonl")
     source_check = verify_sources(base)
+    adapter_readiness = doctor_adapter_readiness(doctor_checks(base))
     latest_claims = sorted(
         claims,
         key=lambda claim: str(claim.get("updated_at") or claim.get("created_at") or ""),
@@ -1962,6 +1963,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         "conformance": {
             "highest_passing_level": conformance_level,
         },
+        "adapter_readiness": adapter_readiness,
     }, indent=2))
     return 0
 
