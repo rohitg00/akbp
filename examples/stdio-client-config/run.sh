@@ -22,6 +22,12 @@ assert config["runtime_requirements"]["network_required"] is False, config
 assert config["runtime_requirements"]["cloud_account_required"] is False, config
 assert config["runtime_requirements"]["secrets_required"] == [], config
 assert "AKBP artifacts" in config["runtime_requirements"]["durable_state_owner"], config
+assert config["knowledge_capability"]["type"] == "durable_agent_knowledge", config
+assert config["knowledge_capability"]["default_mode"] == "read_only", config
+assert config["knowledge_capability"]["write_mode"] == "reviewed_write_only", config
+assert "source_backed_claims" in config["knowledge_capability"]["guarantees"], config
+assert "automatic background write sink" in config["knowledge_capability"]["not_a"], config
+assert "approved:true" in config["knowledge_capability"]["host_mapping"]["apply"], config
 assert config["startup"]["id"] == "capabilities-1", config
 assert config["startup"]["method"] == "akbp.capabilities", config
 assert config["startup"]["path"] == config["knowledge_base"]["path"], config

@@ -41,6 +41,8 @@ AKBP stdio client config example passed
 - `akbp client-config --portable` emits a commit-safe template that installers can resolve at first run
 - the config exposes `runtime_requirements` so adapter installers can show the
   local-first/no-cloud/no-secret setup boundary before asking for trust
+- the config exposes `knowledge_capability` so host registries can label AKBP
+  as durable, cited, review-gated agent knowledge instead of opaque memory
 - the config starts with capability negotiation instead of hard-coded assumptions
 - the config exposes a health check that adapters can map to setup warnings and next steps
 - the config exposes the response envelope and schema paths adapter authors should validate against

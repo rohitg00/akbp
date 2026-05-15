@@ -12,6 +12,13 @@ Use `akbp client-config --profile read-only` as the machine-readable starting po
 
 It also includes `tool_protocol_bridge.forward_tools`: a ready wrapper map for tool-protocol hosts. Each entry gives the host-facing tool name, AKBP JSONL method, method-parameter schema reference, and response fields the bridge should preserve in its own response. Use that map when generating tool-protocol tools, IDE commands, or local assistant actions instead of inventing a second memory contract.
 
+The same config includes `knowledge_capability` for installers and host
+registries that need to label what AKBP provides. Treat it as
+`durable_agent_knowledge`: local-first, cited, bounded, review-gated, and
+export-checkable. Do not advertise it as a chat transcript store, runtime
+scratchpad, uncited vector cache, bridge-owned memory format, or automatic
+background write sink.
+
 For a runnable preflight, use `examples/tool-protocol-bridge/run.sh`. It checks
 that the generated wrapper map stays read-only, that blocked write methods are
 not exposed as direct bridge tools, that startup context returns cited items,
@@ -37,6 +44,7 @@ The bridge is translation glue only. It should not create another durable memory
 Required behavior:
 
 - Call `akbp.capabilities` at startup and require `read_only` plus `startup_context` for the first bridge.
+- Preserve `knowledge_capability.type`, `guarantees`, and `not_a` when the host has its own capability registry or marketplace metadata.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.

@@ -49,6 +49,10 @@ assert config["safety"]["profile"] == "read_only", config["safety"]
 assert config["safety"]["write_policy"] == "no_writes", config["safety"]
 assert config["safety"]["host_trust_boundary"]["default_mode"] == "read_only_until_verified", config["safety"]
 assert config["quality_gates"]["startup_context"]["require_citations"], config["quality_gates"]
+assert config["knowledge_capability"]["type"] == "durable_agent_knowledge", config
+assert config["knowledge_capability"]["default_mode"] == "read_only", config
+assert "bridge-owned memory format" in config["knowledge_capability"]["not_a"], config
+assert "source_backed_claims" in config["knowledge_capability"]["guarantees"], config
 print("bridge config contract ok")
 PY
 
