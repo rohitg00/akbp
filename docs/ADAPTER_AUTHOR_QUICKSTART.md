@@ -180,6 +180,20 @@ examples/adapter-lifecycle/run.sh
 
 It verifies the complete adapter loop: capability negotiation, startup context, `akbp.session.end` dry-run preview, unapproved write rejection, approved apply, index refresh, and recalled context after the write.
 
+Before an adapter treats AKBP output as trusted memory, run the structured output
+harness:
+
+```bash
+examples/structured-output-harness/run.sh
+```
+
+Use it as the response-contract gate for capability discovery, doctor
+readiness, cited startup context, dry-run review metadata, and the
+`approval_required` stop signal. This is especially useful when a runtime uses
+structured prompts internally: the prompt can request fields, but the harness
+proves the JSONL server actually returned the schema-backed fields the adapter
+will branch on.
+
 Treat these examples as the adapter output quality harness, not just smoke
 tests. A structured prompt can ask an agent to return citations, review
 metadata, or write decisions, but the harness proves the runtime actually
