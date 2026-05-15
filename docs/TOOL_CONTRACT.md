@@ -8,6 +8,11 @@ Expose AKBP through stable tool calls so any compatible agent can read, write, c
 
 All tools use the `akbp.` prefix.
 
+For tool-protocol hosts, keep AKBP's newline-delimited JSON server as the source
+contract and treat the bridge layer as translation glue. Start with a read-only
+tool allowlist and preserve `ok`, `result`, `error.code`, citations,
+warnings, and budget fields in the host response. See `docs/TOOL_PROTOCOL_BRIDGE.md`.
+
 ## Tools
 
 ### akbp.search

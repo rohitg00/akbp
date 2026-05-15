@@ -51,6 +51,7 @@ Use this matrix to pick the smallest integration path for a new runtime. The run
 | Local assistant or automation | CLI or JSONL tool server | `adapters/coding-agent-template/` | retrieve task-scoped context at job start | preview `akbp.remember`, `akbp.ingest`, or `akbp.session.end` | use request-level `approved:true` after local policy review |
 | Repository-backed agent | CLI in repo hooks or JSONL tool server | `adapters/git-native-agent/` | read AKBP context after repo checkout | preserve durable session findings as dry-run memory proposals | keep code state in Git and durable knowledge in AKBP artifacts |
 | Custom tool-protocol bridge | Bridge to JSONL tool server | `adapters/example-coding-agent/` | call `akbp.capabilities`, then lifecycle start | expose dry-run responses as the bridge review artifact | forward approved calls without inventing a separate memory store |
+| Tool-protocol host bridge | Host tools wrapping the JSONL server | `docs/TOOL_PROTOCOL_BRIDGE.md` | expose read-only context tools after `akbp.capabilities` and `akbp.doctor` pass | keep write-capable tools disabled until the host can render dry-run review metadata | repeat the exact reviewed request with `approved:true`; do not treat a tool call as approval |
 
 Minimum publishable adapter behavior:
 
@@ -171,6 +172,7 @@ Use this checklist before opening a pull request:
 - Keep runtime-specific setup in adapter docs, not in the protocol spec.
 - Point the startup and shutdown loop to `docs/AGENT_FLOW.md`.
 - Point cross-runtime handoff behavior to `docs/CROSS_RUNTIME_CONTEXT.md` when the adapter can be used alongside other coding agents.
+- For tool-protocol hosts, follow `docs/TOOL_PROTOCOL_BRIDGE.md`: start with read-only retrieval, preserve AKBP response envelopes, and add reviewed writes only when the host has an approval surface outside the model-generated tool call.
 - Use public-safe runtime names and avoid private workspace paths, tokens, screenshots, cookies, logs, or user-specific config.
 - Include `README.md`, `instructions.md`, `config.example.json`, `session-start.md`, `session-end.md`, and `privacy.md` when the runtime supports those concepts.
 - In `config.example.json`, include an explicit `akbp.lifecycle` mapping for `akbp.session.start` and `akbp.session.end`, with shutdown apply mode requiring approval.

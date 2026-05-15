@@ -56,6 +56,7 @@ host can show previews and collect approval before any durable write.
 | Local assistant or desktop runtime | stdio JSONL behind local config | `akbp client-config --profile read-only` | Assistant session open calls `akbp.session.start` | Keep read-only unless the assistant has a trusted local approval surface | Autonomous background writes should stay disabled; approval must happen outside the model-generated tool call. |
 | Custom script or task runner | CLI or stdio JSONL | `examples/stdio-client-config/` | Script calls `akbp.context` or `akbp.session.start` before work | Script previews import, ingest, remember, or session-end requests | CI and scheduled jobs should use `dry_run:true` by default and require a human or trusted policy before `approved:true`. |
 | Hosted or remote tool bridge | Remote wrapper around local AKBP | Local read-only config plus wrapper docs | Wrapper exposes read-only retrieval first | Avoid durable writes until the remote trust boundary is documented | Do not treat remote tool execution as user approval; keep writes blocked unless a separate review channel exists. |
+| Tool-protocol host bridge | Host tools forwarding to the local JSONL server | `docs/TOOL_PROTOCOL_BRIDGE.md` | Bridge calls `akbp.capabilities`, `akbp.doctor`, then exposes read-only context tools | Keep direct write tools disabled; expose dry-run previews only after review UI exists | The apply call must repeat the exact reviewed method/path/params with `approved:true`; a tool call is not approval. |
 
 ## 2. Start from the template
 

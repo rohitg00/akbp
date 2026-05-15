@@ -139,7 +139,7 @@ AKBP is designed for short, repeated agent sessions where the next runtime must 
 
 The core rule: agents can propose memory, but durable writes are review-gated.
 
-See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `examples/session-start-harness/`, and `examples/tool-server-approval-flow/`.
+See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `examples/session-start-harness/`, and `examples/tool-server-approval-flow/`.
 
 ## Knowledge base layout
 
@@ -206,6 +206,8 @@ See `docs/TOOL_CONTRACT.md` and `examples/tool-error-handling/`.
 Start here if you want AKBP inside a coding agent, IDE agent, task runner, local assistant, or research workflow:
 
 If the same project moves between multiple coding agents, read `docs/CROSS_RUNTIME_CONTEXT.md` first. It defines the handoff contract: retrieve cited context at session start, keep scratch state inside the runtime, preview durable memory writes, apply only after approval, and let the next runtime restart from AKBP artifacts instead of copied chat transcripts.
+
+If the host speaks a tool protocol, read `docs/TOOL_PROTOCOL_BRIDGE.md` before exposing AKBP tools. The recommended first bridge is read-only and forwards a small allowlist to the local JSONL server so hosts can retrieve cited context without turning the bridge into another opaque memory store.
 
 Fastest read-only setup:
 
