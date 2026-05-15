@@ -1,0 +1,160 @@
+{
+  "id": "adapter-structured-output-harness-001",
+  "task": "Verify that adapter authors can use AKBP responses as a structured output harness before trusting recalled memory or applying writes.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_benchmark_harness_guidance",
+        "type": "file",
+        "locator": "docs/BENCHMARK.md",
+        "title": "Benchmark harness guidance"
+      },
+      {
+        "id": "source_tool_contract_harness",
+        "type": "file",
+        "locator": "docs/TOOL_CONTRACT.md",
+        "title": "Tool contract"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_adapter_harness_checks_shapes",
+        "text": "Adapter quality gates should check structured AKBP response fields, nested values, schemas, and error codes before the runtime trusts recalled context.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_benchmark_harness_guidance", "source_tool_contract_harness"],
+        "entities": ["adapter", "quality_gate", "structured_output", "response_schema", "error_code"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_adapter_harness_blocks_unapproved_writes",
+        "text": "Adapter harnesses should treat approval_required as a stop signal and require dry-run preview metadata before any approved durable write.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_tool_contract_harness"],
+        "entities": ["adapter", "approval_required", "dry_run", "review_required", "approved:true"],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "caps-structured-harness",
+        "method": "akbp.capabilities",
+        "params": {
+          "client": "adapter-harness-fixture",
+          "requires": ["method_param_schemas", "structured_errors", "capability_negotiation"],
+          "requires_profiles": ["startup_context", "reviewed_write"]
+        },
+        "expected_result_schema": "#/$defs/capabilities_result",
+        "expected_result_fields": ["protocol", "features", "profiles", "profile_contracts", "methods", "negotiation"],
+        "expected_result_contains": {
+          "features.method_param_schemas": [true],
+          "features.structured_errors": [true],
+          "features.capability_negotiation": [true],
+          "features.write_apply_requires_approval": [true],
+          "negotiation.satisfied": [true],
+          "profiles.startup_context[]": ["akbp.session.start", "akbp.context"],
+          "profiles.reviewed_write[]": ["akbp.remember", "akbp.session.end"],
+          "profile_contracts.reviewed_write.write_policy": ["dry_run_preview_then_approved_apply"],
+          "methods.akbp\\.remember.write": [true],
+          "methods.akbp\\.remember.review_required": [true]
+        }
+      },
+      {
+        "id": "doctor-structured-harness",
+        "method": "akbp.doctor",
+        "params": {},
+        "expected_result_schema": "#/$defs/doctor_result",
+        "expected_result_fields": ["ok", "adapter_readiness", "security_posture", "workflow", "checks", "next_steps"],
+        "expected_result_contains": {
+          "ok": [true],
+          "security_posture.write_boundary": ["dry_run_preview_then_approved_apply"],
+          "security_posture.approval_field": ["approved"],
+          "security_posture.safe_review_methods[]": ["akbp.doctor", "akbp.source.verify", "akbp.import_check"],
+          "adapter_readiness.reviewed_write_ready": [true]
+        }
+      },
+      {
+        "id": "session-start-structured-harness",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "adapter structured output harness",
+          "limit": 5,
+          "max_chars": 400
+        },
+        "expected_result_schema": "#/$defs/session_start_result",
+        "expected_result_fields": ["session_id", "task", "context"],
+        "expected_result_values": {
+          "task": "adapter structured output harness"
+        },
+        "expected_result_contains": {
+          "context.items[].id": ["claim_adapter_harness_checks_shapes"],
+          "context.items[].citations[]": ["source_benchmark_harness_guidance"],
+          "context.budget.max_chars": [400]
+        }
+      },
+      {
+        "id": "remember-preview-structured-harness",
+        "method": "akbp.remember",
+        "params": {
+          "text": "Adapter harnesses should fail closed when response shape validation fails.",
+          "type": "workflow",
+          "evidence": ["source_tool_contract_harness"],
+          "dry_run": true
+        },
+        "expected_result_schema": "#/$defs/dry_run_review_result",
+        "expected_result_fields": ["dry_run", "method", "argv", "would_write", "review_required", "apply_instruction"],
+        "expected_result_values": {
+          "dry_run": true,
+          "would_write": true,
+          "review_required": true
+        },
+        "expected_result_contains": {
+          "method": ["akbp.remember"]
+        }
+      },
+      {
+        "id": "remember-unapproved-structured-harness",
+        "method": "akbp.remember",
+        "params": {
+          "text": "Unapproved harness writes must fail closed.",
+          "type": "workflow",
+          "evidence": ["source_tool_contract_harness"]
+        },
+        "expected_error_code": "approval_required",
+        "expected_error_schema": "#/$defs/approval_required_details",
+        "expected_error_fields": ["method", "dry_run", "review_required", "apply_instruction"],
+        "expected_error_values": {
+          "method": "akbp.remember",
+          "dry_run": false,
+          "review_required": true
+        }
+      }
+    ]
+  },
+  "query": "What should an adapter structured output harness verify before trusting AKBP context or applying memory writes?",
+  "expected": {
+    "must_retrieve": [
+      "claim_adapter_harness_checks_shapes",
+      "claim_adapter_harness_blocks_unapproved_writes"
+    ],
+    "must_cite": [
+      "source_benchmark_harness_guidance",
+      "source_tool_contract_harness"
+    ],
+    "must_cite_in_context": [
+      "source_benchmark_harness_guidance"
+    ],
+    "answer_should_include": [
+      "structured AKBP response fields",
+      "schemas",
+      "error codes",
+      "dry-run",
+      "approval_required"
+    ],
+    "must_dry_run_tool_methods": ["akbp.remember"],
+    "must_reject_tool_methods": ["akbp.remember"]
+  }
+}

@@ -36,6 +36,7 @@ Any field checked in `expected_result_values` or `expected_error_values` must al
 ## Current fixtures
 
 - `adapter-write-safety`: require runtime adapters to share the same dry-run, review metadata, approved write, and privacy boundary.
+- `adapter-structured-output-harness`: verify adapter quality gates can machine-check capability negotiation, doctor/security posture, bounded startup context, dry-run preview metadata, and approval-gated write rejection before trusting memory.
 - `adapter-session-operation`: verify adapter session start/end lifecycle operations and compatibility shapes.
 - `git-native-agent-handoff`: verify git-native agent adapters retrieve cited handoff context and review-gated write policy before continuing repository work.
 - `inherited-repo-intake`: verify agents entering unfamiliar repositories discover AKBP, run adapter readiness checks, retrieve cited startup context, and keep durable writes disabled until trust gates pass.

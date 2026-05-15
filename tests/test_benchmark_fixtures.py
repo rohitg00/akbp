@@ -689,6 +689,35 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertNotIn("akbp.crystallize_session", text)
         self.assertIn("claim_adapter_docs_require_review_boundary", data["expected"]["must_retrieve"])
 
+    def test_adapter_structured_output_harness_fixture_covers_quality_gate(self):
+        path = FIXTURES / "adapter-structured-output-harness" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
+        self.assertIn("adapter-structured-output-harness", fixture_readme)
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        capabilities = requests["caps-structured-harness"]
+        self.assertEqual(capabilities["method"], "akbp.capabilities")
+        self.assertEqual(capabilities["expected_result_schema"], "#/$defs/capabilities_result")
+        self.assertIn("features.capability_negotiation", capabilities["expected_result_contains"])
+        self.assertIn("methods.akbp\\.remember.review_required", capabilities["expected_result_contains"])
+        doctor = requests["doctor-structured-harness"]
+        self.assertEqual(doctor["expected_result_contains"]["security_posture.write_boundary"], ["dry_run_preview_then_approved_apply"])
+        session_start = requests["session-start-structured-harness"]
+        self.assertEqual(session_start["expected_result_values"]["task"], "adapter structured output harness")
+        self.assertEqual(session_start["expected_result_contains"]["context.budget.max_chars"], [400])
+        preview = requests["remember-preview-structured-harness"]
+        self.assertTrue(preview["params"]["dry_run"])
+        self.assertEqual(preview["expected_result_schema"], "#/$defs/dry_run_review_result")
+        self.assertEqual(preview["expected_result_values"]["review_required"], True)
+        rejected = requests["remember-unapproved-structured-harness"]
+        self.assertEqual(rejected["expected_error_code"], "approval_required")
+        self.assertEqual(rejected["expected_error_schema"], "#/$defs/approval_required_details")
+        self.assertIn("claim_adapter_harness_checks_shapes", data["expected"]["must_retrieve"])
+        self.assertIn("approval_required", data["expected"]["answer_should_include"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("claim_adapter_harness_checks_shapes", report["query_result_ids"])
+
     def test_git_native_agent_handoff_fixture_covers_context_and_write_policy(self):
         path = FIXTURES / "git-native-agent-handoff" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
