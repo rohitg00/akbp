@@ -209,6 +209,13 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
         "approval_flag": "approved",
         "approval_required_error": "approval_required",
     },
+    "session_boundary": {
+        "transient_state_policy": "runtime_owned_until_reviewed_promotion",
+        "promotion_method": "akbp.session.end",
+        "promotion_preview_flag": "dry_run",
+        "durable_apply_flag": "approved",
+        "reject_uncited_transient_state": True,
+    },
     "portability": {
         "export_method": "akbp.export",
         "import_check_method": "akbp.import_check",

@@ -37,6 +37,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("source_backed_claims", config["knowledge_capability"]["guarantees"])
             self.assertIn("uncited vector cache", config["knowledge_capability"]["not_a"])
             self.assertIn("approved:true", config["knowledge_capability"]["host_mapping"]["apply"])
+            session_boundary = config["knowledge_capability"]["session_boundary"]
+            self.assertIn("raw transcripts", session_boundary["runtime_transient_state"])
+            self.assertEqual(session_boundary["promotion_method"], "akbp.session.end")
+            self.assertIn("dry_run preview", session_boundary["promotion_gate"])
+            self.assertIn("approved AKBP artifacts", session_boundary["trusted_durable_state"])
             descriptor = config["host_capability_descriptor"]
             self.assertEqual(descriptor["format"], "akbp-host-capability-descriptor-v1")
             self.assertEqual(descriptor["capability_type"], "durable_agent_knowledge")

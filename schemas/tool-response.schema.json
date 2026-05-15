@@ -418,6 +418,7 @@
             "trust_model",
             "retrieval",
             "writes",
+            "session_boundary",
             "portability"
           ],
           "properties": {
@@ -490,6 +491,34 @@
                 },
                 "approval_required_error": {
                   "const": "approval_required"
+                }
+              }
+            },
+            "session_boundary": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "transient_state_policy",
+                "promotion_method",
+                "promotion_preview_flag",
+                "durable_apply_flag",
+                "reject_uncited_transient_state"
+              ],
+              "properties": {
+                "transient_state_policy": {
+                  "const": "runtime_owned_until_reviewed_promotion"
+                },
+                "promotion_method": {
+                  "const": "akbp.session.end"
+                },
+                "promotion_preview_flag": {
+                  "const": "dry_run"
+                },
+                "durable_apply_flag": {
+                  "const": "approved"
+                },
+                "reject_uncited_transient_state": {
+                  "const": true
                 }
               }
             },

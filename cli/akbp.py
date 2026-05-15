@@ -2346,6 +2346,17 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "default_mode": "read_only",
             "write_mode": "reviewed_write_only",
+            "session_boundary": {
+                "runtime_transient_state": [
+                    "scratchpads",
+                    "raw transcripts",
+                    "private logs",
+                    "per-client caches",
+                ],
+                "promotion_method": "akbp.session.end",
+                "promotion_gate": "dry_run preview before reviewed approved:true apply",
+                "trusted_durable_state": "approved AKBP artifacts with citations, lifecycle status, and audit records",
+            },
             "host_mapping": {
                 "read": "Expose startup, context, search, cite, source verification, and import checks first.",
                 "write": "Expose preview tools only when the host can render review metadata outside the model-generated tool call.",

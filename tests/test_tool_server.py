@@ -371,12 +371,23 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("profile_contracts", capabilities["required"])
         knowledge_capability = capabilities["properties"]["knowledge_capability"]
         self.assertFalse(knowledge_capability["additionalProperties"])
-        for field in ["kind", "artifact_model", "transport", "scope", "trust_model", "retrieval", "writes", "portability"]:
+        for field in [
+            "kind",
+            "artifact_model",
+            "transport",
+            "scope",
+            "trust_model",
+            "retrieval",
+            "writes",
+            "session_boundary",
+            "portability",
+        ]:
             self.assertIn(field, knowledge_capability["required"])
         self.assertEqual(knowledge_capability["properties"]["kind"], {"const": "agent_knowledge_base"})
         self.assertEqual(knowledge_capability["properties"]["trust_model"], {"const": "cited_review_gated_memory"})
         self.assertFalse(knowledge_capability["properties"]["retrieval"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["writes"]["additionalProperties"])
+        self.assertFalse(knowledge_capability["properties"]["session_boundary"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["portability"]["additionalProperties"])
         negotiation = capabilities["properties"]["negotiation"]
         self.assertFalse(negotiation["additionalProperties"])
@@ -657,6 +668,12 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["retrieval"]["startup_method"], "akbp.session.start")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["policy"], "dry_run_preview_then_approved_apply")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["approval_required_error"], "approval_required")
+            boundary = lines[0]["result"]["knowledge_capability"]["session_boundary"]
+            self.assertEqual(boundary["transient_state_policy"], "runtime_owned_until_reviewed_promotion")
+            self.assertEqual(boundary["promotion_method"], "akbp.session.end")
+            self.assertEqual(boundary["promotion_preview_flag"], "dry_run")
+            self.assertEqual(boundary["durable_apply_flag"], "approved")
+            self.assertTrue(boundary["reject_uncited_transient_state"])
             self.assertIn("sha256", lines[0]["result"]["runtime"]["hash_algorithms"])
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
