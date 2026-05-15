@@ -146,8 +146,10 @@ See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE
 
 For first-run adoption gates, `examples/adoption-preflight/` verifies that a
 fresh knowledge base starts with a read-only trust boundary, becomes cited
-startup context ready only after evidence and indexing, emits portable client
-config without local paths, and rejects unapproved writes.
+startup context ready only after evidence and indexing, proves nested
+`akbp discover` exposes profile selection and the ten-minute proof for adapter
+installers, emits portable client config without local paths, and rejects
+unapproved writes.
 
 For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,

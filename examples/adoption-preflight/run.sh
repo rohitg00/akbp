@@ -9,10 +9,59 @@ KB="$TMP/kb"
 NOTE="$TMP/adoption-note.md"
 DOCTOR_JSON="$TMP/doctor.json"
 CONFIG_JSON="$TMP/client-config.json"
+DISCOVER_JSON="$TMP/discover.json"
 
 echo "AKBP adoption preflight example"
 
 python3 "$ROOT/cli/akbp.py" --path "$KB" init >/dev/null
+
+mkdir -p "$KB/app/src"
+python3 "$ROOT/cli/akbp.py" --path "$KB/app/src" discover > "$DISCOVER_JSON"
+python3 - "$DISCOVER_JSON" "$KB" <<'PY'
+import json
+import os
+import sys
+
+discover = json.loads(open(sys.argv[1], encoding="utf-8").read())
+kb = os.path.realpath(sys.argv[2])
+
+assert discover["found"], discover
+assert os.path.realpath(discover["path"]) == kb, discover
+assert os.path.realpath(discover["trust_boundary"]["read_path"]) == kb, discover
+assert discover["positioning"]["not_a_hidden_memory_store"], discover
+
+profiles = discover["profile_selection"]
+assert profiles["safe_default"] == "read_only", profiles
+assert [profile["profile"] for profile in profiles["profiles"]] == [
+    "startup_context",
+    "read_only",
+    "reviewed_write",
+], profiles
+assert "keep the integration read-only" in profiles["fallback"], profiles
+
+proof = discover["ten_minute_proof"]
+assert proof["format"] == "akbp-ten-minute-proof-v1", proof
+assert not proof["setup_claims"]["requires_docker"], proof
+assert not proof["setup_claims"]["requires_cloud_account"], proof
+assert not proof["setup_claims"]["requires_secrets"], proof
+assert [step["name"] for step in proof["proof_steps"]] == [
+    "create_visible_artifacts",
+    "check_readiness",
+    "retrieve_cited_context",
+    "preview_reviewed_write",
+    "block_unapproved_apply",
+    "export_portable_bundle",
+], proof
+
+harness = discover["first_run_proof"]["recommended_harness"]
+assert harness["command"] == "./examples/structured-output-harness/run.sh", harness
+assert "keep the integration read-only" in harness["stop_policy"], harness
+
+prompt = discover["adapter_prompt_contract"]
+assert prompt["format"] == "akbp-adapter-prompt-contract-v1", prompt
+assert any("ok field and error.code" in rule for rule in prompt["system_rules"]), prompt
+print("nested discovery profile proof ok")
+PY
 
 python3 "$ROOT/cli/akbp.py" --path "$KB" doctor --profile read-only > "$DOCTOR_JSON" || true
 python3 - "$DOCTOR_JSON" <<'PY'

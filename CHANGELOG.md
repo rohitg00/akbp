@@ -29,6 +29,7 @@
 - Added descriptions and safety metadata to generated host-tool manifests so tool-protocol hosts can create read-only wrappers without guessing tool purpose or review requirements.
 - Added a runnable structured output harness example for adapter authors, including validation for JSONL envelopes, capability negotiation, cited startup context, dry-run review metadata, and approval-gated write rejection.
 - Added a runnable adoption preflight example that verifies first-run trust boundaries, cited startup context readiness, portable read-only client config, and unapproved write rejection.
+- Expanded the adoption preflight example to verify nested `akbp discover` profile selection, adapter prompt contract, recommended harness, and ten-minute proof before host integration.
 - Added machine-readable local-first runtime requirements to generated client configs so adapter installers can surface no-cloud, no-network, no-secret setup boundaries before enabling trust.
 - Added a runnable JSONL quickstart example that verifies the canonical tool-server adoption sequence from capability discovery through reviewed write, cited recall, and portable export.
 - Added an adapter structured-output harness benchmark fixture for capability negotiation, doctor/security posture, bounded startup context, dry-run preview metadata, and approval-gated write rejection.
