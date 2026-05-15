@@ -1272,7 +1272,8 @@
       "required": [
         "query",
         "backend",
-        "results"
+        "results",
+        "warnings"
       ],
       "properties": {
         "query": {
@@ -1289,6 +1290,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/search_result_row"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       }

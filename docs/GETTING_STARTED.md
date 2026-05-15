@@ -22,7 +22,7 @@ AKBP is easiest to evaluate when the first run makes the file contract visible. 
 
 | Artifact | Purpose | Portable? |
 |----------|---------|-----------|
-| `AKBP.md` | Human-readable entry point for agents and maintainers | Yes |
+| `AKBP.md` | Human-readable entry point with starter memory rules, review policy, and layout notes | Yes |
 | `akbp.json` | Machine-readable Knowledge Base Card for tooling | Yes |
 | `raw/sources/sources.jsonl` | Registered evidence with locator, hash, and metadata | Yes |
 | `claims/claims.jsonl` | Reviewed durable claims with type, status, confidence, and evidence | Yes |
@@ -41,6 +41,7 @@ The trust boundary is just as important as the layout:
 | Knowledge changes | Supersede or contradict old claims instead of deleting history |
 
 If a tool hides these artifacts or applies writes without the preview/approval step, it is bypassing the main AKBP value.
+The generated `AKBP.md` now makes that policy visible on first run, so adapters and humans have a shared local rule sheet before any memory is written.
 
 ## Fast path
 

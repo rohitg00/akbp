@@ -326,6 +326,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(defs["search_result"]["additionalProperties"])
         self.assertIn("backend", defs["search_result"]["required"])
         self.assertIn("results", defs["search_result"]["required"])
+        self.assertIn("warnings", defs["search_result"]["required"])
         self.assertFalse(defs["status_result"]["additionalProperties"])
         self.assertIn("initialized", defs["status_result"]["required"])
         self.assertIn("entrypoint", defs["status_result"]["required"])

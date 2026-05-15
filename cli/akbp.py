@@ -112,11 +112,26 @@ Describe what durable knowledge belongs here and who should use it.
 ## Agent instructions
 
 - Read `akbp.json` before writing knowledge.
+- Read existing claims, sources, relations, and recent audit events before proposing new memory.
 - Store durable claims in `claims/claims.jsonl`.
 - Store human-readable synthesis in `wiki/`.
 - Preserve evidence for claims whenever possible.
 - Do not store secrets, credentials, tokens, cookies, or private keys.
 - Prefer updating existing pages over creating duplicate pages.
+- Use `akbp.context` or `akbp.session.start` before planning substantial follow-up work.
+
+## Memory rules
+
+- Durable claims should be specific enough for a future agent to act on.
+- Every durable claim should cite a source id or a local evidence file when possible.
+- Preview write-capable operations first; apply only after review or trusted local policy.
+- Supersede or contradict stale claims instead of silently rewriting history.
+- Keep private notes, raw logs, and secrets out of portable artifacts.
+
+## Review policy
+
+Agents may propose project memory, but durable writes require explicit approval.
+If approval is unavailable, leave a preview or recommendation instead of mutating the knowledge base.
 
 ## Layout
 
@@ -486,7 +501,12 @@ def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
 
 def cmd_query(args: argparse.Namespace) -> int:
     base = root(args.path)
-    out = {"query": args.query, "results": collect_results(base, args.query, args.limit)}
+    inactive_matches = inactive_claim_matches(base, args.query, args.limit)
+    warnings = []
+    if inactive_matches:
+        skipped = ", ".join(str(item["id"]) for item in inactive_matches)
+        warnings.append(f"Skipped inactive matching claims: {skipped}")
+    out = {"query": args.query, "results": collect_results(base, args.query, args.limit), "warnings": warnings}
     print(json.dumps(out, indent=2, ensure_ascii=False))
     return 0
 
@@ -1763,11 +1783,16 @@ def fts_query(query: str) -> str:
 def cmd_search(args: argparse.Namespace) -> int:
     base = root(args.path)
     db_path = base / ".akbp" / "state.db"
+    inactive_matches = inactive_claim_matches(base, args.query, args.limit)
+    warnings = []
+    if inactive_matches:
+        skipped = ", ".join(str(item["id"]) for item in inactive_matches)
+        warnings.append(f"Skipped inactive matching claims: {skipped}")
     if not db_path.exists():
         return cmd_query(args)
     query_used = fts_query(args.query)
     if not query_used:
-        print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": []}, indent=2, ensure_ascii=False))
+        print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": [], "warnings": warnings}, indent=2, ensure_ascii=False))
         return 0
     results = collect_fts_results(base, args.query, args.limit)
     if results is None:
@@ -1776,7 +1801,7 @@ def cmd_search(args: argparse.Namespace) -> int:
         {k: item[k] for k in ("type", "id", "path", "snippet", "rank") if k in item}
         for item in results
     ]
-    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": compact_results}, indent=2, ensure_ascii=False))
+    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": compact_results, "warnings": warnings}, indent=2, ensure_ascii=False))
     return 0
 
 

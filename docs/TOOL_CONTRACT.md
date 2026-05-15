@@ -292,7 +292,7 @@ The response schema also names common result and error detail shapes used by ada
 
 - `#/$defs/capabilities_result`: the closed capability discovery result with protocol, feature flags, schema URLs, methods, adapter workflow profiles, and examples.
 - `#/$defs/context_result`: a closed `akbp.context` result with query, generated timestamp, context items, and warnings.
-- `#/$defs/search_result`: a closed `akbp.search` result with query, backend, optional FTS query, and result rows.
+- `#/$defs/search_result`: a closed `akbp.search` result with query, backend, optional FTS query, result rows, and warnings such as skipped inactive matching claims.
 - `#/$defs/status_result`: a closed `akbp.status` result with path, legacy object counts, initialization flags, latest claims, source verification health, audit count, index presence, and highest passing conformance level.
 - `#/$defs/doctor_result`: a closed `akbp.doctor` result with pass/fail checks, adapter readiness, and actionable next steps.
 - `#/$defs/index_result`: a closed approved `akbp.index` result with database path, row counts, indexed/skipped/removed counts, incremental mode, and doc keys for indexed, skipped, and removed items.
@@ -363,7 +363,7 @@ Importing a local file through the JSONL server should also start with dry-run w
 
 For `akbp.ingest`, dry-run executes the CLI preview and returns redacted import metadata instead of only argv: `source_id`, page path, extracted signals, claim ids, redaction status, and `would_write` paths. It also includes `review_required:true` and an `apply_instruction` focused on reviewing redaction and planned writes. It does not create source, claim, page, log, audit, or index files. In apply mode, ingested source content, optional claim text, and source titles are redacted before durable writes.
 
-Agents can also manage the local search index and query it. The index covers claims, markdown pages, source records, entity records, and relation records so structured JSONL knowledge can be retrieved without relying on page mirrors. Search supports conservative SQLite FTS5 syntax: plain terms default to OR, quoted phrases are preserved, `AND`/`OR`/`NOT` are accepted, punctuation is sanitized, trailing malformed operators are removed, and trailing `*` enables safe prefix matches for simple word tokens. Queries with no safe searchable terms, including a leading standalone `NOT` or operator-only text, return `sqlite_fts5` with an empty `fts_query` and empty result set instead of falling back to broad text scanning.
+Agents can also manage the local search index and query it. The index covers claims, markdown pages, source records, entity records, and relation records so structured JSONL knowledge can be retrieved without relying on page mirrors. Search supports conservative SQLite FTS5 syntax: plain terms default to OR, quoted phrases are preserved, `AND`/`OR`/`NOT` are accepted, punctuation is sanitized, trailing malformed operators are removed, and trailing `*` enables safe prefix matches for simple word tokens. Queries with no safe searchable terms, including a leading standalone `NOT` or operator-only text, return `sqlite_fts5` with an empty `fts_query` and empty result set instead of falling back to broad text scanning. Search and context retrieval skip inactive claims such as superseded, archived, redacted, or superseded-by claims and return warnings when an inactive claim matched the query.
 
 ```json
 {"id":"3","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}

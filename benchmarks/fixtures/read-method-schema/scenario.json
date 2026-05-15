@@ -122,7 +122,8 @@
         "expected_result_fields": [
           "query",
           "backend",
-          "results"
+          "results",
+          "warnings"
         ],
         "expected_result_schema": "#/$defs/search_result"
       },

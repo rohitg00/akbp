@@ -55,6 +55,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             run_cli("--path", str(kb), "init")
             self.assertTrue((kb / "wiki" / "index.md").exists())
             self.assertTrue((kb / "AKBP.md").exists())
+            entrypoint = (kb / "AKBP.md").read_text(encoding="utf-8")
+            self.assertIn("## Memory rules", entrypoint)
+            self.assertIn("Use `akbp.context` or `akbp.session.start` before planning", entrypoint)
+            self.assertIn("Supersede or contradict stale claims instead of silently rewriting history", entrypoint)
+            self.assertIn("durable writes require explicit approval", entrypoint)
             card = json.loads((kb / "akbp.json").read_text(encoding="utf-8"))
             self.assertEqual(card["schema_version"], "0.1-draft")
             self.assertIn("claims", card["artifacts"])
@@ -286,13 +291,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             new_claim = json.loads(out.stdout)
             self.assertEqual(new_claim["supersedes"], [claim["id"]])
             out = run_cli("--path", str(kb), "search", "stdlib")
-            self.assertTrue(json.loads(out.stdout)["results"])
+            search = json.loads(out.stdout)
+            self.assertTrue(search["results"])
+            self.assertIn("warnings", search)
             out = run_cli("--path", str(kb), "context", "Bun Python stdlib")
             pack = json.loads(out.stdout)
             context_claim_ids = [item["id"] for item in pack["items"] if item["type"] == "claim"]
             self.assertIn(new_claim["id"], context_claim_ids)
             self.assertNotIn(claim["id"], context_claim_ids)
             self.assertTrue(any(claim["id"] in warning for warning in pack["warnings"]))
+            out = run_cli("--path", str(kb), "search", "Bun Python stdlib")
+            search = json.loads(out.stdout)
+            self.assertTrue(any(claim["id"] in warning for warning in search["warnings"]))
 
             out = run_cli(
                 "--path", str(kb),
