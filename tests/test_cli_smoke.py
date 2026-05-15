@@ -53,6 +53,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(source["locator"], "https://docs.example.com/release")
             self.assertIsNone(source["hash"])
 
+    def test_status_accepts_adapter_profile_readiness_gate(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            out = run_cli("--path", str(kb), "status", "--profile", "startup-context")
+            status = json.loads(out.stdout)
+            self.assertEqual(status["requested_profile"], "startup_context")
+            self.assertTrue(status["requested_profile_ready"])
+            self.assertTrue(status["adapter_readiness"]["startup_context_ready"])
+            self.assertFalse(status["adapter_readiness"]["read_only_ready"])
+
     def test_client_config_generates_negotiated_stdio_profile(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

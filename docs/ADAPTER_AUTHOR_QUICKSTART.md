@@ -107,6 +107,7 @@ python3 cli/akbp.py --path ./my-kb doctor --profile read-only
 ```
 
 The command returns the normal JSON doctor report and exits non-zero when the requested profile is not ready. This matters because a KB can have valid base files while still missing the index, sources, or reviewed-write readiness an adapter expects.
+For a lightweight startup or dashboard check, `akbp status --profile read-only` returns the same `requested_profile`, `requested_profile_ready`, and `adapter_readiness` fields without the full checklist. Use `doctor` when you need actionable remediation steps; use `status` when an adapter only needs to decide whether to enable a profile or stay in the safer recommended mode.
 
 Hosted or autonomous tool environments should stay on the read-only profile unless there is a separate human approval step outside the tool call. A runtime that can call tools without showing a dry-run preview cannot safely use the reviewed-write profile by itself.
 

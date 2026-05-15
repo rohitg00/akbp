@@ -1878,6 +1878,17 @@
           "type": "string",
           "minLength": 1
         },
+        "requested_profile": {
+          "type": "string",
+          "enum": [
+            "startup_context",
+            "read_only",
+            "reviewed_write"
+          ]
+        },
+        "requested_profile_ready": {
+          "type": "boolean"
+        },
         "claims": {
           "type": "integer",
           "minimum": 0

@@ -76,7 +76,7 @@ WRITE_METHODS = {
 
 METHODS: dict[str, dict[str, Any]] = {
     "akbp.capabilities": {"write": False, "params": ["client", "requires", "requires_profiles", "requires_methods"]},
-    "akbp.status": {"write": False, "params": ["limit"]},
+    "akbp.status": {"write": False, "params": ["limit", "profile"]},
     "akbp.doctor": {"write": False, "params": ["profile"]},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
     "akbp.context": {"write": False, "params": ["task", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings"]},
@@ -522,7 +522,7 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "akbp.session.end": ["crystallize", params.get("transcript", "")],
     }
     argv = [str(a) for a in mapping[method] if a != ""]
-    if method == "akbp.doctor" and params.get("profile"):
+    if method in {"akbp.doctor", "akbp.status"} and params.get("profile"):
         argv.extend(["--profile", doctor_profile_args[str(params["profile"])]])
     if method in {"akbp.context", "akbp.session.start"} and "max_chars" in params:
         argv.extend(["--max-chars", str(params["max_chars"])])
@@ -752,7 +752,7 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "level" in params and method == "akbp.conformance" and params.get("level") not in CONFORMANCE_LEVELS:
         errors.append("level must be one of: " + ", ".join(sorted(CONFORMANCE_LEVELS)))
-    if "profile" in params and method == "akbp.doctor" and params.get("profile") not in {"startup_context", "read_only", "reviewed_write"}:
+    if "profile" in params and method in {"akbp.doctor", "akbp.status"} and params.get("profile") not in {"startup_context", "read_only", "reviewed_write"}:
         errors.append("profile must be one of: read_only, reviewed_write, startup_context")
     if "client" in params:
         client = params.get("client")

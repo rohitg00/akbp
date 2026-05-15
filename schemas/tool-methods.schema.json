@@ -481,6 +481,16 @@
           "minimum": 1,
           "maximum": 100,
           "default": 5
+        },
+        "profile": {
+          "type": "string",
+          "pattern": "^[^\\u0000\\n\\r]*$",
+          "enum": [
+            "startup_context",
+            "read_only",
+            "reviewed_write"
+          ],
+          "description": "Optional adapter readiness profile to evaluate in the lightweight status response."
         }
       }
     },

@@ -1925,6 +1925,13 @@ def cmd_lint(args: argparse.Namespace) -> int:
 
 def cmd_status(args: argparse.Namespace) -> int:
     base = root(args.path)
+    profile_key = None
+    profile_ready = None
+    profile_map = {
+        "startup-context": "startup_context",
+        "read-only": "read_only",
+        "reviewed-writes": "reviewed_write",
+    }
     card = load_card(base)
     privacy = card.get("privacy", {}) if isinstance(card, dict) else {}
     default_scope = privacy.get("default_scope") if isinstance(privacy, dict) else None
@@ -1954,8 +1961,12 @@ def cmd_status(args: argparse.Namespace) -> int:
         if conformance_issues(base, level)["ok"]:
             conformance_level = level
             break
+    if getattr(args, "profile", None):
+        profile_key = profile_map[args.profile]
+        profile_ready = bool(adapter_readiness[f"{profile_key}_ready"])
     print(json.dumps({
         "path": str(base),
+        **({"requested_profile": profile_key, "requested_profile_ready": profile_ready} if profile_key else {}),
         "claims": len(claims),
         "sources": len(sources),
         "pages": len(pages),
@@ -4283,6 +4294,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("status")
     s.add_argument("--limit", type=int, default=5, help="number of recent claims and source issues to include")
+    s.add_argument(
+        "--profile",
+        choices=["startup-context", "read-only", "reviewed-writes"],
+        help="include readiness for a requested adapter workflow profile without running the full doctor report",
+    )
     s.set_defaults(func=cmd_status)
 
     s = sub.add_parser("doctor")

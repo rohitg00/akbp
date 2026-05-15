@@ -630,7 +630,7 @@ class ToolServerTest(unittest.TestCase):
             run_cli("--path", str(kb), "remember", "AKBP keeps durable claims", "--evidence", "AKBP.md")
             requests = "\n".join([
                 json.dumps({"id": "caps", "path": str(kb), "method": "akbp.capabilities"}),
-                json.dumps({"id": "1", "path": str(kb), "method": "akbp.status"}),
+                json.dumps({"id": "1", "path": str(kb), "method": "akbp.status", "params": {"profile": "startup_context"}}),
                 json.dumps({"id": "doctor", "path": str(kb), "method": "akbp.doctor"}),
                 json.dumps({"id": "2", "path": str(kb), "method": "akbp.context", "params": {"task": "durable claims", "max_chars": 24, "min_items": 1, "require_citations": True, "fail_on_warnings": False}}),
             ]) + "\n"
@@ -739,6 +739,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
             assert_matches_required_schema(self, lines[1]["result"], schema_def("status_result"))
+            self.assertEqual(lines[1]["result"]["requested_profile"], "startup_context")
+            self.assertTrue(lines[1]["result"]["requested_profile_ready"])
             self.assertEqual(lines[1]["result"]["trust_boundary"]["default_scope"], "project")
             self.assertIn("dry_run preview", lines[1]["result"]["trust_boundary"]["write_rule"])
             self.assertIn("adapter_readiness", lines[1]["result"])

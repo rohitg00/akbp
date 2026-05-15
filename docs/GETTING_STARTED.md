@@ -132,7 +132,7 @@ sed -n '1,120p' "$TMP_KB/raw/sources/sources.jsonl"
 
 The important distinction is that `.akbp/` is rebuildable runtime state. The portable state is the markdown and JSONL artifact set.
 
-`akbp status` is the quick dashboard health check for a knowledge base. It keeps the old object counts, and also returns dashboard-ready sections for the trust boundary, default scope, latest claims, claim type/status counts, source verification health, audit count, index presence, and highest passing conformance level.
+`akbp status` is the quick dashboard health check for a knowledge base. It keeps the old object counts, and also returns dashboard-ready sections for the trust boundary, default scope, latest claims, claim type/status counts, source verification health, audit count, index presence, highest passing conformance level, and adapter readiness. For installer or startup checks, pass `--profile startup-context`, `--profile read-only`, or `--profile reviewed-writes` to include `requested_profile_ready` without loading the full doctor report.
 
 `akbp doctor` is the adoption check. It returns pass/fail checks, warnings, and concrete next steps so a new user or adapter author can see whether the knowledge base is ready for retrieval and approved writes.
 Its `workflow` section maps the same result onto the first-run path: create the knowledge base, register evidence, create a reviewed claim, build retrieval, pass adapter checks, and export a portable bundle.
