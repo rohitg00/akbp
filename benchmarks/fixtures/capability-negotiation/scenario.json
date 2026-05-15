@@ -11,7 +11,7 @@
           "requires": ["method_param_schemas", "features.capability_negotiation", "future_feature"]
         },
         "expected_result_schema": "#/$defs/capabilities_result",
-        "expected_result_fields": ["protocol", "features", "negotiation", "schemas", "methods"],
+        "expected_result_fields": ["protocol", "features", "negotiation", "schemas", "methods", "profiles"],
         "expected_result_values": {
           "protocol": "akbp-jsonl-tool-server"
         },
@@ -28,13 +28,16 @@
           "methods.akbp\\.search.write": [false],
           "methods.akbp\\.remember.write": [true],
           "methods.akbp\\.remember.review_required": [true],
-          "methods.akbp\\.remember.params[]": ["text", "dry_run"]
+          "methods.akbp\\.remember.params[]": ["text", "dry_run"],
+          "profiles.read_only[]": ["akbp.search", "akbp.import_check", "akbp.session.start"],
+          "profiles.reviewed_write[]": ["akbp.remember", "akbp.session.end"],
+          "profiles.portability[]": ["akbp.import_apply"]
         }
       }
     ]
   },
   "query": "tool capability negotiation",
   "expected": {
-    "answer_should_include": ["akbp.capabilities", "method_param_schemas", "write_review_required"]
+    "answer_should_include": ["akbp.capabilities", "method_param_schemas", "write_review_required", "read_only"]
   }
 }

@@ -42,6 +42,7 @@ For write-capable methods:
 - include a dry-run request before any approved apply request.
 - assert `review_required` and `apply_instruction` in preview responses when applicable.
 - assert `approval_required` errors for non-dry-run writes without request-level `approved:true`.
+- assert `akbp.capabilities` profile groups such as `read_only`, `reviewed_write`, and `portability` when adapter behavior depends on a safe method allowlist.
 - do not add realistic secrets, private paths, or raw private logs to fixtures.
 
 ## Validation checklist

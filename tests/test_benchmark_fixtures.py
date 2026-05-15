@@ -475,6 +475,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertIn("features.method_param_schemas", expected)
         self.assertIn("methods.akbp\\.remember.review_required", expected)
         self.assertIn("methods.akbp\\.remember.params[]", expected)
+        self.assertIn("profiles.read_only[]", expected)
+        self.assertIn("akbp.session.start", expected["profiles.read_only[]"])
+        self.assertIn("profiles.reviewed_write[]", expected)
 
     def test_read_method_schema_fixture_covers_capability_enforcement_flags(self):
         path = FIXTURES / "read-method-schema" / "scenario.json"
