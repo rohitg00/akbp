@@ -266,6 +266,13 @@ def negotiation_result(params: dict[str, Any], features: dict[str, bool]) -> dic
 def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
     params = params or {}
     features = capability_features()
+    profiles = {
+        "startup_context": ["akbp.capabilities", "akbp.status", "akbp.session.start", "akbp.context", "akbp.search"],
+        "reviewed_write": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
+        "lifecycle": ["akbp.supersede", "akbp.contradict", "akbp.crystallize_session", "akbp.audit", "akbp.cite"],
+        "portability": ["akbp.export", "akbp.export_check", "akbp.import_check", "akbp.import_apply"],
+        "maintenance": ["akbp.doctor", "akbp.index", "akbp.source.verify", "akbp.conformance"],
+    }
     return {
         "protocol": "akbp-jsonl-tool-server",
         "version": "0.1-draft",
@@ -308,6 +315,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
             }
             for name, meta in METHODS.items()
         },
+        "profiles": profiles,
         "examples": [
             {"id": "status-1", "method": "akbp.status", "path": "."},
             {"id": "doctor-1", "method": "akbp.doctor", "path": "."},

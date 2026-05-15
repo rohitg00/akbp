@@ -222,7 +222,15 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
-`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, and advertises enforcement features for method parameter schemas, capability negotiation, unknown request-field rejection, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, request-id string validation, request-id numeric bounds, path validation, string parameter length validation, path-like parameter control-character validation, evidence/entity array validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size, request-id string length, and request-id numeric bounds, caller-supplied local path policy, string parameter length policy, path-like parameter control-character policy, evidence/entity array count and item-length policy, supported hash algorithms, dry-run support, review-gated writes, the approval field name, and `method_schema_runtime_errors` so adapters can surface schema/runtime drift instead of guessing.
+`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, returns adapter-oriented method groups under `result.profiles`, and advertises enforcement features for method parameter schemas, capability negotiation, unknown request-field rejection, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, request-id string validation, request-id numeric bounds, path validation, string parameter length validation, path-like parameter control-character validation, evidence/entity array validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size, request-id string length, and request-id numeric bounds, caller-supplied local path policy, string parameter length policy, path-like parameter control-character policy, evidence/entity array count and item-length policy, supported hash algorithms, dry-run support, review-gated writes, the approval field name, and `method_schema_runtime_errors` so adapters can surface schema/runtime drift instead of guessing.
+
+`result.profiles` is a discovery shortcut for adapters that need workflow intent instead of a flat method list:
+
+- `startup_context`: capability discovery, status, session start, context, and search methods for startup retrieval.
+- `reviewed_write`: write methods that should be previewed with `dry_run:true` before approved application.
+- `lifecycle`: supersession, contradiction, crystallization, audit, and citation methods for maintaining memory over time.
+- `portability`: export, export check, import check, and import apply methods for bundle exchange.
+- `maintenance`: doctor, index, source verification, and conformance methods for local upkeep.
 
 Adapters may pass optional capability negotiation params to `akbp.capabilities`: `client` is a short adapter identifier, and `requires` is a bounded list of required feature names such as `method_param_schemas` or `features.capability_negotiation`. The response always includes `result.negotiation` with requested, supported, unsupported, and `satisfied` fields. Treat `satisfied:false` as a graceful-degrade signal, not a transport failure.
 
@@ -282,7 +290,7 @@ Errors are structured:
 
 The response schema also names common result and error detail shapes used by adapters:
 
-- `#/$defs/capabilities_result`: the closed capability discovery result with protocol, feature flags, schema URLs, methods, and examples.
+- `#/$defs/capabilities_result`: the closed capability discovery result with protocol, feature flags, schema URLs, methods, adapter workflow profiles, and examples.
 - `#/$defs/context_result`: a closed `akbp.context` result with query, generated timestamp, context items, and warnings.
 - `#/$defs/search_result`: a closed `akbp.search` result with query, backend, optional FTS query, and result rows.
 - `#/$defs/status_result`: a closed `akbp.status` result with path, legacy object counts, initialization flags, latest claims, source verification health, audit count, index presence, and highest passing conformance level.

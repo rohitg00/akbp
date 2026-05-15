@@ -294,6 +294,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("request_id_numeric_bounds", capabilities["properties"]["features"]["required"])
         self.assertIn("capability_negotiation", capabilities["properties"]["features"]["required"])
         self.assertIn("negotiation", capabilities["required"])
+        self.assertIn("profiles", capabilities["required"])
         negotiation = capabilities["properties"]["negotiation"]
         self.assertFalse(negotiation["additionalProperties"])
         self.assertIn("requested_features", negotiation["required"])
@@ -312,6 +313,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("method_schema_parity_policy", capabilities["properties"]["runtime"]["required"])
         self.assertIn("method_schema_runtime_errors", capabilities["properties"]["runtime"]["required"])
         self.assertFalse(capabilities["properties"]["methods"]["additionalProperties"]["additionalProperties"])
+        self.assertFalse(capabilities["properties"]["profiles"]["additionalProperties"])
+        for profile in ["startup_context", "reviewed_write", "lifecycle", "portability", "maintenance"]:
+            self.assertIn(profile, capabilities["properties"]["profiles"]["required"])
         self.assertFalse(capabilities["properties"]["examples"]["items"]["additionalProperties"])
         self.assertIn("features", capabilities["required"])
         self.assertIn("methods", capabilities["required"])
@@ -553,6 +557,15 @@ class ToolServerTest(unittest.TestCase):
             self.assertIn("akbp.index", lines[0]["result"]["methods"])
             self.assertIn("akbp.search", lines[0]["result"]["methods"])
             self.assertIn("akbp.audit", lines[0]["result"]["methods"])
+            profiles = lines[0]["result"]["profiles"]
+            self.assertIn("akbp.session.start", profiles["startup_context"])
+            self.assertIn("akbp.remember", profiles["reviewed_write"])
+            self.assertIn("akbp.supersede", profiles["lifecycle"])
+            self.assertIn("akbp.export_check", profiles["portability"])
+            self.assertIn("akbp.source.verify", profiles["maintenance"])
+            for group in profiles.values():
+                for method in group:
+                    self.assertIn(method, lines[0]["result"]["methods"])
             self.assertTrue(lines[0]["result"]["methods"]["akbp.remember"]["review_required"])
             self.assertFalse(lines[0]["result"]["methods"]["akbp.query"]["review_required"])
             examples = lines[0]["result"]["examples"]
