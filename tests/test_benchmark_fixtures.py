@@ -103,6 +103,35 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(export_path.exists())
         self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
 
+    def test_existing_memory_migration_fixture_covers_reviewed_promotion(self):
+        path = FIXTURES / "existing-memory-migration" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        opaque_check = requests["opaque-import-check"]
+        opaque_preview = requests["opaque-import-apply-preview"]
+        reviewed_check = requests["reviewed-import-check"]
+        reviewed_preview = requests["reviewed-import-apply-preview"]
+        reviewed_apply = requests["reviewed-import-apply-approved"]
+
+        self.assertEqual(opaque_check["method"], "akbp.import_check")
+        self.assertEqual(opaque_check["expected_result_schema"], "#/$defs/import_check_result")
+        self.assertEqual(opaque_check["expected_result_contains"]["review.claims_without_evidence[]"], ["claim_opaque_memory_summary"])
+        self.assertEqual(opaque_preview["method"], "akbp.import_apply")
+        self.assertTrue(opaque_preview["params"]["dry_run"])
+        self.assertFalse(opaque_preview["expected_result_values"]["ok"])
+        self.assertEqual(opaque_preview["expected_result_schema"], "#/$defs/import_apply_result")
+
+        self.assertEqual(reviewed_check["expected_result_contains"]["review.ready_for_reviewed_apply"], [True])
+        self.assertEqual(reviewed_preview["expected_result_contains"]["would_write.claims[]"], ["claim_existing_memory_review_gate"])
+        self.assertTrue(reviewed_preview["params"]["dry_run"])
+        self.assertTrue(reviewed_apply["approved"])
+        self.assertEqual(reviewed_apply["expected_result_values"]["applied"], True)
+
+        for request in requests.values():
+            export_path = ROOT / request["params"]["file"]
+            self.assertTrue(export_path.exists())
+            self.assertNotIn("sk-proj-", export_path.read_text(encoding="utf-8"))
+
     def test_long_document_ingest_fixture_covers_section_level_review(self):
         path = FIXTURES / "long-document-ingest" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

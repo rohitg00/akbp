@@ -55,6 +55,7 @@ runtime.
 - `import-safety`: validate JSONL import objects, normal plus strict `akbp.import_check` responses, and rejected `akbp.import_apply` preview result shapes before durable writes.
 - `long-document-ingest`: verify longer source documents produce section-level ingest signals through dry-run review, approved apply, indexing, and retrieval.
 - `export-bundle-compatibility`: validate portable bundle manifest counts, artifact hash shape, safety flags, and strict failure results.
+- `existing-memory-migration`: verify existing agent-memory exports are imported only when source-backed, dry-run reviewed, and explicitly approved.
 - `invalid-param-rejection`: validate schema-backed `invalid_params` details for unknown, zero-param method unknown, missing and partial missing required method params, file/source verification missing params, wrong-typed, wrong item-typed, out-of-range, boolean flag, oversized string, import/export file-param, source verification id, cite claim id, claim relation id, audit limit, read-method limit, conformance level, lifecycle method params, and unsupported enum method parameters before CLI execution.
 - `import-apply-flow`: validate JSONL `akbp.import_apply` dry-run and approved apply responses before durable writes.
 - `import-compatibility-edges`: validate mixed JSONL compatibility for accepted source/claim records, unknown evidence ids, unsupported kinds, invalid claim shapes, and scalar collection-field rejection.

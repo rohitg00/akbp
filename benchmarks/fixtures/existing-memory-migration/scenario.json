@@ -1,0 +1,243 @@
+{
+  "id": "existing-memory-migration-001",
+  "task": "Verify that existing agent-memory exports, including opaque hosted memory summaries, migrate into AKBP only when they are source-backed, dry-run reviewed, and explicitly approved.",
+  "setup": {
+    "tool_server_requests": [
+      {
+        "id": "opaque-import-check",
+        "method": "akbp.import_check",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/existing-memory-migration/opaque-export.jsonl",
+          "fail_on_rejected": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "fail_on_rejected",
+          "accepted",
+          "rejected",
+          "errors",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "checked": 1,
+          "accepted_count": 1,
+          "rejected_count": 0,
+          "error_count": 0,
+          "fail_on_rejected": true
+        },
+        "expected_result_schema": "#/$defs/import_check_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "claim_opaque_memory_summary"
+          ],
+          "review.claims_without_evidence[]": [
+            "claim_opaque_memory_summary"
+          ],
+          "review.next_actions[]": [
+            "Add source evidence for every durable claim before trusting the import."
+          ]
+        }
+      },
+      {
+        "id": "opaque-import-apply-preview",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/existing-memory-migration/opaque-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "accepted",
+          "rejected",
+          "errors",
+          "review",
+          "review_required",
+          "apply_instruction"
+        ],
+        "expected_result_values": {
+          "ok": false,
+          "dry_run": true,
+          "applied": false,
+          "checked": 1,
+          "accepted_count": 1,
+          "rejected_count": 0,
+          "error_count": 1,
+          "review_required": true
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "claim_opaque_memory_summary"
+          ],
+          "review.claims_without_evidence[]": [
+            "claim_opaque_memory_summary"
+          ],
+          "review.next_actions[]": [
+            "Add source evidence for every durable claim before trusting the import."
+          ]
+        }
+      },
+      {
+        "id": "reviewed-import-check",
+        "method": "akbp.import_check",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/existing-memory-migration/reviewed-export.jsonl",
+          "fail_on_rejected": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "fail_on_rejected",
+          "accepted",
+          "rejected",
+          "errors",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0,
+          "fail_on_rejected": true
+        },
+        "expected_result_schema": "#/$defs/import_check_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "source_existing_memory_runbook",
+            "claim_existing_memory_review_gate"
+          ],
+          "review.ready_for_reviewed_apply": [
+            true
+          ]
+        }
+      },
+      {
+        "id": "reviewed-import-apply-preview",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/existing-memory-migration/reviewed-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "review_required",
+          "apply_instruction",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": true,
+          "applied": false,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0,
+          "review_required": true
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "would_write.sources[]": [
+            "source_existing_memory_runbook"
+          ],
+          "would_write.claims[]": [
+            "claim_existing_memory_review_gate"
+          ],
+          "review.ready_for_reviewed_apply": [
+            true
+          ]
+        }
+      },
+      {
+        "id": "reviewed-import-apply-approved",
+        "method": "akbp.import_apply",
+        "approved": true,
+        "params": {
+          "file": "benchmarks/fixtures/existing-memory-migration/reviewed-export.jsonl"
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": false,
+          "applied": true,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "would_write.sources[]": [
+            "source_existing_memory_runbook"
+          ],
+          "would_write.claims[]": [
+            "claim_existing_memory_review_gate"
+          ],
+          "review.ready_for_reviewed_apply": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  "query": "How should an adapter migrate existing agent memory into AKBP?",
+  "expected": {
+    "must_apply_tool_methods": [
+      "akbp.import_apply"
+    ],
+    "must_dry_run_tool_methods": [
+      "akbp.import_apply"
+    ],
+    "answer_should_include": [
+      "existing agent-memory exports",
+      "source-backed",
+      "dry-run review",
+      "explicitly approved",
+      "opaque hosted memory summaries"
+    ]
+  }
+}

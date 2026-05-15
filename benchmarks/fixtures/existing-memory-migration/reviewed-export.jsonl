@@ -1,0 +1,2 @@
+{"kind":"source","id":"source_existing_memory_runbook","type":"note","locator":"memory-export/agent-runbook.md","title":"Existing memory agent runbook"}
+{"kind":"claim","id":"claim_existing_memory_review_gate","text":"Existing agent memory should migrate into durable AKBP only after source-backed dry-run review and explicit approval.","type":"policy","status":"working","confidence":0.86,"evidence":["source_existing_memory_runbook"],"scope":"project"}

@@ -144,6 +144,7 @@ Initial scenarios:
 - `import-apply-flow`: validate schema-backed `akbp.import_apply` dry-run previews and approval-gated apply results before durable writes.
 - `import-apply-malformed`: validate schema-backed `akbp.import_apply` failure results for malformed JSONL before durable writes.
 - `import-apply-skipped-existing`: validate import apply reports existing source and claim records through `skipped_existing` instead of rewriting them.
+- `existing-memory-migration`: verify existing agent-memory exports, including opaque hosted memory summaries, are imported only when source-backed, dry-run reviewed, and explicitly approved.
 - `graph-jsonl-records`: populate real JSONL entities and relations and validate schema-backed export.
 - `multi-agent-handoff`: retrieve cited prior-agent context before continuing adapter work.
 - `review-gated-writes`: require agents to honor `review_required` and `apply_instruction` before applying durable writes, with real dry-run JSONL outputs.
