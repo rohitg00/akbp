@@ -158,6 +158,12 @@ JSONL request:
 
 The response includes `result.negotiation.satisfied`. If it is `false`, disable or degrade the flows named in `unsupported_features` or `unsupported_profiles` instead of guessing.
 It also includes `result.profile_contracts`, a machine-readable map from workflow profiles to their purpose, risk level, write policy, review-surface requirement, and matching doctor readiness field. Use that map in installers and setup screens so users can see why a host starts read-only and what must change before reviewed writes are enabled.
+It also includes `result.knowledge_capability.retrieval.scope_policy`, which is
+the adapter rule for workflow-aware context: pass the explicit KB `path` plus a
+bounded `params.task` or `params.query` when calling `akbp.session.start` or
+`akbp.context`. If the host cannot tell which repo, workspace, workflow, or user
+task the memory belongs to, keep running without recalled context instead of
+mixing unrelated memory into the prompt.
 
 Generated client configs also include `response_contract.error_actions`. Use that
 map as the adapter's failure policy before writing host-specific glue:

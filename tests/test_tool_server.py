@@ -394,6 +394,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(knowledge_capability["properties"]["kind"], {"const": "agent_knowledge_base"})
         self.assertEqual(knowledge_capability["properties"]["trust_model"], {"const": "cited_review_gated_memory"})
         self.assertFalse(knowledge_capability["properties"]["retrieval"]["additionalProperties"])
+        for field in ["task_scope_required", "scope_inputs", "scope_policy"]:
+            self.assertIn(field, knowledge_capability["properties"]["retrieval"]["required"])
         self.assertFalse(knowledge_capability["properties"]["writes"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["session_boundary"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["portability"]["additionalProperties"])
@@ -677,7 +679,11 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["runtime"]["write_policy"], "review-gated")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["kind"], "agent_knowledge_base")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["trust_model"], "cited_review_gated_memory")
-            self.assertEqual(lines[0]["result"]["knowledge_capability"]["retrieval"]["startup_method"], "akbp.session.start")
+            retrieval = lines[0]["result"]["knowledge_capability"]["retrieval"]
+            self.assertEqual(retrieval["startup_method"], "akbp.session.start")
+            self.assertTrue(retrieval["task_scope_required"])
+            self.assertEqual(retrieval["scope_inputs"], ["path", "params.task", "params.query"])
+            self.assertIn("ambiguous", retrieval["scope_policy"])
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["policy"], "dry_run_preview_then_approved_apply")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["approval_required_error"], "approval_required")
             adapter_quality = lines[0]["result"]["knowledge_capability"]["adapter_quality"]

@@ -203,6 +203,12 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
         "citations_required_for_trusted_context": True,
         "startup_method": "akbp.session.start",
         "search_methods": ["akbp.context", "akbp.search", "akbp.query"],
+        "task_scope_required": True,
+        "scope_inputs": ["path", "params.task", "params.query"],
+        "scope_policy": (
+            "Adapters must pass an explicit KB path plus task or query for startup context, "
+            "and continue without recalled memory when the scope is ambiguous."
+        ),
     },
     "writes": {
         "enabled": True,

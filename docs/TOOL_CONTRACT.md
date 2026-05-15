@@ -120,6 +120,14 @@ Adapter-level session-end operation. It crystallizes a transcript using the same
 
 Capability discovery exposes `knowledge_capability.session_boundary.promotion_contract` so adapters can enforce the promotion workflow without scraping prose. The contract lists durable candidate types, preview fields that must be shown to a review surface, the requirement to repeat the same approved request, and inputs that must stay transient such as raw transcripts, scratch reasoning, secrets, private messages, and uncited claims.
 
+Capability discovery also exposes `knowledge_capability.retrieval.scope_policy`.
+Adapters should treat this as the startup-context boundary: pass the explicit
+knowledge-base `path` plus a bounded `params.task` or `params.query` when
+calling `akbp.session.start` or `akbp.context`. If the adapter cannot identify
+the repo, workspace, workflow, or user task that recalled memory belongs to, it
+should continue without recalled context instead of mixing unrelated memory into
+the prompt.
+
 Capability discovery also exposes `knowledge_capability.adapter_quality`, a
 machine-readable pointer to `examples/structured-output-harness/run.sh`. Adapter
 authors should run that harness before letting recalled AKBP context affect
