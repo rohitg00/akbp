@@ -1553,6 +1553,7 @@
         "ok",
         "ready_for_adapter",
         "summary",
+        "adapter_readiness",
         "workflow",
         "checks",
         "next_steps"
@@ -1580,6 +1581,52 @@
             "passed": { "type": "integer", "minimum": 0 },
             "warnings": { "type": "integer", "minimum": 0 },
             "errors": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "adapter_readiness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "recommended_profile",
+            "read_only_ready",
+            "reviewed_write_ready",
+            "blocking_checks",
+            "read_only_missing",
+            "reviewed_write_missing"
+          ],
+          "properties": {
+            "recommended_profile": {
+              "type": "string",
+              "enum": [
+                "setup_only",
+                "read_only",
+                "reviewed_write"
+              ]
+            },
+            "read_only_ready": {
+              "type": "boolean"
+            },
+            "reviewed_write_ready": {
+              "type": "boolean"
+            },
+            "blocking_checks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "read_only_missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "reviewed_write_missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
         "checks": {

@@ -304,7 +304,7 @@ The response schema also names common result and error detail shapes used by ada
 - `#/$defs/context_result`: a closed `akbp.context` result with query, generated timestamp, context items, and warnings.
 - `#/$defs/search_result`: a closed `akbp.search` result with query, backend, optional FTS query, result rows, and warnings such as skipped inactive matching claims.
 - `#/$defs/status_result`: a closed `akbp.status` result with path, legacy object counts, initialization flags, latest claims, source verification health, audit count, index presence, and highest passing conformance level.
-- `#/$defs/doctor_result`: a closed `akbp.doctor` result with pass/fail checks, adapter readiness, and actionable next steps.
+- `#/$defs/doctor_result`: a closed `akbp.doctor` result with pass/fail checks, profile-specific adapter readiness, recommended adapter profile, and actionable next steps.
 - `#/$defs/index_result`: a closed approved `akbp.index` result with database path, row counts, indexed/skipped/removed counts, incremental mode, and doc keys for indexed, skipped, and removed items.
 - `#/$defs/cite_result`: a closed `akbp.cite` result with claim id, text, evidence list, and status.
 - `#/$defs/audit_result`: a closed `akbp.audit` result with audit events and count.

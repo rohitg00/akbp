@@ -1599,6 +1599,32 @@ def doctor_workflow(base: Path, checks: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
+    by_id = {check["id"]: check for check in checks}
+    blocking = [check for check in checks if not check["ok"] and check["severity"] == "error"]
+    warnings = [check for check in checks if not check["ok"] and check["severity"] == "warning"]
+    read_only_required = ["entrypoint", "card", "source_health", "conformance_level_1", "index", "conformance_level_2"]
+    reviewed_write_required = [check["id"] for check in checks]
+    read_only_missing = [check_id for check_id in read_only_required if not by_id[check_id]["ok"]]
+    reviewed_write_missing = [check_id for check_id in reviewed_write_required if not by_id[check_id]["ok"]]
+    read_only_ready = not blocking and not read_only_missing
+    reviewed_write_ready = not blocking and not warnings
+    if reviewed_write_ready:
+        recommended_profile = "reviewed_write"
+    elif read_only_ready:
+        recommended_profile = "read_only"
+    else:
+        recommended_profile = "setup_only"
+    return {
+        "recommended_profile": recommended_profile,
+        "read_only_ready": read_only_ready,
+        "reviewed_write_ready": reviewed_write_ready,
+        "blocking_checks": [check["id"] for check in blocking],
+        "read_only_missing": read_only_missing,
+        "reviewed_write_missing": reviewed_write_missing,
+    }
+
+
 def cmd_doctor(args: argparse.Namespace) -> int:
     base = root(args.path)
     checks = doctor_checks(base)
@@ -1613,6 +1639,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             "warnings": sum(1 for check in failing if check["severity"] == "warning"),
             "errors": len(blocking),
         },
+        "adapter_readiness": doctor_adapter_readiness(checks),
         "workflow": doctor_workflow(base, checks),
         "checks": checks,
         "next_steps": [check["next_step"] for check in failing if check.get("next_step")][: args.limit],
@@ -1700,6 +1727,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "limit": 5,
             },
             "ready_field": "ready_for_adapter",
+            "recommended_profile_field": "adapter_readiness.recommended_profile",
             "blocking_field": "summary.errors",
         },
         "verification": [
@@ -1721,9 +1749,10 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "expect": {
                     "ok": True,
                     "result.ready_for_adapter": True,
+                    f"result.adapter_readiness.{requested_profile}_ready": True,
                     "result.summary.errors": 0,
                 },
-                "on_failure": "Show result.next_steps and keep the adapter in read-only setup mode.",
+                "on_failure": "Show result.next_steps, follow result.adapter_readiness.recommended_profile, and keep writes disabled unless reviewed_write_ready is true.",
             },
             {
                 "id": "session-start-1",
