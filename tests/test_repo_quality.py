@@ -195,6 +195,8 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.doctor",
             "read_only",
             "ready_for_adapter",
+            "first_run_sequence",
+            "ordered checklist",
             "reviewed_write",
             "akbp.session.start",
             "dry_run",

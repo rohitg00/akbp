@@ -97,6 +97,9 @@ If no Knowledge Base Card is found, the command exits non-zero and suggests akbp
 The emitted config includes `runtime_requirements` so installers can tell users
 up front that the reference stdio flow is local-first and does not require a
 network connection, cloud account, or secrets.
+It also includes `first_run_sequence`, an ordered setup path that resolves the
+knowledge-base path, negotiates capabilities, checks doctor readiness, retrieves
+cited startup context, and keeps writes disabled until a review surface exists.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.
@@ -114,6 +117,11 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rev
 ```
 
 The generated config includes the server command, knowledge-base path, knowledge capability descriptor, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, bounded session-start method, structured response contract, quality gates, tool-protocol bridge allowlists, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
+
+Use `first_run_sequence.steps` as the adapter install checklist. Stop at the
+first failed required step, show its structured failure, and keep the
+integration read-only until the failing setup or review-surface requirement is
+fixed.
 
 The `quality_gates` section tells adapters when startup context is safe to use in a plan: request bounded cited context with `max_chars`, require at least one recalled item, require citations, surface warnings and budget truncation, and continue without recalled memory when context is empty or uncited. Reviewed-write configs also list the preview fields an adapter must show before retrying with `approved:true`.
 

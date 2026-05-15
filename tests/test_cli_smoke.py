@@ -43,6 +43,29 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["runtime_requirements"]["secrets_required"], [])
             self.assertIn("AKBP artifacts", config["runtime_requirements"]["durable_state_owner"])
             self.assertIn("read-only bridge allowlist", config["runtime_requirements"]["tool_protocol_hosts"])
+            first_run = config["first_run_sequence"]
+            self.assertIn("ordered setup path", first_run["purpose"])
+            self.assertIn("keep the integration read-only", first_run["stop_policy"])
+            self.assertEqual(
+                [step["step"] for step in first_run["steps"]],
+                [
+                    "resolve_knowledge_base",
+                    "negotiate_capabilities",
+                    "check_adapter_readiness",
+                    "retrieve_cited_startup_context",
+                    "enable_writes_only_after_review_surface",
+                ],
+            )
+            self.assertTrue(first_run["steps"][0]["required"])
+            self.assertEqual(first_run["steps"][0]["expect"]["knowledge_base.path"], str(kb.resolve()))
+            self.assertEqual(first_run["steps"][1]["request_id"], "capabilities-1")
+            self.assertTrue(first_run["steps"][1]["expect"]["result.features.method_param_schemas"])
+            self.assertEqual(first_run["steps"][2]["request_id"], "doctor-1")
+            self.assertTrue(first_run["steps"][2]["expect"]["result.adapter_readiness.reviewed_write_ready"])
+            self.assertEqual(first_run["steps"][3]["request_id"], "session-start-1")
+            self.assertEqual(first_run["steps"][3]["expect"]["result.context.budget.max_chars"], 4000)
+            self.assertTrue(first_run["steps"][4]["required"])
+            self.assertTrue(first_run["steps"][4]["expect"]["approval_outside_model_tool_call"])
             self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
             self.assertEqual(config["startup"]["path"], str(kb.resolve()))
@@ -161,6 +184,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.import_check", read_only["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertFalse(read_only["quality_gates"]["reviewed_writes"]["required_for_apply"])
+            self.assertFalse(read_only["first_run_sequence"]["steps"][4]["required"])
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
             portable = json.loads(
@@ -169,6 +193,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["knowledge_base"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["knowledge_base"]["card"], "<AKBP_KB_PATH>/akbp.json")
             self.assertTrue(portable["knowledge_base"]["portable_template"])
+            self.assertEqual(portable["first_run_sequence"]["steps"][0]["expect"]["knowledge_base.path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["tool_protocol_bridge"]["host_tool_manifest"]["knowledge_base_path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")

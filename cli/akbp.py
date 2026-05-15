@@ -2018,6 +2018,69 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "path_resolution": "Resolve <AKBP_KB_PATH> during install or first run when portable_template is true.",
             "tool_protocol_hosts": "Use the read-only bridge allowlist until doctor, capabilities, and startup context checks pass.",
         },
+        "first_run_sequence": {
+            "purpose": "Give adapter installers an ordered setup path before any runtime trusts or writes memory.",
+            "stop_policy": "Stop at the first failed required step, show the structured failure, and keep the integration read-only.",
+            "steps": [
+                {
+                    "step": "resolve_knowledge_base",
+                    "run": "knowledge_base",
+                    "required": True,
+                    "expect": {
+                        "knowledge_base.path": kb_path,
+                        "knowledge_base.card": card_path,
+                    },
+                    "on_failure": "Run akbp init or replace <AKBP_KB_PATH> before starting the adapter.",
+                },
+                {
+                    "step": "negotiate_capabilities",
+                    "run": "startup",
+                    "required": True,
+                    "request_id": "capabilities-1",
+                    "expect": {
+                        "ok": True,
+                        "result.negotiation.satisfied": True,
+                        "result.features.method_param_schemas": True,
+                    },
+                    "on_failure": "Disable unsupported methods or profiles and refresh the generated client-config.",
+                },
+                {
+                    "step": "check_adapter_readiness",
+                    "run": "health_check",
+                    "required": True,
+                    "request_id": "doctor-1",
+                    "expect": {
+                        "ok": True,
+                        "result.ready_for_adapter": True,
+                        f"result.adapter_readiness.{requested_profile}_ready": True,
+                    },
+                    "on_failure": "Show result.next_steps and use the recommended lower-risk profile until the knowledge base is ready.",
+                },
+                {
+                    "step": "retrieve_cited_startup_context",
+                    "run": "session_start",
+                    "required": requested_profile in {"startup_context", "read_only", "reviewed_write"},
+                    "request_id": "session-start-1",
+                    "expect": {
+                        "ok": True,
+                        "result.context.items": "array",
+                        "result.context.budget.max_chars": 4000,
+                    },
+                    "on_failure": "Continue without recalled memory, surface the warning, and do not invent prior project decisions.",
+                },
+                {
+                    "step": "enable_writes_only_after_review_surface",
+                    "run": "reviewed_writes",
+                    "required": requested_profile == "reviewed_write",
+                    "expect": {
+                        "dry_run_preview_visible": True,
+                        "approval_outside_model_tool_call": True,
+                        "approved_apply_repeats_exact_request": True,
+                    },
+                    "on_failure": "Keep write-capable tools disabled and use the read-only allowlist.",
+                },
+            ],
+        },
         "startup": {
             "id": "capabilities-1",
             "method": "akbp.capabilities",

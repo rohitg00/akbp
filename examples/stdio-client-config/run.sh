@@ -22,6 +22,21 @@ assert config["runtime_requirements"]["network_required"] is False, config
 assert config["runtime_requirements"]["cloud_account_required"] is False, config
 assert config["runtime_requirements"]["secrets_required"] == [], config
 assert "AKBP artifacts" in config["runtime_requirements"]["durable_state_owner"], config
+first_run = config["first_run_sequence"]
+assert "ordered setup path" in first_run["purpose"], config
+assert "keep the integration read-only" in first_run["stop_policy"], config
+assert [step["step"] for step in first_run["steps"]] == [
+    "resolve_knowledge_base",
+    "negotiate_capabilities",
+    "check_adapter_readiness",
+    "retrieve_cited_startup_context",
+    "enable_writes_only_after_review_surface",
+], config
+assert first_run["steps"][0]["expect"]["knowledge_base.path"] == config["knowledge_base"]["path"], config
+assert first_run["steps"][1]["request_id"] == "capabilities-1", config
+assert first_run["steps"][2]["request_id"] == "doctor-1", config
+assert first_run["steps"][3]["request_id"] == "session-start-1", config
+assert first_run["steps"][4]["required"] is False, config
 assert config["knowledge_capability"]["type"] == "durable_agent_knowledge", config
 assert config["knowledge_capability"]["default_mode"] == "read_only", config
 assert config["knowledge_capability"]["write_mode"] == "reviewed_write_only", config
@@ -70,6 +85,7 @@ config = json.load(sys.stdin)
 assert config["knowledge_base"]["path"] == "<AKBP_KB_PATH>", config
 assert config["knowledge_base"]["card"] == "<AKBP_KB_PATH>/akbp.json", config
 assert config["knowledge_base"]["portable_template"] is True, config
+assert config["first_run_sequence"]["steps"][0]["expect"]["knowledge_base.path"] == "<AKBP_KB_PATH>", config
 assert "<AKBP_KB_PATH>" in config["runtime_requirements"]["path_resolution"], config
 assert config["startup"]["path"] == "<AKBP_KB_PATH>", config
 assert config["health_check"]["path"] == "<AKBP_KB_PATH>", config
@@ -90,6 +106,8 @@ assert config["startup"]["id"] == "capabilities-1", config
 assert config["startup"]["path"] == config["knowledge_base"]["path"], config
 assert config["startup"]["params"]["requires_profiles"] == ["reviewed_write"], config
 assert "write_apply_requires_approval" in config["startup"]["params"]["requires"], config
+assert config["first_run_sequence"]["steps"][4]["required"] is True, config
+assert config["first_run_sequence"]["steps"][4]["expect"]["approval_outside_model_tool_call"] is True, config
 assert config["health_check"]["id"] == "doctor-1", config
 assert config["health_check"]["path"] == config["knowledge_base"]["path"], config
 assert config["health_check"]["blocking_field"] == "summary.errors", config
