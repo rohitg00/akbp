@@ -144,6 +144,29 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, readme + script)
         self.assertIn("small, weekly, and evidence-backed", note)
 
+    def test_getting_started_documents_first_run_value(self):
+        guide = (ROOT / "docs" / "GETTING_STARTED.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        install = (ROOT / "docs" / "INSTALL.md").read_text(encoding="utf-8")
+        for required in [
+            "Create a local knowledge base.",
+            "Register source material as evidence.",
+            "Preview a durable memory write before applying it.",
+            "Reject an unapproved write.",
+            "Retrieve cited context for a later agent session.",
+            "Export and check a portable bundle.",
+            "make demo",
+            "akbp.remember",
+            "dry_run",
+            "approval_required",
+            "approved",
+            "akbp.context",
+            "docs/ADAPTER_AUTHOR_QUICKSTART.md",
+        ]:
+            self.assertIn(required, guide)
+        self.assertIn("docs/GETTING_STARTED.md", readme)
+        self.assertIn("docs/GETTING_STARTED.md", install)
+
     def test_makefile_exposes_demo_target(self):
         text = (ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("demo:", text)

@@ -64,6 +64,8 @@ Critique tracking lives in `docs/CRITIQUE_RESPONSE.md` so public feedback turns 
 
 ## See it work
 
+If this is your first run, start with `docs/GETTING_STARTED.md`. It gives a ten-minute path from empty checkout to reviewed memory, cited recall, and export checking.
+
 Run the public-alpha demo:
 
 ```bash
@@ -366,6 +368,7 @@ akbp/
 
 ## Start here
 
+- First-time user: read `docs/GETTING_STARTED.md`, then run `make demo`.
 - New user: run `make demo`, then read `docs/USABILITY_DEMO_PLAN.md` and `docs/USE_CASES.md`.
 - Benchmark reviewer: run `examples/akbp-bench/run.sh`.
 - Repo-memory reviewer: run `examples/repo-memory-demo/run.sh`.

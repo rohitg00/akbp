@@ -11,6 +11,8 @@ No runtime package dependencies are required.
 
 ## Run from source
 
+For a complete first-run path, read `docs/GETTING_STARTED.md` before choosing an install mode.
+
 ```bash
 git clone https://github.com/rohitg00/akbp.git
 cd akbp
