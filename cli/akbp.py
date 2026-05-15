@@ -817,8 +817,9 @@ def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[st
     return pack
 
 
-def context_quality(pack: dict[str, Any], min_items: int, require_citations: bool) -> dict[str, Any]:
+def context_quality(pack: dict[str, Any], min_items: int, require_citations: bool, fail_on_warnings: bool = False) -> dict[str, Any]:
     items = pack.get("items", [])
+    warnings = pack.get("warnings", [])
     uncited = [
         str(item.get("id"))
         for item in items
@@ -829,12 +830,16 @@ def context_quality(pack: dict[str, Any], min_items: int, require_citations: boo
         failed.append(f"minimum_items:{len(items)}<{min_items}")
     if require_citations and uncited:
         failed.append(f"uncited_items:{','.join(uncited)}")
+    if fail_on_warnings and warnings:
+        failed.append(f"warnings:{len(warnings)}")
     return {
         "ok": not failed,
         "minimum_items": min_items,
         "require_citations": require_citations,
+        "fail_on_warnings": fail_on_warnings,
         "items": len(items),
         "uncited_items": uncited,
+        "warnings": len(warnings),
         "failed": failed,
     }
 
@@ -855,7 +860,7 @@ def cmd_context(args: argparse.Namespace) -> int:
         "warnings": warnings,
     }
     pack = apply_context_budget(pack, args.max_chars)
-    pack["quality"] = context_quality(pack, args.min_items, args.require_citations)
+    pack["quality"] = context_quality(pack, args.min_items, args.require_citations, args.fail_on_warnings)
     if not pack["quality"]["ok"]:
         pack["warnings"].append("Context quality gate failed: " + "; ".join(pack["quality"]["failed"]))
     if args.markdown:
@@ -3493,6 +3498,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--max-chars", type=int, help="cap total context item summary characters")
     s.add_argument("--min-items", type=int, default=0, help="fail when fewer context items are returned")
     s.add_argument("--require-citations", action="store_true", help="fail when returned context items lack citations")
+    s.add_argument("--fail-on-warnings", action="store_true", help="fail when the context pack includes warnings")
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
 

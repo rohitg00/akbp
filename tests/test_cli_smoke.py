@@ -829,6 +829,58 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(doctor["workflow"]["stages"][0]["id"], "create_kb")
             self.assertIn("Run: akbp --path <kb> init", doctor["next_steps"])
 
+    def test_context_can_fail_on_warnings(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            note = Path(d) / "note.md"
+            note.write_text("Decision: adapter startup gates should surface warning-bearing context before planning.\n", encoding="utf-8")
+            run_cli("--path", str(kb), "init")
+            run_cli(
+                "--path", str(kb),
+                "remember",
+                "Adapter startup gates should surface warning-bearing context before planning from recalled memory.",
+                "--type", "workflow",
+                "--evidence", str(note),
+            )
+
+            out = run_cli(
+                "--path", str(kb),
+                "context",
+                "adapter startup warning context",
+                "--max-chars", "24",
+                "--min-items", "1",
+                "--require-citations",
+            )
+            pack = json.loads(out.stdout)
+            self.assertTrue(pack["quality"]["ok"])
+            self.assertTrue(pack["warnings"])
+
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLI),
+                    "--path",
+                    str(kb),
+                    "context",
+                    "adapter startup warning context",
+                    "--max-chars",
+                    "24",
+                    "--min-items",
+                    "1",
+                    "--require-citations",
+                    "--fail-on-warnings",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(proc.returncode, 1)
+            failed = json.loads(proc.stdout)
+            self.assertFalse(failed["quality"]["ok"])
+            self.assertTrue(failed["quality"]["fail_on_warnings"])
+            self.assertIn("warnings:1", failed["quality"]["failed"])
+            self.assertTrue(any("Context budget truncated" in warning for warning in failed["warnings"]))
+
     def test_ingest_imports_redacted_page_and_optional_claim(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"

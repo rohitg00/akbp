@@ -1578,8 +1578,10 @@
             "ok",
             "minimum_items",
             "require_citations",
+            "fail_on_warnings",
             "items",
             "uncited_items",
+            "warnings",
             "failed"
           ],
           "properties": {
@@ -1593,6 +1595,9 @@
             "require_citations": {
               "type": "boolean"
             },
+            "fail_on_warnings": {
+              "type": "boolean"
+            },
             "items": {
               "type": "integer",
               "minimum": 0
@@ -1602,6 +1607,10 @@
               "items": {
                 "type": "string"
               }
+            },
+            "warnings": {
+              "type": "integer",
+              "minimum": 0
             },
             "failed": {
               "type": "array",
