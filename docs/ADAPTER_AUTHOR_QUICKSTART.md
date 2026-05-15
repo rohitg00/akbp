@@ -121,9 +121,10 @@ Minimum startup gate:
 2. Confirm `result.negotiation.satisfied` is `true` for required features.
 3. Confirm required workflow profiles such as `read_only` or `startup_context` are present in `result.negotiation.supported_profiles`.
 4. Call `akbp.doctor` and show `next_steps` if `ready_for_adapter` is `false`; use `adapter_readiness.recommended_profile` to decide whether the host should stay in setup-only, read-only, or reviewed-write mode.
-5. Confirm `result.features.method_schema_runtime_parity` is `true`.
-6. Confirm `result.runtime.method_schema_runtime_errors` is empty.
-7. Confirm the write method you plan to call advertises `review_required:true`.
+5. Read `security_posture` from the doctor report and keep writes disabled unless `write_boundary` is `dry_run_preview_then_approved_apply`, the approval field is `approved`, and the host can follow the listed adapter rules.
+6. Confirm `result.features.method_schema_runtime_parity` is `true`.
+7. Confirm `result.runtime.method_schema_runtime_errors` is empty.
+8. Confirm the write method you plan to call advertises `review_required:true`.
 
 If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
 If `akbp.doctor` returns `adapter_readiness.reviewed_write_ready:false`, keep write flows disabled even when capability negotiation succeeded. Capability discovery tells you what the server supports; doctor tells you whether this specific knowledge base is ready to trust.

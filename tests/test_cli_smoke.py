@@ -46,6 +46,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["health_check"]["id"], "doctor-1")
             self.assertEqual(config["health_check"]["path"], str(kb.resolve()))
             self.assertEqual(config["health_check"]["recommended_profile_field"], "adapter_readiness.recommended_profile")
+            self.assertEqual(config["health_check"]["security_posture_field"], "security_posture")
             self.assertEqual(config["tool_protocol_bridge"]["mode"], "reviewed_write")
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertIn("akbp.remember", config["tool_protocol_bridge"]["blocked_write_methods"])
@@ -55,6 +56,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual([step["run"] for step in config["verification"]], ["startup", "health_check", "session_start"])
             self.assertTrue(config["verification"][0]["expect"]["result.negotiation.satisfied"])
             self.assertTrue(config["verification"][1]["expect"]["result.adapter_readiness.reviewed_write_ready"])
+            self.assertEqual(
+                config["verification"][1]["expect"]["result.security_posture.write_boundary"],
+                "dry_run_preview_then_approved_apply",
+            )
             self.assertEqual(config["verification"][1]["expect"]["result.summary.errors"], 0)
             self.assertEqual(config["verification"][2]["expect"]["result.context.items"], "array")
             self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
@@ -130,6 +135,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             run_cli("--path", str(kb), "init")
             doctor = json.loads(run_cli("--path", str(kb), "doctor").stdout)
             self.assertEqual(doctor["adapter_readiness"]["recommended_profile"], "startup_context")
+            self.assertEqual(doctor["security_posture"]["write_boundary"], "dry_run_preview_then_approved_apply")
+            self.assertEqual(doctor["security_posture"]["approval_field"], "approved")
+            self.assertTrue(doctor["security_posture"]["redaction"]["tool_server_error_output"])
+            self.assertIn("akbp.import_check", doctor["security_posture"]["safe_review_methods"])
             self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertFalse(doctor["adapter_readiness"]["read_only_ready"])
             self.assertFalse(doctor["adapter_readiness"]["reviewed_write_ready"])

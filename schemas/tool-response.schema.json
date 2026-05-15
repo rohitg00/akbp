@@ -1554,6 +1554,7 @@
         "ready_for_adapter",
         "summary",
         "adapter_readiness",
+        "security_posture",
         "workflow",
         "checks",
         "next_steps"
@@ -1637,6 +1638,59 @@
               "type": "array",
               "items": {
                 "type": "string"
+              }
+            }
+          }
+        },
+        "security_posture": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "write_boundary",
+            "approval_field",
+            "redaction",
+            "adapter_rules",
+            "safe_review_methods"
+          ],
+          "properties": {
+            "write_boundary": {
+              "const": "dry_run_preview_then_approved_apply"
+            },
+            "approval_field": {
+              "const": "approved"
+            },
+            "redaction": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ingest",
+                "import_check",
+                "import_apply",
+                "export_check",
+                "tool_server_error_output"
+              ],
+              "properties": {
+                "ingest": { "const": true },
+                "import_check": { "const": true },
+                "import_apply": { "const": true },
+                "export_check": { "const": true },
+                "tool_server_error_output": { "const": true }
+              }
+            },
+            "adapter_rules": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "safe_review_methods": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^akbp\\."
               }
             }
           }

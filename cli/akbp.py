@@ -1723,6 +1723,31 @@ def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def doctor_security_posture() -> dict[str, Any]:
+    return {
+        "write_boundary": "dry_run_preview_then_approved_apply",
+        "approval_field": "approved",
+        "redaction": {
+            "ingest": True,
+            "import_check": True,
+            "import_apply": True,
+            "export_check": True,
+            "tool_server_error_output": True,
+        },
+        "adapter_rules": [
+            "Start read-only unless the host can show previews and collect approval outside the model-generated tool call.",
+            "Treat approval_required as a stop signal.",
+            "Do not apply writes when dry-run output reports redaction, rejected imports, missing evidence, or source verification issues without human review.",
+        ],
+        "safe_review_methods": [
+            "akbp.doctor",
+            "akbp.source.verify",
+            "akbp.import_check",
+            "akbp.export_check",
+        ],
+    }
+
+
 def cmd_doctor(args: argparse.Namespace) -> int:
     base = root(args.path)
     checks = doctor_checks(base)
@@ -1750,6 +1775,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             "errors": len(blocking),
         },
         "adapter_readiness": adapter_readiness,
+        "security_posture": doctor_security_posture(),
         "workflow": doctor_workflow(base, checks),
         "checks": checks,
         "next_steps": [check["next_step"] for check in failing if check.get("next_step")][: args.limit],
@@ -1849,6 +1875,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             },
             "ready_field": "ready_for_adapter",
             "recommended_profile_field": "adapter_readiness.recommended_profile",
+            "security_posture_field": "security_posture",
             "blocking_field": "summary.errors",
         },
         "tool_protocol_bridge": {
@@ -1911,6 +1938,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "expect": {
                     "ok": True,
                     "result.ready_for_adapter": True,
+                    "result.security_posture.write_boundary": "dry_run_preview_then_approved_apply",
                     f"result.adapter_readiness.{requested_profile}_ready": True,
                     "result.summary.errors": 0,
                 },

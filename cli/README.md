@@ -118,6 +118,8 @@ python3 cli/akbp.py --path ./my-kb doctor --profile read-only
 
 `doctor --profile` returns the same JSON health report and exits non-zero when the requested workflow profile is not ready, even if the knowledge base has no hard setup errors. Use this to avoid enabling a read-only, startup-context, or reviewed-write adapter against a KB that still needs indexing, evidence, or review readiness work.
 
+The doctor report also includes `security_posture` so adapters can machine-check the write boundary before enabling memory. The reference posture requires dry-run previews followed by `approved:true` apply requests, reports which paths redact secret-like values, and lists safe review methods such as `akbp.import_check`, `akbp.export_check`, and `akbp.source.verify`.
+
 ## Conformance
 
 `akbp conformance --level 0` checks the minimal file convention: `AKBP.md`, `akbp.json`, portable artifact paths, and required card capabilities.
