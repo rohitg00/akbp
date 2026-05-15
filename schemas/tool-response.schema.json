@@ -977,7 +977,8 @@
         "page",
         "source_id",
         "created_claims",
-        "skipped_claims"
+        "skipped_claims",
+        "dry_run"
       ],
       "properties": {
         "session_id": {
@@ -1058,6 +1059,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "dry_run": {
+          "type": "boolean"
         }
       }
     },

@@ -725,8 +725,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             transcript.write_text("We decided to use SQLite for local state.\nTODO: add tool-server implementation.\n", encoding="utf-8")
 
             run_cli("--path", str(kb), "init")
+            preview = json.loads(run_cli("--path", str(kb), "crystallize", str(transcript), "--dry-run").stdout)
+            self.assertTrue(preview["dry_run"])
+            self.assertFalse(preview["apply"])
+            self.assertFalse(Path(preview["page"]).exists())
+
             out = run_cli("--path", str(kb), "crystallize", str(transcript), "--apply")
             data = json.loads(out.stdout)
+            self.assertFalse(data["dry_run"])
             self.assertTrue(Path(data["page"]).exists())
 
             claims = [json.loads(line) for line in (kb / "claims" / "claims.jsonl").read_text(encoding="utf-8").splitlines()]
@@ -741,6 +747,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             out = run_cli("--path", str(kb), "crystallize", str(transcript), "--apply")
             rerun = json.loads(out.stdout)
             self.assertTrue(rerun["skipped_claims"])
+
+            conflict = subprocess.run(
+                [sys.executable, str(CLI), "--path", str(kb), "crystallize", str(transcript), "--apply", "--dry-run"],
+                text=True,
+                capture_output=True,
+            )
+            self.assertNotEqual(conflict.returncode, 0)
+            self.assertIn("cannot use --apply and --dry-run together", conflict.stderr)
 
 
     def test_relative_source_hash_uses_kb_path_first(self):

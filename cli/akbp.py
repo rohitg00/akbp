@@ -1026,6 +1026,12 @@ def summary_claim_type(section: str) -> str:
 
 def cmd_crystallize(args: argparse.Namespace) -> int:
     base = root(args.path)
+    if args.apply and args.dry_run:
+        print(json.dumps({
+            "ok": False,
+            "error": "crystallize cannot use --apply and --dry-run together",
+        }, indent=2), file=sys.stderr)
+        return 1
     ensure_dirs(base)
     transcript_path = Path(args.transcript).resolve()
     text = transcript_path.read_text(encoding="utf-8", errors="ignore")
@@ -1074,6 +1080,7 @@ def cmd_crystallize(args: argparse.Namespace) -> int:
     print(json.dumps({
         "session_id": sid,
         "apply": args.apply,
+        "dry_run": args.dry_run or not args.apply,
         "summary": summary,
         "page": str(page),
         "source_id": source["id"] if source else None,
@@ -2129,6 +2136,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("crystallize")
     s.add_argument("transcript")
     s.add_argument("--apply", action="store_true")
+    s.add_argument("--dry-run", action="store_true", help="preview session extraction without writing durable artifacts")
     s.set_defaults(func=cmd_crystallize)
 
     s = sub.add_parser("lint")
