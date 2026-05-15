@@ -208,6 +208,26 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_context_pack_schema_exposes_full_budget_diagnostics(self):
+        schema = json.loads((ROOT / "schemas" / "context-pack.schema.json").read_text(encoding="utf-8"))
+        budget = schema["properties"]["budget"]
+
+        self.assertFalse(budget["additionalProperties"])
+        for required in [
+            "max_chars",
+            "summary_chars",
+            "original_summary_chars",
+            "truncated",
+            "truncated_items",
+            "clipped_items",
+            "omitted_items",
+            "items_before_budget",
+            "items_after_budget",
+        ]:
+            self.assertIn(required, budget["properties"])
+        self.assertEqual(budget["properties"]["clipped_items"]["minimum"], 0)
+        self.assertEqual(budget["properties"]["omitted_items"]["minimum"], 0)
+
     def test_stdio_client_config_example_documents_negotiated_setup(self):
         text = (ROOT / "examples" / "stdio-client-config" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "stdio-client-config" / "run.sh").read_text(encoding="utf-8")
