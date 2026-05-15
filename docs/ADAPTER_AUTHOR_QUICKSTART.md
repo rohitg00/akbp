@@ -23,6 +23,12 @@ If a runtime cannot tell the user which KB it is reading or writing, keep it
 read-only. AKBP's durable value comes from reviewable scope, citations, and
 auditability, not from silently accumulating more memory.
 
+Adapter installers that start from an arbitrary workspace directory can run
+`akbp discover` first. It walks upward to the nearest `akbp.json`, reports the
+resolved KB path, default scope, artifact presence, trust-boundary rules, and
+the next `doctor --profile` and `client-config` commands. If discovery fails,
+continue without durable memory instead of creating hidden state.
+
 ## 1. Generate a read-only client config first
 
 Start with a read-only config when you are evaluating a runtime or wiring a new host. It proves startup retrieval and capability negotiation without granting durable write access.

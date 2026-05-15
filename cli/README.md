@@ -29,6 +29,7 @@ python3 cli/akbp.py --path ./my-kb index
 python3 cli/akbp.py --path ./my-kb index --incremental
 python3 cli/akbp.py --path ./my-kb search "Bun npm"
 python3 cli/akbp.py --path ./my-kb context "continue the package manager migration" --max-chars 4000
+python3 cli/akbp.py --path ./my-kb/subdir discover
 python3 cli/akbp.py --path ./my-kb cite claim_123
 python3 cli/akbp.py --path ./my-kb supersede claim_123 "Use the stdlib CLI until package metadata exists" --type decision --evidence cli/akbp.py
 python3 cli/akbp.py --path ./my-kb contradict claim_123 claim_456 --evidence source_123
@@ -77,6 +78,17 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 `akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of a local context retrieval call.
 
 Use `--max-chars` when an adapter has a fixed startup prompt budget. The returned context pack includes a `budget` object with the requested cap, final summary characters, original summary characters, and the number of truncated or omitted items.
+
+## Discovery
+
+akbp discover finds the nearest akbp.json from --path or its parent directories and prints a JSON preflight payload for adapter installers. It reports the resolved KB path, card metadata, default scope, artifact presence, trust-boundary rules, and recommended doctor, client-config, and context commands.
+
+Use it before wiring a runtime that starts from an arbitrary workspace subdirectory:
+
+    python3 cli/akbp.py --path ./my-kb/subdir discover
+    python3 cli/akbp.py --path ./my-kb/subdir discover | jq .trust_boundary
+
+If no Knowledge Base Card is found, the command exits non-zero and suggests akbp init instead of inventing durable memory state.
 
 ## Client config
 

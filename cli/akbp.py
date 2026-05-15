@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import sqlite3
 import sys
 from pathlib import Path
@@ -49,6 +50,27 @@ def file_hash(path: Path) -> str | None:
 
 def root(path: str | None = None) -> Path:
     return Path(path or os.getcwd()).resolve()
+
+
+def find_kb_root(start: Path) -> Path | None:
+    cursor = start.resolve()
+    if cursor.is_file():
+        cursor = cursor.parent
+    for candidate in [cursor, *cursor.parents]:
+        if (candidate / "akbp.json").exists():
+            return candidate
+    return None
+
+
+def load_card(base: Path) -> dict[str, Any] | None:
+    card_path = base / "akbp.json"
+    if not card_path.exists():
+        return None
+    try:
+        data = json.loads(card_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
 
 
 def ensure_dirs(base: Path) -> None:
@@ -330,6 +352,75 @@ def cmd_init(args: argparse.Namespace) -> int:
     audit(base, "init", {"path": str(base)})
     print(f"Initialized AKBP knowledge base at {base}")
     return 0
+
+
+def cmd_discover(args: argparse.Namespace) -> int:
+    start = root(args.path)
+    kb_root = find_kb_root(start)
+    if kb_root is None:
+        print(json.dumps({
+            "start_path": str(start),
+            "found": False,
+            "path": None,
+            "card_path": None,
+            "warnings": ["No akbp.json found in the start path or parent directories."],
+            "next_steps": [
+                "Run: akbp --path <kb> init",
+                "For an existing KB, pass --path to a directory under that KB.",
+            ],
+        }, indent=2, ensure_ascii=False))
+        return 1
+
+    card = load_card(kb_root)
+    artifacts = card.get("artifacts", {}) if isinstance(card, dict) else {}
+    artifact_paths = {key: str(value) for key, value in artifacts.items() if isinstance(value, str)}
+    artifact_status = {
+        key: {
+            "path": value,
+            "exists": (kb_root / value).exists(),
+        }
+        for key, value in artifact_paths.items()
+    }
+    missing_artifacts = [key for key, status in artifact_status.items() if not status["exists"]]
+    privacy = card.get("privacy", {}) if isinstance(card, dict) else {}
+    default_scope = privacy.get("default_scope") if isinstance(privacy, dict) else None
+    warnings: list[str] = []
+    if card is None:
+        warnings.append("akbp.json exists but could not be parsed as a JSON object.")
+    if missing_artifacts:
+        warnings.append("Some artifact paths from akbp.json are missing; run doctor before trusting this KB.")
+    kb_arg = shlex.quote(str(kb_root))
+
+    print(json.dumps({
+        "start_path": str(start),
+        "found": True,
+        "path": str(kb_root),
+        "card_path": str(kb_root / "akbp.json"),
+        "entrypoint_path": str(kb_root / "AKBP.md"),
+        "entrypoint_exists": (kb_root / "AKBP.md").exists(),
+        "card": {
+            "schema_version": card.get("schema_version") if isinstance(card, dict) else None,
+            "name": card.get("name") if isinstance(card, dict) else None,
+            "root": card.get("root") if isinstance(card, dict) else None,
+            "default_scope": default_scope,
+            "secret_redaction": privacy.get("secret_redaction") if isinstance(privacy, dict) else None,
+        },
+        "artifacts": artifact_status,
+        "missing_artifacts": missing_artifacts,
+        "trust_boundary": {
+            "read_path": str(kb_root),
+            "default_scope": default_scope or "unknown",
+            "write_rule": "Use dry-run previews first; apply only after approval or trusted local policy.",
+            "adapter_rule": "Run doctor --profile before enabling a workflow profile.",
+        },
+        "recommended_commands": {
+            "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
+            "client_config": f"akbp --path {kb_arg} client-config --profile read-only",
+            "session_start": f"akbp --path {kb_arg} context '<task>' --max-chars 4000",
+        },
+        "warnings": warnings,
+    }, indent=2, ensure_ascii=False))
+    return 0 if not warnings else 1
 
 
 def add_log(base: Path, title: str, body: str) -> None:
@@ -2443,6 +2534,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("init")
     s.set_defaults(func=cmd_init)
+
+    s = sub.add_parser("discover", help="find the nearest AKBP knowledge base from --path or its parents")
+    s.set_defaults(func=cmd_discover)
 
     s = sub.add_parser("remember")
     s.add_argument("text")

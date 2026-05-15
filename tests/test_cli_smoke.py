@@ -95,6 +95,35 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(startup_context["safety"]["profile"], "startup_context")
             self.assertEqual(startup_context["safety"]["write_policy"], "no_writes")
 
+    def test_discover_finds_nearest_kb_and_reports_trust_boundary(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "repo"
+            nested = kb / "src" / "agent"
+            run_cli("--path", str(kb), "init")
+            nested.mkdir(parents=True)
+
+            discovered = json.loads(run_cli("--path", str(nested), "discover").stdout)
+            self.assertTrue(discovered["found"])
+            self.assertEqual(discovered["path"], str(kb.resolve()))
+            self.assertEqual(discovered["card_path"], str(kb.resolve() / "akbp.json"))
+            self.assertEqual(discovered["card"]["default_scope"], "project")
+            self.assertEqual(discovered["trust_boundary"]["read_path"], str(kb.resolve()))
+            self.assertIn("dry-run previews", discovered["trust_boundary"]["write_rule"])
+            self.assertIn("doctor --profile", discovered["trust_boundary"]["adapter_rule"])
+            self.assertIn("doctor --profile read-only", discovered["recommended_commands"]["doctor"])
+            self.assertEqual(discovered["missing_artifacts"], [])
+
+            missing = subprocess.run(
+                [sys.executable, str(CLI), "--path", str(Path(d) / "outside"), "discover"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(missing.returncode, 1)
+            missing_payload = json.loads(missing.stdout)
+            self.assertFalse(missing_payload["found"])
+            self.assertIn("akbp.json", missing_payload["warnings"][0])
+
     def test_doctor_recommends_startup_context_for_initialized_kb_without_index(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
