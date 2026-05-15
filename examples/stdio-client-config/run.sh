@@ -17,6 +17,11 @@ import json, sys
 
 config = json.load(sys.stdin)
 assert config["transport"] == "stdio-jsonl", config
+assert config["runtime_requirements"]["local_first"] is True, config
+assert config["runtime_requirements"]["network_required"] is False, config
+assert config["runtime_requirements"]["cloud_account_required"] is False, config
+assert config["runtime_requirements"]["secrets_required"] == [], config
+assert "AKBP artifacts" in config["runtime_requirements"]["durable_state_owner"], config
 assert config["startup"]["id"] == "capabilities-1", config
 assert config["startup"]["method"] == "akbp.capabilities", config
 assert config["startup"]["path"] == config["knowledge_base"]["path"], config
@@ -59,6 +64,7 @@ config = json.load(sys.stdin)
 assert config["knowledge_base"]["path"] == "<AKBP_KB_PATH>", config
 assert config["knowledge_base"]["card"] == "<AKBP_KB_PATH>/akbp.json", config
 assert config["knowledge_base"]["portable_template"] is True, config
+assert "<AKBP_KB_PATH>" in config["runtime_requirements"]["path_resolution"], config
 assert config["startup"]["path"] == "<AKBP_KB_PATH>", config
 assert config["health_check"]["path"] == "<AKBP_KB_PATH>", config
 assert config["session_start"]["path"] == "<AKBP_KB_PATH>", config

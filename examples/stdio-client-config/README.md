@@ -7,6 +7,8 @@ The generated config makes the trust boundary visible:
 - call `akbp.capabilities` before assuming methods or schemas
 - run `akbp.doctor` before trusting startup retrieval or write flows
 - request either `read_only` or `reviewed_write`
+- expose local-first install requirements, including no network, cloud account,
+  or secrets required for the reference stdio flow
 - include request ids and the knowledge-base path in startup checks
 - include a structured response contract so adapters branch on `ok` and `error.code`
 - include a structured error-action map so bridge installers can recover from
@@ -37,6 +39,8 @@ AKBP stdio client config example passed
 
 - `akbp client-config` emits valid JSON for both read-only and reviewed-write adapters
 - `akbp client-config --portable` emits a commit-safe template that installers can resolve at first run
+- the config exposes `runtime_requirements` so adapter installers can show the
+  local-first/no-cloud/no-secret setup boundary before asking for trust
 - the config starts with capability negotiation instead of hard-coded assumptions
 - the config exposes a health check that adapters can map to setup warnings and next steps
 - the config exposes the response envelope and schema paths adapter authors should validate against

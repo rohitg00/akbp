@@ -94,6 +94,9 @@ If no Knowledge Base Card is found, the command exits non-zero and suggests akbp
 ## Client config
 
 `akbp client-config` prints a pasteable stdio JSONL tool-server configuration for coding agents, editor agents, task runners, or local assistants.
+The emitted config includes `runtime_requirements` so installers can tell users
+up front that the reference stdio flow is local-first and does not require a
+network connection, cloud account, or secrets.
 
 The default profile is read-only:
 

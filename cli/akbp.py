@@ -1956,6 +1956,16 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "card": card_path,
             "portable_template": bool(args.portable),
         },
+        "runtime_requirements": {
+            "local_first": True,
+            "network_required": False,
+            "cloud_account_required": False,
+            "secrets_required": [],
+            "durable_state_owner": "AKBP artifacts under knowledge_base.path",
+            "runtime_state_policy": "Adapters may keep ephemeral state locally, but durable memory must stay in AKBP artifacts.",
+            "path_resolution": "Resolve <AKBP_KB_PATH> during install or first run when portable_template is true.",
+            "tool_protocol_hosts": "Use the read-only bridge allowlist until doctor, capabilities, and startup context checks pass.",
+        },
         "startup": {
             "id": "capabilities-1",
             "method": "akbp.capabilities",
