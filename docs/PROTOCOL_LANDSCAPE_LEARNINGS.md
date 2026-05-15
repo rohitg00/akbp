@@ -255,6 +255,19 @@ This turns the benchmark fixture into a user-facing adoption path: copy the
 harness, keep read paths strict, and fail closed on response shape or approval
 contract drift.
 
+## Shipped artifact: bounded context budget diagnostics
+
+Recent tool-protocol discussions reinforced that agents burn context when every
+startup flow pastes full tool definitions, wiki pages, or raw memory records.
+AKBP already supports `max_chars` on `akbp.context` and `akbp.session.start`;
+the budget payload now makes partial context machine-readable by separating
+clipped summaries from omitted items and reporting item counts before and after
+budgeting.
+
+This gives low-context adapters a concrete control signal: trust cited bounded
+context when it fits, lower `limit` or ask for more budget when important items
+were omitted, and surface warnings without parsing prose.
+
 ## Shipped artifact: KB scope guidance
 
 Recent local and tool-compatible memory projects keep converging on shared

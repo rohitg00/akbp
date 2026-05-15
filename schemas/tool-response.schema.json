@@ -1587,6 +1587,22 @@
             "truncated_items": {
               "type": "integer",
               "minimum": 0
+            },
+            "clipped_items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "omitted_items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items_before_budget": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items_after_budget": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         },

@@ -75,7 +75,11 @@ Output:
     "max_chars": 4000,
     "summary_chars": 0,
     "original_summary_chars": 0,
-    "truncated_items": 0
+    "truncated_items": 0,
+    "clipped_items": 0,
+    "omitted_items": 0,
+    "items_before_budget": 0,
+    "items_after_budget": 0
   },
   "warnings": []
 }
@@ -247,7 +251,7 @@ Request and response envelopes are specified in:
 
 Adapters may pass optional capability negotiation params to `akbp.capabilities`: `client` is a short adapter identifier, `requires` is a bounded list of required feature names such as `method_param_schemas` or `features.capability_negotiation`, and `requires_profiles` is a bounded list of workflow profiles such as `read_only` or `startup_context`. The response always includes `result.negotiation` with requested, supported, unsupported, and `satisfied` fields for both features and profiles. Treat `satisfied:false` as a graceful-degrade signal, not a transport failure.
 
-For low-context agent harnesses, negotiate `features.bounded_context` and use `akbp.session.start` or `akbp.context` with `max_chars`. This lets the adapter request compact cited startup context instead of pasting full `AKBP.md`, wiki, or JSONL artifacts into every run.
+For low-context agent harnesses, negotiate `features.bounded_context` and use `akbp.session.start` or `akbp.context` with `max_chars`. This lets the adapter request compact cited startup context instead of pasting full `AKBP.md`, wiki, or JSONL artifacts into every run. The returned `budget` object separates clipped summaries from omitted items and reports item counts before and after budgeting so adapters can fail closed, lower `limit`, or ask for a larger budget without parsing warning prose.
 
 `tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method. Shared list contracts are bounded before CLI dispatch: `evidence` accepts at most 64 string items of 512 characters each, and `entity` accepts at most 128 string items of 256 characters each. Both reject NUL, newline, and carriage-return characters.
 
@@ -308,7 +312,7 @@ Errors are structured:
 The response schema also names common result and error detail shapes used by adapters:
 
 - `#/$defs/capabilities_result`: the closed capability discovery result with protocol, feature flags, schema URLs, methods, adapter workflow profiles, and examples.
-- `#/$defs/context_result`: a closed `akbp.context` result with query, generated timestamp, context items, and warnings.
+- `#/$defs/context_result`: a closed `akbp.context` result with query, generated timestamp, context items, warnings, and optional budget metadata for bounded context requests.
 - `#/$defs/search_result`: a closed `akbp.search` result with query, backend, optional FTS query, result rows, and warnings such as skipped inactive matching claims.
 - `#/$defs/status_result`: a closed `akbp.status` result with path, legacy object counts, initialization flags, latest claims, source verification health, audit count, index presence, and highest passing conformance level.
 - `#/$defs/doctor_result`: a closed `akbp.doctor` result with pass/fail checks, profile-specific adapter readiness, recommended adapter profile, and actionable next steps.

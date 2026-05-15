@@ -77,7 +77,7 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 `akbp context` returns a protocol-shaped context pack for agents. It is the CLI equivalent of a local context retrieval call.
 
-Use `--max-chars` when an adapter has a fixed startup prompt budget. The returned context pack includes a `budget` object with the requested cap, final summary characters, original summary characters, and the number of truncated or omitted items.
+Use `--max-chars` when an adapter has a fixed startup prompt budget. The returned context pack includes a `budget` object with the requested cap, final summary characters, original summary characters, clipped item count, omitted item count, and item counts before and after budgeting.
 
 ## Discovery
 

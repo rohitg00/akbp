@@ -29,6 +29,14 @@ def load_server_module():
     return module
 
 
+def load_cli_module():
+    spec = importlib.util.spec_from_file_location("akbp_cli_reference", CLI)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def assert_matches_required_schema(testcase, payload, schema):
     for field in schema["required"]:
         testcase.assertIn(field, payload)
@@ -71,6 +79,31 @@ def assert_response_envelope(testcase, payload):
 
 
 class ToolServerTest(unittest.TestCase):
+
+    def test_context_budget_reports_clipped_and_omitted_items(self):
+        cli = load_cli_module()
+        pack = {
+            "query": "adapter startup",
+            "generated_at": "2026-01-01T00:00:00Z",
+            "items": [
+                {"id": "claim-one", "summary": "abcde", "citations": ["source-one"]},
+                {"id": "claim-two", "summary": "vwxyz", "citations": ["source-two"]},
+            ],
+            "warnings": [],
+        }
+
+        result = cli.apply_context_budget(pack, 3)
+
+        self.assertEqual(result["items"][0]["summary"], "abc")
+        self.assertEqual(len(result["items"]), 1)
+        self.assertEqual(result["budget"]["summary_chars"], 3)
+        self.assertEqual(result["budget"]["original_summary_chars"], 10)
+        self.assertEqual(result["budget"]["clipped_items"], 1)
+        self.assertEqual(result["budget"]["omitted_items"], 1)
+        self.assertEqual(result["budget"]["truncated_items"], 2)
+        self.assertEqual(result["budget"]["items_before_budget"], 2)
+        self.assertEqual(result["budget"]["items_after_budget"], 1)
+        self.assertIn("Context budget truncated: clipped 1 item(s) and omitted 1 item(s)", result["warnings"][0])
 
     def test_all_server_outputs_use_response_envelope(self):
         requests = "\n".join([
@@ -663,6 +696,12 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[3]["result"], schema_def("context_result"))
             self.assertTrue(lines[3]["result"]["items"])
             self.assertLessEqual(lines[3]["result"]["budget"]["summary_chars"], 24)
+            self.assertEqual(
+                lines[3]["result"]["budget"]["truncated_items"],
+                lines[3]["result"]["budget"]["clipped_items"] + lines[3]["result"]["budget"]["omitted_items"],
+            )
+            self.assertGreaterEqual(lines[3]["result"]["budget"]["items_before_budget"], lines[3]["result"]["budget"]["items_after_budget"])
+            self.assertEqual(lines[3]["result"]["budget"]["items_after_budget"], len(lines[3]["result"]["items"]))
             assert_matches_required_schema(self, lines[3]["result"]["items"][0], schema_def("context_item"))
 
     def test_capabilities_negotiates_required_features(self):

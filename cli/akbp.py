@@ -781,21 +781,23 @@ def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[st
         return pack
     remaining = max_chars
     budgeted_items: list[dict[str, Any]] = []
-    truncated = 0
+    clipped = 0
+    omitted = 0
     original_chars = sum(len(str(item.get("summary", ""))) for item in pack["items"])
+    original_items = len(pack["items"])
     for item in pack["items"]:
         summary = str(item.get("summary", ""))
         if remaining <= 0:
-            truncated += 1
+            omitted += 1
             continue
         if len(summary) > remaining:
             if remaining > 3:
-                clipped = summary[: remaining - 3].rstrip()
-                clipped = f"{clipped}..." if clipped else "..."[:remaining]
+                clipped_summary = summary[: remaining - 3].rstrip()
+                clipped_summary = f"{clipped_summary}..." if clipped_summary else "..."[:remaining]
             else:
-                clipped = summary[:remaining]
-            item = {**item, "summary": clipped}
-            truncated += 1
+                clipped_summary = summary[:remaining]
+            item = {**item, "summary": clipped_summary}
+            clipped += 1
         budgeted_items.append(item)
         remaining -= len(str(item.get("summary", "")))
     pack["items"] = budgeted_items
@@ -804,10 +806,14 @@ def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[st
         "max_chars": max_chars,
         "summary_chars": final_chars,
         "original_summary_chars": original_chars,
-        "truncated_items": truncated,
+        "truncated_items": clipped + omitted,
+        "clipped_items": clipped,
+        "omitted_items": omitted,
+        "items_before_budget": original_items,
+        "items_after_budget": len(budgeted_items),
     }
-    if truncated:
-        pack["warnings"].append(f"Context budget truncated or omitted {truncated} item(s); increase max_chars or lower limit for more detail.")
+    if clipped or omitted:
+        pack["warnings"].append(f"Context budget truncated: clipped {clipped} item(s) and omitted {omitted} item(s); increase max_chars or lower limit for more detail.")
     return pack
 
 
