@@ -30,6 +30,7 @@ assert config["verification"][0]["expect"]["result.negotiation.satisfied"] is Tr
 assert config["verification"][1]["expect"]["result.summary.errors"] == 0, config
 assert config["verification"][2]["expect"]["result.context.items"] == "array", config
 assert config["safety"]["write_policy"] == "no_writes", config
+assert config["safety"]["host_trust_boundary"]["default_mode"] == "read_only_until_verified", config
 assert config["safety"]["require_adapter_ready"] is True, config
 assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
@@ -55,7 +56,9 @@ assert config["verification"][0]["run"] == "startup", config
 assert config["verification"][1]["run"] == "health_check", config
 assert config["verification"][2]["run"] == "session_start", config
 assert config["safety"]["write_policy"] == "dry_run_then_approved", config
+assert config["safety"]["host_trust_boundary"]["hosted_autonomous_tools"] == "use_read_only_unless_a_separate_human_approval_step_exists", config
 assert config["safety"]["require_adapter_ready"] is True, config
+assert config["safety"]["require_human_review_surface"] is True, config
 assert config["safety"]["require_review_metadata"] is True, config
 assert config["safety"]["never_auto_apply_session_end"] is True, config
 print("reviewed-write config ok")

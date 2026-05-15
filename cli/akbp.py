@@ -1679,9 +1679,15 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "safety": {
             "profile": requested_profile,
             "write_policy": "dry_run_then_approved" if requested_profile == "reviewed_write" else "no_writes",
+            "host_trust_boundary": {
+                "default_mode": "read_only_until_verified",
+                "hosted_autonomous_tools": "use_read_only_unless_a_separate_human_approval_step_exists",
+                "local_interactive_tools": "reviewed_writes_allowed_only_when_previews_are_visible",
+            },
             "require_capability_negotiation": True,
             "require_method_param_schemas": True,
             "require_adapter_ready": True,
+            "require_human_review_surface": requested_profile == "reviewed_write",
             "require_review_metadata": requested_profile == "reviewed_write",
             "never_auto_apply_session_end": True,
         },
@@ -1689,6 +1695,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "Call startup.method before any other method.",
             "Disable flows when result.negotiation.satisfied is false.",
             "Run health_check.method and show next_steps when ready_field is false.",
+            "Keep hosted or autonomous tool integrations read-only unless a separate human approval step exists outside the tool call.",
             "For write-capable flows, preview with dry_run:true and repeat unchanged with approved:true only after review.",
             "Branch on error.code, not free-form error text.",
         ],

@@ -15,6 +15,8 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rea
 
 The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, verification expectations, and safety rules. Paste that into the host runtime, then run the config's `verification` steps before adding write flows.
 
+Hosted or autonomous tool environments should stay on the read-only profile unless there is a separate human approval step outside the tool call. A runtime that can call tools without showing a dry-run preview cannot safely use the reviewed-write profile by itself.
+
 Use reviewed writes only after the runtime can show a preview and collect approval:
 
 ```bash

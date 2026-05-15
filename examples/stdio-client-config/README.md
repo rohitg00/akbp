@@ -11,6 +11,7 @@ The generated config makes the trust boundary visible:
 - include a verification plan with expected pass fields for startup, doctor, and session-start calls
 - retrieve context with `akbp.session.start`
 - keep durable writes blocked unless the adapter implements dry-run review and `approved:true`
+- keep hosted or autonomous tool integrations read-only unless a separate human approval step exists outside the tool call
 
 ## Run
 
@@ -33,3 +34,4 @@ AKBP stdio client config example passed
 - the config exposes a health check that adapters can map to setup warnings and next steps
 - the config tells adapter authors which calls to run and which result fields must pass before trusting setup
 - reviewed-write configs keep the dry-run and approval boundary explicit
+- configs describe the host trust boundary so adapter authors do not accidentally treat autonomous tool execution as reviewed writes

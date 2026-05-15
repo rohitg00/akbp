@@ -141,6 +141,7 @@ class RepoQualityTest(unittest.TestCase):
             "dry_run",
             "approved:true",
             "result.negotiation.satisfied",
+            "hosted or autonomous tool integrations read-only",
         ]:
             self.assertIn(required, combined)
         self.assertIn("./examples/stdio-client-config/run.sh", makefile)

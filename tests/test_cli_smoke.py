@@ -47,6 +47,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["verification"][1]["expect"]["result.summary.errors"], 0)
             self.assertEqual(config["verification"][2]["expect"]["result.context.items"], "array")
             self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
+            self.assertEqual(
+                config["safety"]["host_trust_boundary"]["hosted_autonomous_tools"],
+                "use_read_only_unless_a_separate_human_approval_step_exists",
+            )
+            self.assertTrue(config["safety"]["require_human_review_surface"])
             self.assertTrue(config["safety"]["never_auto_apply_session_end"])
 
             caps = subprocess.run(
