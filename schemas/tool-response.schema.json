@@ -1794,6 +1794,7 @@
         "initialized",
         "card",
         "entrypoint",
+        "trust_boundary",
         "counts",
         "claim_summary",
         "source_health",
@@ -1825,6 +1826,30 @@
         },
         "entrypoint": {
           "type": "boolean"
+        },
+        "trust_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "default_scope",
+            "secret_redaction",
+            "write_rule",
+            "adapter_default"
+          ],
+          "properties": {
+            "default_scope": {
+              "type": "string"
+            },
+            "secret_redaction": {
+              "type": "string"
+            },
+            "write_rule": {
+              "type": "string"
+            },
+            "adapter_default": {
+              "type": "string"
+            }
+          }
         },
         "counts": {
           "type": "object",

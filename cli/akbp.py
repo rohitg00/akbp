@@ -1714,6 +1714,10 @@ def cmd_lint(args: argparse.Namespace) -> int:
 
 def cmd_status(args: argparse.Namespace) -> int:
     base = root(args.path)
+    card = load_card(base)
+    privacy = card.get("privacy", {}) if isinstance(card, dict) else {}
+    default_scope = privacy.get("default_scope") if isinstance(privacy, dict) else None
+    secret_redaction = privacy.get("secret_redaction") if isinstance(privacy, dict) else None
     claims = read_jsonl(base / "claims" / "claims.jsonl")
     pages = list((base / "wiki").rglob("*.md")) if (base / "wiki").exists() else []
     sources = read_jsonl(base / "raw" / "sources" / "sources.jsonl")
@@ -1746,6 +1750,12 @@ def cmd_status(args: argparse.Namespace) -> int:
         "initialized": (base / ".akbp/config.json").exists(),
         "card": (base / "akbp.json").exists(),
         "entrypoint": (base / "AKBP.md").exists(),
+        "trust_boundary": {
+            "default_scope": default_scope or "unknown",
+            "secret_redaction": secret_redaction or "unknown",
+            "write_rule": "dry_run preview before approved durable writes",
+            "adapter_default": "read_only_until_doctor_and_capabilities_pass",
+        },
         "counts": {
             "claims": len(claims),
             "sources": len(sources),
