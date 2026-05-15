@@ -90,6 +90,18 @@ assert first["citations"], first
 assert "structured AKBP responses" in first["summary"], first
 print("startup context contract ok")
 
+truncated = envelope("session-start-truncated")
+assert truncated["ok"], truncated
+truncated_context = truncated["result"]["context"]
+budget = truncated_context["budget"]
+assert budget["max_chars"] == 24, truncated
+assert budget["truncated"] is True, truncated
+assert budget["truncated_items"] >= 1, truncated
+assert budget["items_before_budget"] >= budget["items_after_budget"], truncated
+assert any("Context budget truncated" in warning for warning in truncated_context["warnings"]), truncated
+assert truncated_context["quality"]["ok"] is True, truncated
+print("budget truncation contract ok")
+
 preview = envelope("remember-preview")
 assert preview["ok"], preview
 review = preview["result"]
@@ -138,6 +150,7 @@ print("approved recall contract ok")
 {"id":"session-start-invalid-params","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":0}}
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":500}}
+{"id":"session-start-truncated","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":24,"min_items":1,"require_citations":true}}
 {"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"remember-approved","method":"akbp.remember","path":"$KB","approved":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}

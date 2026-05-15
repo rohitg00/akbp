@@ -30,6 +30,7 @@ unsupported capability gate ok
 invalid params repair contract ok
 doctor contract ok
 startup context contract ok
+budget truncation contract ok
 dry-run review contract ok
 approval-required contract ok
 approved apply contract ok
@@ -121,6 +122,34 @@ preserves the budget object:
 }
 ```
 
+When context is clipped by the requested prompt budget, adapters must preserve
+the truncation diagnostics and fail closed before planning from partial memory:
+
+```json
+{
+  "id": "session-start-truncated",
+  "ok": true,
+  "result": {
+    "context": {
+      "items": [{"summary": "Adapters should validate..."}],
+      "budget": {
+        "max_chars": 24,
+        "truncated": true,
+        "truncated_items": 1,
+        "items_before_budget": 1,
+        "items_after_budget": 1
+      },
+      "warnings": ["Context budget truncated: clipped 1 item(s) and omitted 2 item(s); increase max_chars or lower limit for more detail."],
+      "quality": {
+        "ok": true,
+        "require_citations": true
+      }
+    }
+  },
+  "error": null
+}
+```
+
 Dry-run write previews must expose enough review metadata for a user or trusted
 policy to approve the exact apply:
 
@@ -170,6 +199,9 @@ Unapproved writes are a hard stop, not a warning:
 - invalid adapter payloads return `invalid_params` with a method schema reference and concrete field errors the adapter can use for repair
 - adapter readiness exposes the dry-run and approval boundary before writes are enabled
 - startup context includes cited records before the adapter uses memory in a plan
+- startup context budget truncation exposes `budget.truncated`,
+  `truncated_items`, and warnings that adapters can use to fail closed before
+  planning from partial memory
 - dry-run write previews include `review_required`, `apply_instruction`, and `would_write`
 - dry-run write previews include `preview_fingerprint` so adapters can bind
   the later approved apply to the reviewed method, path, and params
