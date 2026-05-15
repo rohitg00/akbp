@@ -462,6 +462,59 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "scratchpads, private logs, and raw transcripts stay outside AKBP unless promoted through review",
         ],
     }
+    ten_minute_proof = {
+        "format": "akbp-ten-minute-proof-v1",
+        "purpose": "Show a new user or adapter installer the smallest proof that AKBP is local, cited, review-gated, and portable.",
+        "user_value_gap": "Adjacent memory tools optimize for quick setup; AKBP must prove its trust boundary just as quickly.",
+        "setup_claims": {
+            "local_first": True,
+            "requires_docker": False,
+            "requires_cloud_account": False,
+            "requires_secrets": False,
+            "durable_source_of_truth": "AKBP.md plus schema-backed JSONL artifacts under the selected knowledge-base path",
+            "rebuildable_runtime_state": ".akbp/ local indexes and caches",
+        },
+        "proof_steps": [
+            {
+                "name": "create_visible_artifacts",
+                "command": f"akbp --path {kb_arg} init",
+                "proves": "AKBP creates inspectable markdown and JSON files instead of hidden memory state.",
+            },
+            {
+                "name": "check_readiness",
+                "command": f"akbp --path {kb_arg} doctor --profile read-only",
+                "proves": "A runtime can check readiness before trusting or exposing memory tools.",
+            },
+            {
+                "name": "retrieve_cited_context",
+                "command": f"akbp --path {kb_arg} context '<task>' --max-chars 4000 --require-citations",
+                "proves": "Startup recall is bounded and citation-aware instead of an uncited summary.",
+            },
+            {
+                "name": "preview_reviewed_write",
+                "command": "akbp.remember, akbp.ingest, or akbp.session.end with dry_run:true",
+                "proves": "Durable knowledge can be proposed without writing artifacts.",
+            },
+            {
+                "name": "block_unapproved_apply",
+                "command": "repeat the write request without approved:true",
+                "proves": "The tool server returns approval_required instead of silently writing memory.",
+            },
+            {
+                "name": "export_portable_bundle",
+                "command": f"akbp --path {kb_arg} export --output bundle.json && akbp --path {kb_arg} export-check bundle.json --fail-on-issues",
+                "proves": "Reviewed knowledge can be checked and carried across tools without local runtime state.",
+            },
+        ],
+        "success_markers": [
+            "doctor reports the requested profile ready",
+            "context results either carry citations or the adapter continues without recalled AKBP memory",
+            "write previews include review metadata and would-write paths",
+            "unapproved writes fail with approval_required",
+            "export-check passes without secret or manifest issues",
+        ],
+        "fallback": "If any proof step fails, keep the integration read-only and show the failing structured response.",
+    }
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give a runtime concrete prompt rules for preserving AKBP's cited, review-gated knowledge contract instead of relying on vague memory instructions.",
@@ -525,6 +578,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         },
         "positioning": positioning,
         "first_run_proof": first_run_proof,
+        "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
         "recommended_commands": {
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
@@ -2617,6 +2671,59 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Keep per-client caches and chat transcripts outside AKBP until promoted through dry-run review and approval.",
                 "Show the selected scope and trust boundary in setup UI before enabling recalled context.",
             ],
+        },
+        "ten_minute_proof": {
+            "format": "akbp-ten-minute-proof-v1",
+            "purpose": "Let installer UIs prove AKBP's user value before positioning it as another memory store.",
+            "user_value_gap": "Fast local memory tools make setup friction visible; AKBP must prove local, cited, review-gated, portable memory in the first run.",
+            "setup_claims": {
+                "local_first": True,
+                "requires_docker": False,
+                "requires_cloud_account": False,
+                "requires_secrets": False,
+                "durable_source_of_truth": "AKBP markdown and JSONL artifacts under knowledge_base.path",
+                "rebuildable_runtime_state": ".akbp/ local indexes and caches",
+            },
+            "proof_steps": [
+                {
+                    "name": "resolve_visible_kb",
+                    "run": "knowledge_base",
+                    "proves": "The adapter knows the explicit AKBP path before trusting recalled memory.",
+                },
+                {
+                    "name": "check_readiness",
+                    "run": "health_check",
+                    "proves": "The requested workflow profile is checked before host tools are exposed.",
+                },
+                {
+                    "name": "retrieve_cited_context",
+                    "run": "session_start",
+                    "proves": "Startup context is bounded and citation-aware.",
+                },
+                {
+                    "name": "preview_reviewed_write",
+                    "run": "write method with dry_run:true",
+                    "proves": "Durable writes can be reviewed without changing AKBP artifacts.",
+                },
+                {
+                    "name": "block_unapproved_apply",
+                    "run": "same write method without approved:true",
+                    "proves": "The server returns approval_required instead of silently writing memory.",
+                },
+                {
+                    "name": "export_checked_bundle",
+                    "run": "akbp export followed by akbp export-check --fail-on-issues",
+                    "proves": "Reviewed knowledge is portable without bridge-owned or index-only state.",
+                },
+            ],
+            "success_markers": [
+                "health_check reports requested_profile_ready",
+                "session_start returns cited items or the host continues without recalled memory",
+                "dry-run preview returns review metadata and would-write paths",
+                "unapproved writes fail with approval_required",
+                "export-check passes before sharing or importing knowledge",
+            ],
+            "fallback": "Keep the integration read-only when any proof step fails.",
         },
         "first_run_sequence": {
             "purpose": "Give adapter installers an ordered setup path before any runtime trusts or writes memory.",

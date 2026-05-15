@@ -174,6 +174,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(first_run["steps"][3]["expect"]["result.context.budget.max_chars"], 4000)
             self.assertTrue(first_run["steps"][4]["required"])
             self.assertTrue(first_run["steps"][4]["expect"]["approval_outside_model_tool_call"])
+            ten_minute = config["ten_minute_proof"]
+            self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")
+            self.assertIn("local, cited, review-gated, portable memory", ten_minute["user_value_gap"])
+            self.assertTrue(ten_minute["setup_claims"]["local_first"])
+            self.assertFalse(ten_minute["setup_claims"]["requires_docker"])
+            self.assertFalse(ten_minute["setup_claims"]["requires_cloud_account"])
+            proof_names = {step["name"] for step in ten_minute["proof_steps"]}
+            self.assertIn("retrieve_cited_context", proof_names)
+            self.assertIn("block_unapproved_apply", proof_names)
+            self.assertIn("export_checked_bundle", proof_names)
+            self.assertIn("approval_required", " ".join(ten_minute["success_markers"]))
+            self.assertIn("read-only", ten_minute["fallback"])
             self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
             self.assertEqual(config["startup"]["path"], str(kb.resolve()))
@@ -416,6 +428,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("memory_server_or_runtime_cache", compared_layers)
             self.assertIn("tool_protocol_host", compared_layers)
             self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
+            ten_minute = discovered["ten_minute_proof"]
+            self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")
+            self.assertIn("local, cited, review-gated, and portable", ten_minute["purpose"])
+            self.assertTrue(ten_minute["setup_claims"]["local_first"])
+            self.assertFalse(ten_minute["setup_claims"]["requires_secrets"])
+            proof_steps = {item["name"]: item for item in ten_minute["proof_steps"]}
+            self.assertIn("create_visible_artifacts", proof_steps)
+            self.assertIn("retrieve_cited_context", proof_steps)
+            self.assertIn("block_unapproved_apply", proof_steps)
+            self.assertIn("export_portable_bundle", proof_steps)
+            self.assertIn("--require-citations", proof_steps["retrieve_cited_context"]["command"])
+            self.assertIn("approval_required", " ".join(ten_minute["success_markers"]))
             self.assertEqual(
                 discovered["first_run_proof"]["recommended_harness"]["command"],
                 "./examples/structured-output-harness/run.sh",

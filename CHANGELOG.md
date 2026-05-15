@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a machine-readable ten-minute adoption proof to discovery and generated
+  client configs so installers can prove local setup, cited recall,
+  review-gated writes, and portable export before positioning AKBP as agent
+  memory.
 - Added a machine-readable session-memory boundary to tool-server capabilities
   and generated client config so adapters can distinguish runtime scratch from
   reviewed durable AKBP promotion.

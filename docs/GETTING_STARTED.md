@@ -74,6 +74,11 @@ make demo
 
 The demo creates a temporary knowledge base, adds evidence, writes a reviewed decision, verifies sources, builds search, retrieves context, supersedes stale knowledge, exports a bundle, checks the bundle, and runs level 3 conformance.
 The first write goes through the JSONL tool-server flow: capability discovery, dry-run preview, unapproved write rejection, approved apply, and approved index refresh.
+For adapter installers and setup UIs, `akbp discover` and `akbp client-config`
+also emit `ten_minute_proof`: a machine-readable checklist that proves AKBP is
+local-first, needs no Docker, cloud account, or secrets, retrieves cited
+startup context, blocks unapproved writes, and exports a checked portable
+bundle.
 
 Expected success markers:
 

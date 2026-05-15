@@ -98,6 +98,10 @@ AKBP memory instead of inventing prior decisions.
 
 akbp discover finds the nearest akbp.json from --path or its parent directories and prints a JSON preflight payload for adapter installers. It reports the resolved KB path, card metadata, default scope, artifact presence, trust-boundary rules, AKBP's role relative to memory servers, repository instruction files, tool-protocol hosts, and search indexes, plus recommended doctor, client-config, and context commands. The payload also includes `first_run_proof`, a machine-readable checklist for proving read-only setup, cited startup context, dry-run write preview, and the `approval_required` stop signal before enabling reviewed writes.
 `first_run_proof.recommended_harness` points adapter authors at the structured-output harness when they need a concrete fail-closed contract test instead of a prose checklist.
+The payload also includes `ten_minute_proof`, a compact checklist for installer
+UIs that need to prove local-first setup, cited startup context, dry-run review,
+unapproved write rejection, and export-checkable portability before exposing
+AKBP as an agent-memory surface.
 The `adapter_prompt_contract` block turns those rules into pasteable runtime instructions: call `akbp.session.start` before planning from memory, trust only cited context, preview writes with `dry_run:true`, apply only the exact reviewed request with `approved:true`, and branch on `ok` plus `error.code`.
 
 Use it before wiring a runtime that starts from an arbitrary workspace subdirectory:
@@ -124,6 +128,9 @@ artifacts remain the durable source of truth.
 It also includes `first_run_sequence`, an ordered setup path that resolves the
 knowledge-base path, negotiates capabilities, checks doctor readiness, retrieves
 cited startup context, and keeps writes disabled until a review surface exists.
+It includes `ten_minute_proof` so hosts can show concrete first-run value:
+local files, no Docker, no cloud account, no secrets, cited context, blocked
+unapproved writes, and checked portable export.
 It includes `multi_client_scope` so several clients can share one selected
 knowledge base without turning per-client scratchpads, private logs, or runtime
 caches into hidden durable memory.
