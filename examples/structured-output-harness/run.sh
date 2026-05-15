@@ -51,6 +51,16 @@ assert caps["result"]["methods"]["akbp.remember"]["write"], caps
 assert caps["result"]["methods"]["akbp.remember"]["review_required"], caps
 print("capability contract ok")
 
+unsupported = envelope("caps-unsupported")
+assert unsupported["ok"], unsupported
+unsupported_negotiation = unsupported["result"]["negotiation"]
+assert unsupported_negotiation["satisfied"] is False, unsupported
+assert unsupported_negotiation["supported_features"] == ["method_param_schemas"], unsupported
+assert unsupported_negotiation["unsupported_features"] == ["hosted_dashboard"], unsupported
+assert unsupported_negotiation["supported_profiles"] == ["startup_context"], unsupported
+assert unsupported_negotiation["unsupported_profiles"] == ["autonomous_write"], unsupported
+print("unsupported capability gate ok")
+
 doctor = envelope("doctor")
 assert doctor["ok"], doctor
 assert doctor["result"]["ready_for_adapter"], doctor
@@ -114,6 +124,7 @@ assert any(item["citations"] for item in recall_items), recall
 print("approved recall contract ok")
 '
 {"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"structured-output-harness-example","requires":["method_param_schemas","structured_errors","write_apply_requires_approval"],"requires_profiles":["startup_context","reviewed_write"]}}
+{"id":"caps-unsupported","method":"akbp.capabilities","path":"$KB","params":{"client":"structured-output-harness-example","requires":["method_param_schemas","hosted_dashboard"],"requires_profiles":["startup_context","autonomous_write"]}}
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":500}}
 {"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
