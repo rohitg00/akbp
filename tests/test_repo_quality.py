@@ -34,6 +34,7 @@ class RepoQualityTest(unittest.TestCase):
         for name in [
             "akbp.capabilities.params",
             "akbp.status.params",
+            "akbp.doctor.params",
             "akbp.query.params",
             "akbp.context.params",
             "akbp.index.params",

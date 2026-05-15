@@ -75,6 +75,7 @@ WRITE_METHODS = {
 METHODS: dict[str, dict[str, Any]] = {
     "akbp.capabilities": {"write": False, "params": ["client", "requires"]},
     "akbp.status": {"write": False, "params": ["limit"]},
+    "akbp.doctor": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
     "akbp.context": {"write": False, "params": ["task", "limit"]},
     "akbp.index": {"write": True, "params": ["incremental", "dry_run"]},
@@ -309,6 +310,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
         },
         "examples": [
             {"id": "status-1", "method": "akbp.status", "path": "."},
+            {"id": "doctor-1", "method": "akbp.doctor", "path": "."},
             {"id": "query-1", "method": "akbp.query", "path": ".", "params": {"query": "deployment", "limit": 5}},
             {"id": "search-1", "method": "akbp.search", "path": ".", "params": {"query": "deployment", "limit": 5}},
             {"id": "safe-write-1", "method": "akbp.remember", "path": ".", "dry_run": True, "params": {"text": "Agents need rollback paths"}},
@@ -328,6 +330,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
 def build_argv(method: str, params: dict[str, Any]) -> list[str]:
     mapping = {
         "akbp.status": ["status", "--limit", str(params.get("limit", 5))],
+        "akbp.doctor": ["doctor"],
         "akbp.query": ["query", params.get("query", ""), "--limit", str(params.get("limit", 10))],
         "akbp.context": ["context", params.get("task", ""), "--limit", str(params.get("limit", 10))],
         "akbp.index": ["index"],

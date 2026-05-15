@@ -451,6 +451,7 @@ class BenchmarkFixtureTest(unittest.TestCase):
         expected = {
             "akbp.capabilities": "#/$defs/capabilities_result",
             "akbp.status": "#/$defs/status_result",
+            "akbp.doctor": "#/$defs/doctor_result",
             "akbp.context": "#/$defs/context_result",
             "akbp.search": "#/$defs/search_result",
             "akbp.cite": "#/$defs/cite_result",

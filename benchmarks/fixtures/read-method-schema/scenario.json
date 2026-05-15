@@ -81,6 +81,21 @@
         "expected_result_schema": "#/$defs/status_result"
       },
       {
+        "id": "doctor-read",
+        "method": "akbp.doctor",
+        "approved": false,
+        "params": {},
+        "expected_result_fields": [
+          "path",
+          "ok",
+          "ready_for_adapter",
+          "summary",
+          "checks",
+          "next_steps"
+        ],
+        "expected_result_schema": "#/$defs/doctor_result"
+      },
+      {
         "id": "context-read",
         "method": "akbp.context",
         "approved": false,

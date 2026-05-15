@@ -325,6 +325,9 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(defs["status_result"]["additionalProperties"])
         self.assertIn("initialized", defs["status_result"]["required"])
         self.assertIn("entrypoint", defs["status_result"]["required"])
+        self.assertFalse(defs["doctor_result"]["additionalProperties"])
+        self.assertIn("ready_for_adapter", defs["doctor_result"]["required"])
+        self.assertIn("next_steps", defs["doctor_result"]["required"])
         self.assertFalse(defs["index_result"]["additionalProperties"])
         self.assertIn("indexed", defs["index_result"]["required"])
         self.assertIn("incremental", defs["index_result"]["required"])
@@ -458,6 +461,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(installed_result["features"], reference_result["features"])
         self.assertEqual(installed_result["runtime"], reference_result["runtime"])
         self.assertEqual(set(installed_result["methods"]), set(reference_result["methods"]))
+        self.assertIn("akbp.doctor", installed_result["methods"])
         self.assertIn("akbp.import_apply", installed_result["methods"])
         self.assertIn("akbp.session.start", installed_result["methods"])
         self.assertIn("akbp.session.end", installed_result["methods"])
@@ -499,6 +503,7 @@ class ToolServerTest(unittest.TestCase):
             requests = "\n".join([
                 json.dumps({"id": "caps", "path": str(kb), "method": "akbp.capabilities"}),
                 json.dumps({"id": "1", "path": str(kb), "method": "akbp.status"}),
+                json.dumps({"id": "doctor", "path": str(kb), "method": "akbp.doctor"}),
                 json.dumps({"id": "2", "path": str(kb), "method": "akbp.context", "params": {"task": "durable claims"}}),
             ]) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
@@ -541,6 +546,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["schemas"]["request"].split("/")[-1], "tool-request.schema.json")
             self.assertEqual(lines[0]["result"]["schemas"]["response"].split("/")[-1], "tool-response.schema.json")
             self.assertIn("akbp.remember", lines[0]["result"]["methods"])
+            self.assertIn("akbp.doctor", lines[0]["result"]["methods"])
             self.assertIn("akbp.ingest", lines[0]["result"]["methods"])
             self.assertIn("akbp.import_check", lines[0]["result"]["methods"])
             self.assertIn("akbp.import_apply", lines[0]["result"]["methods"])
@@ -554,15 +560,20 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(crystallize_examples)
             self.assertTrue(crystallize_examples[0]["dry_run"])
             self.assertTrue(crystallize_examples[0]["params"]["apply"])
-            for method in ["akbp.status", "akbp.remember", "akbp.ingest", "akbp.import_check", "akbp.import_apply", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
+            for method in ["akbp.status", "akbp.doctor", "akbp.remember", "akbp.ingest", "akbp.import_check", "akbp.import_apply", "akbp.index", "akbp.search", "akbp.audit", "akbp.cite", "akbp.crystallize_session"]:
                 self.assertTrue(lines[0]["result"]["methods"][method]["params_schema"].endswith(f"#/$defs/{method}.params"))
             self.assertEqual(lines[1]["id"], "1")
             self.assertTrue(lines[1]["ok"])
             assert_matches_required_schema(self, lines[1]["result"], schema_def("status_result"))
-            self.assertEqual(lines[2]["id"], "2")
-            assert_matches_required_schema(self, lines[2]["result"], schema_def("context_result"))
-            self.assertTrue(lines[2]["result"]["items"])
-            assert_matches_required_schema(self, lines[2]["result"]["items"][0], schema_def("context_item"))
+            self.assertEqual(lines[2]["id"], "doctor")
+            self.assertTrue(lines[2]["ok"])
+            assert_matches_required_schema(self, lines[2]["result"], schema_def("doctor_result"))
+            self.assertTrue(lines[2]["result"]["ok"])
+            self.assertEqual(lines[2]["result"]["summary"]["errors"], 0)
+            self.assertEqual(lines[3]["id"], "2")
+            assert_matches_required_schema(self, lines[3]["result"], schema_def("context_result"))
+            self.assertTrue(lines[3]["result"]["items"])
+            assert_matches_required_schema(self, lines[3]["result"]["items"][0], schema_def("context_item"))
 
     def test_capabilities_negotiates_required_features(self):
         request = json.dumps({

@@ -1428,6 +1428,98 @@
         }
       }
     },
+    "doctor_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "ok",
+        "ready_for_adapter",
+        "summary",
+        "checks",
+        "next_steps"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "ready_for_adapter": {
+          "type": "boolean"
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "passed",
+            "warnings",
+            "errors"
+          ],
+          "properties": {
+            "passed": { "type": "integer", "minimum": 0 },
+            "warnings": { "type": "integer", "minimum": 0 },
+            "errors": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "ok",
+              "severity",
+              "message"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "warning",
+                  "error"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1
+              },
+              "next_step": {
+                "type": "string",
+                "minLength": 1
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "checked": { "type": "integer", "minimum": 0 },
+                  "verified": { "type": "integer", "minimum": 0 },
+                  "changed": { "type": "integer", "minimum": 0 },
+                  "missing": { "type": "integer", "minimum": 0 },
+                  "unchecked": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        },
+        "next_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "index_result": {
       "type": "object",
       "additionalProperties": false,
