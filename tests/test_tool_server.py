@@ -745,6 +745,31 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[3]["result"]["budget"]["items_after_budget"], len(lines[3]["result"]["items"]))
             assert_matches_required_schema(self, lines[3]["result"]["items"][0], schema_def("context_item"))
 
+    def test_doctor_accepts_profile_readiness_param(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            request = {
+                "id": "doctor-startup",
+                "path": str(kb),
+                "method": "akbp.doctor",
+                "params": {"profile": "startup_context"},
+            }
+            proc = subprocess.run(
+                [sys.executable, str(SERVER)],
+                input=json.dumps(request) + "\n",
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            row = json.loads(proc.stdout)
+            self.assertTrue(row["ok"])
+            assert_matches_required_schema(self, row["result"], schema_def("doctor_result"))
+            self.assertEqual(row["result"]["requested_profile"], "startup_context")
+            self.assertTrue(row["result"]["requested_profile_ready"])
+            self.assertTrue(row["result"]["adapter_readiness"]["startup_context_ready"])
+            self.assertFalse(row["result"]["ready_for_adapter"])
+
     def test_capabilities_negotiates_required_features(self):
         request = json.dumps({
             "id": "caps-negotiate",

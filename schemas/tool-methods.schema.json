@@ -482,7 +482,18 @@
     "akbp.doctor.params": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {}
+      "properties": {
+        "profile": {
+          "type": "string",
+          "pattern": "^[^\\u0000\\n\\r]*$",
+          "enum": [
+            "startup_context",
+            "read_only",
+            "reviewed_write"
+          ],
+          "description": "Optional adapter readiness profile to evaluate, using capability profile names."
+        }
+      }
     },
     "akbp.conformance.params": {
       "type": "object",

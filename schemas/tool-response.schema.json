@@ -2009,6 +2009,17 @@
         "ready_for_adapter": {
           "type": "boolean"
         },
+        "requested_profile": {
+          "type": "string",
+          "enum": [
+            "startup_context",
+            "read_only",
+            "reviewed_write"
+          ]
+        },
+        "requested_profile_ready": {
+          "type": "boolean"
+        },
         "summary": {
           "type": "object",
           "additionalProperties": false,
