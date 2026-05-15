@@ -129,6 +129,13 @@ JSONL request:
 The response includes `result.negotiation.satisfied`. If it is `false`, disable or degrade the flows named in `unsupported_features` or `unsupported_profiles` instead of guessing.
 It also includes `result.profile_contracts`, a machine-readable map from workflow profiles to their purpose, risk level, write policy, review-surface requirement, and matching doctor readiness field. Use that map in installers and setup screens so users can see why a host starts read-only and what must change before reviewed writes are enabled.
 
+Generated client configs also include `response_contract.error_actions`. Use that
+map as the adapter's failure policy before writing host-specific glue:
+`invalid_json` and `invalid_request` are client bugs, `unknown_method` requires
+a capability refresh, `invalid_params` requires payload repair from the
+advertised schema, `approval_required` is a hard stop until reviewed approval,
+and `cli_error` or `internal_error` must not be treated as successful writes.
+
 Adapter checks:
 
 - method exists before use

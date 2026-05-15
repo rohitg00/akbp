@@ -41,6 +41,13 @@ assert config["session_start"]["path"] == config["knowledge_base"]["path"], conf
 assert config["response_contract"]["envelope"]["required"] == ["id", "ok", "result", "error"], config
 assert config["response_contract"]["envelope"]["ok"] == "boolean", config
 assert config["response_contract"]["schemas"]["response"] == "schemas/tool-response.schema.json", config
+actions = config["response_contract"]["error_actions"]
+assert actions["invalid_json"]["adapter_action"].startswith("repair JSON serialization"), config
+assert actions["unknown_method"]["retry"] == "only after capability refresh", config
+assert "params_schema" in actions["invalid_params"]["adapter_action"], config
+assert "approved:true" in actions["approval_required"]["retry"], config
+assert actions["cli_error"]["write_policy"] == "do not assume a durable write happened", config
+assert actions["internal_error"]["retry"] == "do not auto-retry writes", config
 print("read-only config ok")
 '
 

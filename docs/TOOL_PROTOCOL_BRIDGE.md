@@ -42,6 +42,9 @@ Required behavior:
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.
 - Return AKBP response envelopes or preserve `ok`, `result`, and `error.code` in the host response.
+- Use `response_contract.error_actions` from `akbp client-config` as the bridge
+  failure policy so unsupported methods, invalid params, approval stops, CLI
+  failures, and internal failures do not collapse into generic text errors.
 - Surface citations, source ids, warnings, and `budget` fields when returning context.
 - Treat `approval_required` as a stop signal, not a warning.
 - Redact secret-like values in logs and never store raw tool requests as durable memory.

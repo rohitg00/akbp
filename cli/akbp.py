@@ -1994,6 +1994,43 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Show error.details when present; it is already redacted by the reference server.",
                 "Keep the adapter in read-only mode after capability, doctor, or schema validation failures.",
             ],
+            "error_actions": {
+                "invalid_json": {
+                    "adapter_action": "repair JSON serialization before sending another line",
+                    "retry": "after local encoder fix",
+                    "write_policy": "never apply approval to malformed JSON",
+                },
+                "invalid_request": {
+                    "adapter_action": "repair the request envelope and remove unknown request-level fields",
+                    "retry": "after envelope fix",
+                    "write_policy": "never apply approval to envelope failures",
+                },
+                "unknown_method": {
+                    "adapter_action": "refresh akbp.capabilities and disable unavailable flows when still missing",
+                    "retry": "only after capability refresh",
+                    "write_policy": "do not synthesize replacement method names",
+                },
+                "invalid_params": {
+                    "adapter_action": "repair params using error.details.params_schema, missing fields, unknown fields, and type errors",
+                    "retry": "after parameter fix and a fresh dry-run for writes",
+                    "write_policy": "do not convert invalid params into an approved write",
+                },
+                "approval_required": {
+                    "adapter_action": "stop the apply path and show the reviewed-write requirement",
+                    "retry": "only with approved:true after the exact dry-run request was reviewed",
+                    "write_policy": "approval must happen outside the model-generated tool call",
+                },
+                "cli_error": {
+                    "adapter_action": "surface redacted CLI stdout, stderr, and exit code",
+                    "retry": "only after the underlying CLI issue is fixed",
+                    "write_policy": "do not assume a durable write happened",
+                },
+                "internal_error": {
+                    "adapter_action": "stop the flow and report a server defect",
+                    "retry": "do not auto-retry writes",
+                    "write_policy": "keep durable writes disabled until the defect is fixed",
+                },
+            },
             "schemas": {
                 "request": "schemas/tool-request.schema.json",
                 "response": "schemas/tool-response.schema.json",

@@ -9,6 +9,9 @@ The generated config makes the trust boundary visible:
 - request either `read_only` or `reviewed_write`
 - include request ids and the knowledge-base path in startup checks
 - include a structured response contract so adapters branch on `ok` and `error.code`
+- include a structured error-action map so bridge installers can recover from
+  `invalid_json`, `invalid_request`, `unknown_method`, `invalid_params`,
+  `approval_required`, `cli_error`, and `internal_error` without parsing prose
 - include a verification plan with expected pass fields for startup, doctor, and session-start calls
 - include a tool-protocol bridge allowlist and blocked write methods
 - retrieve context with `akbp.session.start`
@@ -37,6 +40,8 @@ AKBP stdio client config example passed
 - the config starts with capability negotiation instead of hard-coded assumptions
 - the config exposes a health check that adapters can map to setup warnings and next steps
 - the config exposes the response envelope and schema paths adapter authors should validate against
+- the config exposes `response_contract.error_actions` so adapters can map each
+  structured failure to a retry and write-safety policy
 - the config exposes `tool_protocol_bridge` so tool-protocol hosts can start with read-only allowlists
 - the config tells adapter authors which calls to run and which result fields must pass before trusting setup
 - reviewed-write configs keep the dry-run and approval boundary explicit
