@@ -154,6 +154,8 @@ assert prompt_contract["format"] == "akbp-adapter-prompt-contract-v1", prompt_co
 assert prompt_contract["profile"] == "reviewed_write", prompt_contract
 assert prompt_contract["startup_request"]["method"] == "akbp.session.start", prompt_contract
 assert prompt_contract["startup_request"]["params"]["max_chars"] == 4000, prompt_contract
+assert prompt_contract["startup_request"]["params"]["min_items"] == 1, prompt_contract
+assert prompt_contract["startup_request"]["params"]["require_citations"] is True, prompt_contract
 assert prompt_contract["planning_gate"]["required_before_planning"], prompt_contract
 trust_gate = prompt_contract["startup_trust_gate"]
 assert trust_gate["format"] == "akbp-startup-trust-gate-v1", trust_gate

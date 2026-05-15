@@ -147,10 +147,16 @@ assert manifest["preflight_requests"][0]["params"]["requires_profiles"] == ["rea
 assert manifest["preflight_requests"][0]["expect"]["result.negotiation.satisfied"] is True, config
 assert manifest["preflight_requests"][1]["method"] == "akbp.doctor", config
 assert manifest["preflight_requests"][2]["params"]["max_chars"] == 4000, config
+assert manifest["preflight_requests"][2]["params"]["min_items"] == 1, config
+assert manifest["preflight_requests"][2]["params"]["require_citations"] is True, config
+assert manifest["preflight_requests"][2]["expect"]["result.quality.minimum_items"] == 1, config
+assert manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"] is True, config
 assert client_manifest["preflight_requests"] == manifest["preflight_requests"], config
 assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
 assert config["session_start"]["path"] == config["knowledge_base"]["path"], config
+assert config["session_start"]["params"]["min_items"] == 1, config
+assert config["session_start"]["params"]["require_citations"] is True, config
 assert config["response_contract"]["envelope"]["required"] == ["id", "ok", "result", "error"], config
 assert config["response_contract"]["envelope"]["ok"] == "boolean", config
 assert config["response_contract"]["schemas"]["response"] == "schemas/tool-response.schema.json", config
@@ -206,6 +212,7 @@ assert config["health_check"]["blocking_field"] == "summary.errors", config
 assert config["verification"][0]["run"] == "startup", config
 assert config["verification"][1]["run"] == "health_check", config
 assert config["verification"][2]["run"] == "session_start", config
+assert config["verification"][2]["expect"]["result.quality.require_citations"] is True, config
 assert "Branch on error.code" in config["response_contract"]["error_rules"][0], config
 assert config["response_contract"]["schemas"]["methods"] == "schemas/tool-methods.schema.json", config
 assert config["safety"]["write_policy"] == "dry_run_then_approved", config

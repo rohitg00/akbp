@@ -53,6 +53,9 @@ assert manifest["preflight_requests"][0]["expect"]["result.negotiation.satisfied
 assert manifest["preflight_requests"][1]["method"] == "akbp.doctor", manifest
 assert manifest["preflight_requests"][2]["method"] == "akbp.session.start", manifest
 assert manifest["preflight_requests"][2]["params"]["max_chars"] == 4000, manifest
+assert manifest["preflight_requests"][2]["params"]["min_items"] == 1, manifest
+assert manifest["preflight_requests"][2]["params"]["require_citations"] is True, manifest
+assert manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"] is True, manifest
 assert config["tool_protocol_bridge"]["client_tool_manifest"]["preflight_requests"] == manifest["preflight_requests"], config
 
 for entry, host_tool in zip(forward_tools, manifest["tools"]):

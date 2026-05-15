@@ -245,13 +245,13 @@ benchmark fixture with `expected_result_schema`, `expected_result_fields`, and
 Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.
 
 ```json
-{"id":"session-start-1","method":"akbp.session.start","path":".","params":{"task":"current task goals and constraints","limit":5,"max_chars":4000}}
+{"id":"session-start-1","method":"akbp.session.start","path":".","params":{"task":"current task goals and constraints","limit":5,"max_chars":4000,"min_items":1,"require_citations":true}}
 ```
 
 Lower-level context request:
 
 ```json
-{"id":"ctx-1","method":"akbp.context","path":".","params":{"task":"current task goals and constraints","limit":5,"max_chars":4000}}
+{"id":"ctx-1","method":"akbp.context","path":".","params":{"task":"current task goals and constraints","limit":5,"max_chars":4000,"min_items":1,"require_citations":true}}
 ```
 
 ```json

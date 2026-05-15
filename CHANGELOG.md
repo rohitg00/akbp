@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Changed generated adapter startup preflight requests to require at least one
+  cited context item, so hosts prove the citation gate in machine-readable
+  config instead of relying only on prompt guidance.
 - Added a compaction handoff recall benchmark fixture so adapter authors can
   prove cited, lifecycle-aware handoff snapshots beat stale relative-date memory
   before trusting recalled context after compaction.
