@@ -34,6 +34,27 @@ adapters/openclaw/
 
 Use `docs/ADAPTER_AUTHOR_QUICKSTART.md` before creating runtime-specific adapters. Use the template before creating runtime-specific adapters. Use the example to confirm the minimum complete file shape. Both define startup context retrieval, safe writes, session crystallization, and privacy defaults without adding a new memory format.
 
+## Quickstart matrix
+
+Use this matrix to pick the smallest integration path for a new runtime. The runtime can use any transport it supports, but the lifecycle and write-safety contract stays the same.
+
+| Runtime shape | Transport | Setup file | Session start | Write preview | Approved apply |
+| --- | --- | --- | --- | --- | --- |
+| Terminal coding agent | JSONL tool server or CLI | `adapters/terminal-coding-agent/` | `akbp.session.start` or `akbp.context` before planning | `akbp.session.end` with `dry_run:true` | repeat with `approved:true`, then `akbp.index` |
+| Editor coding agent | JSONL tool server plus editor rules | `adapters/editor-coding-agent/` | inject cited context into the workspace/session | show `review_required` and `apply_instruction` in the editor review surface | apply only after explicit user approval |
+| Local assistant or automation | CLI or JSONL tool server | `adapters/coding-agent-template/` | retrieve task-scoped context at job start | preview `akbp.remember`, `akbp.ingest`, or `akbp.session.end` | use request-level `approved:true` after local policy review |
+| Repository-backed agent | CLI in repo hooks or JSONL tool server | `adapters/git-native-agent/` | read AKBP context after repo checkout | preserve durable session findings as dry-run memory proposals | keep code state in Git and durable knowledge in AKBP artifacts |
+| Custom tool-protocol bridge | Bridge to JSONL tool server | `adapters/example-coding-agent/` | call `akbp.capabilities`, then lifecycle start | expose dry-run responses as the bridge review artifact | forward approved calls without inventing a separate memory store |
+
+Minimum publishable adapter behavior:
+
+- Discover `akbp.capabilities` before assuming methods or parameter schemas.
+- Retrieve cited context before substantial planning.
+- Start write-capable flows with `dry_run:true`.
+- Render `review_required`, `apply_instruction`, warnings, skipped records, and planned writes.
+- Apply only with request-level `approved:true` or an explicit trusted local policy.
+- Store durable output in AKBP markdown and JSONL artifacts, not runtime-only memory.
+
 ## Required adapter files
 
 Each adapter should include:

@@ -483,6 +483,25 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn("review_required", text, rel)
             self.assertIn("apply_instruction", text, rel)
 
+    def test_adapter_docs_include_quickstart_matrix(self):
+        text = (ROOT / "docs" / "ADAPTERS.md").read_text(encoding="utf-8")
+        for required in [
+            "## Quickstart matrix",
+            "Terminal coding agent",
+            "Editor coding agent",
+            "Local assistant or automation",
+            "Repository-backed agent",
+            "Custom tool-protocol bridge",
+            "akbp.capabilities",
+            "akbp.session.start",
+            "akbp.session.end",
+            "dry_run:true",
+            "approved:true",
+            "review_required",
+            "apply_instruction",
+        ]:
+            self.assertIn(required, text)
+
     def test_all_adapter_configs_define_lifecycle_hooks(self):
         adapters_root = ROOT / "adapters"
         adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
