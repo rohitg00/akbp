@@ -113,7 +113,7 @@ If the response includes review metadata, surface it in the runtime UI or comman
 - `review_required`
 - `apply_instruction`
 - accepted/rejected object counts
-- source/evidence warnings
+- source/evidence warnings, including changed or missing cited source hashes during retrieval
 
 Apply only after approval or an explicit trusted local policy:
 

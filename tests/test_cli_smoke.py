@@ -304,6 +304,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(status["index"]["present"])
             self.assertEqual(status["conformance"]["highest_passing_level"], "3")
 
+            out = run_cli("--path", str(kb), "context", "Bun runtime decision")
+            drift_pack = json.loads(out.stdout)
+            self.assertTrue(any(source["id"] in warning and "changed" in warning for warning in drift_pack["warnings"]))
+
+            out = run_cli("--path", str(kb), "search", "Bun runtime decision")
+            drift_search = json.loads(out.stdout)
+            self.assertTrue(any(source["id"] in warning and "changed" in warning for warning in drift_search["warnings"]))
+
             out = run_cli("--path", str(kb), "cite", claim["id"])
             citation = json.loads(out.stdout)
             self.assertEqual(citation["claim_id"], claim["id"])

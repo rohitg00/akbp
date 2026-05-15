@@ -499,14 +499,43 @@ def collect_results(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
     return collect_keyword_results(base, query, limit)
 
 
+def source_drift_warnings(base: Path, results: list[dict[str, Any]], limit: int) -> list[str]:
+    cited: set[str] = set()
+    for result in results:
+        if result.get("type") == "claim":
+            cited.update(str(item) for item in result.get("evidence", []) if str(item).startswith("source_"))
+        elif result.get("type") == "source" and result.get("id"):
+            cited.add(str(result["id"]))
+        for citation in result.get("citations", []):
+            if str(citation).startswith("source_"):
+                cited.add(str(citation))
+    if not cited:
+        return []
+
+    source_check = verify_sources(base)
+    by_id: dict[str, str] = {}
+    for item in source_check.get("changed", []):
+        by_id[str(item.get("id"))] = "changed"
+    for item in source_check.get("missing", []):
+        by_id[str(item.get("id"))] = "missing"
+
+    warnings = [
+        f"Cited source {source_id} is {by_id[source_id]}; run source verify before trusting dependent claims."
+        for source_id in sorted(cited)
+        if source_id in by_id
+    ]
+    return warnings[:limit]
+
+
 def cmd_query(args: argparse.Namespace) -> int:
     base = root(args.path)
+    results = collect_results(base, args.query, args.limit)
     inactive_matches = inactive_claim_matches(base, args.query, args.limit)
-    warnings = []
+    warnings = source_drift_warnings(base, results, args.limit)
     if inactive_matches:
         skipped = ", ".join(str(item["id"]) for item in inactive_matches)
         warnings.append(f"Skipped inactive matching claims: {skipped}")
-    out = {"query": args.query, "results": collect_results(base, args.query, args.limit), "warnings": warnings}
+    out = {"query": args.query, "results": results, "warnings": warnings}
     print(json.dumps(out, indent=2, ensure_ascii=False))
     return 0
 
@@ -548,6 +577,7 @@ def cmd_context(args: argparse.Namespace) -> int:
     results = collect_results(base, args.task, args.limit)
     inactive_matches = inactive_claim_matches(base, args.task, args.limit)
     warnings = [] if results else ["No matching AKBP context found."]
+    warnings.extend(source_drift_warnings(base, results, args.limit))
     if inactive_matches:
         skipped = ", ".join(str(item["id"]) for item in inactive_matches)
         warnings.append(f"Skipped inactive matching claims: {skipped}")
@@ -1870,6 +1900,7 @@ def cmd_search(args: argparse.Namespace) -> int:
     results = collect_fts_results(base, args.query, args.limit)
     if results is None:
         return cmd_query(args)
+    warnings.extend(source_drift_warnings(base, results, args.limit))
     compact_results = [
         {k: item[k] for k in ("type", "id", "path", "snippet", "rank") if k in item}
         for item in results
