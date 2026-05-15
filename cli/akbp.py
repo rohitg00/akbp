@@ -931,6 +931,7 @@ def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[st
         "max_chars": max_chars,
         "summary_chars": final_chars,
         "original_summary_chars": original_chars,
+        "truncated": bool(clipped or omitted),
         "truncated_items": clipped + omitted,
         "clipped_items": clipped,
         "omitted_items": omitted,

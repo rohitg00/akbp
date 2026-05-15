@@ -803,6 +803,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             budgeted = json.loads(out.stdout)
             self.assertLessEqual(budgeted["budget"]["summary_chars"], 40)
             self.assertGreaterEqual(budgeted["budget"]["truncated_items"], 1)
+            self.assertTrue(budgeted["budget"]["truncated"])
             self.assertTrue(any("Context budget truncated" in warning for warning in budgeted["warnings"]))
 
             out = run_cli("--path", str(kb), "export")

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added an explicit `budget.truncated` boolean to context response budgets so
+  adapter startup trust gates can fail closed on clipped or omitted recalled
+  context without deriving state from item counts.
 - Added a machine-readable startup trust gate to generated adapter prompt
   contracts so hosts can fail closed on empty, uncited, truncated, or
   unsurfaced-warning startup context before planning from recalled memory.

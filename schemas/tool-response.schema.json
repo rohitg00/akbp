@@ -1704,6 +1704,7 @@
             "max_chars",
             "summary_chars",
             "original_summary_chars",
+            "truncated",
             "truncated_items"
           ],
           "properties": {
@@ -1718,6 +1719,9 @@
             "original_summary_chars": {
               "type": "integer",
               "minimum": 0
+            },
+            "truncated": {
+              "type": "boolean"
             },
             "truncated_items": {
               "type": "integer",

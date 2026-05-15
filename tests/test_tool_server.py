@@ -98,12 +98,17 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(len(result["items"]), 1)
         self.assertEqual(result["budget"]["summary_chars"], 3)
         self.assertEqual(result["budget"]["original_summary_chars"], 10)
+        self.assertTrue(result["budget"]["truncated"])
         self.assertEqual(result["budget"]["clipped_items"], 1)
         self.assertEqual(result["budget"]["omitted_items"], 1)
         self.assertEqual(result["budget"]["truncated_items"], 2)
         self.assertEqual(result["budget"]["items_before_budget"], 2)
         self.assertEqual(result["budget"]["items_after_budget"], 1)
         self.assertIn("Context budget truncated: clipped 1 item(s) and omitted 1 item(s)", result["warnings"][0])
+
+        untruncated = cli.apply_context_budget({**pack, "warnings": []}, 100)
+        self.assertFalse(untruncated["budget"]["truncated"])
+        self.assertEqual(untruncated["budget"]["truncated_items"], 0)
 
     def test_all_server_outputs_use_response_envelope(self):
         requests = "\n".join([
@@ -741,6 +746,7 @@ class ToolServerTest(unittest.TestCase):
                 lines[3]["result"]["budget"]["truncated_items"],
                 lines[3]["result"]["budget"]["clipped_items"] + lines[3]["result"]["budget"]["omitted_items"],
             )
+            self.assertTrue(lines[3]["result"]["budget"]["truncated"])
             self.assertGreaterEqual(lines[3]["result"]["budget"]["items_before_budget"], lines[3]["result"]["budget"]["items_after_budget"])
             self.assertEqual(lines[3]["result"]["budget"]["items_after_budget"], len(lines[3]["result"]["items"]))
             assert_matches_required_schema(self, lines[3]["result"]["items"][0], schema_def("context_item"))
