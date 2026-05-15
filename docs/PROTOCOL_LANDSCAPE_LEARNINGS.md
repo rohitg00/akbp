@@ -12,6 +12,10 @@ Public themes observed:
   - persistent memory for coding agents and tool-compatible runtimes
   - shared memory across multiple engineers and agents
   - local-first `.agent` style folders for portable skills and memory
+  - local-first memory servers that are easy to start but still require users
+    to decide which durable memory scope the agent should trust
+  - portable agent-memory protocol discussions that emphasize transfer,
+    provenance, and privacy across heterogeneous runtimes
   - remote tool APIs, REST APIs, dashboards, OAuth, and multi-transport access
   - knowledge graphs, temporal reasoning, contradiction detection, and source-backed memory
   - lifecycle hooks for governance, audit, redaction, and safe writes
@@ -151,6 +155,9 @@ AKBP should avoid overpromising runtime features. It should emphasize artifacts 
 
 9. **Project namespace guidance**
    - Clarify how to use one KB per repo, one KB per team, or exported bundles across repos.
+   - Make that scope choice machine-readable in generated adapter config so a
+     runtime does not silently blend repo-local, team-shared, personal, and
+     migration memory.
 
 10. **Evaluation fixtures from real usability failures**
    - Convert early user confusion into benchmark fixtures: contradiction handling, stale source, unsafe import, missing approval, vague query retrieval.
@@ -216,6 +223,21 @@ runnable sequence for adapter authors:
 
 This addresses the low-friction setup lesson from adjacent memory tools without
 weakening AKBP's review-gated protocol boundary.
+
+## Shipped artifact: client config scope selection
+
+`akbp client-config` now emits `scope_selection`, a first-run trust-boundary
+contract for adapter installers:
+
+- repo-local KB as the safe default
+- team-shared KB when reviewed project knowledge is intentionally shared
+- personal-assistant KB outside public repos for private user/workflow memory
+- migration KB for reviewed imports from existing notes or memory exports
+
+This turns the research-backed adoption gap into setup data: before an adapter
+trusts recalled context, it can show which AKBP path is selected, what belongs
+there, what must stay out, and why write-capable flows remain blocked until
+dry-run review and approval exist.
 
 ## Shipped artifact: structured output harness example
 

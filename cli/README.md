@@ -108,6 +108,9 @@ cited startup context, and keeps writes disabled until a review surface exists.
 It includes `multi_client_scope` so several clients can share one selected
 knowledge base without turning per-client scratchpads, private logs, or runtime
 caches into hidden durable memory.
+It includes `scope_selection` so installers can show the first-run trust
+question before creating or reusing durable memory: repo-local, team-shared,
+personal-assistant, or migration KB.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.
@@ -125,6 +128,12 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rev
 ```
 
 The generated config includes the server command, knowledge-base path, knowledge capability descriptor, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, bounded session-start method, structured response contract, quality gates, tool-protocol bridge allowlists, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
+
+Use `scope_selection` before capability negotiation when an adapter can create
+or reuse multiple knowledge bases. The safe default is a repo-local, read-only
+KB; team-shared, personal-assistant, and migration scopes require an explicit
+trust boundary so private notes, chat transcripts, or stale exports do not
+silently become project memory.
 
 Use `first_run_sequence.steps` as the adapter install checklist. Stop at the
 first failed required step, show its structured failure, and keep the

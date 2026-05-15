@@ -51,6 +51,24 @@ assert "same selected knowledge_base.path" in multi_client["scope_rule"], config
 assert "Runtime scratchpads" in multi_client["isolation_rule"], config
 assert "supersede or contradict" in multi_client["conflict_policy"], config
 assert multi_client["safe_for_public_templates"] is False, config
+scope = config["scope_selection"]
+assert scope["selected_scope"] == "repo_local", config
+assert scope["selected_kb_path"] == config["knowledge_base"]["path"], config
+assert scope["safe_default"] == "repo_local_read_only", config
+assert "Which reviewed AKBP knowledge base" in scope["installer_prompt"], config
+assert [option["scope"] for option in scope["scope_options"]] == [
+    "repo_local",
+    "team_shared",
+    "personal_assistant",
+    "migration",
+], config
+assert scope["scope_options"][0]["recommended"] is True, config
+assert scope["scope_options"][0]["default_profile"] == "read_only", config
+assert "private chat exports" in scope["scope_options"][0]["avoid"], config
+assert "outside public repos" in scope["scope_options"][2]["trust_boundary"], config
+assert "import-check" in scope["scope_options"][3]["trust_boundary"], config
+assert "selected_kb_path" in scope["adapter_rules"][0], config
+assert "setup UI" in scope["adapter_rules"][3], config
 assert config["startup"]["id"] == "capabilities-1", config
 assert config["startup"]["method"] == "akbp.capabilities", config
 assert config["startup"]["path"] == config["knowledge_base"]["path"], config
@@ -122,6 +140,7 @@ assert config["health_check"]["path"] == "<AKBP_KB_PATH>", config
 assert config["session_start"]["path"] == "<AKBP_KB_PATH>", config
 assert config["multi_client_scope"]["shared_kb_path"] == "<AKBP_KB_PATH>", config
 assert config["multi_client_scope"]["safe_for_public_templates"] is True, config
+assert config["scope_selection"]["selected_kb_path"] == "<AKBP_KB_PATH>", config
 assert config["distribution"]["safe_to_commit"] is True, config
 assert config["distribution"]["replace_before_run"] == ["<AKBP_KB_PATH>"], config
 print("portable config ok")

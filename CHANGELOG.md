@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added machine-readable scope selection to generated client configs so adapter installers can distinguish repo-local, team-shared, personal-assistant, and migration knowledge-base boundaries before trusting recalled memory.
 - Added executable preflight requests to generated host and client tool manifests so adapter installers can run capability negotiation, doctor, and bounded startup context checks without reconstructing JSONL calls from docs.
 - Added descriptions and safety metadata to generated host-tool manifests so tool-protocol hosts can create read-only wrappers without guessing tool purpose or review requirements.
 - Added a runnable structured output harness example for adapter authors, including validation for JSONL envelopes, capability negotiation, cited startup context, dry-run review metadata, and approval-gated write rejection.
