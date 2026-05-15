@@ -33,6 +33,7 @@ Required behavior:
 
 - Call `akbp.capabilities` at startup and require `read_only` plus `startup_context` for the first bridge.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
+- Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.
 - Return AKBP response envelopes or preserve `ok`, `result`, and `error.code` in the host response.

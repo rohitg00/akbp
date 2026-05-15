@@ -2126,6 +2126,53 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "apply_policy": "repeat the exact reviewed method, path, and params with approved:true only after approval outside the model-generated tool call",
             },
         },
+        "maintenance": {
+            "purpose": "Keep recalled context trustworthy after setup; storage is easy, stale or unaudited memory is the failure mode.",
+            "cadence": {
+                "source_verify": "before relying on old citations or before a release",
+                "doctor": "after adapter setup changes and before enabling a stricter profile",
+                "export_check": "before sharing or importing a portable bundle",
+                "index_refresh": "after approved writes when retrieval should include the new records",
+            },
+            "checks": [
+                {
+                    "id": "source-verify",
+                    "method": "akbp.source.verify",
+                    "path": kb_path,
+                    "params": {"source_id": "<AKBP_SOURCE_ID>", "fail_on_issue": False},
+                    "expected": {
+                        "ok": True,
+                        "result.counts.changed": 0,
+                        "result.counts.missing": 0,
+                    },
+                    "on_failure": "Surface changed or missing evidence before trusting recalled claims.",
+                },
+                {
+                    "id": "doctor-profile",
+                    "method": "akbp.doctor",
+                    "path": kb_path,
+                    "params": {"limit": 5},
+                    "expected": {
+                        "ok": True,
+                        "result.summary.errors": 0,
+                        f"result.adapter_readiness.{requested_profile}_ready": True,
+                    },
+                    "on_failure": "Show result.next_steps and keep the adapter on the recommended lower-risk profile.",
+                },
+                {
+                    "id": "export-check",
+                    "method": "akbp.export_check",
+                    "path": kb_path,
+                    "params": {"file": "<AKBP_EXPORT_BUNDLE>", "fail_on_issues": True},
+                    "expected": {
+                        "ok": True,
+                        "result.ok": True,
+                    },
+                    "on_failure": "Do not share or import the bundle until manifest and artifact issues are fixed.",
+                },
+            ],
+            "warning_policy": "Treat source drift, missing evidence, empty startup context, and unsupported workflow profiles as maintenance blockers, not adapter prose.",
+        },
         "safety": {
             "profile": requested_profile,
             "write_policy": "dry_run_then_approved" if requested_profile == "reviewed_write" else "no_writes",

@@ -91,6 +91,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("session-start-harness", config["quality_gates"]["startup_context"]["recommended_harness"])
             self.assertTrue(config["quality_gates"]["reviewed_writes"]["required_for_apply"])
             self.assertIn("apply_instruction", config["quality_gates"]["reviewed_writes"]["preview_fields"])
+            self.assertIn("stale or unaudited memory", config["maintenance"]["purpose"])
+            self.assertEqual(config["maintenance"]["checks"][0]["method"], "akbp.source.verify")
+            self.assertEqual(config["maintenance"]["checks"][0]["params"]["source_id"], "<AKBP_SOURCE_ID>")
+            self.assertEqual(config["maintenance"]["checks"][0]["expected"]["result.counts.changed"], 0)
+            self.assertEqual(config["maintenance"]["checks"][1]["method"], "akbp.doctor")
+            self.assertTrue(config["maintenance"]["checks"][1]["expected"]["result.adapter_readiness.reviewed_write_ready"])
+            self.assertEqual(config["maintenance"]["checks"][2]["method"], "akbp.export_check")
+            self.assertEqual(config["maintenance"]["checks"][2]["params"]["file"], "<AKBP_EXPORT_BUNDLE>")
+            self.assertIn("unsupported workflow profiles", config["maintenance"]["warning_policy"])
             self.assertEqual(config["safety"]["write_policy"], "dry_run_then_approved")
             self.assertEqual(
                 config["safety"]["host_trust_boundary"]["hosted_autonomous_tools"],
