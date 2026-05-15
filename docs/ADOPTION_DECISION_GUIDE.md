@@ -24,6 +24,29 @@ AKBP should not be the hidden memory behind an agent. The user should be able to
 open the knowledge base, inspect the claims, verify the sources, and see how a
 claim changed over time.
 
+## What useful memory looks like
+
+Many agent-memory integrations are easy to install but hard to trust later:
+they save vague summaries, hide where a fact came from, or blur temporary
+scratchpad state with durable project knowledge. Treat that as the adoption
+bar AKBP must clear.
+
+Before an adapter presents recalled AKBP context as useful memory, check that
+the recalled item is:
+
+- Specific enough to change the next agent action.
+- Backed by at least one citation or source id the user can inspect.
+- Scoped to the selected knowledge base, such as repo-local, team-shared, or
+  personal assistant memory.
+- Marked with lifecycle state so stale facts can be superseded or contradicted.
+- Produced from reviewed durable artifacts, not raw chat history or hidden
+  product memory.
+- Compact enough to fit startup context without crowding out the current task.
+
+If a recalled item cannot pass those checks, show it as an untrusted hint or
+continue without recalled memory. Do not promote it into durable AKBP state
+until it has source evidence and a dry-run review path.
+
 ## Default setup choices
 
 Start with the smallest trustworthy setup:

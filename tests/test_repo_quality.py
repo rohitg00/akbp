@@ -944,6 +944,21 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, text)
 
+    def test_adoption_guide_defines_useful_memory_bar(self):
+        text = (ROOT / "docs" / "ADOPTION_DECISION_GUIDE.md").read_text(encoding="utf-8")
+        for required in [
+            "## What useful memory looks like",
+            "Specific enough to change the next agent action.",
+            "citation or source id",
+            "repo-local, team-shared, or",
+            "lifecycle state",
+            "reviewed durable artifacts",
+            "raw chat history or hidden",
+            "continue without recalled memory",
+            "dry-run review path",
+        ]:
+            self.assertIn(required, text)
+
     def test_all_adapter_configs_define_lifecycle_hooks(self):
         adapters_root = ROOT / "adapters"
         adapters = [path for path in adapters_root.iterdir() if path.is_dir() and any(path.iterdir())]
