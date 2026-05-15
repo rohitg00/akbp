@@ -179,6 +179,30 @@ Unapproved writes are a hard stop, not a warning:
   `error.code`, preserve budget warnings, and keep writes behind a visible
   review surface
 
+## Adapter confidence scorecard
+
+Use this scorecard when the harness passes but you still need to decide whether
+an adapter is ready for real memory traffic. Do not collapse it to a short
+generic checklist. A bridge can preserve JSON shape and still be unsafe if it
+ignores citations, warnings, approval boundaries, or unsupported profiles.
+
+| Gate | Pass condition | Fail closed when |
+|------|----------------|------------------|
+| Envelope | Every response has exactly `id`, `ok`, `result`, and `error`, and the adapter branches on `ok` before reading nested fields. | The host treats malformed JSON, missing fields, or `ok:false` as usable memory. |
+| Capability negotiation | `result.negotiation.satisfied` is true for the requested features and profiles before the adapter enables that flow. | The host silently falls back from a missing profile to a weaker memory mode. |
+| Repairable params | `invalid_params` includes `params_schema` and concrete `type_errors` that the bridge can map back to its payload. | The host retries by changing free-form prompt text instead of fixing the structured request. |
+| Startup trust | `akbp.session.start` returns at least one cited item, preserves `result.context.budget`, and surfaces warnings or truncation. | Context is empty, uncited, over budget, or warning-bearing and the runtime still plans from recalled memory. |
+| Review preview | Dry-run writes expose `review_required`, `would_write`, `would_write_paths`, `redacted`, and `apply_instruction` to the review surface. | The user or policy cannot inspect the exact durable change before approval. |
+| Approval stop | Non-dry-run writes without `approved:true` return `error.code:"approval_required"` and the adapter stops. | The adapter logs a warning, asks the model to continue, or writes to another memory store. |
+| Approved apply | The approved request matches the reviewed preview and returns schema-backed records with cited evidence. | The apply changes text, evidence, scope, or target path after review. |
+| Recalled proof | After indexing, the same reviewed claim is retrievable with citations for the task that needs it. | The write succeeds but the next startup context cannot cite or retrieve it. |
+| Prompt contract | Generated `adapter_prompt_contract.system_rules` and validation fields are preserved in the runtime instructions. | The host turns AKBP guidance into prose that loses field names, stop conditions, or `error.code` handling. |
+
+Minimum bar: all gates pass in `examples/structured-output-harness/run.sh`
+and the focused benchmark passes through `make adapter-quality`. Keep the
+adapter read-only until failures are fixed at the structured-response boundary,
+not hidden behind more prompting.
+
 Use this as a starting harness before wiring AKBP into an editor command, local coding agent, or tool bridge. The adapter should branch on fields and error codes, not on free-form text.
 
 Run this after the session-start harness and before enabling reviewed writes.

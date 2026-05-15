@@ -1100,6 +1100,22 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("Action Items", text)
         self.assertIn("speaker prefixes", text)
 
+    def test_structured_output_harness_documents_confidence_scorecard(self):
+        text = (ROOT / "examples" / "structured-output-harness" / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "## Adapter confidence scorecard",
+            "Capability negotiation",
+            "Repairable params",
+            "Startup trust",
+            "Review preview",
+            "Approval stop",
+            "Approved apply",
+            "Recalled proof",
+            "Prompt contract",
+            "make adapter-quality",
+            "adapter read-only until failures are fixed",
+        ]:
+            self.assertIn(required, text)
 
     def test_install_smoke_verifies_console_scripts(self):
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
