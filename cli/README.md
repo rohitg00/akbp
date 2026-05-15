@@ -218,7 +218,7 @@ The doctor report also includes `security_posture` so adapters can machine-check
 
 `akbp source add` records immutable source material before claims cite it. For local files, the CLI records a SHA-256 hash when the file exists.
 
-`akbp source verify --fail-on-issue` re-checks recorded file sources against their stored hashes and separates verified, changed, missing, and unchecked evidence.
+`akbp source verify --fail-on-issue` re-checks recorded file sources against their stored hashes and separates verified, changed, missing, and unchecked evidence. Its `attention` block summarizes changed or missing source ids, unique affected claim ids, and the recommended review action for adapters.
 
 ## Export
 

@@ -712,6 +712,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(changed_verify["counts"]["changed"], 1)
             affected = changed_verify["changed"][0]["affected_claims"]
             self.assertIn(claim["id"], affected)
+            self.assertTrue(changed_verify["attention"]["requires_review"])
+            self.assertEqual(changed_verify["attention"]["recommended_action"], "review_affected_claims")
+            self.assertEqual(changed_verify["attention"]["changed_source_ids"], [source["id"]])
+            self.assertEqual(changed_verify["attention"]["missing_source_ids"], [])
+            self.assertIn(claim["id"], changed_verify["attention"]["affected_claims"])
 
             bundle = Path(d) / "bundle.json"
             bundle.write_text(json.dumps(exported), encoding="utf-8")

@@ -3372,6 +3372,15 @@ def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
             verified.append({**base_item, "hash": actual})
         else:
             changed.append({**base_item, "expected_hash": expected, "actual_hash": actual})
+    affected_attention = sorted({
+        claim_id
+        for item in changed + missing
+        for claim_id in item.get("affected_claims", [])
+        if isinstance(claim_id, str) and claim_id
+    })
+    attention_action = "none"
+    if changed or missing:
+        attention_action = "review_affected_claims" if affected_attention else "review_sources"
     return {
         "ok": not changed and not missing,
         "checked_at": now_iso(),
@@ -3387,6 +3396,13 @@ def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
         "changed": changed,
         "missing": missing,
         "unchecked": unchecked,
+        "attention": {
+            "requires_review": bool(changed or missing),
+            "recommended_action": attention_action,
+            "changed_source_ids": [item["id"] for item in changed],
+            "missing_source_ids": [item["id"] for item in missing],
+            "affected_claims": affected_attention,
+        },
     }
 
 

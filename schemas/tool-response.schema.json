@@ -2884,7 +2884,8 @@
         "verified",
         "changed",
         "missing",
-        "unchecked"
+        "unchecked",
+        "attention"
       ],
       "properties": {
         "ok": {
@@ -2955,6 +2956,48 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/source_verify_item"
+          }
+        },
+        "attention": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requires_review",
+            "recommended_action",
+            "changed_source_ids",
+            "missing_source_ids",
+            "affected_claims"
+          ],
+          "properties": {
+            "requires_review": {
+              "type": "boolean"
+            },
+            "recommended_action": {
+              "type": "string",
+              "enum": [
+                "none",
+                "review_sources",
+                "review_affected_claims"
+              ]
+            },
+            "changed_source_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "missing_source_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "affected_claims": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       }

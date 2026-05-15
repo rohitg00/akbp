@@ -989,6 +989,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertFalse(line["result"]["ok"])
             self.assertEqual(line["result"]["counts"]["changed"], 1)
             self.assertEqual(line["result"]["changed"][0]["affected_claims"], [claim["id"]])
+            self.assertEqual(line["result"]["attention"]["recommended_action"], "review_affected_claims")
+            self.assertEqual(line["result"]["attention"]["changed_source_ids"], [source["id"]])
+            self.assertEqual(line["result"]["attention"]["affected_claims"], [claim["id"]])
 
     def test_export_check_method_validates_bundle_manifest(self):
         with tempfile.TemporaryDirectory() as d:
