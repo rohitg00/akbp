@@ -22,6 +22,16 @@ assert config["runtime_requirements"]["network_required"] is False, config
 assert config["runtime_requirements"]["cloud_account_required"] is False, config
 assert config["runtime_requirements"]["secrets_required"] == [], config
 assert "AKBP artifacts" in config["runtime_requirements"]["durable_state_owner"], config
+hosted = config["hosted_agent_policy"]
+assert hosted["format"] == "akbp-hosted-agent-policy-v1", config
+assert hosted["default_profile"] == "read_only", config
+assert "akbp.session.start" in hosted["hosted_tool_allowlist"], config
+assert "akbp.import_check" in hosted["hosted_tool_allowlist"], config
+assert "akbp.remember" in hosted["blocked_apply_methods"], config
+assert "akbp.session.end" in hosted["blocked_apply_methods"], config
+assert "error.code" in " ".join(hosted["unsafe_to_enable_writes_when"]), config
+assert "approved:true" in hosted["write_path"], config
+assert "read-only startup context" in hosted["fallback"], config
 first_run = config["first_run_sequence"]
 assert "ordered setup path" in first_run["purpose"], config
 assert "keep the integration read-only" in first_run["stop_policy"], config

@@ -23,6 +23,9 @@ The generated config makes the trust boundary visible:
 - include a tool-protocol bridge allowlist and blocked write methods
 - include a managed tool-host bridge contract for stdio-compatible hosts
   without turning AKBP into an opaque memory store
+- include a hosted-agent policy for managed coding agents that cannot run the
+  local stdio server beside AKBP artifacts or cannot show reviewed write
+  previews
 - include tool-protocol bridge snippets that are explicit about requiring a
   bridge rather than claiming the JSONL reference server is a direct host-native
   tool server
@@ -71,6 +74,9 @@ AKBP stdio client config example passed
   responses, and keep writes blocked until reviewed-write readiness and a
   separate approval surface exist
 - host install profiles include managed tool-protocol hosts where read-only startup context is safe but durable writes stay disabled until a separate approval UI exists
+- hosted-agent policy keeps managed cloud or remote tool hosts read-only unless
+  a user-controlled bridge preserves AKBP envelopes, citations, warnings, and
+  dry-run review metadata
 - host-tool manifests include descriptions and safety metadata for each generated read-only wrapper
 - tool-protocol-capable hosts get copyable bridge inputs while the safe default
   stays read-only and write apply remains blocked without a separate review

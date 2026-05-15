@@ -47,6 +47,13 @@ methods, and preflight requests while making the fallback explicit: if the
 host cannot preserve citations, warnings, structured errors, and dry-run
 review metadata, expose AKBP as read-only startup context only.
 
+For hosted coding agents or managed tool hosts that cannot run the local stdio
+server beside AKBP artifacts, also read the generated `hosted_agent_policy`.
+The safe default is read-only. Write-capable flows stay disabled unless the
+host reaches a user-controlled bridge that preserves AKBP envelopes, citations,
+warnings, budget fields, and review metadata, and applies durable writes only
+from a local checkout or CI step with visible approval.
+
 For a runnable preflight, use `examples/tool-protocol-bridge/run.sh`. It checks
 that the generated wrapper map stays read-only, that blocked write methods are
 not exposed as direct bridge tools, that startup context returns cited items,
@@ -110,6 +117,9 @@ Required behavior:
 - For managed tool-protocol hosts, generate the local server entry and read-only tool
   exposure from `managed_tool_host_bridge` so the host config cannot drift from AKBP
   capabilities, preflight requests, and write blocking policy.
+- For hosted agents, apply `hosted_agent_policy`: expose only the hosted
+  allowlist unless there is a user-controlled bridge and visible reviewed-write
+  approval path.
 - Run `tool_protocol_bridge.host_tool_manifest.preflight_requests` before exposing host tools, and branch on the structured `expect` fields.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
