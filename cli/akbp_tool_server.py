@@ -190,6 +190,32 @@ PROFILE_CONTRACTS: dict[str, dict[str, Any]] = {
     },
 }
 
+KNOWLEDGE_CAPABILITY: dict[str, Any] = {
+    "kind": "agent_knowledge_base",
+    "artifact_model": "file_backed_jsonl",
+    "transport": "jsonl-stdio",
+    "scope": "caller_supplied_local_path",
+    "trust_model": "cited_review_gated_memory",
+    "retrieval": {
+        "bounded_context": True,
+        "citations_required_for_trusted_context": True,
+        "startup_method": "akbp.session.start",
+        "search_methods": ["akbp.context", "akbp.search", "akbp.query"],
+    },
+    "writes": {
+        "enabled": True,
+        "policy": "dry_run_preview_then_approved_apply",
+        "preview_flag": "dry_run",
+        "approval_flag": "approved",
+        "approval_required_error": "approval_required",
+    },
+    "portability": {
+        "export_method": "akbp.export",
+        "import_check_method": "akbp.import_check",
+        "import_apply_method": "akbp.import_apply",
+    },
+}
+
 
 def fallback_method_schema_defs() -> dict[str, Any]:
     return {
@@ -359,6 +385,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
         "version": "0.1-draft",
         "features": features,
         "negotiation": negotiation_result(params, features),
+        "knowledge_capability": KNOWLEDGE_CAPABILITY,
         "schemas": {
             "request": REQUEST_SCHEMA,
             "response": RESPONSE_SCHEMA,

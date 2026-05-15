@@ -559,7 +559,11 @@ class ToolServerTest(unittest.TestCase):
         installed_result = json.loads(installed.stdout)["result"]
         self.assertEqual(installed_result["features"], reference_result["features"])
         self.assertEqual(installed_result["runtime"], reference_result["runtime"])
+        self.assertEqual(installed_result["knowledge_capability"], reference_result["knowledge_capability"])
         self.assertEqual(set(installed_result["methods"]), set(reference_result["methods"]))
+        self.assertEqual(installed_result["knowledge_capability"]["kind"], "agent_knowledge_base")
+        self.assertEqual(installed_result["knowledge_capability"]["trust_model"], "cited_review_gated_memory")
+        self.assertEqual(installed_result["knowledge_capability"]["retrieval"]["startup_method"], "akbp.session.start")
         self.assertIn("akbp.doctor", installed_result["methods"])
         self.assertIn("akbp.import_apply", installed_result["methods"])
         self.assertIn("akbp.session.start", installed_result["methods"])
