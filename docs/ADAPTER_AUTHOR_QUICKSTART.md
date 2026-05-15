@@ -23,6 +23,11 @@ If a runtime cannot tell the user which KB it is reading or writing, keep it
 read-only. AKBP's durable value comes from reviewable scope, citations, and
 auditability, not from silently accumulating more memory.
 
+For runtimes that already keep scratchpads, chat summaries, local caches, or
+private memory, apply `docs/SESSION_MEMORY_BOUNDARY.md`: keep transient session
+state in the runtime, then promote only reviewed durable candidates through
+`akbp.session.end` with `dry_run:true` and an approved apply.
+
 Adapter installers that start from an arbitrary workspace directory can run
 `akbp discover` first. It walks upward to the nearest `akbp.json`, reports the
 resolved KB path, default scope, artifact presence, trust-boundary rules, and

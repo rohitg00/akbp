@@ -138,6 +138,9 @@ AKBP is designed for short, repeated agent sessions where the next runtime must 
 | Another runtime starts later | Retrieve compact context with citations and source-backed claims |
 
 The core rule: agents can propose memory, but durable writes are review-gated.
+Keep runtime scratch, raw transcripts, temporary plans, and private tool caches
+out of AKBP unless they are promoted through the reviewed session-memory
+boundary in `docs/SESSION_MEMORY_BOUNDARY.md`.
 
 See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/DEVELOPER_PROTOCOL_FIT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `docs/BENCHMARK.md`, `examples/session-start-harness/`, and `examples/tool-server-approval-flow/`.
 
@@ -413,6 +416,7 @@ akbp/
 - JSONL tool author: run `examples/jsonl-quickstart/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
+- Session-memory reviewer: read `docs/SESSION_MEMORY_BOUNDARY.md`.
 - Git-native adapter reviewer: run `examples/git-native-agent-handoff/run.sh`.
 - Multi-agent workflow reviewer: run `examples/multi-agent-consistency-demo/run.sh`.
 - Handoff reviewer: inspect `examples/rich-context-artifact/`, then read `docs/RICH_CONTEXT_ARTIFACTS.md`.

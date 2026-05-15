@@ -88,6 +88,9 @@ If a hosted or autonomous runtime cannot display the preview and collect
 explicit approval, keep it on the `read_only` profile and send memory proposals
 to a local review step instead.
 
+For the detailed session scratch versus durable knowledge boundary, use
+`docs/SESSION_MEMORY_BOUNDARY.md`.
+
 ## Acceptance checks
 
 A cross-runtime adapter is ready only when it can prove:

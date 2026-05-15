@@ -58,6 +58,7 @@ Minimum publishable adapter behavior:
 - Discover `akbp.capabilities` before assuming methods or parameter schemas.
 - If an integration cannot safely accept writes yet, use `result.profiles.read_only` as its allowlist and ignore write-capable profiles until review UX exists.
 - Retrieve cited context before substantial planning.
+- Keep scratchpads, chat summaries, and runtime caches transient unless they pass the reviewed session-memory boundary in `docs/SESSION_MEMORY_BOUNDARY.md`.
 - Start write-capable flows with `dry_run:true`.
 - Render `review_required`, `apply_instruction`, warnings, skipped records, and planned writes.
 - Apply only with request-level `approved:true` or an explicit trusted local policy.

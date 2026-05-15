@@ -238,6 +238,34 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, combined)
 
+    def test_session_memory_boundary_documents_promotion_contract(self):
+        boundary = (ROOT / "docs" / "SESSION_MEMORY_BOUNDARY.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        agent_flow = (ROOT / "docs" / "AGENT_FLOW.md").read_text(encoding="utf-8")
+        quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
+        cross_runtime = (ROOT / "docs" / "CROSS_RUNTIME_CONTEXT.md").read_text(encoding="utf-8")
+        combined = boundary + readme + agent_flow + quickstart + cross_runtime
+        for required in [
+            "Session Memory Boundary",
+            "Runtime scratch",
+            "Session summary",
+            "Durable project knowledge",
+            "Rebuildable local state",
+            "memory servers",
+            "tool-protocol hosts",
+            "akbp.session.start",
+            "akbp.session.end",
+            "dry_run:true",
+            "approved:true",
+            "review_required",
+            "apply_instruction",
+            "akbp.index",
+            "akbp.supersede",
+            "akbp.contradict",
+            "docs/SESSION_MEMORY_BOUNDARY.md",
+        ]:
+            self.assertIn(required, combined)
+
     def test_cli_readme_documents_search_query_syntax(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
         for required in [
