@@ -43,6 +43,7 @@ runtime.
 - `adapter-write-safety`: require runtime adapters to share the same dry-run, review metadata, approved write, and privacy boundary.
 - `adapter-structured-output-harness`: verify adapter quality gates can machine-check capability negotiation, doctor/security posture, bounded startup context, dry-run preview metadata, and approval-gated write rejection before trusting memory.
 - `adapter-session-operation`: verify adapter session start/end lifecycle operations and compatibility shapes.
+- `bounded-context-citation-lifecycle`: verify bounded startup context keeps citations and lifecycle freshness while skipping superseded long-context memory.
 - `git-native-agent-handoff`: verify git-native agent adapters retrieve cited handoff context and review-gated write policy before continuing repository work.
 - `inherited-repo-intake`: verify agents entering unfamiliar repositories discover AKBP, run adapter readiness checks, retrieve cited startup context, and keep durable writes disabled until trust gates pass.
 - `knowledge-gap-to-task`: verify recent adoption research can become a cited, reviewable product task before new adapter or write-transport work starts.

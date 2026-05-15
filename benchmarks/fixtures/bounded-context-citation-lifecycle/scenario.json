@@ -1,0 +1,82 @@
+{
+  "id": "bounded-context-citation-lifecycle-001",
+  "task": "Verify bounded startup context preserves citations and lifecycle filtering for long-context agent handoffs.",
+  "profiles": ["retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_startup_context_contract",
+        "type": "transcript",
+        "locator": "handoffs/startup-context-contract.md",
+        "title": "Startup context contract"
+      },
+      {
+        "id": "source_stale_context_note",
+        "type": "note",
+        "locator": "handoffs/stale-context-note.md",
+        "title": "Stale context note"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_startup_context_preserves_citations",
+        "text": "Agent startup context should stay bounded for long-context reliability while preserving source citations and lifecycle status for every trusted item.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.91,
+        "evidence": ["source_startup_context_contract"],
+        "entities": ["startup-context", "citations", "lifecycle", "long-context"]
+      },
+      {
+        "id": "claim_old_uncited_startup_context",
+        "text": "Agent startup context can rely on uncited long transcript summaries when the model has enough context window.",
+        "type": "workflow",
+        "status": "superseded",
+        "confidence": 0.42,
+        "evidence": ["source_stale_context_note"],
+        "entities": ["startup-context", "long-context"],
+        "superseded_by": "claim_startup_context_preserves_citations"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_context_contract_supersedes_uncited_summary",
+        "source": "claim_startup_context_preserves_citations",
+        "target": "claim_old_uncited_startup_context",
+        "relation": "supersedes",
+        "confidence": 0.9,
+        "evidence": ["source_startup_context_contract"]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "bounded-context",
+        "method": "akbp.context",
+        "params": {
+          "task": "long context startup adapter citations lifecycle",
+          "limit": 5,
+          "max_chars": 90,
+          "min_items": 1,
+          "require_citations": true
+        },
+        "expected_result_fields": ["items", "quality", "budget", "warnings"],
+        "expected_result_schema": "#/$defs/context_result",
+        "expected_result_contains": {
+          "items[].citations[]": ["source_startup_context_contract"],
+          "items[].freshness": ["stable"],
+          "quality.ok": [true],
+          "budget.max_chars": [90]
+        }
+      }
+    ]
+  },
+  "query": "long context startup adapter citations lifecycle",
+  "expected": {
+    "must_retrieve": ["claim_startup_context_preserves_citations"],
+    "must_cite": ["source_startup_context_contract"],
+    "must_cite_in_context": ["source_startup_context_contract"],
+    "must_preserve": ["claim_old_uncited_startup_context"],
+    "must_not_answer_from": ["claim_old_uncited_startup_context"],
+    "answer_should_include": ["bounded", "citations", "lifecycle"]
+  }
+}
