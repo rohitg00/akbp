@@ -324,11 +324,12 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(approval["properties"]["dry_run"], {"const": False})
         self.assertEqual(approval["properties"]["review_required"], {"const": True})
         self.assertIn("apply_instruction", approval["required"])
+        self.assertIn("preview_fingerprint", approval["required"])
         self.assertFalse(dry_run["additionalProperties"])
         self.assertEqual(dry_run["properties"]["dry_run"], {"const": True})
         self.assertEqual(dry_run["properties"]["review_required"], {"const": True})
         self.assertEqual(dry_run["properties"]["would_write"], {"const": True})
-        for field in ["method", "path", "argv", "redacted", "apply_instruction"]:
+        for field in ["method", "path", "argv", "redacted", "apply_instruction", "preview_fingerprint"]:
             self.assertIn(field, dry_run["required"])
         ingest_apply = defs["ingest_result"]
         crystallize = defs["crystallize_session_result"]
@@ -641,6 +642,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["features"]["max_request_bytes_enforced"])
             self.assertTrue(lines[0]["result"]["features"]["path_validation"])
             self.assertTrue(lines[0]["result"]["features"]["dry_run_argv_redaction"])
+            self.assertTrue(lines[0]["result"]["features"]["preview_fingerprint"])
             self.assertIn("path_policy", lines[0]["result"]["runtime"])
             self.assertTrue(lines[0]["result"]["features"]["unknown_param_rejection"])
             self.assertTrue(lines[0]["result"]["features"]["required_param_validation"])
@@ -844,7 +846,7 @@ class ToolServerTest(unittest.TestCase):
             requests = "\n".join([
                 json.dumps({"id": "dry", "path": str(kb), "method": "akbp.remember", "dry_run": True, "params": {"text": "AKBP dry run does not write"}}),
                 json.dumps({"id": "param-dry", "path": str(kb), "method": "akbp.source.add", "params": {"locator": "AKBP.md", "dry_run": True}}),
-                json.dumps({"id": "unapproved", "path": str(kb), "method": "akbp.remember", "params": {"text": "AKBP should reject unapproved non-dry-run writes"}}),
+                json.dumps({"id": "unapproved", "path": str(kb), "method": "akbp.remember", "params": {"text": "AKBP dry run does not write"}}),
                 json.dumps({"id": "source", "path": str(kb), "method": "akbp.source.add", "approved": True, "params": {"locator": "AKBP.md", "type": "file", "title": "Entry point"}}),
                 json.dumps({"id": "remember", "path": str(kb), "method": "akbp.remember", "approved": True, "params": {"text": "AKBP has a JSONL local tool server", "type": "fact", "evidence": ["AKBP.md"]}}),
             ]) + "\n"
@@ -860,6 +862,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[0]["result"]["dry_run"])
             self.assertTrue(lines[0]["result"]["review_required"])
             self.assertIn("approval", lines[0]["result"]["apply_instruction"])
+            self.assertRegex(lines[0]["result"]["preview_fingerprint"], r"^sha256:[a-f0-9]{64}$")
+            self.assertEqual(lines[2]["error"]["details"]["preview_fingerprint"], lines[0]["result"]["preview_fingerprint"])
             self.assertTrue(lines[1]["result"]["dry_run"])
             self.assertTrue(lines[1]["result"]["review_required"])
             self.assertEqual(lines[1]["result"]["method"], "akbp.source.add")
@@ -913,6 +917,8 @@ class ToolServerTest(unittest.TestCase):
                     self.assertEqual(rejected["error"]["code"], "approval_required")
                     assert_matches_required_schema(self, rejected["error"]["details"], approval_schema)
                     self.assertTrue(rejected["error"]["details"]["review_required"])
+                    if "preview_fingerprint" in dry["result"]:
+                        self.assertEqual(rejected["error"]["details"]["preview_fingerprint"], dry["result"]["preview_fingerprint"])
                     self.assertIn("approved:true", rejected["error"]["message"])
                     self.assertIn("approved:true", rejected["error"]["details"]["apply_instruction"])
 

@@ -171,6 +171,8 @@ Unapproved writes are a hard stop, not a warning:
 - adapter readiness exposes the dry-run and approval boundary before writes are enabled
 - startup context includes cited records before the adapter uses memory in a plan
 - dry-run write previews include `review_required`, `apply_instruction`, and `would_write`
+- dry-run write previews include `preview_fingerprint` so adapters can bind
+  the later approved apply to the reviewed method, path, and params
 - unapproved writes return the structured `approval_required` stop signal
 - approved writes return a schema-backed claim only after the review gate is
   crossed, and indexed recall can cite the approved memory
@@ -192,7 +194,7 @@ ignores citations, warnings, approval boundaries, or unsupported profiles.
 | Capability negotiation | `result.negotiation.satisfied` is true for the requested features and profiles before the adapter enables that flow. | The host silently falls back from a missing profile to a weaker memory mode. |
 | Repairable params | `invalid_params` includes `params_schema` and concrete `type_errors` that the bridge can map back to its payload. | The host retries by changing free-form prompt text instead of fixing the structured request. |
 | Startup trust | `akbp.session.start` returns at least one cited item, preserves `result.context.budget`, and surfaces warnings or truncation. | Context is empty, uncited, over budget, or warning-bearing and the runtime still plans from recalled memory. |
-| Review preview | Dry-run writes expose `review_required`, `would_write`, `would_write_paths`, `redacted`, and `apply_instruction` to the review surface. | The user or policy cannot inspect the exact durable change before approval. |
+| Review preview | Dry-run writes expose `review_required`, `would_write`, `would_write_paths`, `redacted`, `preview_fingerprint`, and `apply_instruction` to the review surface. | The user or policy cannot inspect or fingerprint the exact durable change before approval. |
 | Approval stop | Non-dry-run writes without `approved:true` return `error.code:"approval_required"` and the adapter stops. | The adapter logs a warning, asks the model to continue, or writes to another memory store. |
 | Approved apply | The approved request matches the reviewed preview and returns schema-backed records with cited evidence. | The apply changes text, evidence, scope, or target path after review. |
 | Recalled proof | After indexing, the same reviewed claim is retrievable with citations for the task that needs it. | The write succeeds but the next startup context cannot cite or retrieve it. |

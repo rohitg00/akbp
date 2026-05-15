@@ -99,6 +99,7 @@ assert review["dry_run"] is True, review
 assert review["review_required"] is True, review
 assert review["would_write"] is True, review
 assert review["method"] == "akbp.remember", review
+assert review["preview_fingerprint"].startswith("sha256:"), review
 print("dry-run review contract ok")
 
 blocked = envelope("remember-blocked")
@@ -109,6 +110,7 @@ assert details["method"] == "akbp.remember", blocked
 assert details["dry_run"] is False, blocked
 assert details["review_required"] is True, blocked
 assert details["apply_instruction"], blocked
+assert details["preview_fingerprint"] == review["preview_fingerprint"], blocked
 print("approval-required contract ok")
 
 approved = envelope("remember-approved")
@@ -137,7 +139,7 @@ print("approved recall contract ok")
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":500}}
 {"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
-{"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Unapproved adapter harness writes must fail closed.","type":"workflow","evidence":["$NOTE"]}}
+{"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"remember-approved","method":"akbp.remember","path":"$KB","approved":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"index-approved","method":"akbp.index","path":"$KB","approved":true,"params":{"incremental":true}}
 {"id":"recall-approved","method":"akbp.context","path":"$KB","params":{"task":"response shape validation fails","limit":5,"max_chars":500}}

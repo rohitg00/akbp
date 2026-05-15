@@ -110,6 +110,7 @@
         "method",
         "dry_run",
         "review_required",
+        "preview_fingerprint",
         "apply_instruction"
       ],
       "properties": {
@@ -126,6 +127,10 @@
         "apply_instruction": {
           "type": "string",
           "minLength": 1
+        },
+        "preview_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
         }
       }
     },
@@ -140,7 +145,8 @@
         "path",
         "argv",
         "redacted",
-        "would_write"
+        "would_write",
+        "preview_fingerprint"
       ],
       "properties": {
         "dry_run": {
@@ -172,6 +178,10 @@
         },
         "redacted": {
           "type": "boolean"
+        },
+        "preview_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
         }
       }
     },
@@ -290,6 +300,7 @@
             "unknown_param_rejection",
             "required_param_validation",
             "approval_required_errors",
+            "preview_fingerprint",
             "max_request_bytes_enforced",
             "path_validation",
             "param_length_validation",
@@ -347,6 +358,9 @@
               "const": true
             },
             "approval_required_errors": {
+              "const": true
+            },
+            "preview_fingerprint": {
               "const": true
             },
             "max_request_bytes_enforced": {

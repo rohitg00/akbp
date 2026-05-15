@@ -8,6 +8,7 @@ stdin and writes one JSON response per line to stdout.
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import io
 import json
 import math
@@ -338,6 +339,14 @@ def cli_error_response(request_id: Any, method: str, code: int, stdout: str, std
     )
 
 
+def preview_fingerprint(method: str, path: str, params: dict[str, Any]) -> str:
+    """Stable fingerprint for matching an approved apply to a reviewed preview."""
+    reviewed_params = {key: value for key, value in params.items() if key != "dry_run"}
+    payload = {"method": method, "path": path, "params": reviewed_params}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
 def capability_features() -> dict[str, bool]:
     return {
             "structured_errors": True,
@@ -355,6 +364,7 @@ def capability_features() -> dict[str, bool]:
             "unknown_param_rejection": True,
             "required_param_validation": True,
             "approval_required_errors": True,
+            "preview_fingerprint": True,
             "max_request_bytes_enforced": True,
             "path_validation": True,
             "param_length_validation": True,
@@ -907,6 +917,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
         return {"id": request_id, "ok": True, "result": capabilities(params), "error": None}
 
     argv = build_argv(method, params)
+    fingerprint = preview_fingerprint(method, path, params) if method in WRITE_METHODS else None
     if dry_run and method == "akbp.ingest":
         code, stdout, stderr = run_cli(path, [*argv, "--dry-run"])
         if code != 0:
@@ -969,6 +980,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
                 "redacted": redacted,
                 "would_write": True,
                 "review_required": True,
+                "preview_fingerprint": fingerprint,
                 "apply_instruction": "Repeat the same request without dry_run only after user approval or trusted local policy.",
             },
             "error": None,
@@ -983,6 +995,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
                 "method": method,
                 "dry_run": False,
                 "review_required": True,
+                "preview_fingerprint": fingerprint,
                 "apply_instruction": "Repeat the same request with approved:true only after user approval or trusted local policy.",
             },
         )
