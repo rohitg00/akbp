@@ -500,3 +500,34 @@ This gives AKBP a very clear public demo:
 > AKBP is the source of truth. Rich artifacts are the review surface.
 
 See `docs/RICH_CONTEXT_ARTIFACTS.md` for the implementation sketch.
+
+## Added research track: host install profiles
+
+Recent scans still show agent-memory projects competing on quick host setup:
+tool-protocol servers, local memory caches, graph-backed stores, and hosted
+bridges all try to make the first integration feel like a one-command install.
+The adoption gap for AKBP is not another memory server claim. It is giving
+installers enough machine-readable setup shape to keep AKBP as the durable,
+reviewable substrate while hosts expose familiar tools.
+
+### Product lesson
+
+Adapter installers need host-specific copy without weakening the trust model:
+
+- terminal agents need pasteable discovery, doctor, and client-config commands
+- editor agents need a host tool manifest, not hand-written method lists
+- existing memory servers need a migration or promotion boundary so runtime
+  caches do not become durable project truth
+
+### Shipped artifact: host install profiles
+
+`akbp client-config` now includes `host_install_profiles` for terminal agents,
+editor agents, and existing memory-server runtimes. Each profile states the safe
+default profile, concrete setup commands or manifest steps, first AKBP tool to
+call, and the condition required before writes can be enabled.
+
+Success criteria:
+
+- adapter installers can show a clear under-ten-minute setup path
+- read-only cited context remains the first enabled capability
+- write-capable flows stay gated on dry-run review or migration checks

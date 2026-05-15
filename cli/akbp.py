@@ -2226,6 +2226,44 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "path_resolution": "Resolve <AKBP_KB_PATH> during install or first run when portable_template is true.",
             "tool_protocol_hosts": "Use the read-only bridge allowlist until doctor, capabilities, and startup context checks pass.",
         },
+        "host_install_profiles": [
+            {
+                "host_type": "terminal_agent",
+                "use_when": "A CLI coding agent can launch a local stdio process and read JSON config.",
+                "safe_default_profile": "read_only",
+                "setup_commands": [
+                    f"akbp --path {kb_path} discover",
+                    f"akbp --path {kb_path} doctor --profile read-only",
+                    f"akbp --path {kb_path} client-config --profile read-only --name {args.name}",
+                ],
+                "first_tool": "akbp_session_start",
+                "enable_writes_after": "host renders dry-run review metadata and repeats the exact reviewed request with approved:true",
+            },
+            {
+                "host_type": "editor_agent",
+                "use_when": "An IDE or editor extension needs host-native tools backed by AKBP JSONL methods.",
+                "safe_default_profile": "read_only",
+                "setup_commands": [
+                    "generate tool_protocol_bridge.host_tool_manifest",
+                    "create read-only host tools from manifest.tools",
+                    "run manifest.preflight_requests before exposing tools",
+                ],
+                "first_tool": "akbp_session_start",
+                "enable_writes_after": "separate review UI exists outside the model-generated tool call",
+            },
+            {
+                "host_type": "existing_memory_server",
+                "use_when": "A runtime already has a memory server, cache, or graph store and wants AKBP-compatible durable artifacts.",
+                "safe_default_profile": "read_only",
+                "setup_commands": [
+                    "keep existing runtime memory as ephemeral cache",
+                    "route durable reviewed records through akbp.remember dry_run first",
+                    "preserve citations, source ids, and error.code in bridge responses",
+                ],
+                "first_tool": "akbp_context",
+                "enable_writes_after": "migration or promotion flow passes import-check or dry-run preview without secret or citation warnings",
+            },
+        ],
         "memory_server_bridge": {
             "purpose": "Classify AKBP beside local memory servers, tool-protocol bridges, and runtime caches without letting the bridge become the source of truth.",
             "safe_default": "read_only_substrate",

@@ -121,6 +121,11 @@ can claim AKBP-compatible memory.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.
+It includes `host_install_profiles` so adapter installers can show concrete
+read-only setup commands for terminal agents, editor agents, and runtimes that
+already have a memory server or cache. These profiles keep the first tool
+`akbp_session_start` or `akbp_context`, and they only enable writes after a
+dry-run review surface or migration check exists.
 
 The default profile is read-only:
 
@@ -147,6 +152,13 @@ Use `memory_server_bridge` when AKBP sits beside an existing memory server or
 tool host. Keep the bridge read-only until capability and doctor preflights
 pass, preserve citations and `error.code`, and warn or disable the integration
 when durable memory is stored in an opaque bridge-owned format.
+
+Use `host_install_profiles` when an adapter needs host-specific install copy.
+The terminal-agent profile emits pasteable `akbp discover`, `doctor`, and
+`client-config --profile read-only` commands. The editor-agent profile points
+to `tool_protocol_bridge.host_tool_manifest`. The existing-memory-server
+profile treats runtime memory as an ephemeral cache and promotes only reviewed,
+cited records into AKBP.
 
 Use `first_run_sequence.steps` as the adapter install checklist. Stop at the
 first failed required step, show its structured failure, and keep the
