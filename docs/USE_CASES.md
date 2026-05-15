@@ -32,7 +32,21 @@ This page maps the public examples to real use cases people can understand quick
 - changed decisions keep lifecycle history
 - supersession is explicit instead of silent overwrite
 
-## 3. Memory quality benchmark
+## 3. Inherited repo intake
+
+**Problem:** coding agents often enter an unfamiliar repo with stale summaries, weak handoff notes, or no trusted project memory.
+
+**AKBP use case:** run `akbp discover`, `akbp doctor --profile read-only`, and `akbp.session.start` before planning. If the knowledge base is missing, unindexed, uncited, or not adapter-ready, stay read-only and show the setup gaps instead of inventing project history.
+
+**Demo:** `examples/session-start-harness/`
+
+**What it proves:**
+
+- an agent can find the nearest AKBP folder before trusting memory
+- adapter readiness gates planning on cited startup context
+- unfamiliar repos get a safe first step instead of automatic durable writes
+
+## 4. Memory quality benchmark
 
 **Problem:** agent memory claims are usually vague and hard to evaluate.
 
@@ -46,7 +60,7 @@ This page maps the public examples to real use cases people can understand quick
 - benchmarks can use real protocol artifacts
 - AKBP can grow into a reusable evaluation harness
 
-## 4. Memory CI for teams
+## 5. Memory CI for teams
 
 **Problem:** project memory can rot, leak unsafe content, or drift away from source evidence.
 
@@ -60,7 +74,7 @@ This page maps the public examples to real use cases people can understand quick
 - unsafe imports are checked before apply
 - teams can enforce review-gated writes
 
-## 5. Rich handoff and review artifacts
+## 6. Rich handoff and review artifacts
 
 **Problem:** long agent summaries are hard to review and often mix facts, guesses, and proposed updates.
 
@@ -74,7 +88,7 @@ This page maps the public examples to real use cases people can understand quick
 - AKBP remains the source of truth
 - proposed updates still pass import-check and approval gates
 
-## 6. Knowledge base health snapshot
+## 7. Knowledge base health snapshot
 
 **Problem:** users and adapters need a fast way to see whether a knowledge base is useful, stale, indexed, and source-backed.
 
@@ -86,7 +100,7 @@ This page maps the public examples to real use cases people can understand quick
 - dashboards and adapters can use one stable status payload
 - source drift is visible before agents trust stale knowledge
 
-## 7. Adapter integration
+## 8. Adapter integration
 
 **Problem:** agent runtimes need a predictable way to request context, propose writes, and close sessions without inventing their own memory format.
 
@@ -100,7 +114,7 @@ This page maps the public examples to real use cases people can understand quick
 - write safety is protocol-level behavior
 - session memory becomes portable files
 
-## 8. Portable knowledge bundles
+## 9. Portable knowledge bundles
 
 **Problem:** memory is trapped in one tool or workspace.
 
@@ -114,7 +128,7 @@ This page maps the public examples to real use cases people can understand quick
 - bundles can be checked before trust
 - import is review-gated
 
-## 9. Existing memory migration
+## 10. Existing memory migration
 
 **Problem:** useful facts already live in notes, agent memory exports, and prior tool stores, but bulk-importing them blindly creates stale or uncited memory.
 
@@ -128,7 +142,7 @@ This page maps the public examples to real use cases people can understand quick
 - missing evidence is rejected before import
 - migration stays review-gated instead of becoming a memory dump
 
-## 10. Read-only adapter rollout
+## 11. Read-only adapter rollout
 
 **Problem:** new adapters often need safe retrieval first, before they have enough UI to review durable writes.
 
@@ -154,10 +168,11 @@ For a first-time reviewer, run these in order:
 make demo
 examples/akbp-bench/run.sh
 examples/repo-memory-demo/run.sh
+examples/session-start-harness/run.sh
 examples/memory-ci/run.sh
 examples/multi-agent-consistency-demo/run.sh
 examples/existing-memory-migration/run.sh
 examples/read-only-adapter/run.sh
 ```
 
-That path shows the protocol, the benchmark, the repo use case, the CI gate, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.
+That path shows the protocol, the benchmark, the repo use case, inherited-repo intake, the CI gate, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.

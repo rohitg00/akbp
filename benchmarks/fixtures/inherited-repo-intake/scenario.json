@@ -1,0 +1,127 @@
+{
+  "id": "inherited-repo-intake-001",
+  "task": "Verify that agents entering an unfamiliar repository discover AKBP, run adapter readiness checks, retrieve cited startup context, and stay read-only until the knowledge base is trustworthy.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_use_cases_inherited_repo",
+        "type": "file",
+        "locator": "docs/USE_CASES.md",
+        "title": "AKBP inherited repo intake use case"
+      },
+      {
+        "id": "source_session_start_harness",
+        "type": "file",
+        "locator": "examples/session-start-harness/README.md",
+        "title": "Session-start harness example"
+      },
+      {
+        "id": "source_adapter_quickstart",
+        "type": "file",
+        "locator": "docs/ADAPTER_AUTHOR_QUICKSTART.md",
+        "title": "Adapter author quickstart"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_inherited_repo_agents_discover_first",
+        "text": "Agents entering an unfamiliar repository should run akbp discover and akbp doctor checks before trusting project memory.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_use_cases_inherited_repo", "source_adapter_quickstart"],
+        "entities": ["inherited repo", "akbp discover", "akbp doctor", "adapter readiness", "read_only"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_inherited_repo_requires_cited_startup_context",
+        "text": "Inherited-repo intake should use akbp.session.start for cited context and continue without recalled memory when context is empty or uncited.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_session_start_harness", "source_use_cases_inherited_repo"],
+        "entities": ["inherited repo", "akbp.session.start", "cited context", "empty_context_policy", "uncited_context_policy"],
+        "scope": "project"
+      },
+      {
+        "id": "claim_inherited_repo_keeps_writes_disabled",
+        "text": "Agents should keep durable writes disabled in unfamiliar repositories until read-only readiness passes and reviewed-write approval UX can require dry_run previews and approved:true applies.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_adapter_quickstart", "source_use_cases_inherited_repo"],
+        "entities": ["inherited repo", "read_only", "reviewed_write", "approval_required", "dry_run", "approved:true"],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "caps-inherited-repo",
+        "method": "akbp.capabilities",
+        "params": {
+          "client": "inherited-repo-intake-fixture",
+          "requires": ["method_param_schemas", "capability_negotiation", "bounded_context"],
+          "requires_profiles": ["read_only", "startup_context"]
+        },
+        "expected_result_schema": "#/$defs/capabilities_result",
+        "expected_result_fields": ["protocol", "features", "profiles", "methods", "negotiation"],
+        "expected_result_contains": {
+          "profiles.read_only[]": ["akbp.capabilities", "akbp.doctor", "akbp.session.start", "akbp.search"],
+          "profiles.startup_context[]": ["akbp.session.start", "akbp.context", "akbp.search"],
+          "methods.akbp\\.session\\.start.write": [false],
+          "methods.akbp\\.doctor.write": [false],
+          "negotiation.satisfied": [true]
+        }
+      },
+      {
+        "id": "doctor-inherited-repo",
+        "method": "akbp.doctor",
+        "params": {},
+        "expected_result_schema": "#/$defs/doctor_result",
+        "expected_result_fields": ["ok", "ready_for_adapter", "summary", "adapter_readiness", "security_posture", "workflow", "checks", "next_steps"],
+        "expected_result_contains": {
+          "adapter_readiness.recommended_profile": ["reviewed_write"],
+          "security_posture.write_boundary": ["dry_run_preview_then_approved_apply"]
+        }
+      },
+      {
+        "id": "session-start-inherited-repo",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "take over an inherited repository safely",
+          "limit": 5,
+          "max_chars": 4000
+        },
+        "expected_result_schema": "#/$defs/session_start_result",
+        "expected_result_fields": ["session_id", "task", "context"],
+        "expected_result_values": {
+          "task": "take over an inherited repository safely"
+        }
+      }
+    ]
+  },
+  "query": "How should an agent take over an inherited repository without trusting stale or uncited memory?",
+  "expected": {
+    "must_retrieve": [
+      "claim_inherited_repo_agents_discover_first",
+      "claim_inherited_repo_requires_cited_startup_context",
+      "claim_inherited_repo_keeps_writes_disabled"
+    ],
+    "must_cite": [
+      "source_use_cases_inherited_repo",
+      "source_session_start_harness",
+      "source_adapter_quickstart"
+    ],
+    "must_cite_in_context": [
+      "source_use_cases_inherited_repo"
+    ],
+    "answer_should_include": [
+      "akbp discover",
+      "akbp doctor",
+      "akbp.session.start",
+      "read_only",
+      "cited context",
+      "approved:true"
+    ]
+  }
+}
