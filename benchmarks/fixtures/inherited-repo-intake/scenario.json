@@ -90,12 +90,20 @@
         "params": {
           "task": "take over an inherited repository safely",
           "limit": 5,
-          "max_chars": 4000
+          "max_chars": 4000,
+          "min_items": 1,
+          "require_citations": true,
+          "fail_on_warnings": true
         },
         "expected_result_schema": "#/$defs/session_start_result",
         "expected_result_fields": ["session_id", "task", "context"],
         "expected_result_values": {
           "task": "take over an inherited repository safely"
+        },
+        "expected_result_contains": {
+          "context.quality.ok": [true],
+          "context.quality.require_citations": [true],
+          "context.quality.fail_on_warnings": [true]
         }
       }
     ]

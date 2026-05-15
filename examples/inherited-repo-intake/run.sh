@@ -81,6 +81,9 @@ assert start["ok"], start
 context = start["result"]["context"]
 assert context["items"], context
 assert all(item["citations"] for item in context["items"]), context
+assert context["quality"]["ok"], context
+assert context["quality"]["require_citations"], context
+assert context["quality"]["fail_on_warnings"], context
 assert "rollback checklist" in json.dumps(context), context
 
 blocked = by_id["write-blocked"]
@@ -92,7 +95,7 @@ print("unapproved inherited repo write blocked ok")
 '
 {"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"inherited-repo-agent","requires":["method_param_schemas","capability_negotiation","bounded_context"],"requires_profiles":["read_only","startup_context"]}}
 {"id":"doctor","method":"akbp.doctor","path":"$KB","params":{"profile":"read_only"}}
-{"id":"start","method":"akbp.session.start","path":"$KB","params":{"task":"take over inherited repo release work safely","limit":5,"max_chars":4000}}
+{"id":"start","method":"akbp.session.start","path":"$KB","params":{"task":"take over inherited repo release work safely","limit":5,"max_chars":4000,"min_items":1,"require_citations":true,"fail_on_warnings":true}}
 {"id":"write-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Takeover agent can directly rewrite durable repo memory.","type":"workflow","evidence":["$ISSUE_SOURCE"]}}
 JSONL
 

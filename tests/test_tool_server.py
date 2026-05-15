@@ -630,7 +630,7 @@ class ToolServerTest(unittest.TestCase):
                 json.dumps({"id": "caps", "path": str(kb), "method": "akbp.capabilities"}),
                 json.dumps({"id": "1", "path": str(kb), "method": "akbp.status"}),
                 json.dumps({"id": "doctor", "path": str(kb), "method": "akbp.doctor"}),
-                json.dumps({"id": "2", "path": str(kb), "method": "akbp.context", "params": {"task": "durable claims", "max_chars": 24, "min_items": 1, "require_citations": True}}),
+                json.dumps({"id": "2", "path": str(kb), "method": "akbp.context", "params": {"task": "durable claims", "max_chars": 24, "min_items": 1, "require_citations": True, "fail_on_warnings": False}}),
             ]) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -749,6 +749,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[3]["result"]["quality"]["ok"])
             self.assertEqual(lines[3]["result"]["quality"]["minimum_items"], 1)
             self.assertTrue(lines[3]["result"]["quality"]["require_citations"])
+            self.assertFalse(lines[3]["result"]["quality"]["fail_on_warnings"])
             self.assertLessEqual(lines[3]["result"]["budget"]["summary_chars"], 24)
             self.assertEqual(
                 lines[3]["result"]["budget"]["truncated_items"],
@@ -1316,6 +1317,34 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(lines[2]["result"]["apply"])
             self.assertTrue((kb / lines[2]["result"]["page"]).exists())
 
+    def test_session_start_can_fail_on_warnings(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            run_cli("--path", str(kb), "remember", "Adapters should fail closed when startup context has warnings", "--type", "workflow", "--evidence", "AKBP.md")
+            request = json.dumps({
+                "id": "start-warning-gate",
+                "path": str(kb),
+                "method": "akbp.session.start",
+                "params": {
+                    "task": "adapter startup warning gate",
+                    "limit": 5,
+                    "max_chars": 24,
+                    "min_items": 1,
+                    "require_citations": True,
+                    "fail_on_warnings": True,
+                },
+            }) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertFalse(line["ok"])
+            self.assertEqual(line["error"]["code"], "cli_error")
+            context = json.loads(line["error"]["details"]["stdout"])
+            self.assertFalse(context["quality"]["ok"])
+            self.assertTrue(context["quality"]["require_citations"])
+            self.assertTrue(context["quality"]["fail_on_warnings"])
+            self.assertIn("warnings:1", context["quality"]["failed"])
+
     def test_crystallize_session_method(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
@@ -1562,6 +1591,7 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "bad-export-check-flag", "method": "akbp.export_check", "params": {"file": "bundle.jsonl", "fail_on_issues": "yes"}}),
             json.dumps({"id": "bad-import-check-flag", "method": "akbp.import_check", "params": {"file": "bundle.jsonl", "fail_on_rejected": "yes"}}),
             json.dumps({"id": "bad-source-verify-flag", "method": "akbp.source.verify", "params": {"source_id": "source_ok", "fail_on_issue": "yes"}}),
+            json.dumps({"id": "bad-session-warning-flag", "method": "akbp.session.start", "params": {"task": "adapter lifecycle", "fail_on_warnings": "yes"}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -1570,8 +1600,9 @@ class ToolServerTest(unittest.TestCase):
             ("fail_on_issues must be a boolean", "#/$defs/akbp.export_check.params"),
             ("fail_on_rejected must be a boolean", "#/$defs/akbp.import_check.params"),
             ("fail_on_issue must be a boolean", "#/$defs/akbp.source.verify.params"),
+            ("fail_on_warnings must be a boolean", "#/$defs/akbp.session.start.params"),
         ]
-        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 4)
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 5)
         for line, (message, schema_ref) in zip(lines, expected):
             self.assertIn(message, line["error"]["details"]["type_errors"])
             self.assertTrue(line["error"]["details"]["params_schema"].endswith(schema_ref))

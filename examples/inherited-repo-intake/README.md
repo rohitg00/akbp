@@ -17,7 +17,8 @@ builds the index, then proves the safe startup path:
 1. Generate a read-only `client-config`.
 2. Negotiate `akbp.capabilities` with read-only and startup-context profiles.
 3. Run `akbp.doctor --profile read-only`.
-4. Retrieve cited context through `akbp.session.start`.
+4. Retrieve cited context through `akbp.session.start` with warnings treated
+   as a failed startup gate.
 5. Reject an unapproved write with `approval_required`.
 6. Treat changed source evidence as a review blocker before trusting recalled
    context.
@@ -26,7 +27,8 @@ builds the index, then proves the safe startup path:
 
 - Start with `akbp discover` or an explicit `--path`; do not guess the KB.
 - Run `akbp doctor --profile read-only` before planning from recalled context.
-- Use `akbp.session.start` with a bounded task and require citations.
+- Use `akbp.session.start` with a bounded task, require citations, and fail on
+  warnings before planning from inherited memory.
 - Run `akbp source verify --fail-on-issue` before trusting old inherited-repo
   claims.
 - Keep write tools disabled until the host can show dry-run previews and collect
