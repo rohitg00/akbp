@@ -74,13 +74,18 @@ cd akbp
 make demo
 ```
 
-The demo creates a temporary knowledge base, registers a source, ingests a reviewed decision, verifies evidence, builds search, retrieves context, exports a portable bundle, checks that bundle, and runs level 3 conformance.
+The demo creates a temporary knowledge base, discovers JSONL tool-server capabilities, previews a reviewed decision, rejects the same write without approval, applies it after approval, verifies evidence, builds search, retrieves context, exports a portable bundle, checks that bundle, and runs level 3 conformance.
 
 Expected success markers:
 
 ```text
 AKBP quickstart demo
 Initialized AKBP knowledge base at ...
+{"id": "caps", "ok": true}
+{"dry_run": true, "id": "ingest-preview"
+{"error": {"code": "approval_required"}, "id": "ingest-blocked", "ok": false}
+{"id": "ingest-approved", "ok": true
+{"id": "index-approved", "indexed":
 "verified": 1
 "results": [
 "items": [

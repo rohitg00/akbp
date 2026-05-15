@@ -136,6 +136,11 @@ class RepoQualityTest(unittest.TestCase):
         for required in [
             "AKBP quickstart demo",
             "source verify --fail-on-issue",
+            "ingest-preview",
+            "ingest-blocked",
+            "approval_required",
+            "ingest-approved",
+            "index-approved",
             "supersedes",
             "audit --event supersede",
             "export-check",

@@ -12,12 +12,14 @@ The strongest public demo is a 6 minute terminal walkthrough that starts with an
 
 1. Initialize a knowledge base.
 2. Register a source note as evidence.
-3. Preview a durable claim before writing it.
-4. Apply the reviewed write.
-5. Build the search index.
-6. Retrieve cited context for the next agent session.
-7. Export and check a portable bundle.
-8. Show level 3 conformance.
+3. Discover JSONL tool-server capabilities.
+4. Preview a durable claim before writing it.
+5. Show unapproved writes returning `approval_required`.
+6. Apply the reviewed write.
+7. Build the search index with approval.
+8. Retrieve cited context for the next agent session.
+9. Export and check a portable bundle.
+10. Show level 3 conformance.
 
 Run the shipped happy path first:
 
@@ -27,7 +29,7 @@ cd akbp
 make demo
 ```
 
-Then show one manual write-safety moment with the JSONL tool server:
+The shipped demo already includes a concise JSONL write-safety moment. For a shorter clip, run only this manual tool-server segment:
 
 ```bash
 TMP_KB="$(mktemp -d)/akbp-demo-kb"

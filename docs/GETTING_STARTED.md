@@ -27,11 +27,17 @@ make demo
 ```
 
 The demo creates a temporary knowledge base, adds evidence, writes a reviewed decision, verifies sources, builds search, retrieves context, supersedes stale knowledge, exports a bundle, checks the bundle, and runs level 3 conformance.
+The first write goes through the JSONL tool-server flow: capability discovery, dry-run preview, unapproved write rejection, approved apply, and approved index refresh.
 
 Expected success markers:
 
 ```text
 AKBP quickstart demo
+"id": "caps", "ok": true
+"id": "ingest-preview"
+"code": "approval_required"
+"id": "ingest-approved"
+"id": "index-approved"
 "verified": 1
 "results": [
 "items": [
