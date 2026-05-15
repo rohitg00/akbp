@@ -58,6 +58,9 @@ AKBP stdio client config example passed
 - the config exposes `first_run_sequence` so adapter installers have one ordered checklist with explicit stop conditions before trusting recalled memory
 - the config exposes `runtime_requirements` so adapter installers can show the
   local-first/no-cloud/no-secret setup boundary before asking for trust
+- the config exposes `harness_adoption_fit` so adapter installers can turn
+  structured-output and harness expectations into a machine-checkable setup
+  gate before trusting recalled memory or enabling write tools
 - the config exposes `multi_client_scope` so adapter installers can wire
   multiple clients to one reviewed KB without hidden per-client memory stores
 - the config exposes `scope_selection` so adapter installers can distinguish

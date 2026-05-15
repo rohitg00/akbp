@@ -2986,6 +2986,42 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "fallback": "If an adjacent memory tool cannot preserve citations, review metadata, or exportable artifacts, keep AKBP read-only and treat that tool as an ephemeral hint source.",
         },
+        "harness_adoption_fit": {
+            "format": "akbp-harness-adoption-fit-v1",
+            "purpose": "Help hosts turn structured-output and agent-harness interest into a concrete AKBP setup gate instead of more prompt text.",
+            "observed_user_pull": [
+                "structured outputs that keep agent behavior predictable",
+                "harnesses that verify tools, memory, permissions, and context before a plan uses them",
+                "fast persistent recall without silent background writes",
+                "machine-checkable failure handling instead of prose-only setup advice",
+            ],
+            "akbp_harness_role": [
+                "negotiate capabilities before exposing host tools",
+                "check adapter readiness before trusting startup context",
+                "retrieve cited bounded context before planning from memory",
+                "preview durable writes with dry_run:true and preserve review metadata",
+                "stop unapproved writes on error.code approval_required",
+            ],
+            "minimum_gate": {
+                "command": "./examples/structured-output-harness/run.sh",
+                "must_pass_before": [
+                    "planning from recalled AKBP context",
+                    "enabling write-capable host tools",
+                    "promoting runtime memory into durable AKBP artifacts",
+                ],
+                "required_fields": [
+                    "id",
+                    "ok",
+                    "result.context.items[].citations",
+                    "result.context.budget",
+                    "result.review_required",
+                    "result.would_write",
+                    "error.code",
+                ],
+            },
+            "installer_positioning": "Present AKBP as the verified memory harness boundary: prompts describe behavior, but the harness proves citations, response envelopes, readiness, and write approval before trust.",
+            "fallback": "If the host cannot run the harness or preserve the required fields, keep AKBP read-only and continue without recalled memory when citations are missing.",
+        },
         "native_memory_interop": {
             "format": "akbp-native-memory-interop-v1",
             "purpose": "Prevent dual-memory drift when a coding agent, tool memory server, or hosted assistant already has product-native memory.",

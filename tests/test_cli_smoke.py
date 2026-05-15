@@ -223,6 +223,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("dry_run:true", " ".join(landscape["comparison_checks"]))
             self.assertIn("export-check", " ".join(landscape["comparison_checks"]))
             self.assertIn("ephemeral hint source", landscape["fallback"])
+            harness_fit = config["harness_adoption_fit"]
+            self.assertEqual(harness_fit["format"], "akbp-harness-adoption-fit-v1")
+            self.assertIn("structured-output", harness_fit["purpose"])
+            self.assertIn("structured outputs", harness_fit["observed_user_pull"][0])
+            self.assertIn("negotiate capabilities", " ".join(harness_fit["akbp_harness_role"]))
+            self.assertEqual(harness_fit["minimum_gate"]["command"], "./examples/structured-output-harness/run.sh")
+            self.assertIn("planning from recalled AKBP context", harness_fit["minimum_gate"]["must_pass_before"])
+            self.assertIn("error.code", harness_fit["minimum_gate"]["required_fields"])
+            self.assertIn("verified memory harness boundary", harness_fit["installer_positioning"])
+            self.assertIn("read-only", harness_fit["fallback"])
             interop = config["native_memory_interop"]
             self.assertEqual(interop["format"], "akbp-native-memory-interop-v1")
             self.assertEqual(interop["safe_default"], "akbp_as_cited_source_of_truth")

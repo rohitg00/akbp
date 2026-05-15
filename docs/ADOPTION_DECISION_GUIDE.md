@@ -107,6 +107,12 @@ not fight those layers for runtime UX. Use `memory_landscape_fit` from
 serve low-latency recall, while AKBP remains the cited, reviewed, exportable
 project-knowledge substrate.
 
+When users ask for structured outputs, harnesses, or predictable agent memory,
+also use `harness_adoption_fit` from `akbp client-config`. It turns that
+preference into a setup gate: run the structured-output harness, preserve
+response envelopes, citations, budget metadata, dry-run review fields, and
+`error.code`, and keep AKBP read-only until those checks pass.
+
 ## What makes an integration AKBP-compatible
 
 An integration is using AKBP as a protocol when it preserves these properties:

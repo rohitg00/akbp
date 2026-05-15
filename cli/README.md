@@ -203,6 +203,11 @@ servers, local memory databases, graph-memory tools, or product-native agent
 memory. The generated checks keep the explanation concrete: inspectable
 artifacts, citations, dry-run preview, approved apply, lifecycle updates, and
 export or import checks.
+Use `harness_adoption_fit` when users expect structured outputs and agent
+harnesses to make memory safer. It maps that expectation to a concrete setup
+gate: run the structured-output harness, preserve response envelopes, citations,
+budget metadata, dry-run review fields, and `error.code`, then keep AKBP
+read-only until the gate passes.
 
 Use `host_install_profiles` when an adapter needs host-specific install copy.
 The terminal-agent profile emits pasteable `akbp discover`, `doctor`, and
