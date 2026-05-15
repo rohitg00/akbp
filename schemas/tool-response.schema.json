@@ -280,6 +280,8 @@
             "write_apply_requires_approval",
             "jsonl_transport",
             "method_param_schemas",
+            "bounded_context",
+            "session_lifecycle_entrypoints",
             "method_schema_runtime_parity",
             "unknown_request_field_rejection",
             "unknown_param_rejection",
@@ -324,6 +326,12 @@
               "const": true
             },
             "method_param_schemas": {
+              "const": true
+            },
+            "bounded_context": {
+              "const": true
+            },
+            "session_lifecycle_entrypoints": {
               "const": true
             },
             "unknown_param_rejection": {
@@ -436,6 +444,7 @@
             "approval_field",
             "path_policy",
             "param_length_policy",
+            "context_budget_policy",
             "param_min_length_policy",
             "param_control_char_policy",
             "param_array_policy",
@@ -482,6 +491,10 @@
               "minLength": 1
             },
             "param_length_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "context_budget_policy": {
               "type": "string",
               "minLength": 1
             },
