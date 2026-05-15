@@ -70,18 +70,33 @@ class RepoQualityTest(unittest.TestCase):
 
     def test_source_intake_example_documents_review_first_flow(self):
         text = (ROOT / "examples" / "source-intake" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "source-intake" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script
         for required in [
+            "AKBP source intake example",
+            "AKBP source intake example passed",
             "Record source material before making durable claims",
             "source add",
             "crystallize",
+            "akbp.ingest",
+            "ingest-preview",
+            "ingest-blocked",
+            "ingest-approved",
+            "approval_required",
+            "index-approved",
+            "akbp.session.start",
             "import-check",
             "import-apply",
             "--dry-run",
             "--approved",
             "secret-like value",
             "unknown `source_...` evidence id",
+            "review-gated source intake ok",
+            "cited intake context ok",
         ]:
-            self.assertIn(required, text)
+            self.assertIn(required, combined)
+        self.assertIn("./examples/source-intake/run.sh", makefile)
 
     def test_portable_bundle_example_documents_review_flow(self):
         text = (ROOT / "examples" / "portable-bundle" / "README.md").read_text(encoding="utf-8")

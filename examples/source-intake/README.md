@@ -2,6 +2,14 @@
 
 Use this flow when an agent needs to turn files, transcripts, exports, or notes into durable AKBP knowledge.
 
+Run the executable example from the repository root:
+
+```bash
+./examples/source-intake/run.sh
+```
+
+The example covers the first inherited-repo intake loop: record file evidence, preview an ingest, reject the unapproved write, apply only with approval, rebuild the index, retrieve cited startup context, and reject an unsafe import.
+
 ## Rules
 
 1. Record source material before making durable claims.
@@ -55,3 +63,12 @@ Before accepting durable writes, confirm:
 - redaction happened before writes
 - planned writes match the user-approved task
 - duplicate imports are skipped instead of rewritten
+
+Expected success markers:
+
+```text
+AKBP source intake example
+review-gated source intake ok
+cited intake context ok
+AKBP source intake example passed
+```
