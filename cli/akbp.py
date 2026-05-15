@@ -3541,6 +3541,37 @@ def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
     sources = load_sources(base)
     if source_id:
         sources = [source for source in sources if source.get("id") == source_id]
+        if not sources:
+            missing_item = {
+                "id": source_id,
+                "type": "",
+                "locator": "",
+                "affected_claims": [],
+                "reason": "source_not_found",
+            }
+            return {
+                "ok": False,
+                "checked_at": now_iso(),
+                "source_id": source_id,
+                "counts": {
+                    "checked": 0,
+                    "verified": 0,
+                    "changed": 0,
+                    "missing": 1,
+                    "unchecked": 0,
+                },
+                "verified": [],
+                "changed": [],
+                "missing": [missing_item],
+                "unchecked": [],
+                "attention": {
+                    "requires_review": True,
+                    "recommended_action": "review_sources",
+                    "changed_source_ids": [],
+                    "missing_source_ids": [source_id],
+                    "affected_claims": [],
+                },
+            }
     affected_claims = affected_claims_by_evidence(base)
     verified: list[dict[str, Any]] = []
     changed: list[dict[str, Any]] = []

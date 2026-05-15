@@ -75,7 +75,7 @@ Then review the result buckets:
 
 - `verified`: source still matches.
 - `changed`: source exists but its hash changed.
-- `missing`: source file cannot be found.
+- `missing`: source file cannot be found, or a requested source id is not registered.
 - `unchecked`: source type cannot be hash-checked locally.
 
 For changed sources, add a new source record or update the durable claim only after reviewing the new evidence.

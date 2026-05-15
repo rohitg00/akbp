@@ -760,6 +760,29 @@ class AkbpCliSmokeTest(unittest.TestCase):
             source_verify = json.loads(out.stdout)
             self.assertTrue(source_verify["ok"])
             self.assertEqual(source_verify["counts"]["verified"], 1)
+            missing_source_verify = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLI),
+                    "--path",
+                    str(kb),
+                    "source",
+                    "verify",
+                    "source_missing",
+                    "--fail-on-issue",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(missing_source_verify.returncode, 1)
+            missing_source = json.loads(missing_source_verify.stdout)
+            self.assertFalse(missing_source["ok"])
+            self.assertEqual(missing_source["counts"]["checked"], 0)
+            self.assertEqual(missing_source["counts"]["missing"], 1)
+            self.assertEqual(missing_source["missing"][0]["reason"], "source_not_found")
+            self.assertEqual(missing_source["attention"]["recommended_action"], "review_sources")
+            self.assertEqual(missing_source["attention"]["missing_source_ids"], ["source_missing"])
             out = run_cli("--path", str(kb), "doctor")
             doctor = json.loads(out.stdout)
             self.assertTrue(doctor["ok"])

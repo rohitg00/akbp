@@ -14,6 +14,7 @@
   selected readiness profile instead of forcing full adapter readiness.
 - Blocked `import-apply` from writing uncited or non-source-backed claims even when `--approved` is passed, so migration/import flows must satisfy the review readiness gate before durable writes.
 - Added a source verification attention summary so adapters can surface changed or missing evidence and affected claim ids before trusting recalled memory.
+- Changed `source verify <source_id>` so unknown source ids fail as missing evidence instead of passing an empty verification check.
 - Added `akbp context --fail-on-warnings` so adapter startup gates can fail closed on warning-bearing context such as source drift, inactive matches, empty retrieval, or budget truncation before trusting recalled memory.
 - Added a schema-backed `knowledge_capability` descriptor to `akbp.capabilities` so tool hosts can classify AKBP as local, cited, review-gated agent knowledge before exposing it through tool-protocol or host-native memory surfaces.
 - Added machine-readable scope selection to generated client configs so adapter installers can distinguish repo-local, team-shared, personal-assistant, and migration knowledge-base boundaries before trusting recalled memory.

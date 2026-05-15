@@ -1050,6 +1050,17 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(line["result"]["attention"]["recommended_action"], "review_affected_claims")
             self.assertEqual(line["result"]["attention"]["changed_source_ids"], [source["id"]])
             self.assertEqual(line["result"]["attention"]["affected_claims"], [claim["id"]])
+            missing_request = json.dumps({"id": "source-missing", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": "source_missing", "fail_on_issue": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=missing_request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertTrue(line["ok"])
+            assert_matches_required_schema(self, line["result"], schema_def("source_verify_result"))
+            self.assertFalse(line["result"]["ok"])
+            self.assertEqual(line["result"]["counts"]["checked"], 0)
+            self.assertEqual(line["result"]["counts"]["missing"], 1)
+            self.assertEqual(line["result"]["missing"][0]["reason"], "source_not_found")
+            self.assertEqual(line["result"]["attention"]["recommended_action"], "review_sources")
+            self.assertEqual(line["result"]["attention"]["missing_source_ids"], ["source_missing"])
 
     def test_export_check_method_validates_bundle_manifest(self):
         with tempfile.TemporaryDirectory() as d:

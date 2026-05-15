@@ -192,7 +192,7 @@ Return a portable bundle of protocol artifacts: card, claims, sources, entities,
 
 ## `akbp.source.verify`
 
-Re-check recorded file sources against their stored SHA-256 hashes. The result separates verified, changed, missing, and unchecked sources so agents can catch evidence drift before relying on old claims. When drift or missing evidence is found, `attention` lists the changed or missing source ids, unique affected claim ids, and a `recommended_action` adapters can surface before trusting recalled memory.
+Re-check recorded file sources against their stored SHA-256 hashes. The result separates verified, changed, missing, and unchecked sources so agents can catch evidence drift before relying on old claims. When a requested `source_id` is not registered, the check returns `ok:false`, reports it in `missing` with `reason:"source_not_found"`, and lists the id in `attention.missing_source_ids`. When drift or missing evidence is found, `attention` lists the changed or missing source ids, unique affected claim ids, and a `recommended_action` adapters can surface before trusting recalled memory.
 
 ## `akbp.export_check`
 
