@@ -393,9 +393,23 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(prompt_contract["startup_request"]["params"]["max_chars"], 4000)
             self.assertTrue(prompt_contract["planning_gate"]["required_before_planning"])
             self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
+            trust_gate = prompt_contract["startup_trust_gate"]
+            self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")
+            self.assertTrue(trust_gate["required_before_planning"])
+            self.assertEqual(trust_gate["trust_conditions"]["minimum_items"], 1)
+            self.assertTrue(trust_gate["trust_conditions"]["require_citations"])
+            self.assertTrue(trust_gate["trust_conditions"]["require_budget"])
+            self.assertEqual(trust_gate["trust_conditions"]["max_chars"], 4000)
+            self.assertIn("result.context.items is empty", trust_gate["fail_closed_on"])
+            self.assertIn("budget.truncated", " ".join(trust_gate["fail_closed_on"]))
+            self.assertIn("Continue without recalled AKBP memory", trust_gate["fallback_action"])
             self.assertFalse(prompt_contract["write_gate"]["required_for_apply"])
             self.assertEqual(prompt_contract["write_gate"]["preview_flags"], {"dry_run": True})
             self.assertIn("error.code", prompt_contract["validation"]["branch_on"])
+            self.assertEqual(
+                read_only["quality_gates"]["startup_context"]["trust_gate_ref"],
+                "adapter_prompt_contract.startup_trust_gate",
+            )
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
             portable = json.loads(

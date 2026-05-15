@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a machine-readable startup trust gate to generated adapter prompt
+  contracts so hosts can fail closed on empty, uncited, truncated, or
+  unsurfaced-warning startup context before planning from recalled memory.
 - Added a machine-readable ten-minute adoption proof to discovery and generated
   client configs so installers can prove local setup, cited recall,
   review-gated writes, and portable export before positioning AKBP as agent
