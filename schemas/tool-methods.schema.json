@@ -16,6 +16,13 @@
       "maximum": 65536,
       "description": "Optional cap for total context item summary characters returned to the client."
     },
+    "minItems": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 0,
+      "description": "Minimum context items required before the context pack is considered usable."
+    },
     "evidenceList": {
       "type": "array",
       "maxItems": 64,
@@ -70,6 +77,13 @@
         },
         "max_chars": {
           "$ref": "#/$defs/maxChars"
+        },
+        "min_items": {
+          "$ref": "#/$defs/minItems"
+        },
+        "require_citations": {
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -558,6 +572,13 @@
         },
         "max_chars": {
           "$ref": "#/$defs/maxChars"
+        },
+        "min_items": {
+          "$ref": "#/$defs/minItems"
+        },
+        "require_citations": {
+          "type": "boolean",
+          "default": false
         }
       }
     },

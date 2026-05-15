@@ -34,6 +34,8 @@ printf '%s\n' "Adoption preflight should prove cited startup context before enab
 python3 "$ROOT/cli/akbp.py" --path "$KB" source add "$NOTE" --type file --title "Adoption preflight note" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Adapters should prove cited startup context before enabling write-capable memory." --type workflow --confidence 0.93 --evidence "$NOTE" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" index --incremental >/dev/null
+python3 "$ROOT/cli/akbp.py" --path "$KB" context "adopt AKBP with cited startup context" --max-chars 4000 --min-items 1 --require-citations >/dev/null
+echo "CLI startup context quality gate ok"
 
 python3 "$ROOT/tool-server/akbp_tool_server.py" <<JSONL | python3 -c '
 import json

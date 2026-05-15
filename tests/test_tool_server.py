@@ -413,6 +413,10 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(defs["context_result"]["additionalProperties"])
         self.assertIn("items", defs["context_result"]["required"])
         self.assertIn("warnings", defs["context_result"]["required"])
+        self.assertIn("quality", defs["context_result"]["required"])
+        self.assertIn("quality", defs["context_result"]["properties"])
+        self.assertFalse(defs["context_result"]["properties"]["quality"]["additionalProperties"])
+        self.assertIn("ok", defs["context_result"]["properties"]["quality"]["required"])
         self.assertFalse(defs["search_result"]["additionalProperties"])
         self.assertIn("backend", defs["search_result"]["required"])
         self.assertIn("results", defs["search_result"]["required"])
@@ -601,7 +605,7 @@ class ToolServerTest(unittest.TestCase):
                 json.dumps({"id": "caps", "path": str(kb), "method": "akbp.capabilities"}),
                 json.dumps({"id": "1", "path": str(kb), "method": "akbp.status"}),
                 json.dumps({"id": "doctor", "path": str(kb), "method": "akbp.doctor"}),
-                json.dumps({"id": "2", "path": str(kb), "method": "akbp.context", "params": {"task": "durable claims", "max_chars": 24}}),
+                json.dumps({"id": "2", "path": str(kb), "method": "akbp.context", "params": {"task": "durable claims", "max_chars": 24, "min_items": 1, "require_citations": True}}),
             ]) + "\n"
             proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
             lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -694,7 +698,11 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[2]["result"]["workflow"]["current_stage"], "register_evidence")
             self.assertEqual(lines[3]["id"], "2")
             assert_matches_required_schema(self, lines[3]["result"], schema_def("context_result"))
+            self.assertTrue(lines[3]["ok"])
             self.assertTrue(lines[3]["result"]["items"])
+            self.assertTrue(lines[3]["result"]["quality"]["ok"])
+            self.assertEqual(lines[3]["result"]["quality"]["minimum_items"], 1)
+            self.assertTrue(lines[3]["result"]["quality"]["require_citations"])
             self.assertLessEqual(lines[3]["result"]["budget"]["summary_chars"], 24)
             self.assertEqual(
                 lines[3]["result"]["budget"]["truncated_items"],
@@ -1534,18 +1542,21 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "bad-context-limit", "method": "akbp.context", "params": {"task": "adapter lifecycle", "limit": 101}}),
             json.dumps({"id": "bad-audit-limit", "method": "akbp.audit", "params": {"limit": "20"}}),
             json.dumps({"id": "bad-context-budget", "method": "akbp.context", "params": {"task": "adapter lifecycle", "max_chars": 0}}),
+            json.dumps({"id": "bad-context-min-items", "method": "akbp.context", "params": {"task": "adapter lifecycle", "min_items": 101}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 4)
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 5)
         self.assertIn("limit must be an integer", lines[0]["error"]["details"]["type_errors"])
         self.assertIn("limit must be between 1 and 100", lines[1]["error"]["details"]["type_errors"])
         self.assertIn("limit must be an integer", lines[2]["error"]["details"]["type_errors"])
         self.assertIn("max_chars must be between 1 and 65536", lines[3]["error"]["details"]["type_errors"])
+        self.assertIn("min_items must be between 0 and 100", lines[4]["error"]["details"]["type_errors"])
         self.assertTrue(lines[0]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.query.params"))
         self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.context.params"))
         self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.audit.params"))
         self.assertTrue(lines[3]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.context.params"))
+        self.assertTrue(lines[4]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.context.params"))
         for line in lines:
             assert_matches_required_schema(self, line["error"]["details"], schema_def("invalid_params_details"))
 

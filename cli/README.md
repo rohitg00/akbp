@@ -80,6 +80,18 @@ The extractor is deliberately conservative and local. Re-running the same crysta
 
 Use `--max-chars` when an adapter has a fixed startup prompt budget. The returned context pack includes a `budget` object with the requested cap, final summary characters, original summary characters, clipped item count, omitted item count, and item counts before and after budgeting.
 
+Use `--min-items` and `--require-citations` when a runtime needs a fail-closed
+startup gate before planning from recalled memory:
+
+```bash
+python3 cli/akbp.py --path ./my-kb context "current task" --max-chars 4000 --min-items 1 --require-citations
+```
+
+The returned context pack includes a `quality` object. The command exits non-zero
+when the gate fails, for example when no items are found or a returned item has
+no citations. Adapters should then continue without recalled AKBP memory instead
+of inventing prior decisions.
+
 ## Discovery
 
 akbp discover finds the nearest akbp.json from --path or its parent directories and prints a JSON preflight payload for adapter installers. It reports the resolved KB path, card metadata, default scope, artifact presence, trust-boundary rules, AKBP's role relative to memory servers, repository instruction files, tool-protocol hosts, and search indexes, plus recommended doctor, client-config, and context commands. The payload also includes `first_run_proof`, a machine-readable checklist for proving read-only setup, cited startup context, dry-run write preview, and the `approval_required` stop signal before enabling reviewed writes.

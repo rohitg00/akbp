@@ -77,7 +77,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.status": {"write": False, "params": ["limit"]},
     "akbp.doctor": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
-    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars"]},
+    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars", "min_items", "require_citations"]},
     "akbp.index": {"write": True, "params": ["incremental", "dry_run"]},
     "akbp.search": {"write": False, "params": ["query", "limit"]},
     "akbp.remember": {"write": True, "params": ["text", "type", "evidence", "entity", "dry_run"]},
@@ -94,7 +94,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
-    "akbp.session.start": {"write": False, "params": ["task", "query", "limit", "max_chars"]},
+    "akbp.session.start": {"write": False, "params": ["task", "query", "limit", "max_chars", "min_items", "require_citations"]},
     "akbp.session.end": {"write": True, "params": ["transcript", "apply", "dry_run"]},
 }
 
@@ -410,7 +410,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
             "param_control_char_policy": "path-like, identifier, evidence, and entity string params reject NUL, newline, and carriage return before CLI dispatch",
             "param_array_policy": "evidence and entity arrays are capped for item count and per-item string length before CLI dispatch",
             "param_enum_policy": "claim type, source type, conformance level, and related enum params are checked against the public schemas before CLI dispatch",
-            "param_numeric_range_policy": "limit and confidence params are checked against method schema bounds before CLI dispatch",
+            "param_numeric_range_policy": "limit, min_items, max_chars, and confidence params are checked against method schema bounds before CLI dispatch",
             "finite_numeric_param_policy": "numeric params are rejected when parser overflow would produce non-finite floats before CLI dispatch",
             "request_id_policy": "request ids must be finite strings or numbers; string ids are capped at 512 characters and reject NUL, newline, and carriage return; numeric ids are capped at the JavaScript safe integer range before dispatch",
             "cli_error_output_policy": "CLI error stdout and stderr are redacted first, then capped before being returned in structured error responses",
@@ -474,6 +474,10 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
     argv = [str(a) for a in mapping[method] if a != ""]
     if method in {"akbp.context", "akbp.session.start"} and "max_chars" in params:
         argv.extend(["--max-chars", str(params["max_chars"])])
+    if method in {"akbp.context", "akbp.session.start"} and "min_items" in params:
+        argv.extend(["--min-items", str(params["min_items"])])
+    if method in {"akbp.context", "akbp.session.start"} and params.get("require_citations"):
+        argv.append("--require-citations")
     if method == "akbp.index" and params.get("incremental"):
         argv.append("--incremental")
     for evidence in params.get("evidence", []) or []:
@@ -762,6 +766,12 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
             errors.append("max_chars must be an integer")
         elif max_chars < 1 or max_chars > 65536:
             errors.append("max_chars must be between 1 and 65536")
+    if "min_items" in params:
+        min_items = params.get("min_items")
+        if not isinstance(min_items, int) or isinstance(min_items, bool):
+            errors.append("min_items must be an integer")
+        elif min_items < 0 or min_items > 100:
+            errors.append("min_items must be between 0 and 100")
     if "confidence" in params:
         confidence = params.get("confidence")
         if not is_finite_number(confidence):

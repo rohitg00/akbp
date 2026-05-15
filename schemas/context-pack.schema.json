@@ -3,7 +3,7 @@
   "$id": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/context-pack.schema.json",
   "title": "AKBP Context Pack",
   "type": "object",
-  "required": ["query", "generated_at", "items"],
+  "required": ["query", "generated_at", "items", "quality"],
   "properties": {
     "query": { "type": "string" },
     "generated_at": { "type": "string", "format": "date-time" },
@@ -21,6 +21,18 @@
           "citations": { "type": "array", "items": { "type": "string" } },
           "freshness": { "type": "string", "enum": ["fresh", "unknown", "stale"] }
         }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["ok", "minimum_items", "require_citations", "items", "uncited_items", "failed"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "minimum_items": { "type": "integer", "minimum": 0 },
+        "require_citations": { "type": "boolean" },
+        "items": { "type": "integer", "minimum": 0 },
+        "uncited_items": { "type": "array", "items": { "type": "string" } },
+        "failed": { "type": "array", "items": { "type": "string" } }
       }
     },
     "budget": {

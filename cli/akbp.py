@@ -817,6 +817,28 @@ def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[st
     return pack
 
 
+def context_quality(pack: dict[str, Any], min_items: int, require_citations: bool) -> dict[str, Any]:
+    items = pack.get("items", [])
+    uncited = [
+        str(item.get("id"))
+        for item in items
+        if not item.get("citations")
+    ]
+    failed: list[str] = []
+    if len(items) < min_items:
+        failed.append(f"minimum_items:{len(items)}<{min_items}")
+    if require_citations and uncited:
+        failed.append(f"uncited_items:{','.join(uncited)}")
+    return {
+        "ok": not failed,
+        "minimum_items": min_items,
+        "require_citations": require_citations,
+        "items": len(items),
+        "uncited_items": uncited,
+        "failed": failed,
+    }
+
+
 def cmd_context(args: argparse.Namespace) -> int:
     base = root(args.path)
     results = collect_results(base, args.task, args.limit)
@@ -833,6 +855,9 @@ def cmd_context(args: argparse.Namespace) -> int:
         "warnings": warnings,
     }
     pack = apply_context_budget(pack, args.max_chars)
+    pack["quality"] = context_quality(pack, args.min_items, args.require_citations)
+    if not pack["quality"]["ok"]:
+        pack["warnings"].append("Context quality gate failed: " + "; ".join(pack["quality"]["failed"]))
     if args.markdown:
         print(f"# AKBP Context Pack\n\nQuery: {pack['query']}\nGenerated: {pack['generated_at']}\n")
         for item in pack["items"]:
@@ -844,7 +869,7 @@ def cmd_context(args: argparse.Namespace) -> int:
             print(f"> Warning: {warning}")
     else:
         print(json.dumps(pack, indent=2, ensure_ascii=False))
-    return 0
+    return 0 if pack["quality"]["ok"] else 1
 
 
 def clean_line(line: str) -> str:
@@ -3466,6 +3491,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("task")
     s.add_argument("--limit", type=int, default=10)
     s.add_argument("--max-chars", type=int, help="cap total context item summary characters")
+    s.add_argument("--min-items", type=int, default=0, help="fail when fewer context items are returned")
+    s.add_argument("--require-citations", action="store_true", help="fail when returned context items lack citations")
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
 

@@ -1554,6 +1554,7 @@
         "query",
         "generated_at",
         "items",
+        "quality",
         "warnings"
       ],
       "properties": {
@@ -1568,6 +1569,46 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/context_item"
+          }
+        },
+        "quality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ok",
+            "minimum_items",
+            "require_citations",
+            "items",
+            "uncited_items",
+            "failed"
+          ],
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            },
+            "minimum_items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "require_citations": {
+              "type": "boolean"
+            },
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "uncited_items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "failed": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
         "budget": {

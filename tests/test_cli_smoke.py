@@ -635,6 +635,37 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(pack["items"])
             self.assertEqual(pack["items"][0]["backend"], "sqlite_fts5")
             self.assertIn("citations", pack["items"][0])
+            self.assertTrue(pack["quality"]["ok"])
+
+            out = run_cli(
+                "--path", str(kb),
+                "context", "continue Bun npm migration",
+                "--min-items", "1",
+                "--require-citations",
+            )
+            gated_pack = json.loads(out.stdout)
+            self.assertTrue(gated_pack["quality"]["ok"])
+            self.assertEqual(gated_pack["quality"]["minimum_items"], 1)
+            self.assertTrue(gated_pack["quality"]["require_citations"])
+
+            empty_gate = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLI),
+                    "--path", str(kb),
+                    "context", "zzzz-unmatched-startup-context-gate",
+                    "--min-items", "1",
+                    "--require-citations",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(empty_gate.returncode, 1)
+            empty_pack = json.loads(empty_gate.stdout)
+            self.assertFalse(empty_pack["quality"]["ok"])
+            self.assertIn("minimum_items:0<1", empty_pack["quality"]["failed"])
+            self.assertTrue(any("Context quality gate failed" in warning for warning in empty_pack["warnings"]))
 
             out = run_cli("--path", str(kb), "context", "continue Bun npm migration", "--max-chars", "40")
             budgeted = json.loads(out.stdout)
