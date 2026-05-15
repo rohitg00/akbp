@@ -8,7 +8,38 @@
     "path": ".",
     "tool_server": {
       "command": "akbp-tool-server",
-      "transport": "jsonl"
+      "transport": "jsonl",
+      "hosted_cloud_agent_default": "read_only"
+    },
+    "hosted_cloud_agent": {
+      "requires_profiles": ["read_only"],
+      "allowed_methods": [
+        "akbp.capabilities",
+        "akbp.status",
+        "akbp.doctor",
+        "akbp.query",
+        "akbp.context",
+        "akbp.search",
+        "akbp.conformance",
+        "akbp.export",
+        "akbp.export_check",
+        "akbp.audit",
+        "akbp.cite",
+        "akbp.source.verify",
+        "akbp.import_check",
+        "akbp.session.start"
+      ],
+      "blocked_write_methods": [
+        "akbp.remember",
+        "akbp.source.add",
+        "akbp.ingest",
+        "akbp.import_apply",
+        "akbp.supersede",
+        "akbp.contradict",
+        "akbp.crystallize_session",
+        "akbp.session.end",
+        "akbp.index"
+      ]
     },
     "startup_context_limit": 8,
     "write_policy": {

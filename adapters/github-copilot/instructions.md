@@ -6,6 +6,7 @@ Use AKBP as the durable knowledge layer for project decisions, preferences, bloc
 
 - Locate `akbp.json` in the current repository or parent directories.
 - Call `akbp.capabilities` to inspect supported methods, schemas, and write review rules.
+- In hosted cloud-agent tool mode, require `result.profiles.read_only` and do not call write-capable methods unless a separate human approval step exists.
 - Call `akbp.context` with the current task.
 - Treat returned citations as evidence, not hidden memory.
 

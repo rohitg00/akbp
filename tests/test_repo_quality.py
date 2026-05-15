@@ -122,6 +122,29 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, text + script)
         self.assertIn("./examples/read-only-adapter/run.sh", makefile)
 
+    def test_github_copilot_adapter_documents_cloud_agent_read_only_boundary(self):
+        readme = (ROOT / "adapters" / "github-copilot" / "README.md").read_text(encoding="utf-8")
+        instructions = (ROOT / "adapters" / "github-copilot" / "instructions.md").read_text(encoding="utf-8")
+        config = json.loads((ROOT / "adapters" / "github-copilot" / "config.example.json").read_text(encoding="utf-8"))
+        docs = (ROOT / "docs" / "ADAPTERS.md").read_text(encoding="utf-8")
+        combined = readme + instructions + docs
+        for required in [
+            "Cloud agent tool safety",
+            "hosted cloud-agent tool integrations read-only",
+            "result.profiles.read_only",
+            "separate human approval step",
+            "akbp.session.start",
+            "blocked_write_methods",
+        ]:
+            self.assertIn(required, combined + json.dumps(config))
+        self.assertEqual(config["akbp"]["tool_server"]["hosted_cloud_agent_default"], "read_only")
+        self.assertEqual(config["akbp"]["hosted_cloud_agent"]["requires_profiles"], ["read_only"])
+        self.assertIn("akbp.context", config["akbp"]["hosted_cloud_agent"]["allowed_methods"])
+        self.assertIn("akbp.import_check", config["akbp"]["hosted_cloud_agent"]["allowed_methods"])
+        self.assertIn("akbp.source.verify", config["akbp"]["hosted_cloud_agent"]["allowed_methods"])
+        self.assertIn("akbp.session.end", config["akbp"]["hosted_cloud_agent"]["blocked_write_methods"])
+        self.assertIn("akbp.crystallize_session", config["akbp"]["hosted_cloud_agent"]["blocked_write_methods"])
+
     def test_cli_readme_documents_search_query_syntax(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
         for required in [

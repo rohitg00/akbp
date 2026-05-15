@@ -125,6 +125,7 @@ Integration style:
 - project-local AKBP discovery from the checkout
 - cited startup context before planning
 - review-gated session crystallization after durable work
+- hosted cloud-agent tool setup should use the `read_only` workflow profile unless a separate human approval step exists for write-capable methods
 
 ## OpenClaw
 

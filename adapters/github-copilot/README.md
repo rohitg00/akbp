@@ -4,12 +4,26 @@ This adapter shows how a GitHub Copilot workspace can use AKBP as reviewable pro
 
 Use it when Copilot can read repository files and the developer can run local terminal commands from the checkout.
 
+## Cloud agent tool safety
+
+GitHub Copilot cloud agent can be connected to repository tools, but hosted-agent tool calls may run without an interactive approval prompt from AKBP. Treat that environment as read-only unless your repository has a separate human review step before any durable write is applied.
+
+Recommended cloud-agent setup:
+
+1. expose only read methods such as `akbp.capabilities`, `akbp.session.start`, `akbp.context`, `akbp.search`, `akbp.cite`, and `akbp.status`
+2. require the `read_only` workflow profile during capability negotiation
+3. keep write-capable methods such as `akbp.remember`, `akbp.ingest`, `akbp.import_apply`, `akbp.session.end`, and `akbp.index` out of the hosted tool allowlist
+4. run write previews and approved applies from a local checkout or CI job that can show `review_required` and `apply_instruction` to a human reviewer
+
+Local Copilot, terminal-assisted, or CI-backed flows can still use the normal dry-run then approved apply sequence below. The key boundary is whether a human can review the preview before the write lands.
+
 ## Startup flow
 
 1. Discover `akbp.json` in the repository root or a parent directory.
-2. Call `akbp.capabilities` before assuming method names, schemas, or write behavior.
-3. Call `akbp.context` with the current task before planning.
-4. Cite retrieved claims when prior project knowledge affects code changes, release decisions, or recommendations.
+2. Call `akbp.capabilities` before assuming method names, schemas, workflow profiles, or write behavior.
+3. For hosted cloud-agent flows, require the `read_only` profile and use its method allowlist.
+4. Call `akbp.context` or `akbp.session.start` with the current task before planning.
+5. Cite retrieved claims when prior project knowledge affects code changes, release decisions, or recommendations.
 
 ## Write flow
 
@@ -51,6 +65,7 @@ Follow `docs/AGENT_FLOW.md`: retrieve context first, preview source imports, cry
 Every adapter must use the same durable write boundary:
 
 - call `akbp.capabilities` before assuming methods or schemas
+- keep hosted cloud-agent tool integrations read-only unless a separate human approval step exists
 - call `akbp.context` before planning substantial work
 - start source imports with ingest dry-run
 - validate JSONL exports with `akbp.import_check` and preview accepted imports with `akbp.import_apply` plus `dry_run:true`
