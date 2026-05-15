@@ -245,6 +245,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("supersede or contradict", interop["conflict_policy"]["when_native_memory_disagrees"])
             self.assertIn("no source or citation", " ".join(interop["reject_promotion_when"]))
             self.assertIn("read-only", interop["fallback"])
+            compaction = config["context_compaction_recovery"]
+            self.assertEqual(compaction["format"], "akbp-context-compaction-recovery-v1")
+            self.assertIn("conversation compaction", compaction["purpose"])
+            self.assertIn("context loss", compaction["research_signal"])
+            self.assertIn("the host compacted or summarized the conversation", compaction["trigger_when"])
+            self.assertEqual(compaction["recovery_sequence"][0]["request"], "session_start")
+            self.assertIn("adapter_prompt_contract.context_use_report", compaction["recovery_sequence"][1]["request"])
+            self.assertIn("startup_trust_gate", compaction["recovery_sequence"][2]["request"])
+            self.assertIn("uncited chat summaries", compaction["do_not_recover_from"])
+            self.assertIn("fresh session", compaction["fallback"])
             multi_client = config["multi_client_scope"]
             self.assertIn("share one reviewed knowledge base", multi_client["purpose"])
             self.assertEqual(multi_client["shared_kb_path"], str(kb.resolve()))

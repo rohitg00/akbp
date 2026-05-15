@@ -3090,6 +3090,50 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "adapter_action": "Expose this policy in installer UI or agent instructions whenever the host advertises built-in memory, external memory tools, or an external memory server.",
             "fallback": "Keep AKBP read-only and leave native memory unpromoted when citations, review metadata, or explicit approval are missing.",
         },
+        "context_compaction_recovery": {
+            "format": "akbp-context-compaction-recovery-v1",
+            "purpose": "Give coding-agent hosts a deterministic recovery path when conversation compaction, truncation, or session restart drops working context.",
+            "research_signal": "Recent user complaints around coding-agent memory focus on context loss and compaction; AKBP should turn recovery into a cited preflight instead of an uncited model summary.",
+            "trigger_when": [
+                "the host compacted or summarized the conversation",
+                "a new agent session resumes an unfinished task",
+                "the adapter cannot prove which prior context survived",
+                "startup context was omitted because the first attempt had no budget",
+            ],
+            "recovery_sequence": [
+                {
+                    "step": "retrieve_cited_context",
+                    "request": "session_start",
+                    "required": True,
+                    "expect": "ok true, non-empty result.context.items, citations, and budget metadata",
+                },
+                {
+                    "step": "emit_context_use_report",
+                    "request": "adapter_prompt_contract.context_use_report",
+                    "required": True,
+                    "expect": "the host records used_akbp_context, item ids, citation ids, surfaced warnings, and fallback reason",
+                },
+                {
+                    "step": "continue_or_fail_closed",
+                    "request": "startup_trust_gate",
+                    "required": True,
+                    "expect": "continue without recalled AKBP memory when citations are missing, warnings cannot be surfaced, or budget is truncated",
+                },
+                {
+                    "step": "preview_new_durable_summary",
+                    "request": "akbp.session.end with dry_run:true",
+                    "required": requested_profile == "reviewed_write",
+                    "expect": "review metadata appears before any compacted-session summary is promoted",
+                },
+            ],
+            "do_not_recover_from": [
+                "uncited chat summaries",
+                "private logs or scratchpads",
+                "native memory items that lack source ids",
+                "bridge-local embeddings that cannot be export-checked",
+            ],
+            "fallback": "If cited context cannot be recovered, proceed as a fresh session, keep writes disabled, and do not invent prior decisions.",
+        },
         "multi_client_scope": {
             "purpose": "Let several coding-agent, editor, or local-assistant clients share one reviewed knowledge base without creating hidden per-client memory stores.",
             "shared_kb_path": kb_path,
