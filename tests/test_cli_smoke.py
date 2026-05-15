@@ -59,6 +59,23 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse(config["runtime_requirements"]["network_required"])
             self.assertFalse(config["runtime_requirements"]["cloud_account_required"])
             self.assertEqual(config["runtime_requirements"]["secrets_required"], [])
+            install_surface = config["runtime_requirements"]["install_surface"]
+            self.assertEqual(install_surface["runtime"], "python3")
+            self.assertEqual(install_surface["external_services_required"], [])
+            self.assertFalse(install_surface["docker_required"])
+            self.assertIn("SQLite FTS index", install_surface["database_required"])
+            self.assertFalse(install_surface["network_required_after_install"])
+            self.assertEqual(install_surface["first_command"], "akbp discover")
+            self.assertEqual(
+                install_surface["adapter_setup_order"],
+                [
+                    "resolve explicit knowledge_base.path",
+                    "run akbp discover",
+                    "run akbp doctor --profile read-only",
+                    "generate akbp client-config --profile read-only",
+                    "run generated preflight_requests before exposing tools",
+                ],
+            )
             self.assertIn("AKBP artifacts", config["runtime_requirements"]["durable_state_owner"])
             self.assertIn("read-only bridge allowlist", config["runtime_requirements"]["tool_protocol_hosts"])
             multi_client = config["multi_client_scope"]

@@ -97,6 +97,11 @@ If no Knowledge Base Card is found, the command exits non-zero and suggests akbp
 The emitted config includes `runtime_requirements` so installers can tell users
 up front that the reference stdio flow is local-first and does not require a
 network connection, cloud account, or secrets.
+Its `runtime_requirements.install_surface` block makes the first-run footprint
+machine-readable for installer UIs: AKBP needs `python3`, no Docker, no cloud
+account, no external service, no secrets, and no external database. The SQLite
+FTS index under `.akbp/` is rebuildable runtime state; markdown and JSONL
+artifacts remain the durable source of truth.
 It also includes `first_run_sequence`, an ordered setup path that resolves the
 knowledge-base path, negotiates capabilities, checks doctor readiness, retrieves
 cited startup context, and keeps writes disabled until a review surface exists.
