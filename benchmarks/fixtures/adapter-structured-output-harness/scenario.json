@@ -83,6 +83,23 @@
         }
       },
       {
+        "id": "session-start-invalid-params-structured-harness",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "adapter structured output harness",
+          "limit": 0
+        },
+        "expected_error_code": "invalid_params",
+        "expected_error_schema": "#/$defs/invalid_params_details",
+        "expected_error_fields": ["type_errors", "params_schema"],
+        "expected_error_values": {
+          "params_schema": "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json#/$defs/akbp.session.start.params"
+        },
+        "expected_error_contains": {
+          "type_errors[]": ["limit must be between 1 and 100"]
+        }
+      },
+      {
         "id": "session-start-structured-harness",
         "method": "akbp.session.start",
         "params": {
@@ -175,6 +192,7 @@
     "answer_should_include": [
       "structured AKBP response fields",
       "schemas",
+      "invalid_params",
       "error codes",
       "dry-run",
       "approval_required"

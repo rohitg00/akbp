@@ -27,6 +27,7 @@ Expected success markers:
 AKBP structured output harness example
 capability contract ok
 unsupported capability gate ok
+invalid params repair contract ok
 doctor contract ok
 startup context contract ok
 dry-run review contract ok
@@ -41,6 +42,7 @@ AKBP structured output harness example passed
 - every response keeps the stable `id`, `ok`, `result`, and `error` envelope
 - capability negotiation advertises schema-backed params, structured errors, and reviewed-write policy
 - unsupported capability or profile requests leave `negotiation.satisfied:false` so adapters can disable unavailable flows before planning
+- invalid adapter payloads return `invalid_params` with a method schema reference and concrete field errors the adapter can use for repair
 - adapter readiness exposes the dry-run and approval boundary before writes are enabled
 - startup context includes cited records before the adapter uses memory in a plan
 - dry-run write previews include `review_required`, `apply_instruction`, and `would_write`
@@ -60,6 +62,7 @@ An adapter should stay read-only or setup-only when this harness cannot prove:
 
 - capability negotiation satisfies the profiles the adapter requires
 - unsupported feature or profile negotiation disables that flow instead of falling through to a weaker memory mode
+- invalid params include the method schema reference and typed errors needed to repair the adapter payload
 - doctor readiness says the selected knowledge base is safe for adapter use
 - startup context includes cited items before the runtime plans from memory
 - write previews expose review metadata and planned durable changes

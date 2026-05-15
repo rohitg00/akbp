@@ -61,6 +61,14 @@ assert unsupported_negotiation["supported_profiles"] == ["startup_context"], uns
 assert unsupported_negotiation["unsupported_profiles"] == ["autonomous_write"], unsupported
 print("unsupported capability gate ok")
 
+invalid_params = envelope("session-start-invalid-params")
+assert not invalid_params["ok"], invalid_params
+assert invalid_params["error"]["code"] == "invalid_params", invalid_params
+invalid_details = invalid_params["error"]["details"]
+assert invalid_details["params_schema"].endswith("#/$defs/akbp.session.start.params"), invalid_params
+assert "limit must be between 1 and 100" in invalid_details["type_errors"], invalid_params
+print("invalid params repair contract ok")
+
 doctor = envelope("doctor")
 assert doctor["ok"], doctor
 assert doctor["result"]["ready_for_adapter"], doctor
@@ -125,6 +133,7 @@ print("approved recall contract ok")
 '
 {"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"structured-output-harness-example","requires":["method_param_schemas","structured_errors","write_apply_requires_approval"],"requires_profiles":["startup_context","reviewed_write"]}}
 {"id":"caps-unsupported","method":"akbp.capabilities","path":"$KB","params":{"client":"structured-output-harness-example","requires":["method_param_schemas","hosted_dashboard"],"requires_profiles":["startup_context","autonomous_write"]}}
+{"id":"session-start-invalid-params","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":0}}
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":500}}
 {"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}

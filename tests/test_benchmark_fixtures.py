@@ -708,6 +708,14 @@ class BenchmarkFixtureTest(unittest.TestCase):
         session_start = requests["session-start-structured-harness"]
         self.assertEqual(session_start["expected_result_values"]["task"], "adapter structured output harness")
         self.assertEqual(session_start["expected_result_contains"]["context.budget.max_chars"], [400])
+        invalid_params = requests["session-start-invalid-params-structured-harness"]
+        self.assertEqual(invalid_params["expected_error_code"], "invalid_params")
+        self.assertEqual(invalid_params["expected_error_schema"], "#/$defs/invalid_params_details")
+        self.assertIn("type_errors", invalid_params["expected_error_fields"])
+        self.assertEqual(
+            invalid_params["expected_error_values"]["params_schema"],
+            "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json#/$defs/akbp.session.start.params",
+        )
         preview = requests["remember-preview-structured-harness"]
         self.assertTrue(preview["params"]["dry_run"])
         self.assertEqual(preview["expected_result_schema"], "#/$defs/dry_run_review_result")
