@@ -7,6 +7,9 @@ trap 'rm -rf "$TMP"' EXIT
 
 KB="$TMP/kb"
 NOTE="$TMP/adapter-note.md"
+REQUESTS="$TMP/jsonl-quickstart-requests.jsonl"
+RESPONSES="$TMP/jsonl-quickstart-responses.jsonl"
+TRACE_DIR="${AKBP_JSONL_QUICKSTART_TRACE_DIR:-}"
 
 echo "AKBP JSONL quickstart example"
 
@@ -16,7 +19,18 @@ python3 "$ROOT/cli/akbp.py" --path "$KB" source add "$NOTE" --type file --title 
 python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Adapters should retrieve cited startup context before enabling write-capable memory." --type workflow --confidence 0.91 --evidence "$NOTE" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" index --incremental >/dev/null
 
-python3 "$ROOT/tool-server/akbp_tool_server.py" <<JSONL | python3 -c '
+cat > "$REQUESTS" <<JSONL
+{"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"jsonl-quickstart-example","requires":["method_param_schemas","approval_required_errors","write_apply_requires_approval"],"requires_profiles":["startup_context","reviewed_write","portability"]}}
+{"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"plan adapter write safety","limit":5}}
+{"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapters must show a dry-run memory preview before approved durable writes.","type":"workflow"}}
+{"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Adapters must show a dry-run memory preview before approved durable writes.","type":"workflow"}}
+{"id":"remember-approved","method":"akbp.remember","path":"$KB","approved":true,"params":{"text":"Adapters must show a dry-run memory preview before approved durable writes.","type":"workflow"}}
+{"id":"index-approved","method":"akbp.index","path":"$KB","approved":true,"params":{"incremental":true}}
+{"id":"context-after-apply","method":"akbp.context","path":"$KB","params":{"task":"continue dry-run memory preview adapter workflow","limit":5}}
+{"id":"export","method":"akbp.export","path":"$KB"}
+JSONL
+
+python3 "$ROOT/tool-server/akbp_tool_server.py" < "$REQUESTS" | tee "$RESPONSES" | python3 -c '
 import json
 import sys
 
@@ -85,14 +99,12 @@ assert bundle["manifest"]["safety"]["excludes_indexes"], bundle
 assert bundle["manifest"]["counts"]["claims"] >= 2, bundle
 print("portable export ok")
 '
-{"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"jsonl-quickstart-example","requires":["method_param_schemas","approval_required_errors","write_apply_requires_approval"],"requires_profiles":["startup_context","reviewed_write","portability"]}}
-{"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"plan adapter write safety","limit":5}}
-{"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapters must show a dry-run memory preview before approved durable writes.","type":"workflow"}}
-{"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Adapters must show a dry-run memory preview before approved durable writes.","type":"workflow"}}
-{"id":"remember-approved","method":"akbp.remember","path":"$KB","approved":true,"params":{"text":"Adapters must show a dry-run memory preview before approved durable writes.","type":"workflow"}}
-{"id":"index-approved","method":"akbp.index","path":"$KB","approved":true,"params":{"incremental":true}}
-{"id":"context-after-apply","method":"akbp.context","path":"$KB","params":{"task":"continue dry-run memory preview adapter workflow","limit":5}}
-{"id":"export","method":"akbp.export","path":"$KB"}
-JSONL
+
+if [[ -n "$TRACE_DIR" ]]; then
+  mkdir -p "$TRACE_DIR"
+  cp "$REQUESTS" "$TRACE_DIR/requests.jsonl"
+  cp "$RESPONSES" "$TRACE_DIR/responses.jsonl"
+  echo "JSONL trace written to $TRACE_DIR"
+fi
 
 echo "AKBP JSONL quickstart example passed"

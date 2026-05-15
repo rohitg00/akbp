@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added optional JSONL trace capture to the quickstart example so adapter
+  authors can inspect exact request and response envelopes while preserving the
+  normal pass/fail smoke output.
 - Added an explicit `budget.truncated` boolean to context response budgets so
   adapter startup trust gates can fail closed on clipped or omitted recalled
   context without deriving state from item counts.

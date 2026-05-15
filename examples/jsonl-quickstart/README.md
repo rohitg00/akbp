@@ -8,6 +8,20 @@ Run it from the repository root:
 ./examples/jsonl-quickstart/run.sh
 ```
 
+To inspect the exact adapter transcript, capture the generated request and
+response JSONL files:
+
+```bash
+AKBP_JSONL_QUICKSTART_TRACE_DIR=/tmp/akbp-jsonl-trace ./examples/jsonl-quickstart/run.sh
+sed -n '1,120p' /tmp/akbp-jsonl-trace/requests.jsonl
+sed -n '1,120p' /tmp/akbp-jsonl-trace/responses.jsonl
+```
+
+The trace is useful when wiring a new host because it shows the concrete
+envelope shape, `dry_run:true` preview, `approval_required` stop, `approved:true`
+apply, index refresh, cited recall, and portable export in the order an adapter
+should preserve.
+
 Expected success markers:
 
 ```text

@@ -1357,6 +1357,9 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.export",
             "portable export ok",
             "cited recall ok",
+            "AKBP_JSONL_QUICKSTART_TRACE_DIR",
+            "requests.jsonl",
+            "responses.jsonl",
         ]:
             self.assertIn(required, combined)
         self.assertIn("examples/jsonl-quickstart/", readme)
