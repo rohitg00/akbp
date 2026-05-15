@@ -646,6 +646,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             changed_verify = json.loads(run_cli("--path", str(kb), "source", "verify").stdout)
             self.assertFalse(changed_verify["ok"])
             self.assertEqual(changed_verify["counts"]["changed"], 1)
+            affected = changed_verify["changed"][0]["affected_claims"]
+            self.assertIn(claim["id"], affected)
 
             bundle = Path(d) / "bundle.json"
             bundle.write_text(json.dumps(exported), encoding="utf-8")
@@ -685,6 +687,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("working", status["claim_summary"]["by_status"])
             self.assertFalse(status["source_health"]["ok"])
             self.assertEqual(status["source_health"]["counts"]["changed"], 1)
+            self.assertIn(claim["id"], status["source_health"]["attention"]["changed"][0]["affected_claims"])
             self.assertTrue(status["index"]["present"])
             self.assertEqual(status["conformance"]["highest_passing_level"], "3")
 

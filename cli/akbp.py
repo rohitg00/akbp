@@ -3172,6 +3172,7 @@ def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
     sources = load_sources(base)
     if source_id:
         sources = [source for source in sources if source.get("id") == source_id]
+    affected_claims = affected_claims_by_evidence(base)
     verified: list[dict[str, Any]] = []
     changed: list[dict[str, Any]] = []
     missing: list[dict[str, Any]] = []
@@ -3181,20 +3182,22 @@ def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
         stype = str(source.get("type") or "")
         locator = str(source.get("locator") or "")
         expected = source.get("hash")
+        affected = sorted(set(affected_claims.get(sid, []) + affected_claims.get(locator, [])))
+        base_item = {"id": sid, "type": stype, "locator": locator, "affected_claims": affected}
         if stype != "file":
-            unchecked.append({"id": sid, "type": stype, "locator": locator, "reason": "non_file_source"})
+            unchecked.append({**base_item, "reason": "non_file_source"})
             continue
         if not expected:
-            unchecked.append({"id": sid, "type": stype, "locator": locator, "reason": "missing_recorded_hash"})
+            unchecked.append({**base_item, "reason": "missing_recorded_hash"})
             continue
         path = resolve_source_file(base, locator)
         actual = file_hash(path)
         if actual is None:
-            missing.append({"id": sid, "type": stype, "locator": locator, "expected_hash": expected})
+            missing.append({**base_item, "expected_hash": expected})
         elif actual == expected:
-            verified.append({"id": sid, "type": stype, "locator": locator, "hash": actual})
+            verified.append({**base_item, "hash": actual})
         else:
-            changed.append({"id": sid, "type": stype, "locator": locator, "expected_hash": expected, "actual_hash": actual})
+            changed.append({**base_item, "expected_hash": expected, "actual_hash": actual})
     return {
         "ok": not changed and not missing,
         "checked_at": now_iso(),
@@ -3211,6 +3214,20 @@ def verify_sources(base: Path, source_id: str | None = None) -> dict[str, Any]:
         "missing": missing,
         "unchecked": unchecked,
     }
+
+
+def affected_claims_by_evidence(base: Path) -> dict[str, list[str]]:
+    affected: dict[str, list[str]] = {}
+    for claim in load_claims(base):
+        claim_id = str(claim.get("id") or "")
+        if not claim_id:
+            continue
+        for evidence_id in claim.get("evidence", []) or []:
+            if isinstance(evidence_id, str) and evidence_id:
+                affected.setdefault(evidence_id, []).append(claim_id)
+    for claim_ids in affected.values():
+        claim_ids.sort()
+    return affected
 
 
 def cmd_source_verify(args: argparse.Namespace) -> int:

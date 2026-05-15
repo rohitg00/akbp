@@ -909,6 +909,7 @@ class ToolServerTest(unittest.TestCase):
             kb = Path(d) / "kb"
             run_cli("--path", str(kb), "init")
             source = json.loads(run_cli("--path", str(kb), "source", "add", "AKBP.md", "--title", "AKBP doc").stdout)
+            claim = json.loads(run_cli("--path", str(kb), "remember", "AKBP source verification reports dependent claims.", "--evidence", "AKBP.md").stdout)
             requests = "\n".join([
                 json.dumps({"id": "source-ok", "path": str(kb), "method": "akbp.source.verify", "params": {"source_id": source["id"], "fail_on_issue": True}}),
             ]) + "\n"
@@ -925,6 +926,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(line["ok"])
             self.assertFalse(line["result"]["ok"])
             self.assertEqual(line["result"]["counts"]["changed"], 1)
+            self.assertEqual(line["result"]["changed"][0]["affected_claims"], [claim["id"]])
 
     def test_export_check_method_validates_bundle_manifest(self):
         with tempfile.TemporaryDirectory() as d:

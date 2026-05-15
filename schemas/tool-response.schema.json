@@ -2670,6 +2670,12 @@
         "locator": {
           "type": "string"
         },
+        "affected_claims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "hash": {
           "type": "string"
         },
