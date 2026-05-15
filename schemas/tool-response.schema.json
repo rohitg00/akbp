@@ -642,6 +642,9 @@
             "requested_features",
             "supported_features",
             "unsupported_features",
+            "requested_profiles",
+            "supported_profiles",
+            "unsupported_profiles",
             "satisfied"
           ],
           "properties": {
@@ -665,6 +668,27 @@
               }
             },
             "unsupported_features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "requested_profiles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "supported_profiles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "unsupported_profiles": {
               "type": "array",
               "items": {
                 "type": "string",

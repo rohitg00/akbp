@@ -73,7 +73,7 @@ WRITE_METHODS = {
 }
 
 METHODS: dict[str, dict[str, Any]] = {
-    "akbp.capabilities": {"write": False, "params": ["client", "requires"]},
+    "akbp.capabilities": {"write": False, "params": ["client", "requires", "requires_profiles"]},
     "akbp.status": {"write": False, "params": ["limit"]},
     "akbp.doctor": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
@@ -114,6 +114,30 @@ REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "akbp.contradict": ("source_claim_id", "target_claim_id"),
     "akbp.crystallize_session": ("transcript",),
     "akbp.session.end": ("transcript",),
+}
+
+CAPABILITY_PROFILES: dict[str, list[str]] = {
+    "read_only": [
+        "akbp.capabilities",
+        "akbp.status",
+        "akbp.doctor",
+        "akbp.query",
+        "akbp.context",
+        "akbp.search",
+        "akbp.conformance",
+        "akbp.export",
+        "akbp.export_check",
+        "akbp.audit",
+        "akbp.cite",
+        "akbp.source.verify",
+        "akbp.import_check",
+        "akbp.session.start",
+    ],
+    "startup_context": ["akbp.capabilities", "akbp.status", "akbp.session.start", "akbp.context", "akbp.search"],
+    "reviewed_write": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
+    "lifecycle": ["akbp.supersede", "akbp.contradict", "akbp.crystallize_session", "akbp.audit", "akbp.cite"],
+    "portability": ["akbp.export", "akbp.export_check", "akbp.import_check", "akbp.import_apply"],
+    "maintenance": ["akbp.doctor", "akbp.index", "akbp.source.verify", "akbp.conformance"],
 }
 
 
@@ -252,11 +276,17 @@ def negotiation_result(params: dict[str, Any], features: dict[str, bool]) -> dic
     requested = list(params.get("requires", []) or [])
     supported = [name for name in requested if features.get(normalize_feature_name(name)) is True]
     unsupported = [name for name in requested if features.get(normalize_feature_name(name)) is not True]
+    requested_profiles = list(params.get("requires_profiles", []) or [])
+    supported_profiles = [name for name in requested_profiles if name in CAPABILITY_PROFILES]
+    unsupported_profiles = [name for name in requested_profiles if name not in CAPABILITY_PROFILES]
     result: dict[str, Any] = {
         "requested_features": requested,
         "supported_features": supported,
         "unsupported_features": unsupported,
-        "satisfied": not unsupported,
+        "requested_profiles": requested_profiles,
+        "supported_profiles": supported_profiles,
+        "unsupported_profiles": unsupported_profiles,
+        "satisfied": not unsupported and not unsupported_profiles,
     }
     if params.get("client"):
         result["client"] = params["client"]
@@ -266,29 +296,6 @@ def negotiation_result(params: dict[str, Any], features: dict[str, bool]) -> dic
 def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
     params = params or {}
     features = capability_features()
-    profiles = {
-        "read_only": [
-            "akbp.capabilities",
-            "akbp.status",
-            "akbp.doctor",
-            "akbp.query",
-            "akbp.context",
-            "akbp.search",
-            "akbp.conformance",
-            "akbp.export",
-            "akbp.export_check",
-            "akbp.audit",
-            "akbp.cite",
-            "akbp.source.verify",
-            "akbp.import_check",
-            "akbp.session.start",
-        ],
-        "startup_context": ["akbp.capabilities", "akbp.status", "akbp.session.start", "akbp.context", "akbp.search"],
-        "reviewed_write": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
-        "lifecycle": ["akbp.supersede", "akbp.contradict", "akbp.crystallize_session", "akbp.audit", "akbp.cite"],
-        "portability": ["akbp.export", "akbp.export_check", "akbp.import_check", "akbp.import_apply"],
-        "maintenance": ["akbp.doctor", "akbp.index", "akbp.source.verify", "akbp.conformance"],
-    }
     return {
         "protocol": "akbp-jsonl-tool-server",
         "version": "0.1-draft",
@@ -331,7 +338,7 @@ def capabilities(params: dict[str, Any] | None = None) -> dict[str, Any]:
             }
             for name, meta in METHODS.items()
         },
-        "profiles": profiles,
+        "profiles": CAPABILITY_PROFILES,
         "examples": [
             {"id": "status-1", "method": "akbp.status", "path": "."},
             {"id": "doctor-1", "method": "akbp.doctor", "path": "."},
@@ -617,6 +624,23 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
                     errors.append(f"requires[{index}] must be at most 128 characters")
                 if has_control_char(item):
                     errors.append(f"requires[{index}] must not contain control characters")
+    if "requires_profiles" in params:
+        requires_profiles = params.get("requires_profiles")
+        if not isinstance(requires_profiles, list):
+            errors.append("requires_profiles must be an array")
+        else:
+            if len(requires_profiles) > 16:
+                errors.append("requires_profiles must contain at most 16 items")
+            for index, item in enumerate(requires_profiles):
+                if not isinstance(item, str):
+                    errors.append("requires_profiles items must be strings")
+                    break
+                if not item.strip():
+                    errors.append(f"requires_profiles[{index}] must not be empty")
+                if len(item) > 64:
+                    errors.append(f"requires_profiles[{index}] must be at most 64 characters")
+                if has_control_char(item):
+                    errors.append(f"requires_profiles[{index}] must not contain control characters")
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "limit" in params:

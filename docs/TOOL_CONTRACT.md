@@ -233,7 +233,7 @@ Request and response envelopes are specified in:
 - `portability`: export, export check, import check, and import apply methods for bundle exchange.
 - `maintenance`: doctor, index, source verification, and conformance methods for local upkeep.
 
-Adapters may pass optional capability negotiation params to `akbp.capabilities`: `client` is a short adapter identifier, and `requires` is a bounded list of required feature names such as `method_param_schemas` or `features.capability_negotiation`. The response always includes `result.negotiation` with requested, supported, unsupported, and `satisfied` fields. Treat `satisfied:false` as a graceful-degrade signal, not a transport failure.
+Adapters may pass optional capability negotiation params to `akbp.capabilities`: `client` is a short adapter identifier, `requires` is a bounded list of required feature names such as `method_param_schemas` or `features.capability_negotiation`, and `requires_profiles` is a bounded list of workflow profiles such as `read_only` or `startup_context`. The response always includes `result.negotiation` with requested, supported, unsupported, and `satisfied` fields for both features and profiles. Treat `satisfied:false` as a graceful-degrade signal, not a transport failure.
 
 `tool-methods.schema.json` defines method-specific parameter contracts for every supported JSONL method. Shared list contracts are bounded before CLI dispatch: `evidence` accepts at most 64 string items of 512 characters each, and `entity` accepts at most 128 string items of 256 characters each. Both reject NUL, newline, and carriage-return characters.
 

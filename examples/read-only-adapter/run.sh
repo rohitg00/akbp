@@ -26,6 +26,10 @@ rows = [json.loads(line) for line in sys.stdin if line.strip()]
 by_id = {row["id"]: row for row in rows}
 
 caps = by_id["caps"]["result"]
+negotiation = caps["negotiation"]
+assert negotiation["satisfied"], negotiation
+assert negotiation["supported_profiles"] == ["read_only"], negotiation
+assert negotiation["unsupported_profiles"] == [], negotiation
 read_only = set(caps["profiles"]["read_only"])
 assert "akbp.search" in read_only
 assert "akbp.import_check" in read_only
@@ -58,7 +62,7 @@ assert blocked["error"]["code"] == "adapter_read_only_block"
 
 print("read-only allowlist ok")
 '
-{"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"read-only-adapter-example","requires":["method_param_schemas","capability_negotiation"]}}
+{"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"read-only-adapter-example","requires":["method_param_schemas","capability_negotiation"],"requires_profiles":["read_only"]}}
 {"id":"start","method":"akbp.session.start","path":"$KB","params":{"task":"plan adapter integration work","limit":5}}
 {"id":"search","method":"akbp.search","path":"$KB","params":{"query":"adapter context retrieval","limit":5}}
 {"id":"import-check","method":"akbp.import_check","path":"$KB","params":{"file":"$IMPORT","fail_on_rejected":true}}

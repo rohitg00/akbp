@@ -32,10 +32,10 @@ An adapter should call `akbp.capabilities` at startup and cache the response for
 JSONL request:
 
 ```json
-{"id":"caps-1","method":"akbp.capabilities","params":{"client":"example-adapter","requires":["method_param_schemas","capability_negotiation","write_apply_requires_approval"]}}
+{"id":"caps-1","method":"akbp.capabilities","params":{"client":"example-adapter","requires":["method_param_schemas","capability_negotiation","write_apply_requires_approval"],"requires_profiles":["read_only","startup_context"]}}
 ```
 
-The response includes `result.negotiation.satisfied`. If it is `false`, disable or degrade the flows named in `unsupported_features` instead of guessing.
+The response includes `result.negotiation.satisfied`. If it is `false`, disable or degrade the flows named in `unsupported_features` or `unsupported_profiles` instead of guessing.
 
 Adapter checks:
 
@@ -51,9 +51,10 @@ Minimum startup gate:
 
 1. Call `akbp.capabilities`.
 2. Confirm `result.negotiation.satisfied` is `true` for required features.
-3. Confirm `result.features.method_schema_runtime_parity` is `true`.
-4. Confirm `result.runtime.method_schema_runtime_errors` is empty.
-5. Confirm the write method you plan to call advertises `review_required:true`.
+3. Confirm required workflow profiles such as `read_only` or `startup_context` are present in `result.negotiation.supported_profiles`.
+4. Confirm `result.features.method_schema_runtime_parity` is `true`.
+5. Confirm `result.runtime.method_schema_runtime_errors` is empty.
+6. Confirm the write method you plan to call advertises `review_required:true`.
 
 If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
 
