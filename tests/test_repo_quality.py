@@ -181,6 +181,33 @@ class RepoQualityTest(unittest.TestCase):
         ]:
             self.assertIn(required, combined)
 
+    def test_structured_output_harness_documents_response_snippets(self):
+        text = (ROOT / "examples" / "structured-output-harness" / "README.md").read_text(encoding="utf-8")
+        for required in [
+            "Response snippets adapters should preserve",
+            '"id": "caps"',
+            '"satisfied": true',
+            '"unsupported_features": []',
+            '"unsupported_profiles": []',
+            '"id": "session-start-invalid-params"',
+            '"code": "invalid_params"',
+            "schemas/tool-methods.schema.json#/$defs/akbp.session.start.params",
+            "limit must be between 1 and 100",
+            '"id": "session-start"',
+            '"session_id": "session_..."',
+            '"citations": [{"source_id": "source_...", "locator": "harness-note.md"}]',
+            '"budget": {',
+            '"id": "remember-preview"',
+            '"dry_run": true',
+            '"review_required": true',
+            '"would_write": true',
+            '"apply_instruction": "Repeat the same request with approved:true after review."',
+            '"id": "remember-blocked"',
+            '"code": "approval_required"',
+            "Unapproved writes are a hard stop, not a warning",
+        ]:
+            self.assertIn(required, text)
+
     def test_stdio_client_config_example_documents_negotiated_setup(self):
         text = (ROOT / "examples" / "stdio-client-config" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "stdio-client-config" / "run.sh").read_text(encoding="utf-8")
