@@ -16,6 +16,32 @@ By the end of the first run, you should have seen AKBP do seven things:
 
 That is the core user value: agents can propose project memory, but durable knowledge stays local, reviewable, cited, and portable.
 
+## What gets created
+
+AKBP is easiest to evaluate when the first run makes the file contract visible. A new knowledge base starts small:
+
+| Artifact | Purpose | Portable? |
+|----------|---------|-----------|
+| `AKBP.md` | Human-readable entry point for agents and maintainers | Yes |
+| `akbp.json` | Machine-readable Knowledge Base Card for tooling | Yes |
+| `raw/sources/sources.jsonl` | Registered evidence with locator, hash, and metadata | Yes |
+| `claims/claims.jsonl` | Reviewed durable claims with type, status, confidence, and evidence | Yes |
+| `graph/relations.jsonl` | Lifecycle and semantic links such as supersession | Yes |
+| `.akbp/` | Rebuildable runtime state such as local indexes | No |
+| export bundle | Portable manifest plus artifacts for inspection or import | Yes |
+
+The trust boundary is just as important as the layout:
+
+| Moment | Expected behavior |
+|--------|-------------------|
+| Agent proposes memory | Use `dry_run:true` and show the preview |
+| Agent skips approval | Return `approval_required` without durable writes |
+| User or trusted local policy approves | Repeat the same request with `approved:true` |
+| Later agent needs context | Use `akbp.context` or `akbp.session.start` and show citations |
+| Knowledge changes | Supersede or contradict old claims instead of deleting history |
+
+If a tool hides these artifacts or applies writes without the preview/approval step, it is bypassing the main AKBP value.
+
 ## Fast path
 
 From a clean checkout:

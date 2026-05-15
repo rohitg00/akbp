@@ -184,6 +184,26 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("docs/GETTING_STARTED.md", readme)
         self.assertIn("docs/GETTING_STARTED.md", install)
 
+    def test_getting_started_shows_file_contract_and_trust_boundary(self):
+        guide = (ROOT / "docs" / "GETTING_STARTED.md").read_text(encoding="utf-8")
+        for required in [
+            "## What gets created",
+            "`AKBP.md`",
+            "`akbp.json`",
+            "`raw/sources/sources.jsonl`",
+            "`claims/claims.jsonl`",
+            "`graph/relations.jsonl`",
+            "`.akbp/`",
+            "Portable manifest plus artifacts for inspection or import",
+            "Use `dry_run:true` and show the preview",
+            "Return `approval_required` without durable writes",
+            "Repeat the same request with `approved:true`",
+            "Use `akbp.context` or `akbp.session.start` and show citations",
+            "Supersede or contradict old claims instead of deleting history",
+            "bypassing the main AKBP value",
+        ]:
+            self.assertIn(required, guide)
+
     def test_makefile_exposes_demo_target(self):
         text = (ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("demo:", text)
