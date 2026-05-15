@@ -36,6 +36,9 @@ Before applying it:
 3. Review accepted ids, rejected ids, planned source ids, and planned claim ids.
 4. Apply with `akbp import-apply incoming.jsonl --approved`.
 5. Rebuild the index and query context for the next agent session.
+6. Generate `akbp client-config --profile read-only` and verify the
+   `memory_server_bridge.promotion_contract` before wiring an existing memory
+   server to AKBP.
 
 `import-check` and `import-apply --dry-run` include a `review` section for
 adapter UIs and CI logs. Treat `review.ready_for_reviewed_apply:true` as the
@@ -75,3 +78,8 @@ Use this promotion rule:
 
 The runnable example includes an opaque-host export that parses cleanly but does
 not pass the reviewed-apply gate because the claim has no source evidence.
+
+It also checks the generated existing-memory-server host profile. That profile
+keeps the old memory server as an ephemeral cache, routes durable records
+through AKBP dry-run review first, and only enables writes after `import-check`
+or a dry-run preview passes without secret or citation warnings.
