@@ -687,10 +687,20 @@ def infer_import_kind(item: dict[str, Any]) -> str:
 
 
 def import_jsonl_objects(source: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    raw_text = source.read_text(encoding="utf-8", errors="ignore")
+    stripped = raw_text.lstrip()
+    if stripped.startswith("{"):
+        try:
+            bundle = json.loads(raw_text)
+        except json.JSONDecodeError:
+            bundle = None
+        if isinstance(bundle, dict) and isinstance(bundle.get("manifest"), dict) and bundle["manifest"].get("format") == "akbp-portable-bundle":
+            return import_bundle_objects(bundle)
+
     accepted: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
-    for line_number, line in enumerate(source.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+    for line_number, line in enumerate(raw_text.splitlines(), start=1):
         if not line.strip():
             continue
         try:
@@ -706,6 +716,33 @@ def import_jsonl_objects(source: Path) -> tuple[list[dict[str, Any]], list[dict[
             rejected.append({"id": item_id, "kind": kind, "line": line_number, "reason": "secret_like_value_redacted"})
         else:
             accepted.append({"id": item_id, "kind": kind, "line": line_number, "object": item})
+    return accepted, rejected, errors
+
+
+def import_bundle_objects(bundle: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    accepted: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
+    line_number = 0
+    for section, kind in [("sources", "source"), ("claims", "claim")]:
+        objects = bundle.get(section, [])
+        if not isinstance(objects, list):
+            errors.append({"line": line_number + 1, "error": f"bundle {section} must be an array"})
+            continue
+        for item in objects:
+            line_number += 1
+            item_id = str(item.get("id") or f"{section}-{line_number}") if isinstance(item, dict) else f"{section}-{line_number}"
+            if not isinstance(item, dict):
+                rejected.append({"id": item_id, "kind": kind, "line": line_number, "reason": "object must be a JSON object"})
+                continue
+            imported = dict(item)
+            imported["kind"] = kind
+            raw = json.dumps(imported, sort_keys=True, ensure_ascii=False)
+            safe = redact_text(raw)
+            if safe != raw:
+                rejected.append({"id": item_id, "kind": kind, "line": line_number, "reason": "secret_like_value_redacted"})
+            else:
+                accepted.append({"id": item_id, "kind": kind, "line": line_number, "object": imported})
     return accepted, rejected, errors
 
 

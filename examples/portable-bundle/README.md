@@ -51,10 +51,12 @@ Minimum review checklist:
 For line-oriented imports, review before write:
 
 ```bash
-akbp --path ./target-kb import-check incoming.jsonl --fail-on-rejected
-akbp --path ./target-kb import-apply incoming.jsonl --dry-run
-akbp --path ./target-kb import-apply incoming.jsonl --approved
+akbp --path ./target-kb import-check bundle.json --fail-on-rejected
+akbp --path ./target-kb import-apply bundle.json --dry-run
+akbp --path ./target-kb import-apply bundle.json --approved
 ```
+
+`import-check` and `import-apply` accept AKBP portable bundle JSON directly. They also still accept newline-delimited source and claim objects for tool integrations that exchange JSONL.
 
 The dry run is the contract boundary. Agents should not apply durable writes until the accepted ids, rejected ids, planned write ids, and skipped-existing ids have been reviewed by the runtime or user policy.
 

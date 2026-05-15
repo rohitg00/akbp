@@ -636,6 +636,42 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual([claim["id"] for claim in claims_after_duplicate].count("claim_imported_safe"), 1)
             self.assertEqual([source["id"] for source in sources_after_duplicate].count("source_imported_safe"), 1)
 
+    def test_import_check_and_apply_accept_portable_bundle_json(self):
+        with tempfile.TemporaryDirectory() as d:
+            producer = Path(d) / "producer"
+            consumer = Path(d) / "consumer"
+            note = producer / "handoff.md"
+            bundle = Path(d) / "bundle.json"
+
+            run_cli("--path", str(producer), "init")
+            note.write_text("Decision: portable bundles should import directly after review.\n", encoding="utf-8")
+            source = json.loads(run_cli("--path", str(producer), "source", "add", str(note), "--type", "file").stdout)
+            run_cli(
+                "--path", str(producer),
+                "remember",
+                "Portable bundles should import directly after review.",
+                "--type", "decision",
+                "--evidence", source["id"],
+            )
+            run_cli("--path", str(producer), "export", "--output", str(bundle))
+
+            run_cli("--path", str(consumer), "init")
+            checked = json.loads(run_cli("--path", str(consumer), "import-check", str(bundle), "--fail-on-rejected").stdout)
+            self.assertTrue(checked["ok"])
+            self.assertEqual(checked["accepted_count"], 2)
+            self.assertEqual(checked["rejected_count"], 0)
+
+            preview = json.loads(run_cli("--path", str(consumer), "import-apply", str(bundle), "--dry-run").stdout)
+            self.assertTrue(preview["ok"])
+            self.assertEqual(preview["would_write"]["sources"], [source["id"]])
+            self.assertEqual(len(preview["would_write"]["claims"]), 1)
+
+            applied = json.loads(run_cli("--path", str(consumer), "import-apply", str(bundle), "--approved").stdout)
+            self.assertTrue(applied["applied"])
+            run_cli("--path", str(consumer), "index", "--incremental")
+            context = json.loads(run_cli("--path", str(consumer), "context", "portable bundles direct import").stdout)
+            self.assertIn("Portable bundles should import directly", json.dumps(context))
+
     def test_ingest_dry_run_previews_redacted_writes_without_creating_kb(self):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
