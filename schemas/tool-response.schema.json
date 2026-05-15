@@ -423,7 +423,8 @@
             "retrieval",
             "writes",
             "session_boundary",
-            "portability"
+            "portability",
+            "adapter_quality"
           ],
           "properties": {
             "kind": {
@@ -587,6 +588,36 @@
                 },
                 "import_apply_method": {
                   "const": "akbp.import_apply"
+                }
+              }
+            },
+            "adapter_quality": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "harness",
+                "contract",
+                "must_preserve_fields",
+                "fail_closed_policy"
+              ],
+              "properties": {
+                "harness": {
+                  "const": "examples/structured-output-harness/run.sh"
+                },
+                "contract": {
+                  "const": "preserve_structured_envelope_citations_review_metadata_and_errors"
+                },
+                "must_preserve_fields": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "fail_closed_policy": {
+                  "type": "string",
+                  "minLength": 1
                 }
               }
             }

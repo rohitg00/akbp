@@ -229,6 +229,19 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
         "import_check_method": "akbp.import_check",
         "import_apply_method": "akbp.import_apply",
     },
+    "adapter_quality": {
+        "harness": "examples/structured-output-harness/run.sh",
+        "contract": "preserve_structured_envelope_citations_review_metadata_and_errors",
+        "must_preserve_fields": [
+            "ok",
+            "error.code",
+            "result.context.items[].citations",
+            "result.quality",
+            "dry_run review metadata",
+            "approval_required",
+        ],
+        "fail_closed_policy": "Keep the integration read-only and continue without recalled memory when the harness fails.",
+    },
 }
 
 

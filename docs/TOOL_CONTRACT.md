@@ -120,6 +120,14 @@ Adapter-level session-end operation. It crystallizes a transcript using the same
 
 Capability discovery exposes `knowledge_capability.session_boundary.promotion_contract` so adapters can enforce the promotion workflow without scraping prose. The contract lists durable candidate types, preview fields that must be shown to a review surface, the requirement to repeat the same approved request, and inputs that must stay transient such as raw transcripts, scratch reasoning, secrets, private messages, and uncited claims.
 
+Capability discovery also exposes `knowledge_capability.adapter_quality`, a
+machine-readable pointer to `examples/structured-output-harness/run.sh`. Adapter
+authors should run that harness before letting recalled AKBP context affect
+planning or before exposing reviewed-write flows. The harness contract requires
+the bridge to preserve the response envelope, citations, context quality fields,
+dry-run review metadata, and structured `approval_required` errors; failure
+means the integration stays read-only and continues without recalled memory.
+
 ```json
 {
   "id": "session-end-preview-1",

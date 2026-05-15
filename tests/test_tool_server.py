@@ -387,6 +387,7 @@ class ToolServerTest(unittest.TestCase):
             "writes",
             "session_boundary",
             "portability",
+            "adapter_quality",
         ]:
             self.assertIn(field, knowledge_capability["required"])
         self.assertEqual(knowledge_capability["properties"]["kind"], {"const": "agent_knowledge_base"})
@@ -395,6 +396,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertFalse(knowledge_capability["properties"]["writes"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["session_boundary"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["portability"]["additionalProperties"])
+        self.assertFalse(knowledge_capability["properties"]["adapter_quality"]["additionalProperties"])
         negotiation = capabilities["properties"]["negotiation"]
         self.assertFalse(negotiation["additionalProperties"])
         self.assertIn("requested_features", negotiation["required"])
@@ -676,6 +678,10 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["retrieval"]["startup_method"], "akbp.session.start")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["policy"], "dry_run_preview_then_approved_apply")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["approval_required_error"], "approval_required")
+            adapter_quality = lines[0]["result"]["knowledge_capability"]["adapter_quality"]
+            self.assertEqual(adapter_quality["harness"], "examples/structured-output-harness/run.sh")
+            self.assertIn("citations", adapter_quality["must_preserve_fields"][2])
+            self.assertIn("read-only", adapter_quality["fail_closed_policy"])
             boundary = lines[0]["result"]["knowledge_capability"]["session_boundary"]
             self.assertEqual(boundary["transient_state_policy"], "runtime_owned_until_reviewed_promotion")
             self.assertEqual(boundary["promotion_method"], "akbp.session.end")
