@@ -29,6 +29,9 @@ AKBP tool-protocol bridge preflight passed
   read-only tool list, descriptions, safety metadata, input schema refs, stdio
   command, and response fields to preserve without inventing another memory
   store.
+- The generated host and client tool manifests include executable
+  `preflight_requests` for capability negotiation, doctor, and bounded startup
+  context.
 - Write-capable AKBP methods stay in `blocked_write_methods` unless the host
   implements a separate reviewed-write surface.
 - The bridge can call `akbp.capabilities`, `akbp.doctor`, and

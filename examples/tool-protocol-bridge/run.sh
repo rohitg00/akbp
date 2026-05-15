@@ -46,6 +46,14 @@ assert manifest["default_mode"] == "read_only", manifest
 assert "second memory format" in manifest["purpose"], manifest
 assert "separate reviewed-write surface" in manifest["approval_boundary"], manifest
 assert [tool["forwards_to"] for tool in manifest["tools"]] == [tool["method"] for tool in forward_tools], manifest
+assert [request["id"] for request in manifest["preflight_requests"]] == ["capabilities-1", "doctor-1", "session-start-1"], manifest
+assert manifest["preflight_requests"][0]["method"] == "akbp.capabilities", manifest
+assert manifest["preflight_requests"][0]["params"]["requires_profiles"] == ["read_only"], manifest
+assert manifest["preflight_requests"][0]["expect"]["result.negotiation.satisfied"] is True, manifest
+assert manifest["preflight_requests"][1]["method"] == "akbp.doctor", manifest
+assert manifest["preflight_requests"][2]["method"] == "akbp.session.start", manifest
+assert manifest["preflight_requests"][2]["params"]["max_chars"] == 4000, manifest
+assert config["tool_protocol_bridge"]["client_tool_manifest"]["preflight_requests"] == manifest["preflight_requests"], config
 
 for entry, host_tool in zip(forward_tools, manifest["tools"]):
     assert entry["mode"] == "read_only", entry

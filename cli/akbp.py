@@ -1982,6 +1982,50 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             }
             for entry in read_only_bridge_tools
         ],
+        "preflight_requests": [
+            {
+                "id": "capabilities-1",
+                "method": "akbp.capabilities",
+                "path": kb_path,
+                "params": {
+                    "client": args.name,
+                    "requires": required_features,
+                    "requires_profiles": [requested_profile],
+                },
+                "expect": {
+                    "ok": True,
+                    "result.negotiation.satisfied": True,
+                    "result.features.method_param_schemas": True,
+                },
+            },
+            {
+                "id": "doctor-1",
+                "method": "akbp.doctor",
+                "path": kb_path,
+                "params": {"limit": 5},
+                "expect": {
+                    "ok": True,
+                    "result.ready_for_adapter": True,
+                    f"result.adapter_readiness.{requested_profile}_ready": True,
+                },
+            },
+            {
+                "id": "session-start-1",
+                "method": "akbp.session.start",
+                "path": kb_path,
+                "params": {
+                    "task": "current task goals and constraints",
+                    "limit": 5,
+                    "max_chars": 4000,
+                },
+                "expect": {
+                    "ok": True,
+                    "result.context.items": "array",
+                    "result.context.warnings": "array",
+                    "result.context.budget.max_chars": 4000,
+                },
+            },
+        ],
     }
     client_tool_manifest = {
         "format": "akbp-client-tool-manifest-v1",
@@ -2025,6 +2069,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "akbp.contradict",
         ],
         "approval_boundary": "Do not expose write methods as host tools until the host can render dry-run previews and collect approval outside the model-generated tool call.",
+        "preflight_requests": host_tool_manifest["preflight_requests"],
     }
     host_capability_descriptor = {
         "format": "akbp-host-capability-descriptor-v1",

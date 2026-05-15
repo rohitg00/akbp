@@ -35,6 +35,11 @@ schema refs, and response fields the bridge must preserve. Generate host tools
 from that manifest when possible; do not copy the list into a separate memory
 server config that can drift from `akbp.capabilities`.
 
+The same manifest includes `preflight_requests` for the startup checks an
+adapter should run before exposing tools: capability negotiation, doctor, and
+bounded startup context. Use these generated JSONL requests as the executable
+harness contract instead of reconstructing preflight calls from prose.
+
 For a runnable preflight, use `examples/tool-protocol-bridge/run.sh`. It checks
 that the generated wrapper map stays read-only, that blocked write methods are
 not exposed as direct bridge tools, that startup context returns cited items,
@@ -86,6 +91,7 @@ Required behavior:
   first-class capability records, so write-capable flows stay disabled until a
   review surface exists.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
+- Run `tool_protocol_bridge.host_tool_manifest.preflight_requests` before exposing host tools, and branch on the structured `expect` fields.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.

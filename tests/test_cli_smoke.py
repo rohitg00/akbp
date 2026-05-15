@@ -134,6 +134,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(manifest["tools"][0]["safety"], forward_tools[0]["safety"])
             self.assertEqual(manifest["tools"][0]["input_schema"], forward_tools[0]["params_schema"])
             self.assertEqual(manifest["tools"][0]["preserve_response_fields"], forward_tools[0]["surface_fields"])
+            self.assertEqual(
+                [request["id"] for request in manifest["preflight_requests"]],
+                ["capabilities-1", "doctor-1", "session-start-1"],
+            )
+            self.assertEqual(manifest["preflight_requests"][0]["method"], "akbp.capabilities")
+            self.assertEqual(manifest["preflight_requests"][0]["path"], str(kb.resolve()))
+            self.assertEqual(manifest["preflight_requests"][0]["params"]["requires_profiles"], ["reviewed_write"])
+            self.assertTrue(manifest["preflight_requests"][0]["expect"]["result.negotiation.satisfied"])
+            self.assertEqual(manifest["preflight_requests"][1]["method"], "akbp.doctor")
+            self.assertTrue(manifest["preflight_requests"][1]["expect"]["result.adapter_readiness.reviewed_write_ready"])
+            self.assertEqual(manifest["preflight_requests"][2]["method"], "akbp.session.start")
+            self.assertEqual(manifest["preflight_requests"][2]["params"]["max_chars"], 4000)
             client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
             self.assertEqual(client_manifest["format"], "akbp-client-tool-manifest-v1")
             self.assertEqual(client_manifest["server"], {"name": "stdio-adapter-test", **config["server"]})
@@ -153,6 +165,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(client_manifest["tools"][0]["input_schema_ref"], forward_tools[0]["params_schema"])
             self.assertIn("akbp.remember", client_manifest["blocked_write_methods"])
             self.assertIn("dry-run previews", client_manifest["approval_boundary"])
+            self.assertEqual(client_manifest["preflight_requests"], manifest["preflight_requests"])
             self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertIn("akbp.remember", config["tool_protocol_bridge"]["blocked_write_methods"])
@@ -239,6 +252,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(portable["knowledge_base"]["portable_template"])
             self.assertEqual(portable["first_run_sequence"]["steps"][0]["expect"]["knowledge_base.path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["tool_protocol_bridge"]["host_tool_manifest"]["knowledge_base_path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["tool_protocol_bridge"]["host_tool_manifest"]["preflight_requests"][0]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")

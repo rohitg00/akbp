@@ -76,6 +76,13 @@ assert client_manifest["tools"][0]["description"] == first_tool["description"], 
 assert client_manifest["tools"][0]["safety"] == first_tool["safety"], config
 assert "akbp.remember" in client_manifest["blocked_write_methods"], config
 assert "dry-run previews" in client_manifest["approval_boundary"], config
+manifest = config["tool_protocol_bridge"]["host_tool_manifest"]
+assert [request["id"] for request in manifest["preflight_requests"]] == ["capabilities-1", "doctor-1", "session-start-1"], config
+assert manifest["preflight_requests"][0]["params"]["requires_profiles"] == ["read_only"], config
+assert manifest["preflight_requests"][0]["expect"]["result.negotiation.satisfied"] is True, config
+assert manifest["preflight_requests"][1]["method"] == "akbp.doctor", config
+assert manifest["preflight_requests"][2]["params"]["max_chars"] == 4000, config
+assert client_manifest["preflight_requests"] == manifest["preflight_requests"], config
 assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
 assert config["session_start"]["path"] == config["knowledge_base"]["path"], config
