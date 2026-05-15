@@ -1373,6 +1373,61 @@ def doctor_checks(base: Path) -> list[dict[str, Any]]:
     return checks
 
 
+def doctor_workflow(base: Path, checks: list[dict[str, Any]]) -> dict[str, Any]:
+    by_id = {check["id"]: check for check in checks}
+    claims = load_claims(base)
+    source_ok = by_id["evidence"]["ok"] and by_id["source_health"]["ok"]
+    blocking_ok = not any(not check["ok"] and check["severity"] == "error" for check in checks)
+    stages: list[dict[str, Any]] = [
+        {
+            "id": "create_kb",
+            "label": "Create a local knowledge base",
+            "ok": by_id["entrypoint"]["ok"] and by_id["card"]["ok"],
+            "next_step": "Run: akbp --path <kb> init",
+        },
+        {
+            "id": "register_evidence",
+            "label": "Register source material as evidence",
+            "ok": source_ok,
+            "next_step": by_id["source_health"].get("next_step") if by_id["evidence"]["ok"] else by_id["evidence"].get("next_step"),
+        },
+        {
+            "id": "reviewed_claim",
+            "label": "Create at least one reviewed durable claim",
+            "ok": bool(claims),
+            "next_step": by_id["claims"].get("next_step"),
+        },
+        {
+            "id": "retrieval_ready",
+            "label": "Build retrieval and context recall",
+            "ok": by_id["index"]["ok"] and by_id["conformance_level_2"]["ok"],
+            "next_step": by_id["conformance_level_2"].get("next_step") if by_id["index"]["ok"] else by_id["index"].get("next_step"),
+        },
+        {
+            "id": "adapter_ready",
+            "label": "Pass adapter-readiness checks",
+            "ok": blocking_ok and all(check["ok"] for check in checks),
+            "next_step": "Run: akbp --path <kb> doctor",
+        },
+        {
+            "id": "portable_export_ready",
+            "label": "Export and check a portable bundle",
+            "ok": blocking_ok and bool(claims) and source_ok,
+            "next_step": "Run: akbp --path <kb> export --output <bundle.json> && akbp --path <kb> export-check <bundle.json>",
+        },
+    ]
+    for stage in stages:
+        if stage["ok"]:
+            stage.pop("next_step", None)
+    current = next((stage["id"] for stage in stages if not stage["ok"]), None)
+    return {
+        "completed": sum(1 for stage in stages if stage["ok"]),
+        "total": len(stages),
+        "current_stage": current,
+        "stages": stages,
+    }
+
+
 def cmd_doctor(args: argparse.Namespace) -> int:
     base = root(args.path)
     checks = doctor_checks(base)
@@ -1387,6 +1442,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             "warnings": sum(1 for check in failing if check["severity"] == "warning"),
             "errors": len(blocking),
         },
+        "workflow": doctor_workflow(base, checks),
         "checks": checks,
         "next_steps": [check["next_step"] for check in failing if check.get("next_step")][: args.limit],
     }, indent=2, ensure_ascii=False))

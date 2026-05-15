@@ -325,6 +325,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse(doctor["ok"])
             self.assertFalse(doctor["ready_for_adapter"])
             self.assertGreaterEqual(doctor["summary"]["errors"], 1)
+            self.assertEqual(doctor["workflow"]["current_stage"], "create_kb")
+            self.assertEqual(doctor["workflow"]["stages"][0]["id"], "create_kb")
             self.assertIn("Run: akbp --path <kb> init", doctor["next_steps"])
 
     def test_ingest_imports_redacted_page_and_optional_claim(self):

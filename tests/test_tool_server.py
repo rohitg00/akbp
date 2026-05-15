@@ -570,6 +570,8 @@ class ToolServerTest(unittest.TestCase):
             assert_matches_required_schema(self, lines[2]["result"], schema_def("doctor_result"))
             self.assertTrue(lines[2]["result"]["ok"])
             self.assertEqual(lines[2]["result"]["summary"]["errors"], 0)
+            self.assertEqual(lines[2]["result"]["workflow"]["total"], 6)
+            self.assertEqual(lines[2]["result"]["workflow"]["current_stage"], "register_evidence")
             self.assertEqual(lines[3]["id"], "2")
             assert_matches_required_schema(self, lines[3]["result"], schema_def("context_result"))
             self.assertTrue(lines[3]["result"]["items"])

@@ -1436,6 +1436,7 @@
         "ok",
         "ready_for_adapter",
         "summary",
+        "workflow",
         "checks",
         "next_steps"
       ],
@@ -1507,6 +1508,55 @@
                   "changed": { "type": "integer", "minimum": 0 },
                   "missing": { "type": "integer", "minimum": 0 },
                   "unchecked": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        },
+        "workflow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "completed",
+            "total",
+            "current_stage",
+            "stages"
+          ],
+          "properties": {
+            "completed": { "type": "integer", "minimum": 0 },
+            "total": { "type": "integer", "minimum": 1 },
+            "current_stage": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "stages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "label",
+                  "ok"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ok": {
+                    "type": "boolean"
+                  },
+                  "next_step": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 }
               }
             }
