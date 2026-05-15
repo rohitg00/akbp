@@ -19,6 +19,13 @@ export-checkable. Do not advertise it as a chat transcript store, runtime
 scratchpad, uncited vector cache, bridge-owned memory format, or automatic
 background write sink.
 
+The generated `tool_protocol_bridge.host_tool_manifest` is the smallest
+host-facing manifest for tool-protocol bridges. It repeats the stdio command,
+local knowledge-base path, read-only tool names, AKBP method targets, parameter
+schema refs, and response fields the bridge must preserve. Generate host tools
+from that manifest when possible; do not copy the list into a separate memory
+server config that can drift from `akbp.capabilities`.
+
 For a runnable preflight, use `examples/tool-protocol-bridge/run.sh`. It checks
 that the generated wrapper map stays read-only, that blocked write methods are
 not exposed as direct bridge tools, that startup context returns cited items,

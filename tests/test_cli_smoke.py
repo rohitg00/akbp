@@ -72,6 +72,21 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 [tool["method"] for tool in forward_tools],
                 config["tool_protocol_bridge"]["read_only_allowlist"],
             )
+            manifest = config["tool_protocol_bridge"]["host_tool_manifest"]
+            self.assertEqual(manifest["format"], "akbp-tool-host-manifest-v1")
+            self.assertEqual(manifest["transport"], "stdio-jsonl")
+            self.assertEqual(manifest["server"], config["server"])
+            self.assertEqual(manifest["knowledge_base_path"], str(kb.resolve()))
+            self.assertEqual(manifest["default_mode"], "read_only")
+            self.assertIn("second memory format", manifest["purpose"])
+            self.assertIn("separate reviewed-write surface", manifest["approval_boundary"])
+            self.assertEqual(
+                [tool["forwards_to"] for tool in manifest["tools"]],
+                config["tool_protocol_bridge"]["read_only_allowlist"],
+            )
+            self.assertEqual(manifest["tools"][0]["name"], "akbp_capabilities")
+            self.assertEqual(manifest["tools"][0]["input_schema"], forward_tools[0]["params_schema"])
+            self.assertEqual(manifest["tools"][0]["preserve_response_fields"], forward_tools[0]["surface_fields"])
             self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertIn("akbp.remember", config["tool_protocol_bridge"]["blocked_write_methods"])
@@ -154,6 +169,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["knowledge_base"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["knowledge_base"]["card"], "<AKBP_KB_PATH>/akbp.json")
             self.assertTrue(portable["knowledge_base"]["portable_template"])
+            self.assertEqual(portable["tool_protocol_bridge"]["host_tool_manifest"]["knowledge_base_path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")

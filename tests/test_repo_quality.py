@@ -220,6 +220,7 @@ class RepoQualityTest(unittest.TestCase):
             "AKBP tool-protocol bridge preflight",
             "AKBP tool-protocol bridge preflight passed",
             "tool_protocol_bridge.forward_tools",
+            "tool_protocol_bridge.host_tool_manifest",
             "read_only_allowlist",
             "blocked_write_methods",
             "akbp.capabilities",

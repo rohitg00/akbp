@@ -27,6 +27,7 @@ bridge = config["tool_protocol_bridge"]
 allowlist = set(bridge["read_only_allowlist"])
 blocked = set(bridge["blocked_write_methods"])
 forward_tools = bridge["forward_tools"]
+manifest = bridge["host_tool_manifest"]
 
 assert bridge["mode"] == "read_only", bridge
 assert "akbp.remember" in blocked, bridge
@@ -37,13 +38,25 @@ assert "akbp.session.start" in allowlist, bridge
 assert "akbp.context" in allowlist, bridge
 assert "akbp.search" in allowlist, bridge
 assert len(forward_tools) >= 6, bridge
+assert manifest["format"] == "akbp-tool-host-manifest-v1", manifest
+assert manifest["transport"] == "stdio-jsonl", manifest
+assert manifest["server"] == config["server"], manifest
+assert manifest["knowledge_base_path"] == config["knowledge_base"]["path"], manifest
+assert manifest["default_mode"] == "read_only", manifest
+assert "second memory format" in manifest["purpose"], manifest
+assert "separate reviewed-write surface" in manifest["approval_boundary"], manifest
+assert [tool["forwards_to"] for tool in manifest["tools"]] == [tool["method"] for tool in forward_tools], manifest
 
-for entry in forward_tools:
+for entry, host_tool in zip(forward_tools, manifest["tools"]):
     assert entry["mode"] == "read_only", entry
     assert entry["method"] in allowlist, entry
     assert entry["tool"].startswith("akbp_"), entry
     assert entry["params_schema"].startswith("schemas/tool-methods.schema.json#/$defs/"), entry
     assert entry["surface_fields"], entry
+    assert host_tool["name"] == entry["tool"], host_tool
+    assert host_tool["mode"] == "read_only", host_tool
+    assert host_tool["input_schema"] == entry["params_schema"], host_tool
+    assert host_tool["preserve_response_fields"] == entry["surface_fields"], host_tool
 
 assert config["safety"]["profile"] == "read_only", config["safety"]
 assert config["safety"]["write_policy"] == "no_writes", config["safety"]

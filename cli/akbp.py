@@ -1942,6 +1942,29 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "surface_fields": ["result.ok", "result.accepted_count", "result.rejected_count", "result.errors"],
         },
     ]
+    host_tool_manifest = {
+        "format": "akbp-tool-host-manifest-v1",
+        "purpose": "Generate host-facing read-only tools from AKBP JSONL methods without creating a second memory format.",
+        "transport": "stdio-jsonl",
+        "server": {
+            "command": command,
+            "args": command_args,
+            "env": {},
+        },
+        "knowledge_base_path": kb_path,
+        "default_mode": "read_only",
+        "approval_boundary": "write tools require a separate reviewed-write surface outside the model-generated tool call",
+        "tools": [
+            {
+                "name": entry["tool"],
+                "forwards_to": entry["method"],
+                "mode": entry["mode"],
+                "input_schema": entry["params_schema"],
+                "preserve_response_fields": entry["surface_fields"],
+            }
+            for entry in read_only_bridge_tools
+        ],
+    }
 
     config = {
         "name": args.name,
@@ -2091,6 +2114,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "tool_protocol_bridge": {
             "mode": "reviewed_write" if requested_profile == "reviewed_write" else "read_only",
             "forward_tools": read_only_bridge_tools,
+            "host_tool_manifest": host_tool_manifest,
             "read_only_allowlist": [
                 "akbp.capabilities",
                 "akbp.doctor",

@@ -119,7 +119,7 @@ The `quality_gates` section tells adapters when startup context is safe to use i
 
 The `maintenance` section gives adapters a small recurring health loop: verify cited source ids before trusting old claims, re-run `doctor` before enabling stricter profiles, check export bundles before sharing or importing them, and refresh the index after approved writes. Treat source drift, missing evidence, empty startup context, and unsupported profiles as blockers to surface, not prose to bury.
 
-The `tool_protocol_bridge` section is for tool-protocol hosts. It exposes a read-only allowlist for `akbp.session.start`, `akbp.context`, `akbp.search`, `akbp.cite`, source verification, and import checks; lists blocked write methods by default; and documents the reviewed-write wrapper pattern where previews require `dry_run:true` and apply requires `approved:true` for the exact reviewed method, path, and params. See `docs/TOOL_PROTOCOL_BRIDGE.md` before publishing a bridge.
+The `tool_protocol_bridge` section is for tool-protocol hosts. It exposes a read-only allowlist for `akbp.session.start`, `akbp.context`, `akbp.search`, `akbp.cite`, source verification, and import checks; lists blocked write methods by default; includes `host_tool_manifest` for hosts that need concrete tool names, schema refs, stdio command, and preserved response fields; and documents the reviewed-write wrapper pattern where previews require `dry_run:true` and apply requires `approved:true` for the exact reviewed method, path, and params. See `docs/TOOL_PROTOCOL_BRIDGE.md` before publishing a bridge.
 
 For scripts or adapter installers, run a profile-specific preflight before wiring a host:
 
