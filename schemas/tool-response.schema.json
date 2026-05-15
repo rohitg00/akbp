@@ -1801,7 +1801,11 @@
             "summary_chars",
             "original_summary_chars",
             "truncated",
-            "truncated_items"
+            "truncated_items",
+            "clipped_items",
+            "omitted_items",
+            "items_before_budget",
+            "items_after_budget"
           ],
           "properties": {
             "max_chars": {

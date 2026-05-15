@@ -230,8 +230,27 @@ class RepoQualityTest(unittest.TestCase):
             "items_after_budget",
         ]:
             self.assertIn(required, budget["properties"])
+            self.assertIn(required, budget["required"])
         self.assertEqual(budget["properties"]["clipped_items"]["minimum"], 0)
         self.assertEqual(budget["properties"]["omitted_items"]["minimum"], 0)
+
+    def test_tool_response_schema_requires_full_context_budget_diagnostics(self):
+        schema = json.loads((ROOT / "schemas" / "tool-response.schema.json").read_text(encoding="utf-8"))
+        budget = schema["$defs"]["context_result"]["properties"]["budget"]
+
+        for required in [
+            "max_chars",
+            "summary_chars",
+            "original_summary_chars",
+            "truncated",
+            "truncated_items",
+            "clipped_items",
+            "omitted_items",
+            "items_before_budget",
+            "items_after_budget",
+        ]:
+            self.assertIn(required, budget["properties"])
+            self.assertIn(required, budget["required"])
 
     def test_stdio_client_config_example_documents_negotiated_setup(self):
         text = (ROOT / "examples" / "stdio-client-config" / "README.md").read_text(encoding="utf-8")

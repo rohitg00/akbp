@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Tightened context budget schemas so adapter validators require clipped,
+  omitted, and before/after item diagnostics whenever a budget object is
+  returned.
 - Added adapter response-contract validation to generated ten-minute proofs so
   installers run the structured-output harness before recalled memory can
   influence planning.

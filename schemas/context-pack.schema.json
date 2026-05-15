@@ -38,7 +38,17 @@
     "budget": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["max_chars", "summary_chars", "original_summary_chars", "truncated", "truncated_items"],
+      "required": [
+        "max_chars",
+        "summary_chars",
+        "original_summary_chars",
+        "truncated",
+        "truncated_items",
+        "clipped_items",
+        "omitted_items",
+        "items_before_budget",
+        "items_after_budget"
+      ],
       "properties": {
         "max_chars": { "type": "integer", "minimum": 1 },
         "summary_chars": { "type": "integer", "minimum": 0 },
