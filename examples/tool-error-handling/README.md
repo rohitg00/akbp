@@ -1,34 +1,114 @@
-# Tool error handling example
+# Tool Error Handling Example
 
-This example shows how an agent runtime should handle AKBP JSONL tool-server failures without guessing from free-form text.
+This example shows the JSONL tool-server failures an adapter should handle as
+control flow. The core rule is to branch on `error.code`, not free-form error
+text.
 
-## Request handling rules
+Adjacent memory tools often expose a simple server interface and let clients
+guess what failed. AKBP keeps the interface small, but makes failures structured
+so a coding-agent adapter can recover safely:
 
-1. Treat `ok: false` as authoritative.
-2. Branch on `error.code`, not on human-readable `error.message`.
-3. Do not retry write methods unless the caller supplies explicit approval when required.
-4. Never store raw request text from invalid JSON errors.
-5. Surface `error.details` to the runtime review layer when present.
-6. Keep request ids stable so callers can match failures to their original request.
+- `invalid_json`: repair the JSON line before retrying.
+- `invalid_request`: repair the request envelope before retrying.
+- `unknown_method`: refresh `akbp.capabilities` and disable that flow.
+- `invalid_params`: repair parameters using the advertised method schema.
+- `approval_required`: stop the apply path until a reviewed `dry_run` is approved.
+- `cli_error`: show the redacted CLI failure and avoid writing partial memory.
+- `internal_error`: stop and surface the bug; do not retry as a write.
 
-## Expected error codes
+Run from the repository root:
 
-| Code | Meaning | Runtime behavior |
-| --- | --- | --- |
-| `invalid_json` | The line was not valid JSON. | Drop or quarantine the line without echoing raw content. |
-| `invalid_request` | The JSON envelope was missing required shape. | Ask the caller to repair the envelope. |
-| `unknown_method` | The method is not advertised by `akbp.capabilities`. | Re-read capabilities before retrying. |
-| `invalid_params` | Method params failed schema-backed validation. | Fix params before retrying. |
-| `approval_required` | A non-dry-run write was requested without approval. | Show the planned write and require explicit approval. |
-| `cli_error` | The reference CLI rejected the operation. | Surface the redacted details, mention if `redacted:true`, and stop the current operation. |
-| `internal_error` | The server failed unexpectedly. | Stop, preserve the request id, and report the failure. |
-
-## Safe retry pattern
-
-```jsonl
-{"id":"caps-1","method":"akbp.capabilities"}
-{"id":"preview-1","method":"akbp.remember","dry_run":true,"params":{"text":"Release needs a rollback owner."}}
-{"id":"apply-1","method":"akbp.remember","approved":true,"params":{"text":"Release needs a rollback owner."}}
+```bash
+./examples/tool-error-handling/run.sh
 ```
 
-For write methods, the preview response is the review artifact. The approved request should only be sent after runtime or user policy accepts that artifact.
+## Discover capabilities first
+
+Start each integration session with capability discovery:
+
+```json
+{"id":"caps","method":"akbp.capabilities","params":{"client":"tool-error-handling-example","requires":["structured_errors","method_param_schemas","approval_required_errors"]}}
+```
+
+Expected behavior:
+
+- `ok:true`
+- `result.features.structured_errors:true`
+- `result.features.method_param_schemas:true`
+- `result.features.approval_required_errors:true`
+
+## Request envelope failures
+
+Malformed JSON returns `invalid_json`:
+
+```text
+{"id":"broken","method":"akbp.search"
+```
+
+Unknown request fields return `invalid_request`:
+
+```json
+{"id":"bad-envelope","method":"akbp.search","params":{"query":"release"},"unexpected":true}
+```
+
+Adapters should fix the envelope before retrying. Do not ask for approval,
+because this is not a write-review failure.
+
+## Method and parameter failures
+
+Unknown methods return `unknown_method` with the advertised method list:
+
+```json
+{"id":"unknown","method":"akbp.nope","params":{}}
+```
+
+Invalid parameters return `invalid_params` with a schema reference:
+
+```json
+{"id":"bad-limit","method":"akbp.search","params":{"query":"release","limit":0}}
+```
+
+The adapter should use `error.details.params_schema` and
+`error.details.type_errors` to repair the request.
+
+## Write-control failures
+
+Write-capable methods should be previewed with request-level `dry_run:true`:
+
+```json
+{"id":"remember-preview","method":"akbp.remember","path":"./my-kb","dry_run":true,"params":{"text":"Decision: keep reviewed writes explicit."}}
+```
+
+Applying the same write without request-level `approved:true` returns
+`approval_required`:
+
+```json
+{"id":"remember-blocked","method":"akbp.remember","path":"./my-kb","params":{"text":"Decision: keep reviewed writes explicit."}}
+```
+
+Only retry the apply after the user or trusted local policy approves the preview:
+
+```json
+{"id":"remember-approved","method":"akbp.remember","path":"./my-kb","approved":true,"params":{"text":"Decision: keep reviewed writes explicit."}}
+```
+
+## CLI failures stay structured
+
+If the underlying CLI rejects an otherwise valid request, the server returns
+`cli_error` with redacted stdout/stderr and the CLI exit code. For example,
+asking `akbp.cite` for a missing claim id should not become an unstructured
+adapter crash:
+
+```json
+{"id":"missing-cite","method":"akbp.cite","path":"./my-kb","params":{"claim_id":"claim_missing"}}
+```
+
+Expected behavior:
+
+- `ok:false`
+- `error.code:"cli_error"`
+- `error.details.exit_code` is present
+- `error.details.redacted` tells the adapter whether secrets were removed
+
+`internal_error` is reserved for unexpected tool-server defects. Treat it as a
+bug report path, not a retryable memory operation.
