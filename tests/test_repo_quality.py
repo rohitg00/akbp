@@ -235,6 +235,30 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("./examples/tool-protocol-bridge/run.sh", makefile)
         self.assertIn("examples/tool-protocol-bridge/", readme)
 
+    def test_tool_protocol_bridge_documents_memory_server_adoption_checklist(self):
+        bridge_doc = (ROOT / "docs" / "TOOL_PROTOCOL_BRIDGE.md").read_text(encoding="utf-8")
+        landscape = (ROOT / "docs" / "PROTOCOL_LANDSCAPE_LEARNINGS.md").read_text(encoding="utf-8")
+        combined = bridge_doc + landscape
+        for required in [
+            "Evaluate memory-server bridges",
+            "bridge adoption checklist",
+            "Durable knowledge remains in AKBP files",
+            "bridge-owned state",
+            "Capability freshness",
+            "akbp.capabilities",
+            "generated `client-config` data",
+            "Cited startup context",
+            "akbp.session.start",
+            "Write boundary",
+            "dry-run preview and approval UI",
+            "Error handling",
+            "approval_required",
+            "invalid_params",
+            "Portability",
+            "export-checkable bundles",
+        ]:
+            self.assertIn(required, combined)
+
     def test_github_copilot_adapter_documents_cloud_agent_read_only_boundary(self):
         readme = (ROOT / "adapters" / "github-copilot" / "README.md").read_text(encoding="utf-8")
         instructions = (ROOT / "adapters" / "github-copilot" / "instructions.md").read_text(encoding="utf-8")

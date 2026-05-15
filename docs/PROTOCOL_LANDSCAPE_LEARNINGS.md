@@ -358,6 +358,22 @@ High-value, low-risk docs/examples:
 
 `templates/project-memory-rules/AKBP.md` now gives new repositories a copyable local rule file before agents start writing durable memory.
 
+## Shipped artifact: bridge adoption checklist
+
+Recent research keeps showing tool-compatible memory projects that make setup
+easy but blur the durability boundary. `docs/TOOL_PROTOCOL_BRIDGE.md` now
+includes an adoption checklist for evaluating memory-server bridges before a
+runtime treats them as trusted AKBP memory.
+
+The checklist keeps the comparison concrete:
+
+- durable knowledge stays in AKBP files, not bridge-owned state
+- bridge tools start from `akbp.capabilities` and generated client config data
+- startup context must be cited before it influences planning
+- direct write methods stay blocked until dry-run preview and approval UI exist
+- hosts preserve `ok`, `error.code`, warnings, and budget fields
+- export and import checks still work without bridge-local metadata
+
 It covers:
 
 - durable knowledge criteria

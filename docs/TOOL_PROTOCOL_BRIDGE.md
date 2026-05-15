@@ -44,6 +44,27 @@ and that a direct unapproved write returns `approval_required`.
 
 Do not expose write-capable methods in the first bridge unless the host has a separate review surface. If the host cannot show a dry-run preview and wait for explicit user approval, keep the bridge read-only.
 
+## Evaluate memory-server bridges
+
+When comparing AKBP with a memory server, plugin, or tool-protocol bridge, do
+not stop at transport setup. A bridge is useful only if it preserves the
+knowledge contract that makes later agent sessions trustworthy.
+
+Use this adoption checklist before enabling a bridge:
+
+| Check | AKBP requirement | Why it matters |
+| --- | --- | --- |
+| Artifact ownership | Durable knowledge remains in AKBP files, not bridge-owned state | Users can inspect, version, export, and migrate memory without the bridge |
+| Capability freshness | The bridge starts from `akbp.capabilities` and generated `client-config` data | Host tools do not drift from supported methods, schemas, profiles, or write policy |
+| Cited startup context | The first planning context comes from `akbp.session.start` or `akbp.context` with citations | Agents can show where recalled knowledge came from before acting |
+| Write boundary | Direct write methods stay blocked until dry-run preview and approval UI exist | Tool execution is not silently treated as user approval |
+| Error handling | The bridge preserves `ok`, `error.code`, warnings, and budget fields | Hosts can branch on `approval_required`, `invalid_params`, and source drift |
+| Portability | Export and import checks still work without bridge-local metadata | Knowledge can move across runtimes instead of being trapped in one server |
+
+If a bridge only stores memories behind a tool call and cannot show citations,
+artifact paths, dry-run review metadata, or export-checkable bundles, treat it
+as an integration experiment rather than a durable AKBP memory path.
+
 ## Bridge contract
 
 The bridge is translation glue only. It should not create another durable memory format.
