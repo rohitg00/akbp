@@ -61,12 +61,19 @@ assert config["safety"]["require_adapter_ready"] is True, config
 assert config["tool_protocol_bridge"]["mode"] == "read_only", config
 assert "akbp.session.start" in config["tool_protocol_bridge"]["read_only_allowlist"], config
 assert "akbp.remember" in config["tool_protocol_bridge"]["blocked_write_methods"], config
+first_tool = config["tool_protocol_bridge"]["forward_tools"][0]
+assert "Discover supported AKBP methods" in first_tool["description"], config
+assert first_tool["safety"]["writes"] is False, config
+assert first_tool["safety"]["requires_review_surface"] is False, config
+assert first_tool["safety"]["approval"] == "not_applicable", config
 client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
 assert client_manifest["format"] == "akbp-client-tool-manifest-v1", config
 assert client_manifest["transport_adapter"] == "stdio-jsonl-to-host-tools", config
 assert client_manifest["response_contract"]["branch_on"] == "error.code", config
 assert client_manifest["response_contract"]["surface_citations"] is True, config
 assert [tool["akbp_method"] for tool in client_manifest["tools"]] == config["tool_protocol_bridge"]["read_only_allowlist"], config
+assert client_manifest["tools"][0]["description"] == first_tool["description"], config
+assert client_manifest["tools"][0]["safety"] == first_tool["safety"], config
 assert "akbp.remember" in client_manifest["blocked_write_methods"], config
 assert "dry-run previews" in client_manifest["approval_boundary"], config
 assert config["session_start"]["id"] == "session-start-1", config

@@ -107,6 +107,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(forward_tools[0]["tool"], "akbp_capabilities")
             self.assertEqual(forward_tools[0]["method"], "akbp.capabilities")
             self.assertEqual(forward_tools[0]["mode"], "read_only")
+            self.assertIn("Discover supported AKBP methods", forward_tools[0]["description"])
+            self.assertEqual(forward_tools[0]["safety"]["writes"], False)
+            self.assertEqual(forward_tools[0]["safety"]["requires_review_surface"], False)
+            self.assertEqual(forward_tools[0]["safety"]["approval"], "not_applicable")
             self.assertTrue(forward_tools[0]["params_schema"].endswith("#/$defs/akbp.capabilities.params"))
             self.assertIn("result.negotiation", forward_tools[0]["surface_fields"])
             self.assertEqual(
@@ -126,6 +130,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 config["tool_protocol_bridge"]["read_only_allowlist"],
             )
             self.assertEqual(manifest["tools"][0]["name"], "akbp_capabilities")
+            self.assertEqual(manifest["tools"][0]["description"], forward_tools[0]["description"])
+            self.assertEqual(manifest["tools"][0]["safety"], forward_tools[0]["safety"])
             self.assertEqual(manifest["tools"][0]["input_schema"], forward_tools[0]["params_schema"])
             self.assertEqual(manifest["tools"][0]["preserve_response_fields"], forward_tools[0]["surface_fields"])
             client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
@@ -142,6 +148,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 config["tool_protocol_bridge"]["read_only_allowlist"],
             )
             self.assertEqual(client_manifest["tools"][0]["name"], "akbp_capabilities")
+            self.assertEqual(client_manifest["tools"][0]["description"], forward_tools[0]["description"])
+            self.assertEqual(client_manifest["tools"][0]["safety"], forward_tools[0]["safety"])
             self.assertEqual(client_manifest["tools"][0]["input_schema_ref"], forward_tools[0]["params_schema"])
             self.assertIn("akbp.remember", client_manifest["blocked_write_methods"])
             self.assertIn("dry-run previews", client_manifest["approval_boundary"])

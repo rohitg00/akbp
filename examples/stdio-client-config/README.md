@@ -51,6 +51,7 @@ AKBP stdio client config example passed
 - the config exposes `response_contract.error_actions` so adapters can map each
   structured failure to a retry and write-safety policy
 - the config exposes `tool_protocol_bridge` so tool-protocol hosts can start with read-only allowlists
+- host-tool manifests include descriptions and safety metadata for each generated read-only wrapper
 - the config tells adapter authors which calls to run and which result fields must pass before trusting setup
 - reviewed-write configs keep the dry-run and approval boundary explicit
 - configs describe the host trust boundary so adapter authors do not accidentally treat autonomous tool execution as reviewed writes

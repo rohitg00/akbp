@@ -51,10 +51,15 @@ for entry, host_tool in zip(forward_tools, manifest["tools"]):
     assert entry["mode"] == "read_only", entry
     assert entry["method"] in allowlist, entry
     assert entry["tool"].startswith("akbp_"), entry
+    assert entry["description"], entry
+    assert entry["safety"]["writes"] is False, entry
+    assert entry["safety"]["requires_review_surface"] is False, entry
     assert entry["params_schema"].startswith("schemas/tool-methods.schema.json#/$defs/"), entry
     assert entry["surface_fields"], entry
     assert host_tool["name"] == entry["tool"], host_tool
+    assert host_tool["description"] == entry["description"], host_tool
     assert host_tool["mode"] == "read_only", host_tool
+    assert host_tool["safety"] == entry["safety"], host_tool
     assert host_tool["input_schema"] == entry["params_schema"], host_tool
     assert host_tool["preserve_response_fields"] == entry["surface_fields"], host_tool
 

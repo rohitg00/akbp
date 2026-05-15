@@ -26,8 +26,9 @@ AKBP tool-protocol bridge preflight passed
 - Every `tool_protocol_bridge.forward_tools` entry maps to the read-only
   allowlist and preserves response fields.
 - `tool_protocol_bridge.host_tool_manifest` gives tool-protocol hosts a concrete
-  read-only tool list, input schema refs, stdio command, and response fields to
-  preserve without inventing another memory store.
+  read-only tool list, descriptions, safety metadata, input schema refs, stdio
+  command, and response fields to preserve without inventing another memory
+  store.
 - Write-capable AKBP methods stay in `blocked_write_methods` unless the host
   implements a separate reviewed-write surface.
 - The bridge can call `akbp.capabilities`, `akbp.doctor`, and
