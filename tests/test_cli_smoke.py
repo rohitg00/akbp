@@ -287,6 +287,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(new_claim["supersedes"], [claim["id"]])
             out = run_cli("--path", str(kb), "search", "stdlib")
             self.assertTrue(json.loads(out.stdout)["results"])
+            out = run_cli("--path", str(kb), "context", "Bun Python stdlib")
+            pack = json.loads(out.stdout)
+            context_claim_ids = [item["id"] for item in pack["items"] if item["type"] == "claim"]
+            self.assertIn(new_claim["id"], context_claim_ids)
+            self.assertNotIn(claim["id"], context_claim_ids)
+            self.assertTrue(any(claim["id"] in warning for warning in pack["warnings"]))
 
             out = run_cli(
                 "--path", str(kb),

@@ -359,6 +359,30 @@ def score_query(query: str, text: str) -> int:
     return sum(tf.get(w, 0) for w in q)
 
 
+INACTIVE_CLAIM_STATUSES = {"superseded", "archived", "redacted"}
+
+
+def is_inactive_claim(claim: dict[str, Any]) -> bool:
+    return str(claim.get("status") or "").lower() in INACTIVE_CLAIM_STATUSES or bool(claim.get("superseded_by"))
+
+
+def inactive_claim_matches(base: Path, query: str, limit: int) -> list[dict[str, Any]]:
+    matches: list[dict[str, Any]] = []
+    for claim in load_claims(base):
+        if not is_inactive_claim(claim):
+            continue
+        score = score_query(query, str(claim.get("text") or ""))
+        if score:
+            matches.append({
+                "id": claim.get("id"),
+                "status": claim.get("status"),
+                "superseded_by": claim.get("superseded_by"),
+                "score": score,
+            })
+    matches.sort(key=lambda item: item["score"], reverse=True)
+    return matches[:limit]
+
+
 def iter_markdown(base: Path) -> Iterable[tuple[str, str]]:
     for p in (base / "wiki").rglob("*.md"):
         yield str(p.relative_to(base)), p.read_text(encoding="utf-8", errors="ignore")
@@ -368,9 +392,18 @@ def collect_keyword_results(base: Path, query: str, limit: int) -> list[dict[str
     claims = read_jsonl(base / "claims" / "claims.jsonl")
     results: list[dict[str, Any]] = []
     for c in claims:
+        if is_inactive_claim(c):
+            continue
         score = score_query(query, c.get("text", ""))
         if score:
-            results.append({"type": "claim", "score": score, "id": c["id"], "text": c["text"], "evidence": c.get("evidence", [])})
+            results.append({
+                "type": "claim",
+                "score": score,
+                "id": c["id"],
+                "text": c["text"],
+                "status": c.get("status"),
+                "evidence": c.get("evidence", []),
+            })
     for rel, text in iter_markdown(base):
         score = score_query(query, text)
         if score:
@@ -392,7 +425,7 @@ def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, An
     try:
         rows = con.execute(
             "SELECT kind, object_id, path, snippet(search_index, 3, '', '', ' … ', 12), bm25(search_index) AS rank FROM search_index WHERE search_index MATCH ? ORDER BY rank LIMIT ?",
-            (query_used, max(limit, limit * 4)),
+            (query_used, max(limit + 20, limit * 8)),
         ).fetchall()
     except sqlite3.Error:
         return None
@@ -403,6 +436,8 @@ def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, An
         score = -float(rank)
         if kind == "claim":
             claim = claims_by_id.get(str(object_id), {})
+            if is_inactive_claim(claim):
+                continue
             results.append({
                 "type": "claim",
                 "score": score,
@@ -410,6 +445,7 @@ def collect_fts_results(base: Path, query: str, limit: int) -> list[dict[str, An
                 "id": object_id,
                 "path": path,
                 "text": claim.get("text") or snippet,
+                "status": claim.get("status"),
                 "snippet": snippet,
                 "evidence": claim.get("evidence", []),
                 "backend": "sqlite_fts5",
@@ -464,7 +500,7 @@ def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
             "score": result["score"],
             "backend": result.get("backend", "keyword"),
             "citations": result.get("evidence", []),
-            "freshness": "unknown",
+            "freshness": str(result.get("status") or "unknown"),
         }
     if result["type"] in {"source", "entity", "relation"}:
         return {
@@ -490,11 +526,16 @@ def result_to_context_item(result: dict[str, Any]) -> dict[str, Any]:
 def cmd_context(args: argparse.Namespace) -> int:
     base = root(args.path)
     results = collect_results(base, args.task, args.limit)
+    inactive_matches = inactive_claim_matches(base, args.task, args.limit)
+    warnings = [] if results else ["No matching AKBP context found."]
+    if inactive_matches:
+        skipped = ", ".join(str(item["id"]) for item in inactive_matches)
+        warnings.append(f"Skipped inactive matching claims: {skipped}")
     pack = {
         "query": args.task,
         "generated_at": now_iso(),
         "items": [result_to_context_item(r) for r in results],
-        "warnings": [] if results else ["No matching AKBP context found."],
+        "warnings": warnings,
     }
     if args.markdown:
         print(f"# AKBP Context Pack\n\nQuery: {pack['query']}\nGenerated: {pack['generated_at']}\n")
