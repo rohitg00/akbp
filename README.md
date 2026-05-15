@@ -142,7 +142,7 @@ Keep runtime scratch, raw transcripts, temporary plans, and private tool caches
 out of AKBP unless they are promoted through the reviewed session-memory
 boundary in `docs/SESSION_MEMORY_BOUNDARY.md`.
 
-See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/DEVELOPER_PROTOCOL_FIT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `docs/BENCHMARK.md`, `examples/session-start-harness/`, and `examples/tool-server-approval-flow/`.
+See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/DEVELOPER_PROTOCOL_FIT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `docs/BENCHMARK.md`, `examples/session-start-harness/`, `examples/tool-protocol-bridge/`, and `examples/tool-server-approval-flow/`.
 
 For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,

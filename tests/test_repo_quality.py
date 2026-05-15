@@ -209,6 +209,31 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/stdio-client-config/run.sh", makefile)
 
+    def test_tool_protocol_bridge_example_documents_read_only_preflight(self):
+        text = (ROOT / "examples" / "tool-protocol-bridge" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "tool-protocol-bridge" / "run.sh").read_text(encoding="utf-8")
+        bridge_doc = (ROOT / "docs" / "TOOL_PROTOCOL_BRIDGE.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script + bridge_doc + readme
+        for required in [
+            "AKBP tool-protocol bridge preflight",
+            "AKBP tool-protocol bridge preflight passed",
+            "tool_protocol_bridge.forward_tools",
+            "read_only_allowlist",
+            "blocked_write_methods",
+            "akbp.capabilities",
+            "akbp.doctor",
+            "akbp.session.start",
+            "akbp.remember",
+            "approval_required",
+            "read-only bridge startup ok",
+            "direct write blocked ok",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/tool-protocol-bridge/run.sh", makefile)
+        self.assertIn("examples/tool-protocol-bridge/", readme)
+
     def test_github_copilot_adapter_documents_cloud_agent_read_only_boundary(self):
         readme = (ROOT / "adapters" / "github-copilot" / "README.md").read_text(encoding="utf-8")
         instructions = (ROOT / "adapters" / "github-copilot" / "instructions.md").read_text(encoding="utf-8")

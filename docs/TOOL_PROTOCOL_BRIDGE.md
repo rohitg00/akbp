@@ -12,6 +12,11 @@ Use `akbp client-config --profile read-only` as the machine-readable starting po
 
 It also includes `tool_protocol_bridge.forward_tools`: a ready wrapper map for tool-protocol hosts. Each entry gives the host-facing tool name, AKBP JSONL method, method-parameter schema reference, and response fields the bridge should preserve in its own response. Use that map when generating tool-protocol tools, IDE commands, or local assistant actions instead of inventing a second memory contract.
 
+For a runnable preflight, use `examples/tool-protocol-bridge/run.sh`. It checks
+that the generated wrapper map stays read-only, that blocked write methods are
+not exposed as direct bridge tools, that startup context returns cited items,
+and that a direct unapproved write returns `approval_required`.
+
 | Bridge tool | Forward to AKBP | Why expose it first |
 | --- | --- | --- |
 | `akbp_capabilities` | `akbp.capabilities` | Discover profiles, method schemas, and write policy before assuming behavior |

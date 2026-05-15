@@ -38,6 +38,7 @@ examples:
 	./examples/session-start-harness/run.sh
 	./examples/structured-output-harness/run.sh
 	./examples/adapter-lifecycle/run.sh
+	./examples/tool-protocol-bridge/run.sh
 	./examples/multi-agent-consistency-demo/run.sh
 	./examples/portable-bundle/run.sh
 	./examples/existing-memory-migration/run.sh
