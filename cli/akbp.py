@@ -1883,6 +1883,64 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         command_args = []
     kb_path = "<AKBP_KB_PATH>" if args.portable else str(base)
     card_path = f"{kb_path}/akbp.json" if args.portable else str(base / "akbp.json")
+    read_only_bridge_tools = [
+        {
+            "tool": "akbp_capabilities",
+            "method": "akbp.capabilities",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.capabilities.params",
+            "surface_fields": ["result.negotiation", "result.features", "result.profiles"],
+        },
+        {
+            "tool": "akbp_doctor",
+            "method": "akbp.doctor",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.doctor.params",
+            "surface_fields": ["result.ready_for_adapter", "result.adapter_readiness", "result.next_steps"],
+        },
+        {
+            "tool": "akbp_session_start",
+            "method": "akbp.session.start",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.session.start.params",
+            "surface_fields": ["result.session_id", "result.context.items", "result.context.warnings", "result.context.budget"],
+        },
+        {
+            "tool": "akbp_context",
+            "method": "akbp.context",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.context.params",
+            "surface_fields": ["result.items", "result.warnings", "result.budget"],
+        },
+        {
+            "tool": "akbp_search",
+            "method": "akbp.search",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.search.params",
+            "surface_fields": ["result.results", "result.warnings", "result.backend"],
+        },
+        {
+            "tool": "akbp_cite",
+            "method": "akbp.cite",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.cite.params",
+            "surface_fields": ["result.claim_id", "result.claim", "result.evidence"],
+        },
+        {
+            "tool": "akbp_source_verify",
+            "method": "akbp.source.verify",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.source.verify.params",
+            "surface_fields": ["result.ok", "result.counts", "result.issues"],
+        },
+        {
+            "tool": "akbp_import_check",
+            "method": "akbp.import_check",
+            "mode": "read_only",
+            "params_schema": "schemas/tool-methods.schema.json#/$defs/akbp.import_check.params",
+            "surface_fields": ["result.ok", "result.accepted_count", "result.rejected_count", "result.errors"],
+        },
+    ]
 
     config = {
         "name": args.name,
@@ -1955,6 +2013,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         },
         "tool_protocol_bridge": {
             "mode": "reviewed_write" if requested_profile == "reviewed_write" else "read_only",
+            "forward_tools": read_only_bridge_tools,
             "read_only_allowlist": [
                 "akbp.capabilities",
                 "akbp.doctor",

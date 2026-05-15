@@ -50,6 +50,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["health_check"]["recommended_profile_field"], "adapter_readiness.recommended_profile")
             self.assertEqual(config["health_check"]["security_posture_field"], "security_posture")
             self.assertEqual(config["tool_protocol_bridge"]["mode"], "reviewed_write")
+            forward_tools = config["tool_protocol_bridge"]["forward_tools"]
+            self.assertEqual(forward_tools[0]["tool"], "akbp_capabilities")
+            self.assertEqual(forward_tools[0]["method"], "akbp.capabilities")
+            self.assertEqual(forward_tools[0]["mode"], "read_only")
+            self.assertTrue(forward_tools[0]["params_schema"].endswith("#/$defs/akbp.capabilities.params"))
+            self.assertIn("result.negotiation", forward_tools[0]["surface_fields"])
+            self.assertEqual(
+                [tool["method"] for tool in forward_tools],
+                config["tool_protocol_bridge"]["read_only_allowlist"],
+            )
+            self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertIn("akbp.remember", config["tool_protocol_bridge"]["blocked_write_methods"])
             self.assertEqual(config["tool_protocol_bridge"]["reviewed_write_tools"][0]["required_flags"], {"dry_run": True})

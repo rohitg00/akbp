@@ -10,6 +10,8 @@ Start with a read-only bridge that forwards a small allowlist to the local JSONL
 
 Use `akbp client-config --profile read-only` as the machine-readable starting point for an adapter installer. The generated `tool_protocol_bridge` section includes the read-only allowlist, blocked write methods, reviewed-write wrapper names, and the apply rule for repeating the exact reviewed method, path, and params.
 
+It also includes `tool_protocol_bridge.forward_tools`: a ready wrapper map for tool-protocol hosts. Each entry gives the host-facing tool name, AKBP JSONL method, method-parameter schema reference, and response fields the bridge should preserve in its own response. Use that map when generating tool-protocol tools, IDE commands, or local assistant actions instead of inventing a second memory contract.
+
 | Bridge tool | Forward to AKBP | Why expose it first |
 | --- | --- | --- |
 | `akbp_capabilities` | `akbp.capabilities` | Discover profiles, method schemas, and write policy before assuming behavior |
@@ -30,6 +32,7 @@ The bridge is translation glue only. It should not create another durable memory
 Required behavior:
 
 - Call `akbp.capabilities` at startup and require `read_only` plus `startup_context` for the first bridge.
+- Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.
 - Return AKBP response envelopes or preserve `ok`, `result`, and `error.code` in the host response.
