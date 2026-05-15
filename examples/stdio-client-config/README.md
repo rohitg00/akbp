@@ -13,6 +13,8 @@ The generated config makes the trust boundary visible:
   selected KB while keeping private scratchpads and caches outside AKBP
 - expose `scope_selection` so installers make the first-run trust question
   explicit before creating or reusing durable memory
+- expose `adapter_prompt_contract.source_provenance_gate` so adapters reject
+  uncited runtime memory before previewing durable AKBP writes
 - expose a first-run sequence that orders path resolution, capability negotiation, doctor readiness, cited startup context, and reviewed-write gating
 - include request ids and the knowledge-base path in startup checks
 - include a structured response contract so adapters branch on `ok` and `error.code`
@@ -68,6 +70,9 @@ AKBP stdio client config example passed
 - the config exposes the response envelope and schema paths adapter authors should validate against
 - the config exposes `response_contract.error_actions` so adapters can map each
   structured failure to a retry and write-safety policy
+- the config exposes `adapter_prompt_contract.source_provenance_gate` so
+  durable claims require source ids, cited context evidence, or newly registered
+  source material before the dry-run preview
 - the config exposes `tool_protocol_bridge` so tool-protocol hosts can start with read-only allowlists
 - the config exposes `managed_tool_host_bridge` so tool-protocol-compatible hosts can launch the
   same local stdio server, run preflight requests, preserve structured

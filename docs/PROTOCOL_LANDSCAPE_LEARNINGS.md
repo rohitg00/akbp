@@ -278,6 +278,21 @@ This gives low-context adapters a concrete control signal: trust cited bounded
 context when it fits, lower `limit` or ask for more budget when important items
 were omitted, and surface warnings without parsing prose.
 
+## Shipped artifact: source provenance gate for adapter writes
+
+Recent memory-server discussions keep showing the same adoption risk: quick
+local setup is attractive, but users ask what backs the stored facts. AKBP's
+generated adapter prompt contract now includes
+`source_provenance_gate`, a machine-readable rule that blocks adapters from
+promoting unsupported chat memory, cache entries, or model summaries into
+durable AKBP claims.
+
+The gate tells adapters to preview writes only when the claim is backed by an
+existing source id, cited startup/context evidence, `akbp.cite`, or source
+material registered with `akbp.source.add`. If that backing is missing, the
+adapter keeps the observation as runtime scratch instead of creating durable
+project memory.
+
 ## Shipped artifact: KB scope guidance
 
 Recent local and tool-compatible memory projects keep converging on shared

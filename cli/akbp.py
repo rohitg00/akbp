@@ -615,6 +615,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "Before planning from project memory, call akbp.session.start with the current task and a bounded max_chars value.",
             "Use only cited context items as recalled project knowledge; surface warnings and continue without recalled memory when context is empty or uncited.",
             "Do not treat runtime scratchpads, chat transcripts, private logs, or cache entries as durable AKBP knowledge.",
+            "Do not propose durable AKBP claims from unsupported memory; attach source ids, evidence refs, or register source material before previewing the write.",
             "For durable writes, first call the write method with dry_run:true and show review_required, apply_instruction, warnings, and would_write.",
             "Apply a durable write only by repeating the exact reviewed method, path, and params with approved:true after approval outside the model-generated tool call.",
             "Branch on the response envelope's ok field and error.code; never parse prose as the success signal.",
@@ -645,6 +646,22 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "apply_flags": {"approved": True},
             "required_preview_fields": ["review_required", "apply_instruction", "would_write", "warnings"],
             "approval_boundary": "Approval must happen outside the model-generated tool call.",
+        },
+        "source_provenance_gate": {
+            "format": "akbp-source-provenance-gate-v1",
+            "purpose": "Block adapters from turning uncited runtime memory into durable AKBP claims.",
+            "required_before_preview": True,
+            "accepted_provenance": [
+                "existing AKBP source ids",
+                "evidence refs from cited context or akbp.cite",
+                "new source material registered with akbp.source.add before a write preview",
+            ],
+            "reject_when": [
+                "the claim only comes from chat memory, scratchpads, cache entries, or a model summary",
+                "the adapter cannot show which source or cited context item backs the claim",
+                "the source has changed or is missing and source verification has not been reviewed",
+            ],
+            "fallback": "Keep the observation as runtime scratch and do not call write methods until source material is registered or cited.",
         },
         "recommended_harness": "./examples/structured-output-harness/run.sh",
     }
@@ -2213,6 +2230,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "Before planning from project memory, call akbp.session.start with the current task and a bounded max_chars value.",
             "Use only cited context items as recalled project knowledge; surface warnings and continue without recalled memory when context is empty or uncited.",
             "Do not treat runtime scratchpads, chat transcripts, private logs, or cache entries as durable AKBP knowledge.",
+            "Do not propose durable AKBP claims from unsupported memory; attach source ids, evidence refs, or register source material before previewing the write.",
             "For durable writes, first call the write method with dry_run:true and show review_required, apply_instruction, warnings, and would_write.",
             "Apply a durable write only by repeating the exact reviewed method, path, and params with approved:true after approval outside the model-generated tool call.",
             "Branch on the response envelope's ok field and error.code; never parse prose as the success signal.",
@@ -2268,6 +2286,22 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "apply_flags": {"approved": True},
             "required_preview_fields": ["review_required", "apply_instruction", "would_write", "warnings"],
             "approval_boundary": "Approval must happen outside the model-generated tool call.",
+        },
+        "source_provenance_gate": {
+            "format": "akbp-source-provenance-gate-v1",
+            "purpose": "Block adapters from turning uncited runtime memory into durable AKBP claims.",
+            "required_before_preview": requested_profile == "reviewed_write",
+            "accepted_provenance": [
+                "existing AKBP source ids",
+                "evidence refs from cited context or akbp.cite",
+                "new source material registered with akbp.source.add before a write preview",
+            ],
+            "reject_when": [
+                "the claim only comes from chat memory, scratchpads, cache entries, or a model summary",
+                "the adapter cannot show which source or cited context item backs the claim",
+                "the source has changed or is missing and source verification has not been reviewed",
+            ],
+            "fallback": "Keep the observation as runtime scratch and do not call write methods until source material is registered or cited.",
         },
         "validation": {
             "recommended_harness": "./examples/structured-output-harness/run.sh",
@@ -3295,6 +3329,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             },
             "reviewed_writes": {
                 "required_for_apply": requested_profile == "reviewed_write",
+                "provenance_gate_ref": "adapter_prompt_contract.source_provenance_gate",
                 "preview_fields": [
                     "review_required",
                     "apply_instruction",

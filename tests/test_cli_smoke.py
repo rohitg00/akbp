@@ -469,6 +469,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(prompt_contract["startup_request"]["params"]["require_citations"])
             self.assertTrue(prompt_contract["planning_gate"]["required_before_planning"])
             self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
+            self.assertIn("source ids", " ".join(prompt_contract["system_rules"]))
             trust_gate = prompt_contract["startup_trust_gate"]
             self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")
             self.assertTrue(trust_gate["required_before_planning"])
@@ -480,11 +481,20 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("budget.truncated", " ".join(trust_gate["fail_closed_on"]))
             self.assertIn("Continue without recalled AKBP memory", trust_gate["fallback_action"])
             self.assertFalse(prompt_contract["write_gate"]["required_for_apply"])
+            provenance_gate = prompt_contract["source_provenance_gate"]
+            self.assertEqual(provenance_gate["format"], "akbp-source-provenance-gate-v1")
+            self.assertFalse(provenance_gate["required_before_preview"])
+            self.assertIn("akbp.source.add", " ".join(provenance_gate["accepted_provenance"]))
+            self.assertIn("model summary", " ".join(provenance_gate["reject_when"]))
             self.assertEqual(prompt_contract["write_gate"]["preview_flags"], {"dry_run": True})
             self.assertIn("error.code", prompt_contract["validation"]["branch_on"])
             self.assertEqual(
                 read_only["quality_gates"]["startup_context"]["trust_gate_ref"],
                 "adapter_prompt_contract.startup_trust_gate",
+            )
+            self.assertEqual(
+                read_only["quality_gates"]["reviewed_writes"]["provenance_gate_ref"],
+                "adapter_prompt_contract.source_provenance_gate",
             )
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
 
@@ -533,6 +543,19 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(startup_context["adapter_prompt_contract"]["planning_gate"]["required_before_planning"])
             self.assertEqual(startup_context["safety"]["profile"], "startup_context")
             self.assertEqual(startup_context["safety"]["write_policy"], "no_writes")
+
+            reviewed_writes = json.loads(
+                run_cli("--path", str(kb), "client-config", "--profile", "reviewed-writes").stdout
+            )
+            self.assertEqual(reviewed_writes["adapter_prompt_contract"]["profile"], "reviewed_write")
+            self.assertTrue(
+                reviewed_writes["adapter_prompt_contract"]["source_provenance_gate"]["required_before_preview"]
+            )
+            self.assertTrue(reviewed_writes["quality_gates"]["reviewed_writes"]["required_for_apply"])
+            self.assertIn(
+                "adapter_prompt_contract.source_provenance_gate",
+                reviewed_writes["quality_gates"]["reviewed_writes"]["provenance_gate_ref"],
+            )
 
     def test_discover_finds_nearest_kb_and_reports_trust_boundary(self):
         with tempfile.TemporaryDirectory() as d:
@@ -590,8 +613,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(prompt_contract["required_startup_call"]["path"], str(kb.resolve()))
             self.assertEqual(prompt_contract["required_startup_call"]["params"]["max_chars"], 4000)
             self.assertIn("dry_run:true", " ".join(prompt_contract["system_rules"]))
+            self.assertIn("source ids", " ".join(prompt_contract["system_rules"]))
             self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
             self.assertEqual(prompt_contract["write_gate"]["apply_flags"], {"approved": True})
+            provenance_gate = prompt_contract["source_provenance_gate"]
+            self.assertEqual(provenance_gate["format"], "akbp-source-provenance-gate-v1")
+            self.assertTrue(provenance_gate["required_before_preview"])
+            self.assertIn("source ids", " ".join(provenance_gate["accepted_provenance"]))
+            self.assertIn("runtime scratch", provenance_gate["fallback"])
             proof_steps = {item["name"]: item for item in discovered["first_run_proof"]["steps"]}
             self.assertIn("doctor_read_only", proof_steps)
             self.assertIn("retrieve_startup_context", proof_steps)

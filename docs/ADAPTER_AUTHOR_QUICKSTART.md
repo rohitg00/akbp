@@ -247,6 +247,10 @@ and blocks apply flows unless the dry-run preview contains the expected
 `review_required`, `apply_instruction`, and write summary fields. Add a
 benchmark fixture with `expected_result_schema`, `expected_result_fields`, and
 `expected_error_code` for every response shape the adapter treats as trusted.
+The generated `adapter_prompt_contract.source_provenance_gate` is the write-side
+check: do not preview a durable claim unless it is backed by an existing source
+id, a cited context item, `akbp.cite` evidence, or source material registered
+with `akbp.source.add`. Unsupported chat memory stays runtime scratch.
 
 ## 4. Retrieve context at session start
 
@@ -308,6 +312,9 @@ Safety rules:
 - Never send both `dry_run:true` and `approved:true` in the same request.
 - Do not silently alter `params` between preview and apply.
 - Do not auto-apply `akbp.session.end` just because a session is closing.
+- Do not promote uncited runtime memory, cache entries, or model summaries into
+  AKBP claims. Register source material first or keep the observation outside
+  durable AKBP artifacts.
 - Treat `approval_required` as a stop signal, not a warning.
 - Show redacted CLI output as redacted; do not retry with raw secrets.
 
