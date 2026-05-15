@@ -198,6 +198,7 @@ class ToolServerTest(unittest.TestCase):
                 "client": "profile-negotiation-test",
                 "requires": ["method_param_schemas", "features.capability_negotiation"],
                 "requires_profiles": ["read_only", "missing_profile"],
+                "requires_methods": ["akbp.context", "akbp.future"],
             },
         }) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
@@ -209,6 +210,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(negotiation["unsupported_features"], [])
         self.assertEqual(negotiation["supported_profiles"], ["read_only"])
         self.assertEqual(negotiation["unsupported_profiles"], ["missing_profile"])
+        self.assertEqual(negotiation["supported_methods"], ["akbp.context"])
+        self.assertEqual(negotiation["unsupported_methods"], ["akbp.future"])
         self.assertFalse(negotiation["satisfied"])
 
     def test_capabilities_rejects_invalid_required_profiles_param(self):
@@ -338,6 +341,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("unsupported_features", negotiation["required"])
         self.assertIn("requested_profiles", negotiation["required"])
         self.assertIn("unsupported_profiles", negotiation["required"])
+        self.assertIn("requested_methods", negotiation["required"])
+        self.assertIn("unsupported_methods", negotiation["required"])
         self.assertIn("satisfied", negotiation["required"])
         self.assertIn("max_request_id_length", capabilities["properties"]["runtime"]["required"])
         self.assertIn("max_request_id_abs_value", capabilities["properties"]["runtime"]["required"])
@@ -582,6 +587,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[0]["result"]["negotiation"]["requested_features"], [])
             self.assertEqual(lines[0]["result"]["negotiation"]["supported_features"], [])
             self.assertEqual(lines[0]["result"]["negotiation"]["unsupported_features"], [])
+            self.assertEqual(lines[0]["result"]["negotiation"]["requested_methods"], [])
+            self.assertEqual(lines[0]["result"]["negotiation"]["supported_methods"], [])
+            self.assertEqual(lines[0]["result"]["negotiation"]["unsupported_methods"], [])
             self.assertTrue(lines[0]["result"]["negotiation"]["satisfied"])
             self.assertEqual(lines[0]["result"]["runtime"]["max_request_id_abs_value"], 9007199254740991)
             self.assertIn("safe integer range", lines[0]["result"]["runtime"]["request_id_policy"])
@@ -649,6 +657,7 @@ class ToolServerTest(unittest.TestCase):
             "params": {
                 "client": "adapter-test",
                 "requires": ["method_param_schemas", "features.capability_negotiation", "future_feature"],
+                "requires_methods": ["akbp.session.start", "akbp.remember", "akbp.future"],
             },
         }) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
@@ -660,16 +669,20 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(negotiation["requested_features"], ["method_param_schemas", "features.capability_negotiation", "future_feature"])
         self.assertEqual(negotiation["supported_features"], ["method_param_schemas", "features.capability_negotiation"])
         self.assertEqual(negotiation["unsupported_features"], ["future_feature"])
+        self.assertEqual(negotiation["requested_methods"], ["akbp.session.start", "akbp.remember", "akbp.future"])
+        self.assertEqual(negotiation["supported_methods"], ["akbp.session.start", "akbp.remember"])
+        self.assertEqual(negotiation["unsupported_methods"], ["akbp.future"])
         self.assertFalse(negotiation["satisfied"])
 
     def test_capabilities_negotiation_params_are_bounded(self):
         requests = "\n".join([
             json.dumps({"id": "bad-client", "method": "akbp.capabilities", "params": {"client": "x" * 129}}),
             json.dumps({"id": "bad-requires", "method": "akbp.capabilities", "params": {"requires": [""]}}),
+            json.dumps({"id": "bad-methods", "method": "akbp.capabilities", "params": {"requires_methods": [""]}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
-        self.assertEqual(len(lines), 2)
+        self.assertEqual(len(lines), 3)
         for line in lines:
             with self.subTest(line=line):
                 assert_response_envelope(self, line)
@@ -1311,7 +1324,7 @@ class ToolServerTest(unittest.TestCase):
         self.assertTrue(lines[1]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.search.params"))
         self.assertEqual(lines[2]["error"]["code"], "invalid_params")
         self.assertEqual(lines[2]["error"]["details"]["unknown"], ["surprise"])
-        self.assertEqual(lines[2]["error"]["details"]["allowed"], ["client", "requires", "requires_profiles"])
+        self.assertEqual(lines[2]["error"]["details"]["allowed"], ["client", "requires", "requires_profiles", "requires_methods"])
         self.assertTrue(lines[2]["error"]["details"]["params_schema"].endswith("#/$defs/akbp.capabilities.params"))
         self.assertEqual(lines[3]["error"]["code"], "invalid_params")
         self.assertEqual(lines[3]["error"]["details"]["missing"], ["transcript"])

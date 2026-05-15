@@ -73,7 +73,7 @@ WRITE_METHODS = {
 }
 
 METHODS: dict[str, dict[str, Any]] = {
-    "akbp.capabilities": {"write": False, "params": ["client", "requires", "requires_profiles"]},
+    "akbp.capabilities": {"write": False, "params": ["client", "requires", "requires_profiles", "requires_methods"]},
     "akbp.status": {"write": False, "params": ["limit"]},
     "akbp.doctor": {"write": False, "params": []},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
@@ -332,6 +332,9 @@ def negotiation_result(params: dict[str, Any], features: dict[str, bool]) -> dic
     requested_profiles = list(params.get("requires_profiles", []) or [])
     supported_profiles = [name for name in requested_profiles if name in CAPABILITY_PROFILES]
     unsupported_profiles = [name for name in requested_profiles if name not in CAPABILITY_PROFILES]
+    requested_methods = list(params.get("requires_methods", []) or [])
+    supported_methods = [name for name in requested_methods if name in METHODS]
+    unsupported_methods = [name for name in requested_methods if name not in METHODS]
     result: dict[str, Any] = {
         "requested_features": requested,
         "supported_features": supported,
@@ -339,7 +342,10 @@ def negotiation_result(params: dict[str, Any], features: dict[str, bool]) -> dic
         "requested_profiles": requested_profiles,
         "supported_profiles": supported_profiles,
         "unsupported_profiles": unsupported_profiles,
-        "satisfied": not unsupported and not unsupported_profiles,
+        "requested_methods": requested_methods,
+        "supported_methods": supported_methods,
+        "unsupported_methods": unsupported_methods,
+        "satisfied": not unsupported and not unsupported_profiles and not unsupported_methods,
     }
     if params.get("client"):
         result["client"] = params["client"]
@@ -698,6 +704,23 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
                     errors.append(f"requires_profiles[{index}] must be at most 64 characters")
                 if has_control_char(item):
                     errors.append(f"requires_profiles[{index}] must not contain control characters")
+    if "requires_methods" in params:
+        requires_methods = params.get("requires_methods")
+        if not isinstance(requires_methods, list):
+            errors.append("requires_methods must be an array")
+        else:
+            if len(requires_methods) > 64:
+                errors.append("requires_methods must contain at most 64 items")
+            for index, item in enumerate(requires_methods):
+                if not isinstance(item, str):
+                    errors.append("requires_methods items must be strings")
+                    break
+                if not item.strip():
+                    errors.append(f"requires_methods[{index}] must not be empty")
+                if len(item) > 128:
+                    errors.append(f"requires_methods[{index}] must be at most 128 characters")
+                if has_control_char(item):
+                    errors.append(f"requires_methods[{index}] must not contain control characters")
     if "dry_run" in params and not isinstance(params.get("dry_run"), bool):
         errors.append("dry_run must be a boolean")
     if "limit" in params:

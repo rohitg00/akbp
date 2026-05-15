@@ -439,6 +439,17 @@
             "pattern": "^[^\\u0000\\n\\r]*$"
           },
           "default": []
+        },
+        "requires_methods": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[^\\u0000\\n\\r]*$"
+          },
+          "default": []
         }
       }
     },
