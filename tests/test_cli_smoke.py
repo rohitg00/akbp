@@ -72,9 +72,32 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             read_only = json.loads(run_cli("--path", str(kb), "client-config").stdout)
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
+            self.assertNotIn("write_apply_requires_approval", read_only["startup"]["params"]["requires"])
             self.assertEqual(read_only["response_contract"]["envelope"]["ok"], "boolean")
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertEqual(read_only["safety"]["write_policy"], "no_writes")
+
+            startup_context = json.loads(
+                run_cli("--path", str(kb), "client-config", "--profile", "startup-context").stdout
+            )
+            self.assertEqual(startup_context["startup"]["params"]["requires_profiles"], ["startup_context"])
+            self.assertNotIn("write_apply_requires_approval", startup_context["startup"]["params"]["requires"])
+            self.assertTrue(startup_context["verification"][1]["expect"]["result.adapter_readiness.startup_context_ready"])
+            self.assertEqual(startup_context["session_start"]["method"], "akbp.session.start")
+            self.assertEqual(startup_context["safety"]["profile"], "startup_context")
+            self.assertEqual(startup_context["safety"]["write_policy"], "no_writes")
+
+    def test_doctor_recommends_startup_context_for_initialized_kb_without_index(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            doctor = json.loads(run_cli("--path", str(kb), "doctor").stdout)
+            self.assertEqual(doctor["adapter_readiness"]["recommended_profile"], "startup_context")
+            self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["read_only_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["reviewed_write_ready"])
+            self.assertEqual(doctor["adapter_readiness"]["startup_context_missing"], [])
+            self.assertIn("index", doctor["adapter_readiness"]["read_only_missing"])
 
     def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):
         with tempfile.TemporaryDirectory() as d:
@@ -296,6 +319,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(doctor["ok"])
             self.assertTrue(doctor["ready_for_adapter"])
             self.assertEqual(doctor["adapter_readiness"]["recommended_profile"], "reviewed_write")
+            self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertTrue(doctor["adapter_readiness"]["read_only_ready"])
             self.assertTrue(doctor["adapter_readiness"]["reviewed_write_ready"])
             self.assertEqual(doctor["adapter_readiness"]["blocking_checks"], [])
@@ -420,6 +444,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse(doctor["ok"])
             self.assertFalse(doctor["ready_for_adapter"])
             self.assertEqual(doctor["adapter_readiness"]["recommended_profile"], "setup_only")
+            self.assertFalse(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertFalse(doctor["adapter_readiness"]["read_only_ready"])
             self.assertFalse(doctor["adapter_readiness"]["reviewed_write_ready"])
             self.assertIn("entrypoint", doctor["adapter_readiness"]["blocking_checks"])

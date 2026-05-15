@@ -1603,23 +1603,30 @@ def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
     by_id = {check["id"]: check for check in checks}
     blocking = [check for check in checks if not check["ok"] and check["severity"] == "error"]
     warnings = [check for check in checks if not check["ok"] and check["severity"] == "warning"]
+    startup_context_required = ["entrypoint", "card", "source_health", "conformance_level_1"]
     read_only_required = ["entrypoint", "card", "source_health", "conformance_level_1", "index", "conformance_level_2"]
     reviewed_write_required = [check["id"] for check in checks]
+    startup_context_missing = [check_id for check_id in startup_context_required if not by_id[check_id]["ok"]]
     read_only_missing = [check_id for check_id in read_only_required if not by_id[check_id]["ok"]]
     reviewed_write_missing = [check_id for check_id in reviewed_write_required if not by_id[check_id]["ok"]]
+    startup_context_ready = not blocking and not startup_context_missing
     read_only_ready = not blocking and not read_only_missing
     reviewed_write_ready = not blocking and not warnings
     if reviewed_write_ready:
         recommended_profile = "reviewed_write"
     elif read_only_ready:
         recommended_profile = "read_only"
+    elif startup_context_ready:
+        recommended_profile = "startup_context"
     else:
         recommended_profile = "setup_only"
     return {
         "recommended_profile": recommended_profile,
+        "startup_context_ready": startup_context_ready,
         "read_only_ready": read_only_ready,
         "reviewed_write_ready": reviewed_write_ready,
         "blocking_checks": [check["id"] for check in blocking],
+        "startup_context_missing": startup_context_missing,
         "read_only_missing": read_only_missing,
         "reviewed_write_missing": reviewed_write_missing,
     }
@@ -1649,7 +1656,18 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 def cmd_client_config(args: argparse.Namespace) -> int:
     base = root(args.path)
-    requested_profile = "read_only" if args.profile == "read-only" else "reviewed_write"
+    profile_map = {
+        "startup-context": "startup_context",
+        "read-only": "read_only",
+        "reviewed-writes": "reviewed_write",
+    }
+    requested_profile = profile_map[args.profile]
+    required_features = [
+        "method_param_schemas",
+        "capability_negotiation",
+    ]
+    if requested_profile == "reviewed_write":
+        required_features.append("write_apply_requires_approval")
     if args.command == "python-module":
         command = "python3"
         command_args = ["-m", "akbp_tool_server"]
@@ -1678,11 +1696,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "path": str(base),
             "params": {
                 "client": args.name,
-                "requires": [
-                    "method_param_schemas",
-                    "capability_negotiation",
-                    "write_apply_requires_approval",
-                ],
+                "requires": required_features,
                 "requires_profiles": [requested_profile],
             },
         },
@@ -2500,7 +2514,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("client-config", help="print a stdio JSONL client configuration for the AKBP tool server")
     s.add_argument("--name", default="akbp-client", help="client name to use during capability negotiation")
-    s.add_argument("--profile", choices=["read-only", "reviewed-writes"], default="read-only")
+    s.add_argument("--profile", choices=["startup-context", "read-only", "reviewed-writes"], default="read-only")
     s.add_argument("--command", choices=["console", "python-module", "repo-script"], default="console")
     s.set_defaults(func=cmd_client_config)
     return p

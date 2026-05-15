@@ -4,6 +4,12 @@
 
 Adapters make AKBP usable from specific agent runtimes without changing the protocol.
 
+When a project moves between multiple coding agents, adapters also need a shared
+handoff contract. Use `docs/CROSS_RUNTIME_CONTEXT.md` for that flow: one runtime
+retrieves cited context, does work in its own UI, previews durable findings with
+`dry_run:true`, applies only after explicit approval, refreshes retrieval, and
+lets the next runtime resume from AKBP artifacts instead of a copied transcript.
+
 ## Reference template
 
 A generic coding-agent adapter template is available at:
@@ -164,6 +170,7 @@ Use this checklist before opening a pull request:
 - Start from `adapters/coding-agent-template/` unless the target environment is not a coding agent.
 - Keep runtime-specific setup in adapter docs, not in the protocol spec.
 - Point the startup and shutdown loop to `docs/AGENT_FLOW.md`.
+- Point cross-runtime handoff behavior to `docs/CROSS_RUNTIME_CONTEXT.md` when the adapter can be used alongside other coding agents.
 - Use public-safe runtime names and avoid private workspace paths, tokens, screenshots, cookies, logs, or user-specific config.
 - Include `README.md`, `instructions.md`, `config.example.json`, `session-start.md`, `session-end.md`, and `privacy.md` when the runtime supports those concepts.
 - In `config.example.json`, include an explicit `akbp.lifecycle` mapping for `akbp.session.start` and `akbp.session.end`, with shutdown apply mode requiring approval.

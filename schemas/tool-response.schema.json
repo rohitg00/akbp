@@ -1588,9 +1588,11 @@
           "additionalProperties": false,
           "required": [
             "recommended_profile",
+            "startup_context_ready",
             "read_only_ready",
             "reviewed_write_ready",
             "blocking_checks",
+            "startup_context_missing",
             "read_only_missing",
             "reviewed_write_missing"
           ],
@@ -1599,9 +1601,13 @@
               "type": "string",
               "enum": [
                 "setup_only",
+                "startup_context",
                 "read_only",
                 "reviewed_write"
               ]
+            },
+            "startup_context_ready": {
+              "type": "boolean"
             },
             "read_only_ready": {
               "type": "boolean"
@@ -1610,6 +1616,12 @@
               "type": "boolean"
             },
             "blocking_checks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "startup_context_missing": {
               "type": "array",
               "items": {
                 "type": "string"

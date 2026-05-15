@@ -192,6 +192,27 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("akbp.session.end", config["akbp"]["hosted_cloud_agent"]["blocked_write_methods"])
         self.assertIn("akbp.crystallize_session", config["akbp"]["hosted_cloud_agent"]["blocked_write_methods"])
 
+    def test_cross_runtime_context_handoff_documents_portability_contract(self):
+        text = (ROOT / "docs" / "CROSS_RUNTIME_CONTEXT.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        adapters = (ROOT / "docs" / "ADAPTERS.md").read_text(encoding="utf-8")
+        combined = text + readme + adapters
+        for required in [
+            "Cross-Runtime Context Handoff",
+            "Handoff contract",
+            "akbp.capabilities",
+            "akbp.session.start",
+            "akbp.context",
+            "dry_run:true",
+            "approved:true",
+            "approval_required",
+            "read_only",
+            "export-check",
+            "copied chat transcript",
+            "docs/CROSS_RUNTIME_CONTEXT.md",
+        ]:
+            self.assertIn(required, combined)
+
     def test_cli_readme_documents_search_query_syntax(self):
         text = (ROOT / "cli" / "README.md").read_text(encoding="utf-8")
         for required in [
