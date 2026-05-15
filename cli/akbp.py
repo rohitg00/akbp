@@ -390,6 +390,34 @@ def cmd_discover(args: argparse.Namespace) -> int:
     if missing_artifacts:
         warnings.append("Some artifact paths from akbp.json are missing; run doctor before trusting this KB.")
     kb_arg = shlex.quote(str(kb_root))
+    positioning = {
+        "primary_role": "portable_reviewable_knowledge_artifacts",
+        "not_a_hidden_memory_store": True,
+        "source_of_truth": "human-readable markdown plus schema-backed JSONL artifacts",
+        "use_with": [
+            {
+                "layer": "memory_server_or_runtime_cache",
+                "role": "access layer for fast recall or host integration",
+                "akbp_boundary": "export reviewed, cited, durable facts into AKBP before another runtime trusts them",
+            },
+            {
+                "layer": "repository_instruction_files",
+                "role": "startup rules and agent behavior hints",
+                "akbp_boundary": "store cited project knowledge, lifecycle state, and portable evidence outside opaque prompt text",
+            },
+            {
+                "layer": "tool_protocol_host",
+                "role": "transport for calling local tools",
+                "akbp_boundary": "negotiate capabilities, keep writes previewed, and require explicit approval before durable changes",
+            },
+            {
+                "layer": "search_or_vector_index",
+                "role": "rebuildable retrieval acceleration",
+                "akbp_boundary": "keep markdown and JSONL artifacts as the inspectable source of truth",
+            },
+        ],
+        "adapter_default": "read_only_until_doctor_and_capabilities_pass",
+    }
 
     print(json.dumps({
         "start_path": str(start),
@@ -413,6 +441,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "write_rule": "Use dry-run previews first; apply only after approval or trusted local policy.",
             "adapter_rule": "Run doctor --profile before enabling a workflow profile.",
         },
+        "positioning": positioning,
         "recommended_commands": {
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
             "client_config": f"akbp --path {kb_arg} client-config --profile read-only",

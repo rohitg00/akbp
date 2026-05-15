@@ -115,6 +115,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(discovered["trust_boundary"]["read_path"], str(kb.resolve()))
             self.assertIn("dry-run previews", discovered["trust_boundary"]["write_rule"])
             self.assertIn("doctor --profile", discovered["trust_boundary"]["adapter_rule"])
+            self.assertEqual(discovered["positioning"]["primary_role"], "portable_reviewable_knowledge_artifacts")
+            self.assertTrue(discovered["positioning"]["not_a_hidden_memory_store"])
+            self.assertEqual(discovered["positioning"]["adapter_default"], "read_only_until_doctor_and_capabilities_pass")
+            compared_layers = {item["layer"] for item in discovered["positioning"]["use_with"]}
+            self.assertIn("memory_server_or_runtime_cache", compared_layers)
+            self.assertIn("tool_protocol_host", compared_layers)
             self.assertIn("doctor --profile read-only", discovered["recommended_commands"]["doctor"])
             self.assertEqual(discovered["missing_artifacts"], [])
 

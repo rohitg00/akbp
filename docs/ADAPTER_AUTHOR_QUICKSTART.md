@@ -26,7 +26,10 @@ auditability, not from silently accumulating more memory.
 Adapter installers that start from an arbitrary workspace directory can run
 `akbp discover` first. It walks upward to the nearest `akbp.json`, reports the
 resolved KB path, default scope, artifact presence, trust-boundary rules, and
-the next `doctor --profile` and `client-config` commands. If discovery fails,
+the next `doctor --profile` and `client-config` commands. The discovery payload
+also includes `positioning` so installers can show that AKBP is the portable,
+reviewable artifact layer beside memory servers, repository instruction files,
+tool-protocol hosts, and rebuildable search indexes. If discovery fails,
 continue without durable memory instead of creating hidden state.
 
 ## 1. Generate a read-only client config first
