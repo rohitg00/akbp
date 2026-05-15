@@ -1760,6 +1760,47 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "recommended_profile_field": "adapter_readiness.recommended_profile",
             "blocking_field": "summary.errors",
         },
+        "tool_protocol_bridge": {
+            "mode": "reviewed_write" if requested_profile == "reviewed_write" else "read_only",
+            "read_only_allowlist": [
+                "akbp.capabilities",
+                "akbp.doctor",
+                "akbp.session.start",
+                "akbp.context",
+                "akbp.search",
+                "akbp.cite",
+                "akbp.source.verify",
+                "akbp.import_check",
+            ],
+            "blocked_write_methods": [
+                "akbp.remember",
+                "akbp.ingest",
+                "akbp.import_apply",
+                "akbp.session.end",
+                "akbp.crystallize_session",
+                "akbp.supersede",
+                "akbp.contradict",
+            ],
+            "reviewed_write_tools": [
+                {
+                    "tool": "akbp_remember_preview",
+                    "method": "akbp.remember",
+                    "required_flags": {"dry_run": True},
+                },
+                {
+                    "tool": "akbp_session_end_preview",
+                    "method": "akbp.session.end",
+                    "required_flags": {"dry_run": True},
+                },
+                {
+                    "tool": "akbp_apply_reviewed",
+                    "method": "same reviewed method/path/params",
+                    "required_flags": {"approved": True},
+                },
+            ],
+            "apply_rule": "Apply only the exact reviewed method, path, and params after approval outside the model-generated tool call.",
+            "docs": "docs/TOOL_PROTOCOL_BRIDGE.md",
+        },
         "verification": [
             {
                 "id": "capabilities-1",

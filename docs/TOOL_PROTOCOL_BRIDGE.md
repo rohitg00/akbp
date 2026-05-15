@@ -8,6 +8,8 @@ Recent local memory tools are converging on tool-call bridges because they are a
 
 Start with a read-only bridge that forwards a small allowlist to the local JSONL server:
 
+Use `akbp client-config --profile read-only` as the machine-readable starting point for an adapter installer. The generated `tool_protocol_bridge` section includes the read-only allowlist, blocked write methods, reviewed-write wrapper names, and the apply rule for repeating the exact reviewed method, path, and params.
+
 | Bridge tool | Forward to AKBP | Why expose it first |
 | --- | --- | --- |
 | `akbp_capabilities` | `akbp.capabilities` | Discover profiles, method schemas, and write policy before assuming behavior |

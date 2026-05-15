@@ -186,6 +186,10 @@ class RepoQualityTest(unittest.TestCase):
             "approved:true",
             "result.negotiation.satisfied",
             "hosted or autonomous tool integrations read-only",
+            "tool_protocol_bridge",
+            "read-only allowlist",
+            "blocked write methods",
+            "exact reviewed method, path, and params",
         ]:
             self.assertIn(required, combined)
         self.assertIn("./examples/stdio-client-config/run.sh", makefile)

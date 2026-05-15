@@ -94,7 +94,9 @@ Use reviewed writes only when the adapter has review UI or a trusted local appro
 python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile reviewed-writes
 ```
 
-The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
+The generated config includes the server command, knowledge-base path, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, session-start method, structured response contract, tool-protocol bridge allowlists, and safety rules. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
+
+The `tool_protocol_bridge` section is for tool-protocol hosts. It exposes a read-only allowlist for `akbp.session.start`, `akbp.context`, `akbp.search`, `akbp.cite`, source verification, and import checks; lists blocked write methods by default; and documents the reviewed-write wrapper pattern where previews require `dry_run:true` and apply requires `approved:true` for the exact reviewed method, path, and params. See `docs/TOOL_PROTOCOL_BRIDGE.md` before publishing a bridge.
 
 For scripts or adapter installers, run a profile-specific preflight before wiring a host:
 
