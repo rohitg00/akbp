@@ -120,6 +120,14 @@ examples/session-start-harness/run.sh
 
 It validates `akbp.capabilities`, `akbp.doctor`, and `akbp.session.start` together so adapter authors can test the first trusted context call before enabling write-capable flows.
 
+When the runtime also has a shutdown hook, run the lifecycle example next:
+
+```bash
+examples/adapter-lifecycle/run.sh
+```
+
+It verifies the complete adapter loop: capability negotiation, startup context, `akbp.session.end` dry-run preview, unapproved write rejection, approved apply, index refresh, and recalled context after the write.
+
 ## 4. Retrieve context at session start
 
 Use `akbp.session.start` as the adapter-level session entrypoint. It wraps context retrieval and returns a stable `session_id` plus the normal context pack. Use `akbp.context` and `akbp.search` directly when the runtime needs lower-level calls.

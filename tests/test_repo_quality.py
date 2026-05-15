@@ -1008,10 +1008,14 @@ class RepoQualityTest(unittest.TestCase):
 
     def test_adapter_lifecycle_example_is_complete(self):
         text = (ROOT / "examples" / "adapter-lifecycle" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "adapter-lifecycle" / "run.sh").read_text(encoding="utf-8")
         transcript = (ROOT / "examples" / "adapter-lifecycle" / "session-summary.md").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         release_notes = (ROOT / "docs" / "RELEASE_NOTES_DRAFT.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         for required in [
+            "AKBP adapter lifecycle example",
+            "AKBP adapter lifecycle example passed",
             "akbp.capabilities",
             "akbp.session.start",
             "akbp.session.end",
@@ -1020,14 +1024,18 @@ class RepoQualityTest(unittest.TestCase):
             "approved:true",
             "review_required",
             "apply_instruction",
+            "approval_required",
             "akbp.index",
+            "akbp.context",
+            "lifecycle recall ok",
         ]:
-            self.assertIn(required, text)
+            self.assertIn(required, text + script)
         self.assertIn("examples/adapter-lifecycle/session-summary.md", text)
         self.assertIn("Use `akbp.session.start`", transcript)
         self.assertIn("Use `akbp.session.end`", transcript)
         self.assertIn("examples/adapter-lifecycle/", readme)
         self.assertIn("examples/adapter-lifecycle/", release_notes)
+        self.assertIn("./examples/adapter-lifecycle/run.sh", makefile)
 
     def test_git_native_agent_handoff_example_is_complete(self):
         text = (ROOT / "examples" / "git-native-agent-handoff" / "README.md").read_text(encoding="utf-8")

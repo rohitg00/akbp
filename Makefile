@@ -35,6 +35,7 @@ examples:
 	./examples/tool-server-approval-flow/run.sh
 	./examples/tool-error-handling/run.sh
 	./examples/session-start-harness/run.sh
+	./examples/adapter-lifecycle/run.sh
 	./examples/multi-agent-consistency-demo/run.sh
 	./examples/portable-bundle/run.sh
 	./examples/existing-memory-migration/run.sh

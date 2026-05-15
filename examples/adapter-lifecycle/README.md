@@ -4,6 +4,25 @@ This example shows the minimal JSONL flow an adapter can wire into a coding-agen
 
 Use this when the runtime has a clear startup and shutdown hook. It is deliberately local-first and review-gated: startup reads context, shutdown previews durable memory, and apply requires explicit approval.
 
+Run the full lifecycle check:
+
+```bash
+./examples/adapter-lifecycle/run.sh
+```
+
+Expected success markers:
+
+```text
+AKBP adapter lifecycle example
+capabilities ok
+session start ok
+session end preview ok
+unapproved session end blocked
+session end apply ok
+lifecycle recall ok
+AKBP adapter lifecycle example passed
+```
+
 ## 1. Start the session with retrieved context
 
 Send a JSONL request to the AKBP tool server:
@@ -44,6 +63,12 @@ After a successful apply, refresh retrieval if the integration does not do it au
 
 ```json
 {"id":"lifecycle-index","method":"akbp.index","path":".","approved":true,"params":{"incremental":true}}
+```
+
+Then retrieve again before relying on the newly written memory:
+
+```json
+{"id":"lifecycle-recall","method":"akbp.context","path":".","params":{"task":"continue adapter lifecycle integration","limit":5}}
 ```
 
 ## Adapter contract
