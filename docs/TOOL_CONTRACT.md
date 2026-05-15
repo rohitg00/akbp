@@ -118,6 +118,8 @@ Adapter-level session entrypoint. It returns a stable `session_id` and a cited c
 
 Adapter-level session-end operation. It crystallizes a transcript using the same underlying behavior as `akbp.crystallize_session`, but gives adapter authors a stable operation name for session lifecycle wiring. Start with request-level `dry_run:true`; only repeat with `approved:true` and `params.apply:true` after reviewing the summary.
 
+Capability discovery exposes `knowledge_capability.session_boundary.promotion_contract` so adapters can enforce the promotion workflow without scraping prose. The contract lists durable candidate types, preview fields that must be shown to a review surface, the requirement to repeat the same approved request, and inputs that must stay transient such as raw transcripts, scratch reasoning, secrets, private messages, and uncited claims.
+
 ```json
 {
   "id": "session-end-preview-1",

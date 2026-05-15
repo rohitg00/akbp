@@ -284,6 +284,7 @@
             "method_param_schemas",
             "bounded_context",
             "session_lifecycle_entrypoints",
+            "session_boundary_contract",
             "method_schema_runtime_parity",
             "unknown_request_field_rejection",
             "unknown_param_rejection",
@@ -334,6 +335,9 @@
               "const": true
             },
             "session_lifecycle_entrypoints": {
+              "const": true
+            },
+            "session_boundary_contract": {
               "const": true
             },
             "unknown_param_rejection": {
@@ -502,7 +506,8 @@
                 "promotion_method",
                 "promotion_preview_flag",
                 "durable_apply_flag",
-                "reject_uncited_transient_state"
+                "reject_uncited_transient_state",
+                "promotion_contract"
               ],
               "properties": {
                 "transient_state_policy": {
@@ -519,6 +524,49 @@
                 },
                 "reject_uncited_transient_state": {
                   "const": true
+                },
+                "promotion_contract": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "durable_candidate_types",
+                    "preview_must_surface",
+                    "apply_requires_same_request",
+                    "apply_requires_reviewed_summary",
+                    "reject_inputs"
+                  ],
+                  "properties": {
+                    "durable_candidate_types": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "preview_must_surface": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "apply_requires_same_request": {
+                      "const": true
+                    },
+                    "apply_requires_reviewed_summary": {
+                      "const": true
+                    },
+                    "reject_inputs": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
                 }
               }
             },

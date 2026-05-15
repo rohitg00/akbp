@@ -215,6 +215,13 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
         "promotion_preview_flag": "dry_run",
         "durable_apply_flag": "approved",
         "reject_uncited_transient_state": True,
+        "promotion_contract": {
+            "durable_candidate_types": ["decision", "workflow", "preference", "fact", "blocker"],
+            "preview_must_surface": ["review_required", "apply_instruction", "warnings", "source_ids", "skipped_claims", "would_write"],
+            "apply_requires_same_request": True,
+            "apply_requires_reviewed_summary": True,
+            "reject_inputs": ["raw_transcript", "scratch_reasoning", "secrets", "private_messages", "uncited_claims"],
+        },
     },
     "portability": {
         "export_method": "akbp.export",
@@ -327,6 +334,7 @@ def capability_features() -> dict[str, bool]:
             "method_param_schemas": True,
             "bounded_context": True,
             "session_lifecycle_entrypoints": True,
+            "session_boundary_contract": True,
             "method_schema_runtime_parity": not SCHEMA_RUNTIME_ERRORS,
             "unknown_request_field_rejection": True,
             "unknown_param_rejection": True,
