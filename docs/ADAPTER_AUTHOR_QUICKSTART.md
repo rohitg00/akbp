@@ -25,6 +25,19 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rev
 
 That profile still requires review-gated writes. The adapter must surface `dry_run:true` previews, warnings, would-write paths, and the `apply_instruction`, then repeat the same method/path/params with `approved:true` after approval.
 
+### Adapter path matrix
+
+Use this matrix to choose the first integration path. Start read-only unless the
+host can show previews and collect approval before any durable write.
+
+| Runtime type | Transport | Starter artifact | Session start | Write path | Approval requirement |
+|--------------|-----------|------------------|---------------|------------|----------------------|
+| Terminal coding agent | stdio JSONL or CLI | `akbp client-config --profile read-only` | `akbp.session.start` | `akbp.remember`, `akbp.ingest`, or `akbp.session.end` | Use reviewed writes only when the terminal flow shows `dry_run:true` output and waits for explicit approval. |
+| Editor or IDE agent | stdio JSONL | `adapters/editor-coding-agent/` or `adapters/coding-agent-template/` | Runtime startup hook calls `akbp.session.start` | Editor command previews write-capable calls | The UI must render warnings, redaction status, would-write paths, and the apply instruction before retrying with `approved:true`. |
+| Local assistant or desktop runtime | stdio JSONL behind local config | `akbp client-config --profile read-only` | Assistant session open calls `akbp.session.start` | Keep read-only unless the assistant has a trusted local approval surface | Autonomous background writes should stay disabled; approval must happen outside the model-generated tool call. |
+| Custom script or task runner | CLI or stdio JSONL | `examples/stdio-client-config/` | Script calls `akbp.context` or `akbp.session.start` before work | Script previews import, ingest, remember, or session-end requests | CI and scheduled jobs should use `dry_run:true` by default and require a human or trusted policy before `approved:true`. |
+| Hosted or remote tool bridge | Remote wrapper around local AKBP | Local read-only config plus wrapper docs | Wrapper exposes read-only retrieval first | Avoid durable writes until the remote trust boundary is documented | Do not treat remote tool execution as user approval; keep writes blocked unless a separate review channel exists. |
+
 ## 2. Start from the template
 
 Copy the runtime-neutral template:

@@ -233,6 +233,10 @@ Adapter implementation checklist:
 7. Store durable output in AKBP artifacts.
 8. Run `make validate`.
 
+`docs/ADAPTER_AUTHOR_QUICKSTART.md` includes a runtime matrix for terminal agents,
+editor agents, local assistants, custom scripts, and hosted tool bridges so new
+adapter authors can choose the safest first profile before writing glue code.
+
 Tracked adapter directories:
 
 ```text

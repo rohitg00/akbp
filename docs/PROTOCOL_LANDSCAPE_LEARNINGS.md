@@ -180,6 +180,20 @@ Success criteria:
 - A tool builder sees the retrieval and supersession path.
 - A skeptical engineer sees files, citations, safety gates, and conformance instead of vague “AI memory” claims.
 
+## Shipped artifact: adapter quickstart matrix
+
+`docs/ADAPTER_AUTHOR_QUICKSTART.md` now includes a matrix for choosing the first
+integration path across terminal agents, editor agents, local assistants, custom
+scripts, and hosted tool bridges.
+
+The matrix keeps the user-value lesson concrete:
+
+- start read-only when evaluating a runtime
+- use `akbp.session.start` for startup context
+- preview write-capable calls with `dry_run:true`
+- require an explicit approval surface before `approved:true`
+- keep hosted or autonomous bridges read-only until their trust boundary is documented
+
 ## Added research track: spec-driven agent development kits
 
 Spec-driven development kits are adjacent to AKBP even when they are not memory systems. The reusable pattern is that agent work improves when intent, constraints, plans, and tasks become durable reviewable artifacts before code or automation runs.
