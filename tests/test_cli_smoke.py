@@ -199,6 +199,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.import_check", " ".join(promotion["preflight_requests"]))
             self.assertIn("approved:true", promotion["apply_rule"])
             self.assertIn("read-only", promotion["fallback"])
+            interop = config["native_memory_interop"]
+            self.assertEqual(interop["format"], "akbp-native-memory-interop-v1")
+            self.assertEqual(interop["safe_default"], "akbp_as_cited_source_of_truth")
+            self.assertIn("product-native memory", interop["purpose"])
+            self.assertIn("cited AKBP startup context", interop["read_order"][0])
+            self.assertIn("ephemeral hints", interop["read_order"][1])
+            self.assertIn("dry_run:true", " ".join(interop["write_order"]))
+            self.assertIn("approved:true", " ".join(interop["write_order"]))
+            self.assertEqual(interop["conflict_policy"]["prefer"], "active AKBP claims with citations and verified sources")
+            self.assertIn("supersede or contradict", interop["conflict_policy"]["when_native_memory_disagrees"])
+            self.assertIn("no source or citation", " ".join(interop["reject_promotion_when"]))
+            self.assertIn("read-only", interop["fallback"])
             multi_client = config["multi_client_scope"]
             self.assertIn("share one reviewed knowledge base", multi_client["purpose"])
             self.assertEqual(multi_client["shared_kb_path"], str(kb.resolve()))

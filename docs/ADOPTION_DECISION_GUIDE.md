@@ -48,6 +48,11 @@ artifacts. Disable or warn on integrations that store durable memory only in an
 opaque bridge format, return uncited recalls, or apply writes without
 `dry_run:true` preview followed by explicit `approved:true`.
 
+When a coding agent already has product-native memory or external memory tools,
+also use `native_memory_interop` from `akbp client-config`. The safe default is
+to read cited AKBP context before planning, treat native memory as unreviewed
+hints, and promote only sourced durable project facts through dry-run review.
+
 ## What makes an integration AKBP-compatible
 
 An integration is using AKBP as a protocol when it preserves these properties:

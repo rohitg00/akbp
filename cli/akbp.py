@@ -2797,6 +2797,34 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "export or import checks depend on bridge-local state",
             ],
         },
+        "native_memory_interop": {
+            "format": "akbp-native-memory-interop-v1",
+            "purpose": "Prevent dual-memory drift when a coding agent, tool memory server, or hosted assistant already has product-native memory.",
+            "safe_default": "akbp_as_cited_source_of_truth",
+            "read_order": [
+                "retrieve cited AKBP startup context before planning from product-native memory",
+                "use product-native or external tool memory only as ephemeral hints until AKBP citations confirm durable project facts",
+                "surface conflicts between native memory and AKBP claims before acting on either source",
+            ],
+            "write_order": [
+                "keep native memory writes disabled or ephemeral for project decisions during first-run setup",
+                "promote durable project facts through akbp.remember or akbp.ingest with dry_run:true",
+                "apply only after the exact preview is approved with approved:true",
+                "refresh AKBP index before expecting later sessions to recall the promoted record",
+            ],
+            "conflict_policy": {
+                "prefer": "active AKBP claims with citations and verified sources",
+                "when_native_memory_disagrees": "treat native memory as unreviewed evidence, then add a source and supersede or contradict the AKBP claim after review",
+                "when_akbp_is_empty": "continue without recalled durable memory and do not bulk-import uncited native memories",
+            },
+            "reject_promotion_when": [
+                "the native memory item has no source or citation",
+                "the item is runtime scratch, a private chat fragment, a secret-like value, or bridge-only cache metadata",
+                "the host cannot show dry-run review metadata and approval outside model tool execution",
+            ],
+            "adapter_action": "Expose this policy in installer UI or agent instructions whenever the host advertises built-in memory, external memory tools, or an external memory server.",
+            "fallback": "Keep AKBP read-only and leave native memory unpromoted when citations, review metadata, or explicit approval are missing.",
+        },
         "multi_client_scope": {
             "purpose": "Let several coding-agent, editor, or local-assistant clients share one reviewed knowledge base without creating hidden per-client memory stores.",
             "shared_kb_path": kb_path,

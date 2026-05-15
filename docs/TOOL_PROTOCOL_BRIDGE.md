@@ -98,6 +98,13 @@ cache metadata should stay out. The bridge should run capability and doctor
 preflights, then use `akbp.import_check` or a dry-run `akbp.remember` preview
 before applying the exact reviewed record with `approved:true`.
 
+For hosts that also advertise product-native memory or external memory tools, read
+`native_memory_interop` from `akbp client-config`. It makes the first-run policy
+explicit: retrieve cited AKBP startup context before planning, treat native
+memory as ephemeral hints until citations confirm a durable project fact, and
+resolve conflicts through reviewed `supersede` or `contradict` records instead
+of silently letting two memory systems disagree.
+
 If a bridge only stores memories behind a tool call and cannot show citations,
 artifact paths, dry-run review metadata, or export-checkable bundles, treat it
 as an integration experiment rather than a durable AKBP memory path.
