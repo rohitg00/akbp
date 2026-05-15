@@ -1827,6 +1827,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     required_features = [
         "method_param_schemas",
         "capability_negotiation",
+        "bounded_context",
     ]
     if requested_profile == "reviewed_write":
         required_features.append("write_apply_requires_approval")
@@ -1872,6 +1873,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "params": {
                 "task": "current task goals and constraints",
                 "limit": 5,
+                "max_chars": 4000,
             },
         },
         "response_contract": {
@@ -1983,6 +1985,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "ok": True,
                     "result.context.items": "array",
                     "result.context.warnings": "array",
+                    "result.context.budget.max_chars": 4000,
                 },
                 "on_failure": "Continue without recalled context and surface the structured error.",
             },
@@ -1992,6 +1995,9 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "required_before_planning": requested_profile in {"startup_context", "read_only", "reviewed_write"},
                 "minimum_items": 1,
                 "require_citations": True,
+                "max_chars": 4000,
+                "require_budget": True,
+                "budget_policy": "request bounded cited context with max_chars; surface budget truncation warnings before relying on recalled memory",
                 "warning_policy": "surface result.context.warnings before relying on recalled context",
                 "empty_context_policy": "continue without recalled memory; do not invent prior decisions",
                 "uncited_context_policy": "treat uncited recalled claims as setup output, not trusted planning input",
