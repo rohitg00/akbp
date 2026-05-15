@@ -1298,6 +1298,101 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 
+def doctor_checks(base: Path) -> list[dict[str, Any]]:
+    claims = load_claims(base)
+    sources = load_sources(base)
+    source_check = verify_sources(base)
+    index_present = (base / ".akbp" / "state.db").exists()
+    conformance = {level: conformance_issues(base, level) for level in ["0", "1", "2", "3"]}
+    checks: list[dict[str, Any]] = [
+        {
+            "id": "entrypoint",
+            "ok": (base / "AKBP.md").exists(),
+            "severity": "error",
+            "message": "AKBP.md exists",
+            "next_step": "Run: akbp --path <kb> init",
+        },
+        {
+            "id": "card",
+            "ok": (base / "akbp.json").exists(),
+            "severity": "error",
+            "message": "akbp.json Knowledge Base Card exists",
+            "next_step": "Run: akbp --path <kb> init",
+        },
+        {
+            "id": "evidence",
+            "ok": bool(sources),
+            "severity": "warning",
+            "message": "at least one source is registered",
+            "next_step": "Run: akbp --path <kb> source add <file> --type file --title '<title>'",
+        },
+        {
+            "id": "claims",
+            "ok": bool(claims),
+            "severity": "warning",
+            "message": "at least one durable claim exists",
+            "next_step": "Run: akbp --path <kb> ingest <file> --claim '<reviewed claim>'",
+        },
+        {
+            "id": "source_health",
+            "ok": source_check["ok"],
+            "severity": "error",
+            "message": "registered sources verify cleanly",
+            "next_step": "Run: akbp --path <kb> source verify --fail-on-issue",
+            "details": source_check["counts"],
+        },
+        {
+            "id": "index",
+            "ok": index_present,
+            "severity": "warning",
+            "message": "search index exists",
+            "next_step": "Run: akbp --path <kb> index --incremental",
+        },
+        {
+            "id": "conformance_level_1",
+            "ok": conformance["1"]["ok"],
+            "severity": "error",
+            "message": "Level 1 structured claims and evidence pass",
+            "next_step": "Run: akbp --path <kb> conformance --level 1",
+            "details": conformance["1"]["issues"][:5],
+        },
+        {
+            "id": "conformance_level_2",
+            "ok": conformance["2"]["ok"],
+            "severity": "warning",
+            "message": "Level 2 retrieval and context packs pass",
+            "next_step": "Run: akbp --path <kb> index && akbp --path <kb> conformance --level 2",
+            "details": conformance["2"]["issues"][:5],
+        },
+    ]
+    for check in checks:
+        if check["ok"]:
+            check.pop("next_step", None)
+            if not check.get("details"):
+                check.pop("details", None)
+    return checks
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    base = root(args.path)
+    checks = doctor_checks(base)
+    failing = [check for check in checks if not check["ok"]]
+    blocking = [check for check in failing if check["severity"] == "error"]
+    print(json.dumps({
+        "path": str(base),
+        "ok": not blocking,
+        "ready_for_adapter": not blocking and not failing,
+        "summary": {
+            "passed": len(checks) - len(failing),
+            "warnings": sum(1 for check in failing if check["severity"] == "warning"),
+            "errors": len(blocking),
+        },
+        "checks": checks,
+        "next_steps": [check["next_step"] for check in failing if check.get("next_step")][: args.limit],
+    }, indent=2, ensure_ascii=False))
+    return 1 if blocking else 0
+
+
 def index_documents(base: Path) -> list[dict[str, str]]:
     docs: list[dict[str, str]] = []
     for claim in load_claims(base):
@@ -1990,6 +2085,10 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("status")
     s.add_argument("--limit", type=int, default=5, help="number of recent claims and source issues to include")
     s.set_defaults(func=cmd_status)
+
+    s = sub.add_parser("doctor")
+    s.add_argument("--limit", type=int, default=5, help="number of next steps to include")
+    s.set_defaults(func=cmd_doctor)
     return p
 
 

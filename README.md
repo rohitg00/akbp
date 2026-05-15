@@ -53,7 +53,7 @@ Critique tracking lives in `docs/CRITIQUE_RESPONSE.md` so public feedback turns 
 | Area | Current support |
 |------|-----------------|
 | Knowledge base | `AKBP.md`, `akbp.json`, markdown wiki pages, JSONL claims, graph records, sources, and audit log |
-| CLI | `init`, `source add`, `ingest`, `remember`, `crystallize`, `index`, `search`, `context`, `export`, `export-check`, `import-check`, `import-apply`, `conformance` |
+| CLI | `init`, `source add`, `ingest`, `remember`, `crystallize`, `index`, `search`, `context`, `doctor`, `export`, `export-check`, `import-check`, `import-apply`, `conformance` |
 | JSONL tool server | `akbp.capabilities`, `akbp.status`, retrieval methods, write methods, lifecycle methods, structured responses, and structured errors |
 | Schemas | Request envelope, response envelope, method params, claims, sources, entities, relations, pages, evidence, audit events, and context packs |
 | Write safety | `dry_run:true`, `approved:true`, `approval_required`, review-gated writes, redaction, request limits, path validation, and schema-backed param checks |
@@ -96,6 +96,7 @@ python3 cli/akbp.py --path ./my-kb source add notes.md --type file --title "Proj
 python3 cli/akbp.py --path ./my-kb ingest notes.md --claim "Capture the durable decision from this note." --claim-type decision
 python3 cli/akbp.py --path ./my-kb source verify --fail-on-issue
 python3 cli/akbp.py --path ./my-kb index --incremental
+python3 cli/akbp.py --path ./my-kb doctor
 python3 cli/akbp.py --path ./my-kb search "durable decision"
 python3 cli/akbp.py --path ./my-kb context "continue this project"
 ```

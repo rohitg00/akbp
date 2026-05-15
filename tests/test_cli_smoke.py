@@ -219,6 +219,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             source_verify = json.loads(out.stdout)
             self.assertTrue(source_verify["ok"])
             self.assertEqual(source_verify["counts"]["verified"], 1)
+            out = run_cli("--path", str(kb), "doctor")
+            doctor = json.loads(out.stdout)
+            self.assertTrue(doctor["ok"])
+            self.assertTrue(doctor["ready_for_adapter"])
+            self.assertEqual(doctor["summary"]["errors"], 0)
+            self.assertEqual(doctor["next_steps"], [])
             (kb / "README.md").write_text("changed", encoding="utf-8")
             changed_verify = json.loads(run_cli("--path", str(kb), "source", "verify").stdout)
             self.assertFalse(changed_verify["ok"])
@@ -258,6 +264,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertGreaterEqual(status["counts"]["claims"], 2)
             self.assertGreaterEqual(status["counts"]["audit_events"], 1)
             self.assertTrue(status["claim_summary"]["latest"])
+
             self.assertIn("working", status["claim_summary"]["by_status"])
             self.assertFalse(status["source_health"]["ok"])
             self.assertEqual(status["source_health"]["counts"]["changed"], 1)
@@ -303,6 +310,22 @@ class AkbpCliSmokeTest(unittest.TestCase):
 
             out = run_cli("--path", str(kb), "lint")
             self.assertTrue(json.loads(out.stdout)["ok"])
+
+    def test_doctor_reports_actionable_first_run_gaps(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            out = subprocess.run(
+                [sys.executable, str(CLI), "--path", str(kb), "doctor"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(out.returncode, 1)
+            doctor = json.loads(out.stdout)
+            self.assertFalse(doctor["ok"])
+            self.assertFalse(doctor["ready_for_adapter"])
+            self.assertGreaterEqual(doctor["summary"]["errors"], 1)
+            self.assertIn("Run: akbp --path <kb> init", doctor["next_steps"])
 
     def test_ingest_imports_redacted_page_and_optional_claim(self):
         with tempfile.TemporaryDirectory() as d:

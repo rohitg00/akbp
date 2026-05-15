@@ -55,6 +55,7 @@ python3 cli/akbp.py --path "$TMP_KB" source add "$TMP_KB/session-note.md" --type
 python3 cli/akbp.py --path "$TMP_KB" ingest "$TMP_KB/session-note.md" --claim "Release work should stay small, reviewed, and evidence-backed." --claim-type decision
 python3 cli/akbp.py --path "$TMP_KB" source verify --fail-on-issue
 python3 cli/akbp.py --path "$TMP_KB" index --incremental
+python3 cli/akbp.py --path "$TMP_KB" doctor
 python3 cli/akbp.py --path "$TMP_KB" status
 python3 cli/akbp.py --path "$TMP_KB" context "prepare the next release"
 CLAIM_ID="$(python3 -c 'import json, pathlib; print(json.loads(pathlib.Path("'"$TMP_KB"'/claims/claims.jsonl").read_text().splitlines()[0])["id"])')"
@@ -74,7 +75,9 @@ sed -n '1,120p' "$TMP_KB/raw/sources/sources.jsonl"
 
 The important distinction is that `.akbp/` is rebuildable runtime state. The portable state is the markdown and JSONL artifact set.
 
-`akbp status` is the quick health check for a knowledge base. It keeps the old object counts, and also returns dashboard-ready sections for latest claims, claim type/status counts, source verification health, audit count, index presence, and highest passing conformance level.
+`akbp status` is the quick dashboard health check for a knowledge base. It keeps the old object counts, and also returns dashboard-ready sections for latest claims, claim type/status counts, source verification health, audit count, index presence, and highest passing conformance level.
+
+`akbp doctor` is the adoption check. It returns pass/fail checks, warnings, and concrete next steps so a new user or adapter author can see whether the knowledge base is ready for retrieval and approved writes.
 
 ## Agent write-safety path
 
