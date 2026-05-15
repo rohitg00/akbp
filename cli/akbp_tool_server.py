@@ -719,7 +719,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             "error": None,
         }
 
-    if dry_run and method == "akbp.session.end":
+    if dry_run and method in {"akbp.crystallize_session", "akbp.session.end"}:
         preview_argv = [arg for arg in argv if arg != "--apply"]
         code, stdout, stderr = run_cli(path, preview_argv)
         if code != 0:
@@ -729,7 +729,7 @@ def handle(req: dict[str, Any]) -> dict[str, Any]:
             result.setdefault("dry_run", True)
             result.setdefault("would_write", True)
             result.setdefault("review_required", True)
-            result.setdefault("apply_instruction", "Review the extracted session summary, skipped claims, planned page path, and evidence before repeating with approved:true and apply:true.")
+            result.setdefault("apply_instruction", "Review the extracted session summary, skipped claims, planned page path, and evidence before repeating with approved:true after approval and apply:true.")
         return {"id": request_id, "ok": True, "result": result, "error": None}
 
     if dry_run and method == "akbp.import_apply":

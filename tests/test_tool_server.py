@@ -683,11 +683,17 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(len(lines), len(requests))
             dry_run_schema = schema_def("dry_run_review_result")
             ingest_dry_run_schema = schema_def("ingest_dry_run_result")
+            session_preview_schema = schema_def("session_end_preview_result")
             approval_schema = schema_def("approval_required_details")
             for dry, rejected in zip(lines[0::2], lines[1::2]):
                 with self.subTest(request=dry["id"]):
                     self.assertTrue(dry["ok"])
-                    expected_schema = ingest_dry_run_schema if dry["id"] == "dry-akbp.ingest" else dry_run_schema
+                    if dry["id"] == "dry-akbp.ingest":
+                        expected_schema = ingest_dry_run_schema
+                    elif dry["id"] == "dry-akbp.crystallize_session":
+                        expected_schema = session_preview_schema
+                    else:
+                        expected_schema = dry_run_schema
                     assert_matches_required_schema(self, dry["result"], expected_schema)
                     self.assertTrue(dry["result"]["dry_run"])
                     self.assertTrue(dry["result"]["review_required"])
@@ -1084,17 +1090,23 @@ class ToolServerTest(unittest.TestCase):
             transcript = Path(d) / "session.md"
             transcript.write_text("# Session\n\nDecision: keep agent knowledge portable.\n", encoding="utf-8")
             run_cli("--path", str(kb), "init")
-            requests = "\n".join([
-                json.dumps({"id": "dry", "path": str(kb), "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": str(transcript), "apply": True}}),
-                json.dumps({"id": "apply", "path": str(kb), "method": "akbp.crystallize_session", "approved": True, "params": {"transcript": str(transcript), "apply": True}}),
-            ]) + "\n"
-            proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
-            lines = [json.loads(line) for line in proc.stdout.splitlines()]
-            self.assertTrue(lines[0]["result"]["dry_run"])
-            self.assertIn("--apply", lines[0]["result"]["argv"])
-            self.assertTrue(lines[1]["ok"])
-            assert_matches_required_schema(self, lines[1]["result"], schema_def("crystallize_session_result"))
-            self.assertTrue(lines[1]["result"]["created_claims"])
+            dry_request = json.dumps({"id": "dry", "path": str(kb), "method": "akbp.crystallize_session", "dry_run": True, "params": {"transcript": str(transcript), "apply": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=dry_request, text=True, capture_output=True, check=True)
+            dry = json.loads(proc.stdout)
+            self.assertTrue(dry["ok"])
+            self.assertTrue(dry["result"]["dry_run"])
+            self.assertFalse(dry["result"]["apply"])
+            self.assertTrue(dry["result"]["review_required"])
+            self.assertIn("summary", dry["result"])
+            assert_matches_required_schema(self, dry["result"], schema_def("session_end_preview_result"))
+            self.assertFalse((kb / dry["result"]["page"]).exists())
+
+            apply_request = json.dumps({"id": "apply", "path": str(kb), "method": "akbp.crystallize_session", "approved": True, "params": {"transcript": str(transcript), "apply": True}}) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=apply_request, text=True, capture_output=True, check=True)
+            applied = json.loads(proc.stdout)
+            self.assertTrue(applied["ok"])
+            assert_matches_required_schema(self, applied["result"], schema_def("crystallize_session_result"))
+            self.assertTrue(applied["result"]["created_claims"])
 
 
     def test_invalid_request_envelope_is_structured_before_dispatch(self):
