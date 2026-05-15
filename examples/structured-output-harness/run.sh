@@ -143,4 +143,37 @@ print("approved recall contract ok")
 {"id":"recall-approved","method":"akbp.context","path":"$KB","params":{"task":"response shape validation fails","limit":5,"max_chars":500}}
 JSONL
 
+python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name structured-output-harness --profile reviewed-writes | python3 -c '
+import json
+import sys
+
+config = json.load(sys.stdin)
+
+prompt_contract = config["adapter_prompt_contract"]
+assert prompt_contract["format"] == "akbp-adapter-prompt-contract-v1", prompt_contract
+assert prompt_contract["profile"] == "reviewed_write", prompt_contract
+assert prompt_contract["startup_request"]["method"] == "akbp.session.start", prompt_contract
+assert prompt_contract["startup_request"]["params"]["max_chars"] == 4000, prompt_contract
+assert prompt_contract["planning_gate"]["required_before_planning"], prompt_contract
+assert "ok" in prompt_contract["validation"]["branch_on"], prompt_contract
+assert "error.code" in prompt_contract["validation"]["branch_on"], prompt_contract
+assert "result.context.budget" in prompt_contract["validation"]["preserve_fields"], prompt_contract
+
+rules = " ".join(prompt_contract["system_rules"])
+assert "Before planning" in rules, prompt_contract
+assert "Use only cited context" in rules, prompt_contract
+assert "approved:true" in rules, prompt_contract
+assert "error.code" in rules, prompt_contract
+
+first_run = config["first_run_sequence"]
+assert "keep the integration read-only" in first_run["stop_policy"], first_run
+steps = {step["step"]: step for step in first_run["steps"]}
+assert steps["negotiate_capabilities"]["expect"]["result.negotiation.satisfied"], first_run
+assert steps["check_adapter_readiness"]["expect"]["result.adapter_readiness.reviewed_write_ready"], first_run
+assert steps["retrieve_cited_startup_context"]["expect"]["result.context.budget.max_chars"] == 4000, first_run
+assert steps["enable_writes_only_after_review_surface"]["expect"]["approval_outside_model_tool_call"], first_run
+
+print("prompt contract harness ok")
+'
+
 echo "AKBP structured output harness example passed"
