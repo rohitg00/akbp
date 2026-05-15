@@ -32,6 +32,7 @@ examples:
 	./examples/akbp-bench/run.sh
 	./examples/repo-memory-demo/run.sh
 	./examples/memory-ci/run.sh
+	./examples/adoption-preflight/run.sh
 	./examples/jsonl-quickstart/run.sh
 	./examples/tool-server-approval-flow/run.sh
 	./examples/tool-error-handling/run.sh

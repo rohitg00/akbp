@@ -59,10 +59,11 @@ may still be useful, but it is not delivering the AKBP trust model.
 
 1. Run `make demo` to see the review-gated flow.
 2. Read `docs/GETTING_STARTED.md` to choose knowledge-base scope.
-3. Use `akbp client-config --profile read-only` for the first adapter setup.
-4. Enable reviewed writes only after the host can show `review_required`,
+3. Run `examples/adoption-preflight/run.sh` to verify the first-run trust gate.
+4. Use `akbp client-config --profile read-only` for the first adapter setup.
+5. Enable reviewed writes only after the host can show `review_required`,
    `apply_instruction`, planned writes, warnings, and skipped records.
-5. Add export or import checks before moving knowledge across tools.
+6. Add export or import checks before moving knowledge across tools.
 
 The adoption goal is simple: a real user should understand what will be stored,
 why it is trusted, how it can be reviewed, and how another runtime can consume

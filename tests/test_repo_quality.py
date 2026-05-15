@@ -211,6 +211,33 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/stdio-client-config/run.sh", makefile)
 
+    def test_adoption_preflight_example_documents_first_run_trust_gate(self):
+        text = (ROOT / "examples" / "adoption-preflight" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "adoption-preflight" / "run.sh").read_text(encoding="utf-8")
+        guide = (ROOT / "docs" / "ADOPTION_DECISION_GUIDE.md").read_text(encoding="utf-8")
+        getting_started = (ROOT / "docs" / "GETTING_STARTED.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script + guide + getting_started + readme + changelog
+        for required in [
+            "AKBP adoption preflight example",
+            "AKBP adoption preflight example passed",
+            "first-run trust boundary",
+            "read-only trust boundary",
+            "cited startup context",
+            "portable client config",
+            "<AKBP_KB_PATH>",
+            "akbp.doctor",
+            "akbp.session.start",
+            "akbp.remember",
+            "approval_required",
+            "unapproved write rejection",
+            "local, cited, reviewable, and portable",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/adoption-preflight/run.sh", makefile)
+
     def test_tool_protocol_bridge_example_documents_read_only_preflight(self):
         text = (ROOT / "examples" / "tool-protocol-bridge" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "tool-protocol-bridge" / "run.sh").read_text(encoding="utf-8")

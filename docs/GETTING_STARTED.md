@@ -162,6 +162,7 @@ This is the adapter contract in one minute: retrieve before planning, dry-run be
 ## Choose your next path
 
 - New user: run `make demo`, then read `docs/AKBP_WORKFLOW.md`.
+- Adoption reviewer: run `examples/adoption-preflight/run.sh` to verify the first-run trust boundary before connecting an adapter or host.
 - Choosing an architecture: read `docs/ADOPTION_DECISION_GUIDE.md` before deciding whether AKBP should sit beside an existing memory server, local index, or agent adapter.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
 - Adapter quality reviewer: run `examples/structured-output-harness/run.sh` before trusting recalled context or enabling reviewed writes.

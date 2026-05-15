@@ -144,6 +144,11 @@ boundary in `docs/SESSION_MEMORY_BOUNDARY.md`.
 
 See `docs/AGENT_FLOW.md`, `docs/AKBP_WORKFLOW.md`, `docs/ADOPTION_DECISION_GUIDE.md`, `docs/CROSS_RUNTIME_CONTEXT.md`, `docs/DEVELOPER_PROTOCOL_FIT.md`, `docs/TOOL_PROTOCOL_BRIDGE.md`, `docs/TEMPLATES.md`, `docs/USE_CASES.md`, `docs/RICH_CONTEXT_ARTIFACTS.md`, `docs/USABILITY_DEMO_PLAN.md`, `docs/PROTOCOL_LANDSCAPE_LEARNINGS.md`, `docs/BENCHMARK.md`, `examples/session-start-harness/`, `examples/tool-protocol-bridge/`, and `examples/tool-server-approval-flow/`.
 
+For first-run adoption gates, `examples/adoption-preflight/` verifies that a
+fresh knowledge base starts with a read-only trust boundary, becomes cited
+startup context ready only after evidence and indexing, emits portable client
+config without local paths, and rejects unapproved writes.
+
 For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,
 dry-run review metadata, and the `approval_required` stop signal before a
@@ -337,6 +342,7 @@ The repo includes:
 - `examples/akbp-bench/` for a small scorecard covering cited writes, retrieval, supersession, export, and conformance
 - `examples/repo-memory-demo/` for turning issue, PR, and release-note fixtures into later-session context
 - `examples/memory-ci/` for CI gates around lint, source verification, conformance, export-check, import-check, and dry-run apply
+- `examples/adoption-preflight/` for the first-run trust gate before an adapter or host treats AKBP as memory
 - `examples/jsonl-quickstart/` for the canonical tool-server sequence: capabilities, session start, dry-run write, approval gate, approved apply, index, context, and export
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
 - `examples/git-native-agent-handoff/` for repo-backed agent handoffs with cited context and review-gated shutdown memory
@@ -418,6 +424,7 @@ akbp/
 - Benchmark reviewer: run `examples/akbp-bench/run.sh`.
 - Repo-memory reviewer: run `examples/repo-memory-demo/run.sh`.
 - CI reviewer: run `examples/memory-ci/run.sh`.
+- Adoption reviewer: run `examples/adoption-preflight/run.sh`.
 - JSONL tool author: run `examples/jsonl-quickstart/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/`.
