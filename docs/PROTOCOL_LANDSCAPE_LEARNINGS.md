@@ -708,3 +708,22 @@ Success criteria:
 - quick-start UX stays competitive with local memory servers
 - trust still comes from cited, reviewed AKBP artifacts
 - installers have machine-readable checks instead of prose-only positioning
+
+## Shipped artifact: temporal graph claim gate
+
+The latest scan also surfaced another recurring pitch from adjacent memory
+tools: temporal or knowledge-graph recall for coding agents. That is useful as
+an access pattern, but it is not enough by itself to make memory trustworthy.
+
+`akbp client-config` now exposes
+`memory_landscape_fit.temporal_graph_claim_gate`. The gate requires graph-backed
+claims to stay connected to cited source ids, lifecycle status, relation records,
+audit or export metadata, and runnable checks before an installer describes AKBP
+as graph-capable project memory. It points adapters at Level 3 conformance,
+export-check, the `graph-jsonl-records` benchmark fixture, and cited
+`akbp.context` retrieval.
+
+If a host can only return graph entities or edges from an opaque memory server,
+the safe positioning is narrower: treat that graph as an ephemeral index and
+trust only AKBP claims, lifecycle links, citations, and export-checkable JSONL
+artifacts.

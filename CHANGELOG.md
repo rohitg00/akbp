@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a temporal graph claim gate to generated client configs so adapter
+  installers can verify cited claims, lifecycle state, relation records,
+  conformance, export-check, and graph benchmark output before trusting
+  graph-backed memory claims.
 - Added contested-claim warnings to query/context retrieval and a fail-closed
   benchmark fixture so adapters do not plan from disputed recalled memory.
 - Added a local-first adoption probe check to the adoption preflight example so

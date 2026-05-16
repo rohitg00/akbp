@@ -3847,6 +3847,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "evidence": "git_reviewable_promotion_flow plus export-check output",
                 },
                 {
+                    "claim": "temporal knowledge graphs make project memory trustworthy",
+                    "akbp_check": "Require graph records to remain linked to cited claims, lifecycle status, source ids, and audit/export checks before treating graph recall as trusted project memory.",
+                    "evidence": "temporal_graph_claim_gate plus graph-jsonl-records benchmark output",
+                },
+                {
                     "claim": "local-first memory is safe by default",
                     "akbp_check": "Require no Docker, cloud account, or secrets for the first-run proof, then keep writes read-only until dry-run review is preserved.",
                     "evidence": "ten_minute_proof.setup_claims plus approval_required response",
@@ -3926,6 +3931,42 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "export-check fails or depends on bridge-local state",
                 ],
                 "fallback": "Keep the Git-backed memory source read-only and import only cited records through import-check plus reviewed apply.",
+            },
+            "temporal_graph_claim_gate": {
+                "format": "akbp-temporal-graph-claim-gate-v1",
+                "purpose": "Turn temporal or knowledge-graph memory claims into an adapter proof instead of trusting graph recall as durable truth by default.",
+                "run_before_claiming": [
+                    "temporal knowledge graph memory",
+                    "causal project memory",
+                    "graph-backed recall",
+                    "entity-relation memory across coding sessions",
+                ],
+                "required_artifacts": [
+                    "claims/claims.jsonl with cited source ids",
+                    "graph/entities.jsonl for named project concepts or tools",
+                    "graph/relations.jsonl for supports, supersedes, contradicts, uses, or related_to edges",
+                    ".akbp/audit.log.jsonl or export metadata for reviewed write history",
+                ],
+                "required_checks": [
+                    "akbp conformance --level 3",
+                    "akbp export followed by akbp export-check",
+                    "python3 benchmarks/run_benchmarks.py --fixtures benchmarks/fixtures/graph-jsonl-records --akbp",
+                    "akbp.context with require_citations:true for the graph-backed task",
+                ],
+                "must_preserve": [
+                    "claim evidence source ids",
+                    "claim lifecycle status and superseded_by links",
+                    "relation ids, relation types, source node ids, and target node ids",
+                    "context citations when graph-linked claims are retrieved",
+                    "export-checkable graph artifacts independent of adapter-local indexes",
+                ],
+                "fail_closed_when": [
+                    "graph recall returns entities or edges without cited claim evidence",
+                    "temporal ordering is inferred only from chat order instead of lifecycle or audit fields",
+                    "relations overwrite old memory instead of using supersedes or contradicts links",
+                    "the host stores graph state only in an opaque memory-server database",
+                ],
+                "fallback": "Describe the adjacent tool as an ephemeral graph index and keep AKBP trusted context limited to cited claims, lifecycle records, and export-checkable graph JSONL.",
             },
             "context_efficiency_claim_gate": {
                 "format": "akbp-context-efficiency-claim-gate-v1",
