@@ -211,6 +211,22 @@ assert "budget_truncated" in context_use["fallback_reason_values"], context_use
 assert "adapter_prompt_contract.context_use_report" in prompt_contract["validation"]["preserve_fields"], prompt_contract
 print("context-use report contract ok")
 
+schema_budget = config["tool_schema_budget"]
+assert schema_budget["format"] == "akbp-tool-schema-budget-v1", schema_budget
+assert schema_budget["selected_profile"] == "reviewed_write", schema_budget
+assert schema_budget["safe_default"] == "publish_read_only_allowlist", schema_budget
+assert schema_budget["within_budget"], schema_budget
+assert schema_budget["budget_check"] == "pass", schema_budget
+assert "akbp.capabilities" in schema_budget["exposed_methods"], schema_budget
+assert "akbp.remember" in schema_budget["blocked_until_needed"], schema_budget
+assert "every exposed tool schema consumes context" in schema_budget["research_signal"], schema_budget
+assert schema_budget["preflight_gate"]["fail_closed_action"].startswith("Do not expose host tools"), schema_budget
+schema_plan = schema_budget["schema_exposure_plan"]
+assert schema_plan["format"] == "akbp-schema-exposure-plan-v1", schema_plan
+assert any(item["method"] == "akbp.remember" for item in schema_plan["defer_until_review_surface"]), schema_plan
+assert "write-capable schemas are enabled before dry-run review and approved:true apply are preserved" in schema_plan["fail_closed_when"], schema_plan
+print("tool schema budget contract ok")
+
 repair = config["structured_output_repair"]
 assert repair["format"] == "akbp-structured-output-repair-v1", repair
 assert repair["max_local_repair_attempts"] == 1, repair

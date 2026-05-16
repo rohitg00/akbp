@@ -182,7 +182,7 @@ python3 cli/akbp.py --path ./my-kb client-config --name my-adapter --profile rev
 ```
 
 The generated config includes the server command, knowledge-base path, knowledge capability descriptor, startup `akbp.capabilities` request, required workflow profile, `akbp.doctor` health check, bounded session-start method, structured response contract, quality gates, tool-protocol bridge allowlists, and safety rules. The live `akbp.capabilities` response also returns `knowledge_capability`, which lets hosts classify AKBP as local, cited, and review-gated before exposing it as a memory surface. Adapters should disable unavailable flows when `result.negotiation.satisfied` is false, follow `doctor.adapter_readiness.recommended_profile` when the knowledge base is not ready for reviewed writes, show `doctor.next_steps` when `ready_for_adapter` is false, and branch on `ok` plus `error.code` instead of prose.
-`adapter_contract_harness` recommends `./examples/structured-output-harness/run.sh` as a machine-checkable preflight for response envelopes, capability negotiation, cited startup context, review metadata, `approval_required` stops, and approved recall before write-capable host tools are exposed.
+`adapter_contract_harness` recommends `./examples/structured-output-harness/run.sh` as a machine-checkable preflight for response envelopes, capability negotiation, cited startup context, tool schema budget, review metadata, `approval_required` stops, and approved recall before write-capable host tools are exposed.
 Use `adapter_prompt_contract.system_rules` as the runtime's memory instructions
 and `adapter_prompt_contract.validation` as the minimum response fields to
 preserve when translating JSONL methods into host-native tools.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Expanded the structured-output harness to verify generated tool-schema
+  budgets and deferred write-schema exposure before adapters trust recalled
+  context or expose write-capable host tools.
 - Added a compaction-survival claim gate to generated client configs so
   adapters must prove cited session-start recovery, surfaced warnings, budget
   diagnostics, and context-use reporting before claiming memory survives
