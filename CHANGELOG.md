@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a local-first adoption probe check to the adoption preflight example so
+  installer UIs prove the memory-server comparison contract before positioning
+  AKBP as a trusted local project-memory layer.
 - Added a cited startup gate to the adapter lifecycle example so runtime
   adapters prove trusted_for_planning before recalled context can shape a plan.
 - Added a branch-scoped handoff gate to generated adapter configs so coding

@@ -21,6 +21,7 @@ capability negotiation read-only profile ok
 unapproved write rejection ok
 portable client config hides local paths ok
 response contract approval stop action ok
+local-first adoption probe contract ok
 AKBP adoption preflight example passed
 ```
 
@@ -43,7 +44,9 @@ treats AKBP as durable memory:
    instead of committing a local absolute path.
 9. Prove the generated response contract tells adapters to branch on
    `error.code` and stop the write path on `approval_required`.
-10. Prove `akbp.remember` rejects unapproved durable writes.
+10. Prove the generated local-first adoption probe gives installer UIs a
+    runnable comparison check before positioning AKBP against memory servers.
+11. Prove `akbp.remember` rejects unapproved durable writes.
 
 This makes the current product promise concrete: AKBP can sit beside a memory
 server or tool-protocol host, but the trusted state remains local, cited, reviewable, and portable.

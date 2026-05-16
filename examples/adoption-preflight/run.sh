@@ -150,8 +150,21 @@ assert not config["runtime_requirements"]["network_required"], config
 assert config["response_contract"]["envelope"]["required"] == ["id", "ok", "result", "error"], config
 assert config["response_contract"]["error_actions"]["approval_required"]["adapter_action"].startswith("stop"), config
 assert config["response_contract"]["error_actions"]["approval_required"]["write_policy"] == "approval must happen outside the model-generated tool call", config
+
+probe = config["memory_landscape_fit"]["local_first_adoption_probe"]
+assert probe["format"] == "akbp-local-first-adoption-probe-v1", probe
+assert probe["run_before_positioning_claims"], probe
+assert "akbp discover" in probe["commands"], probe
+assert "akbp doctor --profile read-only" in probe["commands"], probe
+assert "akbp client-config --profile read-only" in probe["commands"], probe
+assert "./examples/structured-output-harness/run.sh" in probe["commands"], probe
+assert any("export-check" in command for command in probe["commands"]), probe
+assert any("approval_required" in item for item in probe["must_prove"]), probe
+assert any("opaque sidecar database" in item for item in probe["fail_closed_when"]), probe
+assert "read-only startup context" in probe["fallback"], probe
 print("portable client config hides local paths ok")
 print("response contract approval stop action ok")
+print("local-first adoption probe contract ok")
 PY
 
 echo "AKBP adoption preflight example passed"
