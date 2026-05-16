@@ -658,6 +658,15 @@ first-run questions before positioning AKBP as memory:
 - can setup stay read-only until citations, response envelopes, and review
   metadata are preserved?
 
+The current scan also found a sharper comparison problem: adjacent memory tools
+often advertise semantic recall, graph memory, token savings, shared memory, or
+local-first safety as feature claims. AKBP should turn those claims into
+verifiable adapter gates instead of accepting them as positioning copy.
+`memory_landscape_fit.feature_claim_audit` now maps those claims to checks for
+cited context, runnable search or benchmark proof, preserved context budget
+diagnostics, one selected KB path, export-checkable artifacts, and an
+`approval_required` stop before writes are enabled.
+
 Success criteria:
 
 - quick-start UX stays competitive with local memory servers

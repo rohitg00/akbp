@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a memory feature-claim audit to generated client configs so adapter
+  installers can verify semantic recall, graph memory, context-window savings,
+  shared memory, and local-first safety claims before trusting recalled project
+  knowledge or enabling writes.
 - Added explicit context planning trust decisions to context quality payloads so
   adapters can branch on trusted_for_planning and fallback_reason instead of
   re-deriving remember/reject behavior from warnings, citations, and budget

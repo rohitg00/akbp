@@ -252,6 +252,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("portable trust layer", landscape["installer_positioning"])
             self.assertIn("dry_run:true", " ".join(landscape["comparison_checks"]))
             self.assertIn("export-check", " ".join(landscape["comparison_checks"]))
+            claim_audit = {item["claim"]: item for item in landscape["feature_claim_audit"]}
+            self.assertIn("semantic, graph, or hierarchical memory improves recall", claim_audit)
+            self.assertIn("memory reduces context-window cost", claim_audit)
+            self.assertIn("multiple agents share one project memory", claim_audit)
+            self.assertIn("local-first memory is safe by default", claim_audit)
+            self.assertIn("runnable search or benchmark proof", claim_audit["semantic, graph, or hierarchical memory improves recall"]["akbp_check"])
+            self.assertIn("result.context.budget", claim_audit["memory reduces context-window cost"]["evidence"])
+            self.assertIn("single selected knowledge_base.path", claim_audit["multiple agents share one project memory"]["akbp_check"])
+            self.assertIn("approval_required", claim_audit["local-first memory is safe by default"]["evidence"])
             friction = landscape["install_friction_checks"]
             self.assertIn("without Docker", friction[0]["question"])
             self.assertEqual(friction[0]["verify_with"], "ten_minute_proof.setup_claims")

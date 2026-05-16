@@ -123,6 +123,12 @@ not fight those layers for runtime UX. Use `memory_landscape_fit` from
 `akbp client-config` to explain the split: adjacent tools can stay ephemeral or
 serve low-latency recall, while AKBP remains the cited, reviewed, exportable
 project-knowledge substrate. Use
+`memory_landscape_fit.feature_claim_audit` when an adapter advertises semantic
+recall, graph memory, context-window savings, multi-agent sharing, or local-first
+safety. Those claims should become concrete checks: cited context plus a runnable
+search or benchmark proof, preserved budget diagnostics, one selected
+`knowledge_base.path`, export-checkable artifacts, and an `approval_required`
+failure before any approved write path is enabled. Use
 `memory_landscape_fit.install_friction_checks` when a user asks why AKBP is not
 just another local memory server: the first-run proof should show no Docker or
 cloud account requirement, one selected KB shared across clients, and a

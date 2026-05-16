@@ -3633,6 +3633,28 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Can stale knowledge be superseded or contradicted without deleting history?",
                 "Can export-check and import-check run without bridge-local state?",
             ],
+            "feature_claim_audit": [
+                {
+                    "claim": "semantic, graph, or hierarchical memory improves recall",
+                    "akbp_check": "Require cited context items, lifecycle state, and a runnable search or benchmark proof before planning from the recall.",
+                    "evidence": "context results with citations plus benchmark or smoke output",
+                },
+                {
+                    "claim": "memory reduces context-window cost",
+                    "akbp_check": "Require context budget diagnostics that show items_before_budget, items_after_budget, omitted_items, and truncated status.",
+                    "evidence": "result.context.budget preserved by the adapter",
+                },
+                {
+                    "claim": "multiple agents share one project memory",
+                    "akbp_check": "Require a single selected knowledge_base.path, client attribution, and export-checkable artifacts instead of hidden per-client stores.",
+                    "evidence": "multi_client_scope plus export-check output",
+                },
+                {
+                    "claim": "local-first memory is safe by default",
+                    "akbp_check": "Require no Docker, cloud account, or secrets for the first-run proof, then keep writes read-only until dry-run review is preserved.",
+                    "evidence": "ten_minute_proof.setup_claims plus approval_required response",
+                },
+            ],
             "install_friction_checks": [
                 {
                     "question": "Can a new user start without Docker, a cloud account, API keys, or a hosted database?",
