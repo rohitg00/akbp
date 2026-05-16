@@ -111,6 +111,10 @@ The `response_contract` block gives installer UIs a compact fail-closed schema:
 preserve the `id`/`ok`/`result`/`error` envelope, reject uncited or truncated
 startup context before planning, stop on `approval_required`, and run the
 structured-output harness before exposing write-capable tools.
+Its `structured_output_gate` names the exact response fields a host must
+preserve, including citations, warnings, budget, quality, and `error.code`, so
+adapters can detect prose-flattened or lossy tool transports before trusting
+AKBP memory.
 
 Use it before wiring a runtime that starts from an arbitrary workspace subdirectory:
 

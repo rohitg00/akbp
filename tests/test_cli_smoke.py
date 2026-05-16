@@ -624,6 +624,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(client_manifest["response_contract"]["preserve_envelope"])
             self.assertEqual(client_manifest["response_contract"]["branch_on"], "error.code")
             self.assertTrue(client_manifest["response_contract"]["surface_citations"])
+            structured_gate = client_manifest["response_contract"]["structured_output_gate"]
+            self.assertEqual(structured_gate["format"], "akbp-structured-output-gate-v1")
+            self.assertTrue(structured_gate["required_before_host_exposure"])
+            self.assertIn("result.context.items[].citations", structured_gate["minimum_fields"])
+            self.assertIn("result.context.quality", structured_gate["minimum_fields"])
+            self.assertIn("error.code", structured_gate["minimum_fields"])
+            self.assertIn("Do not expose host tools", structured_gate["fail_closed_action"])
             self.assertEqual(
                 [tool["akbp_method"] for tool in client_manifest["tools"]],
                 config["tool_protocol_bridge"]["read_only_allowlist"],
@@ -1216,6 +1223,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(response_contract["envelope"]["required"], ["id", "ok", "result", "error"])
             self.assertTrue(response_contract["startup_context_gate"]["required_before_planning"])
             self.assertIn("missing citations", response_contract["startup_context_gate"]["fail_closed_on"])
+            structured_gate = response_contract["structured_output_gate"]
+            self.assertEqual(structured_gate["format"], "akbp-structured-output-gate-v1")
+            self.assertTrue(structured_gate["required_before_host_exposure"])
+            self.assertIn("result.context.items[].citations", structured_gate["minimum_fields"])
+            self.assertIn("result.context.quality", structured_gate["minimum_fields"])
+            self.assertIn("error.code", structured_gate["minimum_fields"])
+            self.assertIn("flatten JSONL responses", " ".join(structured_gate["host_must_not"]))
+            self.assertIn("approval_required", " ".join(structured_gate["fail_closed_on"]))
             self.assertEqual(response_contract["write_gate"]["preview_required"], "dry_run:true")
             self.assertIn("preview_fingerprint", response_contract["write_gate"]["required_preview_fields"])
             self.assertIn("structured-output-harness", response_contract["harness"]["command"])

@@ -1415,6 +1415,35 @@ def cmd_discover(args: argparse.Namespace) -> int:
             ],
             "fallback": "Continue without recalled AKBP memory and keep writes disabled.",
         },
+        "structured_output_gate": {
+            "format": "akbp-structured-output-gate-v1",
+            "purpose": "Prove the host preserves AKBP response shape before an adapter plans from memory or exposes write-capable methods.",
+            "required_before_host_exposure": True,
+            "minimum_fields": [
+                "id",
+                "ok",
+                "result.context.items[].id",
+                "result.context.items[].citations",
+                "result.context.warnings",
+                "result.context.budget",
+                "result.context.quality",
+                "error.code",
+                "error.details",
+            ],
+            "host_must_not": [
+                "flatten JSONL responses into prose summaries",
+                "drop empty arrays or null error fields",
+                "rename error.code, citations, warnings, budget, or quality fields",
+                "hide approval_required behind a retry loop",
+            ],
+            "fail_closed_on": [
+                "any minimum field is missing after host transport",
+                "citations are present in the raw response but absent in host output",
+                "budget or warning fields are not surfaced before planning",
+                "approval_required is converted into an automatic approved:true retry",
+            ],
+            "adapter_action_on_fail": "Do not expose host tools; keep AKBP read-only or call the JSONL server explicitly until the host preserves the structured response.",
+        },
         "write_gate": {
             "preview_required": "dry_run:true",
             "apply_required": "approved:true after external review",
@@ -3476,6 +3505,22 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "branch_on": "error.code",
             "surface_warnings": True,
             "surface_citations": True,
+            "structured_output_gate": {
+                "format": "akbp-structured-output-gate-v1",
+                "required_before_host_exposure": True,
+                "minimum_fields": [
+                    "id",
+                    "ok",
+                    "result.context.items[].id",
+                    "result.context.items[].citations",
+                    "result.context.warnings",
+                    "result.context.budget",
+                    "result.context.quality",
+                    "error.code",
+                    "error.details",
+                ],
+                "fail_closed_action": "Do not expose host tools when the host drops citations, warnings, budget, quality, or error.code.",
+            },
         },
         "tools": [
             {
