@@ -1,0 +1,106 @@
+{
+  "id": "multi-agent-consistency-001",
+  "task": "Verify shared agent knowledge preserves supersession history while retrieving the current cited decision for later agents.",
+  "profiles": ["retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_agent_a_release_notes",
+        "type": "file",
+        "locator": "sessions/agent-a-release-notes.md",
+        "title": "Agent A release notes"
+      },
+      {
+        "id": "source_agent_b_validation_notes",
+        "type": "file",
+        "locator": "sessions/agent-b-validation-notes.md",
+        "title": "Agent B validation notes"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_alpha_updates_small_reviewable",
+        "text": "Agent A decided public alpha updates should stay small and reviewable so maintainers can inspect durable knowledge objects before accepting them.",
+        "type": "decision",
+        "status": "superseded",
+        "confidence": 0.82,
+        "evidence": ["source_agent_a_release_notes"],
+        "entities": [
+          "multi-agent",
+          "shared knowledge",
+          "public alpha",
+          "reviewable release"
+        ],
+        "scope": "project",
+        "superseded_by": "claim_alpha_updates_require_validation"
+      },
+      {
+        "id": "claim_alpha_updates_require_validation",
+        "text": "Agent B refined the public alpha release decision: keep updates small and reviewable, and require a validation result before applying durable knowledge changes.",
+        "type": "decision",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_agent_b_validation_notes"],
+        "entities": [
+          "multi-agent",
+          "shared knowledge",
+          "public alpha",
+          "reviewable release",
+          "validation result",
+          "durable knowledge"
+        ],
+        "scope": "project",
+        "supersedes": ["claim_alpha_updates_small_reviewable"]
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_agent_b_supersedes_agent_a_release_decision",
+        "source": "claim_alpha_updates_require_validation",
+        "target": "claim_alpha_updates_small_reviewable",
+        "relation": "supersedes",
+        "confidence": 0.9,
+        "evidence": ["source_agent_b_validation_notes"]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "session-start-current-shared-decision",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "later agent public alpha release shared knowledge validation result",
+          "limit": 1,
+          "max_chars": 900,
+          "require_citations": true
+        },
+        "expected_result_schema": "#/$defs/session_start_result",
+        "expected_result_fields": ["session_id", "task", "context"],
+        "expected_result_values": {
+          "task": "later agent public alpha release shared knowledge validation result"
+        },
+        "expected_result_contains": {
+          "context.items[].id": ["claim_alpha_updates_require_validation"],
+          "context.items[].citations[]": ["source_agent_b_validation_notes"],
+          "context.items[].freshness": ["stable"],
+          "context.quality.ok": [true],
+          "context.quality.require_citations": [true]
+        }
+      }
+    ]
+  },
+  "query": "What should a later agent know before changing the public alpha release plan?",
+  "expected": {
+    "must_retrieve": ["claim_alpha_updates_require_validation"],
+    "must_cite": ["source_agent_b_validation_notes"],
+    "must_cite_in_context": ["source_agent_b_validation_notes"],
+    "must_preserve": ["claim_alpha_updates_small_reviewable"],
+    "must_not_answer_from": ["claim_alpha_updates_small_reviewable"],
+    "answer_should_include": [
+      "later agent",
+      "public alpha",
+      "small and reviewable",
+      "validation result",
+      "shared knowledge"
+    ]
+  }
+}
