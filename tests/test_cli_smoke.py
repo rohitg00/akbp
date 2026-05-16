@@ -751,12 +751,32 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("dry_run:true", " ".join(prompt_contract["system_rules"]))
             self.assertIn("source ids", " ".join(prompt_contract["system_rules"]))
             self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
+            self.assertTrue(prompt_contract["planning_gate"]["required_before_planning"])
+            context_use = prompt_contract["context_use_report"]
+            self.assertEqual(context_use["format"], "akbp-context-use-report-v1")
+            self.assertIn("used_akbp_context", context_use["required_fields"])
+            self.assertIn("akbp_citation_ids", context_use["required_fields"])
+            self.assertIn("budget_truncated", context_use["fallback_reason_values"])
+            self.assertIn("trace back to result.context.items", " ".join(context_use["rules"]))
+            trust_gate = prompt_contract["startup_trust_gate"]
+            self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")
+            self.assertTrue(trust_gate["required_before_planning"])
+            self.assertTrue(trust_gate["trust_conditions"]["require_citations"])
+            self.assertIn("budget.truncated", " ".join(trust_gate["fail_closed_on"]))
             self.assertEqual(prompt_contract["write_gate"]["apply_flags"], {"approved": True})
             provenance_gate = prompt_contract["source_provenance_gate"]
             self.assertEqual(provenance_gate["format"], "akbp-source-provenance-gate-v1")
             self.assertTrue(provenance_gate["required_before_preview"])
             self.assertIn("source ids", " ".join(provenance_gate["accepted_provenance"]))
             self.assertIn("runtime scratch", provenance_gate["fallback"])
+            self.assertIn(
+                "adapter_prompt_contract.context_use_report",
+                prompt_contract["validation"]["preserve_fields"],
+            )
+            self.assertIn(
+                "adapter_prompt_contract.startup_trust_gate",
+                prompt_contract["validation"]["preserve_fields"],
+            )
             response_contract = discovered["response_contract"]
             self.assertEqual(response_contract["format"], "akbp-discovery-response-contract-v1")
             self.assertEqual(response_contract["envelope"]["required"], ["id", "ok", "result", "error"])

@@ -57,6 +57,9 @@ pasteable system rules: call `akbp.session.start` before planning from memory,
 trust only cited items, continue without recalled memory when context is empty
 or uncited, preview writes with `dry_run:true`, apply only the exact reviewed
 request with `approved:true`, and branch on `ok` plus `error.code`.
+It also includes `context_use_report` and `startup_trust_gate` so installers can
+record whether recalled context was used, which citation ids supported it, and
+why the host continued without memory before any plan is generated.
 Discovery also returns `memory_server_bridge` for hosts that already have a
 tool-protocol memory server, local database, or runtime cache. Treat that existing
 memory as ephemeral until it can pass AKBP's evidence and review boundary:

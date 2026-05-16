@@ -102,7 +102,7 @@ The payload also includes `ten_minute_proof`, a compact checklist for installer
 UIs that need to prove local-first setup, cited startup context, dry-run review,
 unapproved write rejection, and export-checkable portability before exposing
 AKBP as an agent-memory surface.
-The `adapter_prompt_contract` block turns those rules into pasteable runtime instructions: call `akbp.session.start` before planning from memory, trust only cited context, preview writes with `dry_run:true`, apply only the exact reviewed request with `approved:true`, and branch on `ok` plus `error.code`.
+The `adapter_prompt_contract` block turns those rules into pasteable runtime instructions: call `akbp.session.start` before planning from memory, trust only cited context, emit `context_use_report` before memory-assisted planning, preview writes with `dry_run:true`, apply only the exact reviewed request with `approved:true`, and branch on `ok` plus `error.code`.
 The `response_contract` block gives installer UIs a compact fail-closed schema:
 preserve the `id`/`ok`/`result`/`error` envelope, reject uncited or truncated
 startup context before planning, stop on `approval_required`, and run the
