@@ -470,7 +470,8 @@
                 "search_methods",
                 "task_scope_required",
                 "scope_inputs",
-                "scope_policy"
+                "scope_policy",
+                "budget_contract"
               ],
               "properties": {
                 "bounded_context": {
@@ -508,6 +509,48 @@
                 "scope_policy": {
                   "type": "string",
                   "minLength": 1
+                },
+                "budget_contract": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "request_param",
+                    "default_recommended_max_chars",
+                    "response_budget_fields",
+                    "quality_fields",
+                    "adapter_policy"
+                  ],
+                  "properties": {
+                    "request_param": {
+                      "const": "max_chars"
+                    },
+                    "default_recommended_max_chars": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "response_budget_fields": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "quality_fields": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "adapter_policy": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
                 }
               }
             },

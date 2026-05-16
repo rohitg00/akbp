@@ -395,8 +395,12 @@ class ToolServerTest(unittest.TestCase):
         self.assertEqual(knowledge_capability["properties"]["kind"], {"const": "agent_knowledge_base"})
         self.assertEqual(knowledge_capability["properties"]["trust_model"], {"const": "cited_review_gated_memory"})
         self.assertFalse(knowledge_capability["properties"]["retrieval"]["additionalProperties"])
-        for field in ["task_scope_required", "scope_inputs", "scope_policy"]:
+        for field in ["task_scope_required", "scope_inputs", "scope_policy", "budget_contract"]:
             self.assertIn(field, knowledge_capability["properties"]["retrieval"]["required"])
+        budget_contract = knowledge_capability["properties"]["retrieval"]["properties"]["budget_contract"]
+        self.assertFalse(budget_contract["additionalProperties"])
+        for field in ["request_param", "default_recommended_max_chars", "response_budget_fields", "quality_fields", "adapter_policy"]:
+            self.assertIn(field, budget_contract["required"])
         self.assertFalse(knowledge_capability["properties"]["writes"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["session_boundary"]["additionalProperties"])
         self.assertFalse(knowledge_capability["properties"]["portability"]["additionalProperties"])
@@ -690,6 +694,10 @@ class ToolServerTest(unittest.TestCase):
             self.assertTrue(retrieval["task_scope_required"])
             self.assertEqual(retrieval["scope_inputs"], ["path", "params.task", "params.query"])
             self.assertIn("ambiguous", retrieval["scope_policy"])
+            self.assertEqual(retrieval["budget_contract"]["request_param"], "max_chars")
+            self.assertEqual(retrieval["budget_contract"]["default_recommended_max_chars"], 4000)
+            self.assertIn("budget.truncated", retrieval["budget_contract"]["response_budget_fields"])
+            self.assertIn("quality.budget_truncated", retrieval["budget_contract"]["quality_fields"])
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["policy"], "dry_run_preview_then_approved_apply")
             self.assertEqual(lines[0]["result"]["knowledge_capability"]["writes"]["approval_required_error"], "approval_required")
             adapter_quality = lines[0]["result"]["knowledge_capability"]["adapter_quality"]

@@ -128,6 +128,13 @@ the repo, workspace, workflow, or user task that recalled memory belongs to, it
 should continue without recalled context instead of mixing unrelated memory into
 the prompt.
 
+Capability discovery also exposes
+`knowledge_capability.retrieval.budget_contract`. Adapters should request
+bounded startup context with `params.max_chars`, preserve the returned
+`budget.*` and `quality.*` fields, and surface budget warnings before
+planning. If a host bridge drops those fields, keep running without recalled
+AKBP context instead of silently trusting clipped memory.
+
 Capability discovery also exposes `knowledge_capability.adapter_quality`, a
 machine-readable pointer to `examples/structured-output-harness/run.sh`. Adapter
 authors should run that harness before letting recalled AKBP context affect
@@ -272,7 +279,7 @@ Request and response envelopes are specified in:
 - `schemas/tool-response.schema.json`
 - `schemas/tool-methods.schema.json`
 
-`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, returns adapter-oriented method groups under `result.profiles`, and advertises enforcement features for method parameter schemas, bounded context retrieval, session lifecycle entrypoints, capability negotiation, unknown request-field rejection, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, request-id string validation, request-id numeric bounds, path validation, string parameter length validation, path-like parameter control-character validation, evidence/entity array validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size, request-id string length, and request-id numeric bounds, caller-supplied local path policy, string parameter length policy, context budget policy for `akbp.context` and `akbp.session.start`, path-like parameter control-character policy, evidence/entity array count and item-length policy, supported hash algorithms, dry-run support, review-gated writes, the approval field name, and `method_schema_runtime_errors` so adapters can surface schema/runtime drift instead of guessing.
+`akbp.capabilities` returns these schema URLs under `result.schemas`, returns runtime policy under `result.runtime`, returns each method's `params_schema` reference when a method-specific contract exists, returns adapter-oriented method groups under `result.profiles`, and advertises enforcement features for method parameter schemas, bounded context retrieval, session lifecycle entrypoints, capability negotiation, unknown request-field rejection, unknown-parameter rejection, required-parameter validation, structured approval-required errors, request-size enforcement, request-id string validation, request-id numeric bounds, path validation, string parameter length validation, path-like parameter control-character validation, evidence/entity array validation, and dry-run argv redaction. Runtime policy includes JSONL stdio transport, default path behavior, request-size, request-id string length, and request-id numeric bounds, caller-supplied local path policy, string parameter length policy, context budget policy for `akbp.context` and `akbp.session.start`, machine-readable retrieval budget contract fields, path-like parameter control-character policy, evidence/entity array count and item-length policy, supported hash algorithms, dry-run support, review-gated writes, the approval field name, and `method_schema_runtime_errors` so adapters can surface schema/runtime drift instead of guessing.
 
 `result.profiles` is a discovery shortcut for adapters that need workflow intent instead of a flat method list:
 

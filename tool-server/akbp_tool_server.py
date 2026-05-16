@@ -210,6 +210,32 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
             "Adapters must pass an explicit KB path plus task or query for startup context, "
             "and continue without recalled memory when the scope is ambiguous."
         ),
+        "budget_contract": {
+            "request_param": "max_chars",
+            "default_recommended_max_chars": 4000,
+            "response_budget_fields": [
+                "budget.max_chars",
+                "budget.summary_chars",
+                "budget.original_summary_chars",
+                "budget.truncated",
+                "budget.clipped_items",
+                "budget.omitted_items",
+                "budget.items_before_budget",
+                "budget.items_after_budget",
+            ],
+            "quality_fields": [
+                "quality.budget_truncated",
+                "quality.budget_omitted_items",
+                "quality.budget_clipped_items",
+                "quality.fail_on_budget_truncation",
+                "quality.fallback_reason",
+            ],
+            "adapter_policy": (
+                "Surface budget warnings before planning; if the host cannot preserve budget "
+                "and quality fields, continue without recalled context instead of silently "
+                "using clipped memory."
+            ),
+        },
     },
     "writes": {
         "enabled": True,

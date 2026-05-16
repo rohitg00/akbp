@@ -96,6 +96,14 @@ configs should make the least-privileged method set explicit, start from the
 read-only allowlist, and expose write-capable schemas only after capability,
 doctor, harness, and review-surface checks pass.
 
+Recent tool-protocol and coding-agent memory discussions keep returning to
+context bloat: users want durable recall, but they do not want every memory
+server, rule file, or tool schema to silently expand the startup prompt. AKBP
+now exposes a retrieval `budget_contract` through capability discovery so
+adapter authors know to pass `max_chars`, preserve `budget.*` and
+`quality.*` fields, and fail closed when a host bridge hides clipped-memory
+warnings.
+
 The newest bridge-oriented scan reinforced a second adapter issue: some hosts
 classify integrations through a generic memory-capability registry rather than a
 custom AKBP-aware adapter. AKBP should give those hosts a compact projection
