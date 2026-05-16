@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a machine-readable tool-schema budget preflight gate to generated
+  adapter configs so hosts fail closed before exposing over-broad AKBP tool
+  surfaces.
 - Added profile-specific host tool schema budgets to generated client configs
   so startup-context adapters expose only the minimal cited-recall tools before
   upgrading to broader read-only inspection.

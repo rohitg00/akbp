@@ -437,6 +437,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(manifest["tool_schema_budget"]["within_budget"])
             self.assertEqual(manifest["tool_schema_budget"]["budget_check"], "pass")
             self.assertEqual(manifest["tool_schema_budget"]["overflow_methods"], [])
+            budget_gate = manifest["tool_schema_budget"]["preflight_gate"]
+            self.assertEqual(budget_gate["format"], "akbp-tool-schema-budget-gate-v1")
+            self.assertTrue(budget_gate["required_before_host_tool_exposure"])
+            self.assertIn("within_budget is true", budget_gate["pass_conditions"])
+            self.assertIn("overflow_methods is empty", budget_gate["pass_conditions"])
+            self.assertIn("blocked_until_needed methods are not exposed", " ".join(budget_gate["pass_conditions"]))
+            self.assertIn("exposed_method_count", budget_gate["required_adapter_output"])
+            self.assertIn("Do not expose host tools", budget_gate["fail_closed_action"])
             self.assertIn("akbp.remember", manifest["tool_schema_budget"]["blocked_until_needed"])
             self.assertIn("every exposed tool schema consumes context", manifest["tool_schema_budget"]["research_signal"])
             self.assertEqual(
@@ -584,6 +592,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["tool_schema_budget"]["selected_profile"], "read_only")
             self.assertEqual(read_only["tool_schema_budget"]["max_exposed_methods_for_profile"], 8)
             self.assertTrue(read_only["tool_schema_budget"]["within_budget"])
+            self.assertEqual(
+                read_only["tool_schema_budget"]["preflight_gate"]["format"],
+                "akbp-tool-schema-budget-gate-v1",
+            )
             self.assertIn("akbp.capabilities", read_only["tool_schema_budget"]["exposed_methods"])
             self.assertIn("akbp.session.end", read_only["tool_schema_budget"]["blocked_until_needed"])
             profile_names = [profile["profile"] for profile in read_only["profile_selection"]["profiles"]]
@@ -735,6 +747,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(startup_context["tool_schema_budget"]["within_budget"])
             self.assertEqual(startup_context["tool_schema_budget"]["budget_check"], "pass")
             self.assertEqual(startup_context["tool_schema_budget"]["overflow_methods"], [])
+            self.assertTrue(startup_context["tool_schema_budget"]["preflight_gate"]["required_before_host_tool_exposure"])
             self.assertNotIn("akbp.search", startup_context["tool_schema_budget"]["exposed_methods"])
             self.assertEqual(
                 startup_context["tool_protocol_bridge"]["read_only_allowlist"],

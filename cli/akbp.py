@@ -278,6 +278,26 @@ def adapter_tool_schema_budget(
         "exposed_methods": exposed_methods,
         "exposed_method_count": len(exposed_methods),
         "overflow_methods": overflow_methods,
+        "preflight_gate": {
+            "format": "akbp-tool-schema-budget-gate-v1",
+            "required_before_host_tool_exposure": True,
+            "pass_conditions": [
+                "selected_profile matches the requested adapter profile",
+                "within_budget is true",
+                "budget_check is pass",
+                "overflow_methods is empty",
+                "every exposed method belongs to the selected profile allowlist",
+                "blocked_until_needed methods are not exposed as host tools",
+            ],
+            "required_adapter_output": [
+                "selected_profile",
+                "exposed_method_count",
+                "max_exposed_methods_for_profile",
+                "within_budget",
+                "overflow_methods",
+            ],
+            "fail_closed_action": "Do not expose host tools; regenerate client-config for a narrower profile or keep AKBP available only through explicit JSONL calls.",
+        },
         "blocked_until_needed": [
             "akbp.remember",
             "akbp.source.add",
