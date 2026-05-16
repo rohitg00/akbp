@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added a source-of-truth drift benchmark fixture so adapter trust gates prove
+  changed repository evidence blocks planning from recalled project memory.
 - Tightened generated adapter startup trust gates so discovery, client configs,
   host-tool manifests, and verification plans request `fail_on_warnings:true`
   before recalled context can influence planning.

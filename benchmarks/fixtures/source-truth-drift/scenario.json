@@ -1,0 +1,81 @@
+{
+  "id": "source-truth-drift-001",
+  "task": "Verify changed repository source files are surfaced as review blockers before an adapter trusts recalled project memory.",
+  "profiles": ["retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_runtime_policy",
+        "type": "file",
+        "locator": "docs/runtime-policy.md",
+        "title": "Runtime policy",
+        "recorded_content": "Runtime policy: startup memory may be trusted after cited context retrieval. Write approval is optional for low-risk preferences.\n",
+        "content": "Runtime policy: startup memory is read-only until source verification passes. Durable writes require dry_run preview and approved:true apply.\n"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_runtime_policy_requires_source_verification",
+        "text": "Adapters must run source verification against the repository source of truth and block planning from recalled memory when source drift changes evidence backing the claim.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.91,
+        "evidence": ["source_runtime_policy"],
+        "entities": ["source verification", "source drift", "adapter startup", "recalled memory", "repository source of truth"],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "verify-runtime-policy",
+        "method": "akbp.source.verify",
+        "params": {
+          "source_id": "source_runtime_policy"
+        },
+        "expected_result_schema": "#/$defs/source_verify_result",
+        "expected_result_fields": ["ok", "counts", "changed", "attention"],
+        "expected_result_contains": {
+          "ok": [false],
+          "counts.changed": [1],
+          "changed[].id": ["source_runtime_policy"],
+          "attention.requires_review": [true],
+          "attention.recommended_action": ["review_affected_claims"],
+          "attention.changed_source_ids[]": ["source_runtime_policy"],
+          "attention.affected_claims[]": ["claim_runtime_policy_requires_source_verification"]
+        }
+      },
+      {
+        "id": "context-runtime-policy-blocks-on-drift",
+        "method": "akbp.context",
+        "params": {
+          "task": "adapter startup source drift recalled memory",
+          "limit": 5,
+          "min_items": 1,
+          "require_citations": true,
+          "fail_on_warnings": true
+        },
+        "expected_error_code": "cli_error",
+        "expected_error_schema": "#/$defs/cli_error_details",
+        "expected_error_fields": ["method", "exit_code", "stdout", "redacted", "truncated"],
+        "expected_error_values": {
+          "method": "akbp.context",
+          "exit_code": 1,
+          "redacted": false,
+          "truncated": false
+        }
+      }
+    ]
+  },
+  "query": "How should an adapter handle recalled project memory when the backing repository source changed?",
+  "expected": {
+    "must_retrieve": ["claim_runtime_policy_requires_source_verification"],
+    "must_cite": ["source_runtime_policy"],
+    "must_cite_in_context": ["source_runtime_policy"],
+    "answer_should_include": [
+      "source verification",
+      "source drift",
+      "recalled memory",
+      "repository source of truth"
+    ]
+  }
+}

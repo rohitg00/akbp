@@ -75,6 +75,7 @@ runtime.
 - `retrieval-structured-jsonl-objects`: verify richer source, claim, entity, and relation JSONL objects retrieve precise AgentMemory operational memory and export graph context.
 - `search-index-observability`: verify safe prefix search and incremental index document-key observability through JSONL tool calls.
 - `search-query-compatibility`: verify phrase, version, hyphenated, slash-separated, prefix, mixed operator-plus-prefix, empty, and malformed-operator FTS query compatibility.
+- `source-truth-drift`: verify changed repository source files are surfaced as review blockers before adapters trust recalled project memory.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes, including import apply, without `approved:true` return structured `approval_required` errors.

@@ -8,6 +8,7 @@ shape and reports readiness checks that future retrieval engines can reuse.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -65,6 +66,10 @@ def retrieval_results(data: dict[str, Any]) -> list[dict[str, Any]]:
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+
+
+def hash_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def run_cli(kb: Path, *args: str) -> dict[str, Any]:
@@ -213,12 +218,24 @@ def scenario_to_kb(data: dict[str, Any], kb: Path) -> None:
     setup = data.get("setup", {})
     sources = []
     for source in setup.get("sources", []) or []:
+        locator = source.get("locator", source["id"])
+        content = source.get("content")
+        if isinstance(content, str) and source.get("type", "file") == "file":
+            target = kb / locator
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+        recorded_hash = source.get("hash")
+        recorded_content = source.get("recorded_content")
+        if recorded_hash is None and isinstance(recorded_content, str):
+            recorded_hash = hash_text(recorded_content)
+        elif recorded_hash is None and isinstance(content, str) and source.get("record_current_hash"):
+            recorded_hash = hash_text(content)
         sources.append({
             "id": source["id"],
             "type": source.get("type", "file"),
-            "locator": source.get("locator", source["id"]),
+            "locator": locator,
             "title": source.get("title"),
-            "hash": None,
+            "hash": recorded_hash,
             "immutable": True,
             "scope": source.get("scope", "project"),
             "created_at": source.get("created_at", "2026-01-01T00:00:00Z"),
