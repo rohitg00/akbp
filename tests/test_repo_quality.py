@@ -181,6 +181,27 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/context-freshness-probe/run.sh", makefile)
 
+    def test_use_cases_surface_markdown_adr_intake(self):
+        use_cases = (ROOT / "docs" / "USE_CASES.md").read_text(encoding="utf-8")
+        example_readme = (ROOT / "examples" / "markdown-folder-intake" / "README.md").read_text(encoding="utf-8")
+        example_script = (ROOT / "examples" / "markdown-folder-intake" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = use_cases + example_readme + example_script
+        for required in [
+            "Agent ADR and architecture insight intake",
+            "valuable ADR drafts, debugging notes, and architecture insights",
+            "examples/markdown-folder-intake/",
+            "AKBP markdown folder intake example passed",
+            "Treat the existing markdown folder as evidence",
+            "review-gated markdown promotion ok",
+            "verified markdown sources ok",
+            "cited markdown context ok",
+            "architectural decisions and debugging workflows",
+            "examples/markdown-folder-intake/run.sh",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/markdown-folder-intake/run.sh", makefile)
+
     def test_docs_define_adapter_output_quality_harness(self):
         benchmark = (ROOT / "docs" / "BENCHMARK.md").read_text(encoding="utf-8")
         quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
