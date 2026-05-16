@@ -120,6 +120,11 @@ Required behavior:
 - Preserve `host_capability_descriptor.profile_contracts` when the host has
   first-class capability records, so write-capable flows stay disabled until a
   review surface exists.
+- Preserve `host_capability_descriptor.tool_protocol_memory_capability` when a
+  host wants to label AKBP as a memory capability. Register it only as cited,
+  review-gated project knowledge; if the host cannot express citations,
+  structured errors, context budgets, or reviewed writes, expose read-only
+  startup context tools instead of a generic memory store.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
 - For managed tool-protocol hosts, generate the local server entry and read-only tool
   exposure from `managed_tool_host_bridge` so the host config cannot drift from AKBP

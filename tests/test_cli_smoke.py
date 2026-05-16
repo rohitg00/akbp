@@ -486,6 +486,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("approved:true", " ".join(reviewed_profile["required_preflight"]))
             self.assertIn("read-only", read_only["profile_selection"]["fallback"])
             self.assertEqual(read_only["host_capability_descriptor"]["default_profile"], "read_only")
+            memory_capability = read_only["host_capability_descriptor"]["tool_protocol_memory_capability"]
+            self.assertEqual(memory_capability["format"], "akbp-tool-protocol-memory-capability-v1")
+            self.assertIn("project_knowledge", memory_capability["candidate_labels"])
+            self.assertIn("startup recall returns citations", " ".join(memory_capability["required_semantics"]))
+            self.assertIn("approved:true", " ".join(memory_capability["required_semantics"]))
+            self.assertIn("automatic background memory", memory_capability["do_not_advertise_as"])
+            self.assertIn("read-only startup context", memory_capability["fallback"])
             self.assertNotIn("write_apply_requires_approval", read_only["startup"]["params"]["requires"])
             self.assertFalse(read_only["knowledge_base"]["portable_template"])
             self.assertEqual(read_only["response_contract"]["envelope"]["ok"], "boolean")

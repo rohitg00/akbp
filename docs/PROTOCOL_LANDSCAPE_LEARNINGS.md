@@ -593,3 +593,19 @@ This keeps the rich artifact path honest:
 - JSONL proposals remain the write boundary
 - source hashes and citations survive the apply path
 - portable exports still validate without artifact-local state
+
+## Shipped artifact: host memory capability mapping
+
+Recent tool-protocol and memory-server discussions are moving toward explicit
+memory capability labels. The adoption risk for AKBP is that a host marks it as
+generic memory and loses the properties that make it trustworthy.
+
+`akbp client-config` now includes
+`host_capability_descriptor.tool_protocol_memory_capability`. It gives host
+registries safe labels plus the required semantics: AKBP artifacts remain the
+source of truth, startup recall must be cited, writes stay review-gated,
+structured errors and budget fields are preserved, and export/import checks do
+not depend on host-local memory state.
+
+If a host registry cannot express those semantics, the safe integration is
+read-only startup context tools, not a generic automatic memory store.

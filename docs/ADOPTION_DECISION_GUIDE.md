@@ -95,6 +95,14 @@ artifacts. Disable or warn on integrations that store durable memory only in an
 opaque bridge format, return uncited recalls, or apply writes without
 `dry_run:true` preview followed by explicit `approved:true`.
 
+If the host has a formal memory-capability registry, also use
+`host_capability_descriptor.tool_protocol_memory_capability`. It gives
+installer-safe labels and the minimum semantics a host must preserve before it
+advertises AKBP as memory: local artifacts as source of truth, cited startup
+recall, reviewed writes, structured errors, budget fields, and exportable
+state. If the registry cannot express those semantics, register only read-only
+startup context tools.
+
 When a coding agent already has product-native memory or external memory tools,
 also use `native_memory_interop` from `akbp client-config`. The safe default is
 to read cited AKBP context before planning, treat native memory as unreviewed
