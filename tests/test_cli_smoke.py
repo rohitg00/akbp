@@ -539,6 +539,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["verification"][1]["run"], "health_check")
             self.assertEqual(read_only["health_check"]["params"]["profile"], "read_only")
             self.assertEqual(read_only["verification"][1]["expect"]["result.requested_profile"], "read_only")
+            client_intake = read_only["memory_server_bridge"]["promotion_contract"]["intake_classification"]
+            self.assertEqual(client_intake["format"], "akbp-memory-intake-classification-v1")
+            self.assertIn("runtime_scratch", [item["class"] for item in client_intake["classes"]])
+            self.assertIn("candidate_durable_claim", [item["class"] for item in client_intake["classes"]])
+            self.assertIn("source kind", client_intake["minimum_fields_before_candidate"])
+            self.assertIn("import-check", read_only["memory_server_bridge"]["external_memory_promotion"]["promotion_sequence"][1]["command"])
             self.assertTrue(read_only["verification"][1]["expect"]["result.requested_profile_ready"])
             self.assertFalse(read_only["quality_gates"]["reviewed_writes"]["required_for_apply"])
             self.assertFalse(read_only["first_run_sequence"]["steps"][4]["required"])
@@ -731,6 +737,19 @@ class AkbpCliSmokeTest(unittest.TestCase):
             external_promotion = discovered["external_memory_promotion"]
             self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
             self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
+            intake = external_promotion["intake_classification"]
+            self.assertEqual(intake["format"], "akbp-memory-intake-classification-v1")
+            self.assertEqual(
+                [item["class"] for item in intake["classes"]],
+                [
+                    "runtime_scratch",
+                    "ephemeral_hint",
+                    "candidate_durable_claim",
+                    "blocked_private_or_secret",
+                ],
+            )
+            self.assertIn("source value or AKBP source id", intake["minimum_fields_before_candidate"])
+            self.assertIn("only candidate_durable_claim rows", intake["adapter_rule"])
             self.assertIn("source.value", external_promotion["required_review_fields"])
             self.assertIn("runtime_cache_metadata_only", external_promotion["reject_reasons"])
             promotion_steps = {step["step"]: step for step in external_promotion["promotion_sequence"]}

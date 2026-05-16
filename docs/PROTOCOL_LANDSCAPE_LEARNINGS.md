@@ -456,6 +456,14 @@ The checklist keeps the comparison concrete:
 - hosts preserve `ok`, `error.code`, warnings, and budget fields
 - export and import checks still work without bridge-local metadata
 
+`akbp discover` and `akbp client-config` now also expose
+`external_memory_promotion.intake_classification`, because recent
+tool-compatible memory projects make it easy to accumulate mixed runtime memory
+but do not always tell adapters which rows are safe durable knowledge. The classifier
+separates runtime scratch, ephemeral hints, source-backed durable candidates,
+and blocked private or secret-like rows before any `import-check` or dry-run
+preview happens.
+
 It covers:
 
 - durable knowledge criteria

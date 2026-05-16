@@ -97,6 +97,11 @@ scratchpads, uncited summaries, private logs, secret-like values, and bridge-onl
 cache metadata should stay out. The bridge should run capability and doctor
 preflights, then use `akbp.import_check` or a dry-run `akbp.remember` preview
 before applying the exact reviewed record with `approved:true`.
+The promotion contract also includes `intake_classification`, a triage table for
+external-memory rows: `runtime_scratch` stays outside AKBP, `ephemeral_hint`
+can help find source material, `candidate_durable_claim` may go through
+`import-check` and dry-run preview, and `blocked_private_or_secret` is rejected
+without echoing private or secret-like data into durable memory.
 
 For hosts that also advertise product-native memory or external memory tools, read
 `native_memory_interop` from `akbp client-config`. It makes the first-run policy

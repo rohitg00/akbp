@@ -350,6 +350,44 @@ def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
         "format": "akbp-external-memory-promotion-v1",
         "purpose": "Give bridges a concrete candidate-record shape for promoting existing memory-server rows into reviewed AKBP artifacts.",
         "safe_default": "import_check_before_apply",
+        "intake_classification": {
+            "format": "akbp-memory-intake-classification-v1",
+            "purpose": "Separate runtime memory rows before an adapter tries to turn them into durable AKBP records.",
+            "classes": [
+                {
+                    "class": "runtime_scratch",
+                    "use_for": "host-local continuity, partial plans, temporary chat summaries, embeddings, and cache metadata",
+                    "akbp_action": "do_not_import",
+                    "reason": "Scratch state is not reviewed project knowledge and usually lacks stable evidence.",
+                },
+                {
+                    "class": "ephemeral_hint",
+                    "use_for": "search hints or candidate context that may help find source material",
+                    "akbp_action": "register_source_before_promotion",
+                    "reason": "Hints can guide investigation, but they do not become durable claims without citations or source ids.",
+                },
+                {
+                    "class": "candidate_durable_claim",
+                    "use_for": "project decisions, facts, workflows, warnings, or preferences with source evidence",
+                    "akbp_action": "import_check_then_dry_run_preview",
+                    "reason": "Source-backed candidates can be reviewed and applied through AKBP's approval boundary.",
+                },
+                {
+                    "class": "blocked_private_or_secret",
+                    "use_for": "secrets, private chat fragments, credentials, personal data, or bridge-only identifiers",
+                    "akbp_action": "reject_and_do_not_echo",
+                    "reason": "Unsafe or private content must not enter portable project memory.",
+                },
+            ],
+            "minimum_fields_before_candidate": [
+                "text",
+                "claim type",
+                "source kind",
+                "source value or AKBP source id",
+                "evidence freshness or verification status when available",
+            ],
+            "adapter_rule": "Classify every external-memory row before import-check; only candidate_durable_claim rows may reach dry-run preview.",
+        },
         "candidate_record_shape": {
             "text": "durable claim text",
             "type": "decision|fact|workflow|preference|observation",
@@ -3262,6 +3300,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "external_memory_promotion": external_memory_promotion,
             "promotion_contract": {
                 "purpose": "Let an existing memory server promote only reviewed durable knowledge into AKBP instead of bulk-copying opaque runtime memory.",
+                "intake_classification": external_memory_promotion["intake_classification"],
                 "candidate_records": [
                     "durable project decisions",
                     "source-backed facts",
