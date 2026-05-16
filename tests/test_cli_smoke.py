@@ -790,6 +790,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("resolve_kb", bridge_steps)
             self.assertIn("stage_external_memory", bridge_steps)
             self.assertIn("import-check", bridge_steps["stage_external_memory"]["command"])
+            bridge_preflight = discovered["tool_protocol_bridge_preflight"]
+            self.assertEqual(bridge_preflight["format"], "akbp-discovery-tool-protocol-bridge-v1")
+            self.assertEqual(bridge_preflight["safe_default"], "read_only_bridge")
+            self.assertIn("client-config --profile read-only", bridge_preflight["next_command"])
+            self.assertEqual(bridge_preflight["runnable_preflight"], "./examples/tool-protocol-bridge/run.sh")
+            self.assertIn("akbp.session.start", bridge_preflight["read_only_methods"])
+            self.assertIn("akbp.import_check", bridge_preflight["read_only_methods"])
+            self.assertIn("akbp.remember", bridge_preflight["blocked_direct_methods"])
+            self.assertIn("akbp.import_apply", bridge_preflight["blocked_direct_methods"])
+            self.assertIn("error.code", " ".join(bridge_preflight["must_preserve"]))
+            self.assertIn("dry-run preview", " ".join(bridge_preflight["enable_reviewed_writes_after"]))
+            self.assertIn("read-only startup context", bridge_preflight["fallback"])
             external_promotion = discovered["external_memory_promotion"]
             self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
             self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
