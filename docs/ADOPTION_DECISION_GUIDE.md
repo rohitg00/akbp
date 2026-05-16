@@ -126,6 +126,9 @@ Adapters may repair malformed JSON, request envelopes, unsupported methods after
 capability refresh, or invalid params using `error.details.params_schema`. They
 must not treat approval failures, uncited startup context, unsurfaced warnings,
 budget truncation, source drift, or rejected imports as retryable prompt issues.
+The repair map caps local repair at one attempt per request fingerprint, so a
+host that still fails after the local fix must surface the structured error
+instead of looping or asking the model to reinterpret it.
 After any params repair on a write-capable method, rerun `dry_run:true` and
 collect a fresh review before `approved:true`.
 

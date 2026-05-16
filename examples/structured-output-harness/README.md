@@ -199,6 +199,8 @@ must stop memory use or writes:
 {
   "structured_output_repair": {
     "format": "akbp-structured-output-repair-v1",
+    "max_local_repair_attempts": 1,
+    "repair_attempt_scope": "per request id, method, path, and params fingerprint",
     "retryable_after_local_fix": [
       {"error_code": "invalid_json", "fix": "repair JSON serialization and resend the same intent without approved:true"},
       {"error_code": "invalid_request", "fix": "repair the JSONL envelope, request id, method, path, or unknown request-level fields"},
@@ -211,7 +213,8 @@ must stop memory use or writes:
       "startup context with unsurfaced warnings",
       "truncated context budget during startup trust gate"
     ],
-    "write_retry_rule": "After any request or params repair, rerun write-capable methods as dry_run:true and require a fresh review before approved:true apply."
+    "write_retry_rule": "After any request or params repair, rerun write-capable methods as dry_run:true and require a fresh review before approved:true apply.",
+    "exhausted_retry_action": "Stop after the local repair budget is exhausted, surface the structured error, and keep AKBP read-only for that flow."
   }
 }
 ```
@@ -251,7 +254,7 @@ ignores citations, warnings, approval boundaries, or unsupported profiles.
 | Envelope | Every response has exactly `id`, `ok`, `result`, and `error`, and the adapter branches on `ok` before reading nested fields. | The host treats malformed JSON, missing fields, or `ok:false` as usable memory. |
 | Capability negotiation | `result.negotiation.satisfied` is true for the requested features and profiles before the adapter enables that flow. | The host silently falls back from a missing profile to a weaker memory mode. |
 | Repairable params | `invalid_params` includes `params_schema` and concrete `type_errors` that the bridge can map back to its payload. | The host retries by changing free-form prompt text instead of fixing the structured request. |
-| Repair map | `structured_output_repair` marks `invalid_json`, `invalid_request`, `invalid_params`, and `unknown_method` as locally repairable, while `approval_required`, uncited startup context, unsurfaced warnings, and truncated startup context are never auto-repaired. | The host asks the model to continue after a trust or approval failure, or resends a write as `approved:true` after repairing params without a fresh dry-run review. |
+| Repair map | `structured_output_repair` marks `invalid_json`, `invalid_request`, `invalid_params`, and `unknown_method` as locally repairable, caps local repair at one attempt per request fingerprint, and keeps trust or approval failures non-retryable. | The host asks the model to continue after a trust or approval failure, loops on repeated repairs, or resends a write as `approved:true` after repairing params without a fresh dry-run review. |
 | Startup trust | `akbp.session.start` returns at least one cited item, preserves `result.context.budget`, and surfaces warnings or truncation. | Context is empty, uncited, over budget, or warning-bearing and the runtime still plans from recalled memory. |
 | Review preview | Dry-run writes expose `review_required`, `would_write`, `would_write_paths`, `redacted`, `preview_fingerprint`, and `apply_instruction` to the review surface. | The user or policy cannot inspect or fingerprint the exact durable change before approval. |
 | Approval stop | Non-dry-run writes without `approved:true` return `error.code:"approval_required"` and the adapter stops. | The adapter logs a warning, asks the model to continue, or writes to another memory store. |

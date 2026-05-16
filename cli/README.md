@@ -208,6 +208,9 @@ harnesses to make memory safer. It maps that expectation to a concrete setup
 gate: run the structured-output harness, preserve response envelopes, citations,
 budget metadata, dry-run review fields, and `error.code`, then keep AKBP
 read-only until the gate passes.
+Use `structured_output_repair.max_local_repair_attempts` as the retry budget
+for schema or envelope fixes. When that one local repair attempt is exhausted,
+surface the structured error and keep AKBP read-only for that flow.
 
 Use `host_install_profiles` when an adapter needs host-specific install copy.
 The terminal-agent profile emits pasteable `akbp discover`, `doctor`, and

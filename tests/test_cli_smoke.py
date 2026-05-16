@@ -294,10 +294,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(repair["format"], "akbp-structured-output-repair-v1")
             retryable_codes = {entry["error_code"] for entry in repair["retryable_after_local_fix"]}
             self.assertEqual(retryable_codes, {"invalid_json", "invalid_request", "invalid_params", "unknown_method"})
+            self.assertEqual(repair["max_local_repair_attempts"], 1)
+            self.assertIn("params fingerprint", repair["repair_attempt_scope"])
             self.assertIn("params_schema", repair["retryable_after_local_fix"][2]["fix"])
             self.assertIn("approval_required", repair["never_auto_repair"])
             self.assertIn("startup context without citations", repair["never_auto_repair"])
             self.assertIn("dry_run:true", repair["write_retry_rule"])
+            self.assertIn("repair budget is exhausted", repair["exhausted_retry_action"])
             self.assertIn("read-only", repair["adapter_action"])
             ten_minute = config["ten_minute_proof"]
             self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")

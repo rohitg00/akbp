@@ -188,12 +188,15 @@ assert "result.context.budget" in prompt_contract["validation"]["preserve_fields
 
 repair = config["structured_output_repair"]
 assert repair["format"] == "akbp-structured-output-repair-v1", repair
+assert repair["max_local_repair_attempts"] == 1, repair
+assert "params fingerprint" in repair["repair_attempt_scope"], repair
 retryable_codes = {item["error_code"] for item in repair["retryable_after_local_fix"]}
 assert {"invalid_json", "invalid_request", "invalid_params", "unknown_method"} <= retryable_codes, repair
 assert "approval_required" in repair["never_auto_repair"], repair
 assert "truncated context budget during startup trust gate" in repair["never_auto_repair"], repair
 assert "dry_run:true" in repair["write_retry_rule"], repair
 assert "approved:true" in repair["write_retry_rule"], repair
+assert "repair budget is exhausted" in repair["exhausted_retry_action"], repair
 assert "read-only" in repair["adapter_action"], repair
 
 rules = " ".join(prompt_contract["system_rules"])

@@ -3423,6 +3423,8 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "structured_output_repair": {
             "format": "akbp-structured-output-repair-v1",
             "purpose": "Tell adapters which failed structured calls can be repaired locally and which failures must stop memory use or writes.",
+            "max_local_repair_attempts": 1,
+            "repair_attempt_scope": "per request id, method, path, and params fingerprint",
             "retryable_after_local_fix": [
                 {
                     "error_code": "invalid_json",
@@ -3450,6 +3452,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "import records rejected for secrets, stale sources, or missing citations",
             ],
             "write_retry_rule": "After any request or params repair, rerun write-capable methods as dry_run:true and require a fresh review before approved:true apply.",
+            "exhausted_retry_action": "Stop after the local repair budget is exhausted, surface the structured error, and keep AKBP read-only for that flow.",
             "adapter_action": "Keep AKBP read-only when a failure is not in retryable_after_local_fix; do not ask the model to reinterpret prose errors as permission to continue.",
         },
         "adapter_prompt_contract": adapter_prompt_contract,
