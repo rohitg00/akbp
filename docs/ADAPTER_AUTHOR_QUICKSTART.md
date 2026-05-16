@@ -91,7 +91,8 @@ that the harness verifies.
 Use `adapter_prompt_contract.context_use_report` as the host's memory-use audit
 shape before planning from recalled context. The host should record whether
 AKBP context was used, which context item ids and citation ids supported the
-plan, whether warnings were surfaced, and the fallback reason when it continues
+plan, whether the quality gate passed, whether the context was budget-truncated,
+whether warnings were surfaced, and the fallback reason when it continues
 without recalled memory. This prevents adapters from compressing cited AKBP
 items into an uncited prose summary and then treating that summary as durable
 project memory.

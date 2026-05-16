@@ -204,6 +204,8 @@ assert context_use["required_fields"] == [
     "used_akbp_context",
     "akbp_context_item_ids",
     "akbp_citation_ids",
+    "akbp_context_quality_ok",
+    "akbp_context_budget_truncated",
     "warnings_surfaced",
     "fallback_reason",
 ], context_use

@@ -822,12 +822,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
                     "used_akbp_context",
                     "akbp_context_item_ids",
                     "akbp_citation_ids",
+                    "akbp_context_quality_ok",
+                    "akbp_context_budget_truncated",
                     "warnings_surfaced",
                     "fallback_reason",
                 ],
             )
             self.assertIn("used_akbp_context to false", context_use["rules"][0])
             self.assertIn("trace back to result.context.items", context_use["rules"][1])
+            self.assertIn("akbp_context_quality_ok", context_use["rules"][2])
+            self.assertIn("akbp_context_budget_truncated", context_use["rules"][3])
             self.assertIn("budget_truncated", context_use["fallback_reason_values"])
             self.assertFalse(prompt_contract["write_gate"]["required_for_apply"])
             provenance_gate = prompt_contract["source_provenance_gate"]
@@ -1119,6 +1123,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(context_use["format"], "akbp-context-use-report-v1")
             self.assertIn("used_akbp_context", context_use["required_fields"])
             self.assertIn("akbp_citation_ids", context_use["required_fields"])
+            self.assertIn("akbp_context_quality_ok", context_use["required_fields"])
+            self.assertIn("akbp_context_budget_truncated", context_use["required_fields"])
             self.assertIn("budget_truncated", context_use["fallback_reason_values"])
             self.assertIn("trace back to result.context.items", " ".join(context_use["rules"]))
             workflow_selector = prompt_contract["workflow_context_selector"]

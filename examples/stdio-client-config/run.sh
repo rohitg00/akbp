@@ -164,6 +164,8 @@ context_use = config["adapter_prompt_contract"]["context_use_report"]
 assert context_use["format"] == "akbp-context-use-report-v1", config
 assert "used_akbp_context" in context_use["required_fields"], config
 assert "akbp_citation_ids" in context_use["required_fields"], config
+assert "akbp_context_quality_ok" in context_use["required_fields"], config
+assert "akbp_context_budget_truncated" in context_use["required_fields"], config
 assert "fallback_reason" in context_use["required_fields"], config
 assert "trace back to result.context.items" in " ".join(context_use["rules"]), config
 assert "budget_truncated" in context_use["fallback_reason_values"], config
