@@ -698,6 +698,18 @@ def workflow_context_selector(kb_path: str) -> dict[str, Any]:
             "workflow_or_component_name",
             "selected_step_or_node_when_available",
         ],
+        "scope_fingerprint": {
+            "format": "akbp-scope-fingerprint-v1",
+            "purpose": "Let hosts prove that retrieved context belongs to the current workflow, file, branch, or selected UI object.",
+            "required_inputs": [
+                "active_artifact_path_or_id",
+                "workflow_or_component_name",
+                "selected_step_or_node_when_available",
+                "user_task",
+            ],
+            "stable_representation": "lowercase JSON object with sorted keys and empty strings for missing optional selection fields",
+            "change_policy": "If any required input changes, rerun akbp.session.start and discard the prior context pack.",
+        },
         "query_template": {
             "method": "akbp.session.start",
             "path": kb_path,
@@ -713,18 +725,21 @@ def workflow_context_selector(kb_path: str) -> dict[str, Any]:
         },
         "selection_rules": [
             "Include the selected workflow, node, file, branch, or component in the task string before retrieval.",
+            "Record a scope_fingerprint for the active selection before calling akbp.session.start.",
             "Prefer cited workflow, decision, warning, and source-backed fact claims over broad project summaries.",
             "Surface context budget and warnings before using recalled context in a plan.",
             "When the active selection changes, rerun scoped startup context instead of reusing stale recall.",
         ],
         "trusted_when": [
             "response ok is true",
+            "scope_fingerprint still matches the active selection",
             "at least one returned item has citations or source ids",
             "result.context.budget.truncated is false",
             "result.context.warnings is empty or has been surfaced and accepted by the host policy",
         ],
         "fail_closed_when": [
             "active artifact or workflow selection is missing for a scoped task",
+            "scope_fingerprint is missing or does not match the current selection",
             "returned context is empty or uncited",
             "warnings cannot be surfaced before planning",
             "budget truncation hides the selected workflow context",
@@ -1286,6 +1301,8 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "emit_when": "after required_startup_call and before any plan, code edit, or durable write that claims to use recalled AKBP context",
             "required_fields": [
                 "used_akbp_context",
+                "akbp_scope_fingerprint",
+                "akbp_scope_inputs",
                 "akbp_context_item_ids",
                 "akbp_citation_ids",
                 "akbp_context_quality_ok",
@@ -1295,6 +1312,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             ],
             "rules": [
                 "Set used_akbp_context to false when startup_trust_gate fails, context is empty, citations are missing, or warnings cannot be surfaced.",
+                "Copy the workflow_context_selector scope_fingerprint and source inputs into akbp_scope_fingerprint and akbp_scope_inputs before planning from scoped context.",
                 "When used_akbp_context is true, akbp_context_item_ids and akbp_citation_ids must be non-empty and trace back to result.context.items.",
                 "Copy result.context.quality.ok or result.quality.ok into akbp_context_quality_ok when the host receives it; otherwise set false and use fallback_reason:preflight_failed.",
                 "Copy result.context.quality.budget_truncated or result.quality.budget_truncated into akbp_context_budget_truncated so partial-memory use is auditable.",
@@ -3116,6 +3134,8 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "emit_when": "after akbp.session.start and before any plan, code edit, or durable write that claims to use recalled AKBP context",
             "required_fields": [
                 "used_akbp_context",
+                "akbp_scope_fingerprint",
+                "akbp_scope_inputs",
                 "akbp_context_item_ids",
                 "akbp_citation_ids",
                 "akbp_context_quality_ok",
@@ -3125,6 +3145,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "rules": [
                 "Set used_akbp_context to false when startup_trust_gate fails, context is empty, citations are missing, or warnings cannot be surfaced.",
+                "Copy the workflow_context_selector scope_fingerprint and source inputs into akbp_scope_fingerprint and akbp_scope_inputs before planning from scoped context.",
                 "When used_akbp_context is true, akbp_context_item_ids and akbp_citation_ids must be non-empty and trace back to result.context.items.",
                 "Copy result.context.quality.ok or result.quality.ok into akbp_context_quality_ok when the host receives it; otherwise set false and use fallback_reason:preflight_failed.",
                 "Copy result.context.quality.budget_truncated or result.quality.budget_truncated into akbp_context_budget_truncated so partial-memory use is auditable.",

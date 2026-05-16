@@ -803,7 +803,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(workflow_selector["query_template"]["path"], str(kb.resolve()))
             self.assertTrue(workflow_selector["query_template"]["params"]["require_citations"])
             self.assertIn("active_artifact_path_or_id", workflow_selector["required_adapter_input"])
+            self.assertEqual(workflow_selector["scope_fingerprint"]["format"], "akbp-scope-fingerprint-v1")
+            self.assertIn("user_task", workflow_selector["scope_fingerprint"]["required_inputs"])
+            self.assertIn("rerun akbp.session.start", workflow_selector["scope_fingerprint"]["change_policy"])
             self.assertIn("rerun scoped startup context", " ".join(workflow_selector["selection_rules"]))
+            self.assertIn("scope_fingerprint", " ".join(workflow_selector["trusted_when"]))
             self.assertIn("budget truncation", " ".join(workflow_selector["fail_closed_when"]))
             trust_gate = prompt_contract["startup_trust_gate"]
             self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")
@@ -825,6 +829,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 context_use["required_fields"],
                 [
                     "used_akbp_context",
+                    "akbp_scope_fingerprint",
+                    "akbp_scope_inputs",
                     "akbp_context_item_ids",
                     "akbp_citation_ids",
                     "akbp_context_quality_ok",
@@ -834,9 +840,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 ],
             )
             self.assertIn("used_akbp_context to false", context_use["rules"][0])
-            self.assertIn("trace back to result.context.items", context_use["rules"][1])
-            self.assertIn("akbp_context_quality_ok", context_use["rules"][2])
-            self.assertIn("akbp_context_budget_truncated", context_use["rules"][3])
+            self.assertIn("akbp_scope_fingerprint", context_use["rules"][1])
+            self.assertIn("trace back to result.context.items", context_use["rules"][2])
+            self.assertIn("akbp_context_quality_ok", context_use["rules"][3])
+            self.assertIn("akbp_context_budget_truncated", context_use["rules"][4])
             self.assertIn("budget_truncated", context_use["fallback_reason_values"])
             self.assertFalse(prompt_contract["write_gate"]["required_for_apply"])
             provenance_gate = prompt_contract["source_provenance_gate"]
@@ -1127,10 +1134,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             context_use = prompt_contract["context_use_report"]
             self.assertEqual(context_use["format"], "akbp-context-use-report-v1")
             self.assertIn("used_akbp_context", context_use["required_fields"])
+            self.assertIn("akbp_scope_fingerprint", context_use["required_fields"])
+            self.assertIn("akbp_scope_inputs", context_use["required_fields"])
             self.assertIn("akbp_citation_ids", context_use["required_fields"])
             self.assertIn("akbp_context_quality_ok", context_use["required_fields"])
             self.assertIn("akbp_context_budget_truncated", context_use["required_fields"])
             self.assertIn("budget_truncated", context_use["fallback_reason_values"])
+            self.assertIn("akbp_scope_fingerprint", " ".join(context_use["rules"]))
             self.assertIn("trace back to result.context.items", " ".join(context_use["rules"]))
             workflow_selector = prompt_contract["workflow_context_selector"]
             self.assertEqual(workflow_selector["format"], "akbp-workflow-context-selector-v1")
@@ -1138,7 +1148,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(workflow_selector["query_template"]["method"], "akbp.session.start")
             self.assertEqual(workflow_selector["query_template"]["path"], shlex.quote(str(kb.resolve())))
             self.assertIn("selected_step_or_node_when_available", workflow_selector["required_adapter_input"])
+            self.assertEqual(workflow_selector["scope_fingerprint"]["format"], "akbp-scope-fingerprint-v1")
+            self.assertIn("selected_step_or_node_when_available", workflow_selector["scope_fingerprint"]["required_inputs"])
+            self.assertIn("discard the prior context pack", workflow_selector["scope_fingerprint"]["change_policy"])
             self.assertIn("active selection changes", " ".join(workflow_selector["selection_rules"]))
+            self.assertIn("scope_fingerprint", " ".join(workflow_selector["fail_closed_when"]))
             self.assertIn("uncited", " ".join(workflow_selector["fail_closed_when"]))
             trust_gate = prompt_contract["startup_trust_gate"]
             self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")

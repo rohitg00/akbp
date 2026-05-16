@@ -220,6 +220,10 @@ component, or selected node before the user asks the agent to explain, edit, or
 debug it. Pass that selection into scoped `akbp.session.start`, require cited
 bounded context, and continue without recalled AKBP context when the selected
 scope is missing, uncited, warning-bearing, or budget-truncated.
+The selector also exposes `scope_fingerprint`, a stable fingerprint contract for
+the active workflow, file, branch, or selected UI object. Record it in
+`adapter_prompt_contract.context_use_report` and rerun `akbp.session.start`
+whenever the selected scope changes instead of reusing stale recalled context.
 Use `structured_output_repair.max_local_repair_attempts` as the retry budget
 for schema or envelope fixes. When that one local repair attempt is exhausted,
 surface the structured error and keep AKBP read-only for that flow.
