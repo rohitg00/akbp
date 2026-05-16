@@ -48,6 +48,10 @@ python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name inherited-repo-age
 import json, sys
 
 config = json.load(sys.stdin)
+risk_triage = config["inherited_repo_intake"]["takeover_risk_triage"]
+assert risk_triage["format"] == "akbp-inherited-repo-risk-triage-v1", config
+assert risk_triage["classes"][1]["class"] == "source_verified_read_only", risk_triage
+assert "no inherited AKBP memory" in risk_triage["adapter_rule"], risk_triage
 assert config["knowledge_capability"]["default_mode"] == "read_only", config
 assert config["host_capability_descriptor"]["default_profile"] == "read_only", config
 assert config["tool_protocol_bridge_snippets"]["requested_profile"] == "read_only", config

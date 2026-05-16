@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added inherited-repo takeover risk triage to discovery output so adapters can
+  classify stale, uncited, or private prior memory before planning from it.
 - Added a machine-readable external-memory promotion triage contract so adapter
   installers can classify memory-server rows before import-check or write
   preview.

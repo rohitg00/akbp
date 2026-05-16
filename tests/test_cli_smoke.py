@@ -792,6 +792,19 @@ class AkbpCliSmokeTest(unittest.TestCase):
             inherited_intake = discovered["inherited_repo_intake"]
             self.assertEqual(inherited_intake["format"], "akbp-inherited-repo-intake-v1")
             self.assertIn("agent-written repository", inherited_intake["purpose"])
+            risk_triage = inherited_intake["takeover_risk_triage"]
+            self.assertEqual(risk_triage["format"], "akbp-inherited-repo-risk-triage-v1")
+            self.assertEqual(
+                [item["class"] for item in risk_triage["classes"]],
+                [
+                    "fresh_repo_no_prior_memory",
+                    "source_verified_read_only",
+                    "review_required",
+                    "blocked_private_or_secret",
+                ],
+            )
+            self.assertIn("source verify --fail-on-issue", " ".join(risk_triage["minimum_green_path"]))
+            self.assertIn("no inherited AKBP memory", risk_triage["adapter_rule"])
             self.assertIn("source verify --fail-on-issue", json.dumps(inherited_intake["preflight_sequence"]))
             self.assertIn("uncited inherited notes", inherited_intake["trust_gate"]["fail_closed_on"])
             self.assertEqual(inherited_intake["example"], "./examples/inherited-repo-intake/run.sh")

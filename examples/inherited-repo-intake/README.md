@@ -15,17 +15,20 @@ notes. It records those files as source evidence, stores a few reviewed claims,
 builds the index, then proves the safe startup path:
 
 1. Generate a read-only `client-config`.
-2. Negotiate `akbp.capabilities` with read-only and startup-context profiles.
-3. Run `akbp.doctor --profile read-only`.
-4. Retrieve cited context through `akbp.session.start` with warnings treated
+2. Classify inherited memory with the generated `takeover_risk_triage` contract.
+3. Negotiate `akbp.capabilities` with read-only and startup-context profiles.
+4. Run `akbp.doctor --profile read-only`.
+5. Retrieve cited context through `akbp.session.start` with warnings treated
    as a failed startup gate.
-5. Reject an unapproved write with `approval_required`.
-6. Treat changed source evidence as a review blocker before trusting recalled
+6. Reject an unapproved write with `approval_required`.
+7. Treat changed source evidence as a review blocker before trusting recalled
    context.
 
 ## Rules
 
 - Start with `akbp discover` or an explicit `--path`; do not guess the KB.
+- If `takeover_risk_triage` does not classify the repo as
+  `source_verified_read_only`, plan as if no inherited AKBP memory exists.
 - Run `akbp doctor --profile read-only` before planning from recalled context.
 - Use `akbp.session.start` with a bounded task, require citations, and fail on
   warnings before planning from inherited memory.

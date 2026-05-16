@@ -298,6 +298,46 @@ def inherited_repo_intake_contract(kb_path: str) -> dict[str, Any]:
         "purpose": "Let a coding agent take over an inherited or agent-written repository without trusting stale, uncited, or hidden memory.",
         "research_signal": "Recent coding-agent users are inheriting AI-written repositories and asking for persistent repo context that knows when stored assumptions are stale.",
         "safe_default": "read_only_until_sources_verify",
+        "takeover_risk_triage": {
+            "format": "akbp-inherited-repo-risk-triage-v1",
+            "purpose": "Classify inherited repository memory before the first planning step, so agents know whether to use recalled context, review it, or ignore it.",
+            "signals": [
+                "older AI-generated changes or vague commit messages",
+                "handoff notes without source ids or citations",
+                "changed or missing source files behind remembered claims",
+                "release, rollback, security, or data-migration decisions in recalled memory",
+                "private assistant exports, chat transcripts, or tool caches staged near the repository",
+            ],
+            "classes": [
+                {
+                    "class": "fresh_repo_no_prior_memory",
+                    "action": "run read-only discovery and continue without recalled memory until sources are registered",
+                    "trust_level": "none",
+                },
+                {
+                    "class": "source_verified_read_only",
+                    "action": "allow cited startup context for planning while keeping durable writes disabled",
+                    "trust_level": "bounded",
+                },
+                {
+                    "class": "review_required",
+                    "action": "show affected claims and source verification findings before the agent can rely on recalled context",
+                    "trust_level": "blocked_until_review",
+                },
+                {
+                    "class": "blocked_private_or_secret",
+                    "action": "do not import or echo the material; keep it outside AKBP and require human cleanup",
+                    "trust_level": "blocked",
+                },
+            ],
+            "minimum_green_path": [
+                "akbp discover resolves the intended knowledge base",
+                "akbp doctor --profile read-only passes",
+                "akbp source verify --fail-on-issue passes",
+                "akbp context returns non-empty cited context with fail_on_warnings true",
+            ],
+            "adapter_rule": "If the class is not source_verified_read_only, the adapter must plan as if no inherited AKBP memory exists.",
+        },
         "trigger_when": [
             "the repository has older AI-generated changes, handoff notes, or memory exports",
             "the current agent did not create the prior context it is about to use",
