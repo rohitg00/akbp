@@ -768,6 +768,7 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[3]["result"]["quality"]["minimum_items"], 1)
             self.assertTrue(lines[3]["result"]["quality"]["require_citations"])
             self.assertFalse(lines[3]["result"]["quality"]["fail_on_warnings"])
+            self.assertFalse(lines[3]["result"]["quality"]["fail_on_budget_truncation"])
             self.assertTrue(lines[3]["result"]["quality"]["budget_truncated"])
             self.assertEqual(lines[3]["result"]["quality"]["budget_omitted_items"], lines[3]["result"]["budget"]["omitted_items"])
             self.assertEqual(lines[3]["result"]["quality"]["budget_clipped_items"], lines[3]["result"]["budget"]["clipped_items"])
@@ -1368,10 +1369,42 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(context["quality"]["fallback_reason"], "warnings_present")
             self.assertTrue(context["quality"]["require_citations"])
             self.assertTrue(context["quality"]["fail_on_warnings"])
+            self.assertFalse(context["quality"]["fail_on_budget_truncation"])
             self.assertTrue(context["quality"]["budget_truncated"])
             self.assertEqual(context["quality"]["budget_omitted_items"], context["budget"]["omitted_items"])
             self.assertEqual(context["quality"]["budget_clipped_items"], context["budget"]["clipped_items"])
             self.assertIn("warnings:1", context["quality"]["failed"])
+
+    def test_session_start_can_fail_on_budget_truncation(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            run_cli("--path", str(kb), "remember", "Adapters should fail closed when startup context is clipped by a budget", "--type", "workflow", "--evidence", "AKBP.md")
+            request = json.dumps({
+                "id": "start-budget-gate",
+                "path": str(kb),
+                "method": "akbp.session.start",
+                "params": {
+                    "task": "adapter startup budget gate",
+                    "limit": 5,
+                    "max_chars": 24,
+                    "min_items": 1,
+                    "require_citations": True,
+                    "fail_on_budget_truncation": True,
+                },
+            }) + "\n"
+            proc = subprocess.run([sys.executable, str(SERVER)], input=request, text=True, capture_output=True, check=True)
+            line = json.loads(proc.stdout)
+            self.assertFalse(line["ok"])
+            self.assertEqual(line["error"]["code"], "cli_error")
+            context = json.loads(line["error"]["details"]["stdout"])
+            self.assertFalse(context["quality"]["ok"])
+            self.assertFalse(context["quality"]["trusted_for_planning"])
+            self.assertEqual(context["quality"]["fallback_reason"], "budget_truncated")
+            self.assertFalse(context["quality"]["fail_on_warnings"])
+            self.assertTrue(context["quality"]["fail_on_budget_truncation"])
+            self.assertTrue(context["quality"]["budget_truncated"])
+            self.assertIn("budget_truncated:clipped=2,omitted=0", context["quality"]["failed"])
 
     def test_crystallize_session_method(self):
         with tempfile.TemporaryDirectory() as d:
@@ -1620,6 +1653,7 @@ class ToolServerTest(unittest.TestCase):
             json.dumps({"id": "bad-import-check-flag", "method": "akbp.import_check", "params": {"file": "bundle.jsonl", "fail_on_rejected": "yes"}}),
             json.dumps({"id": "bad-source-verify-flag", "method": "akbp.source.verify", "params": {"source_id": "source_ok", "fail_on_issue": "yes"}}),
             json.dumps({"id": "bad-session-warning-flag", "method": "akbp.session.start", "params": {"task": "adapter lifecycle", "fail_on_warnings": "yes"}}),
+            json.dumps({"id": "bad-session-budget-flag", "method": "akbp.session.start", "params": {"task": "adapter lifecycle", "fail_on_budget_truncation": "yes"}}),
         ]) + "\n"
         proc = subprocess.run([sys.executable, str(SERVER)], input=requests, text=True, capture_output=True, check=True)
         lines = [json.loads(line) for line in proc.stdout.splitlines()]
@@ -1629,8 +1663,9 @@ class ToolServerTest(unittest.TestCase):
             ("fail_on_rejected must be a boolean", "#/$defs/akbp.import_check.params"),
             ("fail_on_issue must be a boolean", "#/$defs/akbp.source.verify.params"),
             ("fail_on_warnings must be a boolean", "#/$defs/akbp.session.start.params"),
+            ("fail_on_budget_truncation must be a boolean", "#/$defs/akbp.session.start.params"),
         ]
-        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 5)
+        self.assertEqual([line["error"]["code"] for line in lines], ["invalid_params"] * 6)
         for line, (message, schema_ref) in zip(lines, expected):
             self.assertIn(message, line["error"]["details"]["type_errors"])
             self.assertTrue(line["error"]["details"]["params_schema"].endswith(schema_ref))

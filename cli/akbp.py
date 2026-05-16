@@ -708,6 +708,7 @@ def workflow_context_selector(kb_path: str) -> dict[str, Any]:
                 "min_items": 1,
                 "require_citations": True,
                 "fail_on_warnings": True,
+                "fail_on_budget_truncation": True,
             },
         },
         "selection_rules": [
@@ -1266,6 +1267,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "min_items": 1,
                 "require_citations": True,
                 "fail_on_warnings": True,
+                "fail_on_budget_truncation": True,
             },
         },
         "planning_gate": {
@@ -1759,12 +1761,20 @@ def context_fallback_reason(failed: list[str]) -> str | None:
         return "no_context"
     if any(item.startswith("uncited_items:") for item in failed):
         return "uncited_context"
+    if any(item.startswith("budget_truncated:") for item in failed):
+        return "budget_truncated"
     if any(item.startswith("warnings:") for item in failed):
         return "warnings_present"
     return "preflight_failed"
 
 
-def context_quality(pack: dict[str, Any], min_items: int, require_citations: bool, fail_on_warnings: bool = False) -> dict[str, Any]:
+def context_quality(
+    pack: dict[str, Any],
+    min_items: int,
+    require_citations: bool,
+    fail_on_warnings: bool = False,
+    fail_on_budget_truncation: bool = False,
+) -> dict[str, Any]:
     items = pack.get("items", [])
     warnings = pack.get("warnings", [])
     budget = pack.get("budget") if isinstance(pack.get("budget"), dict) else {}
@@ -1779,6 +1789,12 @@ def context_quality(pack: dict[str, Any], min_items: int, require_citations: boo
         failed.append(f"minimum_items:{len(items)}<{min_items}")
     if require_citations and uncited:
         failed.append(f"uncited_items:{','.join(uncited)}")
+    if fail_on_budget_truncation and budget_truncated:
+        failed.append(
+            "budget_truncated:"
+            f"clipped={int(budget.get('clipped_items') or 0)},"
+            f"omitted={int(budget.get('omitted_items') or 0)}"
+        )
     if fail_on_warnings and warnings:
         failed.append(f"warnings:{len(warnings)}")
     ok = not failed
@@ -1789,6 +1805,7 @@ def context_quality(pack: dict[str, Any], min_items: int, require_citations: boo
         "minimum_items": min_items,
         "require_citations": require_citations,
         "fail_on_warnings": fail_on_warnings,
+        "fail_on_budget_truncation": fail_on_budget_truncation,
         "budget_truncated": budget_truncated,
         "budget_omitted_items": int(budget.get("omitted_items") or 0),
         "budget_clipped_items": int(budget.get("clipped_items") or 0),
@@ -1816,7 +1833,13 @@ def cmd_context(args: argparse.Namespace) -> int:
         "warnings": warnings,
     }
     pack = apply_context_budget(pack, args.max_chars)
-    pack["quality"] = context_quality(pack, args.min_items, args.require_citations, args.fail_on_warnings)
+    pack["quality"] = context_quality(
+        pack,
+        args.min_items,
+        args.require_citations,
+        args.fail_on_warnings,
+        args.fail_on_budget_truncation,
+    )
     if not pack["quality"]["ok"]:
         pack["warnings"].append("Context quality gate failed: " + "; ".join(pack["quality"]["failed"]))
     if args.markdown:
@@ -3062,6 +3085,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "min_items": 1,
                 "require_citations": True,
                 "fail_on_warnings": True,
+                "fail_on_budget_truncation": True,
             },
         },
         "planning_gate": {
@@ -3317,6 +3341,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "min_items": 1,
                     "require_citations": True,
                     "fail_on_warnings": True,
+                    "fail_on_budget_truncation": True,
                 },
                 "expect": {
                     "ok": True,
@@ -4108,6 +4133,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                         "min_items": 1,
                         "require_citations": True,
                         "fail_on_warnings": True,
+                        "fail_on_budget_truncation": True,
                     },
                 },
                 "must_preserve": [
@@ -4154,6 +4180,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                         "min_items": 1,
                         "require_citations": True,
                         "fail_on_warnings": True,
+                        "fail_on_budget_truncation": True,
                     },
                 },
                 "required_checks": [
@@ -4666,6 +4693,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "min_items": 1,
                 "require_citations": True,
                 "fail_on_warnings": True,
+                "fail_on_budget_truncation": True,
             },
         },
         "response_contract": {
@@ -4829,6 +4857,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "result.quality.minimum_items": 1,
                     "result.quality.require_citations": True,
                     "result.quality.fail_on_warnings": True,
+                    "result.quality.fail_on_budget_truncation": True,
                 },
                 "on_failure": "Continue without recalled context and surface the structured error.",
             },
@@ -4841,6 +4870,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "max_chars": 4000,
                 "require_budget": True,
                 "fail_on_warnings": True,
+                "fail_on_budget_truncation": True,
                 "trust_gate_ref": "adapter_prompt_contract.startup_trust_gate",
                 "budget_policy": "request bounded cited context with max_chars; surface budget truncation warnings before relying on recalled memory",
                 "warning_policy": "request fail_on_warnings:true for startup checks; continue without recalled memory when warnings are present unless a human explicitly downgrades the gate",
@@ -5624,6 +5654,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--min-items", type=int, default=0, help="fail when fewer context items are returned")
     s.add_argument("--require-citations", action="store_true", help="fail when returned context items lack citations")
     s.add_argument("--fail-on-warnings", action="store_true", help="fail when the context pack includes warnings")
+    s.add_argument("--fail-on-budget-truncation", action="store_true", help="fail when max-chars clips or omits context items")
     s.add_argument("--markdown", action="store_true")
     s.set_defaults(func=cmd_context)
 

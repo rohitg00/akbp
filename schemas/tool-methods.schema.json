@@ -89,6 +89,11 @@
           "type": "boolean",
           "default": false,
           "description": "Return a failing context quality gate when the context pack contains warnings such as source drift, uncited context, or budget truncation."
+        },
+        "fail_on_budget_truncation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Return a failing context quality gate when max_chars clips or omits context items."
         }
       }
     },
@@ -610,6 +615,11 @@
           "type": "boolean",
           "default": false,
           "description": "Fail the startup context gate when the context pack contains warnings so adapters can continue without recalled memory instead of planning from risky context."
+        },
+        "fail_on_budget_truncation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Fail the startup context gate when max_chars clips or omits context items so adapters can continue without recalled memory instead of planning from incomplete context."
         }
       }
     },

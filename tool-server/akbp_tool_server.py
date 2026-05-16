@@ -79,7 +79,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.status": {"write": False, "params": ["limit", "profile"]},
     "akbp.doctor": {"write": False, "params": ["profile"]},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
-    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings"]},
+    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings", "fail_on_budget_truncation"]},
     "akbp.index": {"write": True, "params": ["incremental", "dry_run"]},
     "akbp.search": {"write": False, "params": ["query", "limit"]},
     "akbp.remember": {"write": True, "params": ["text", "type", "evidence", "entity", "dry_run"]},
@@ -96,7 +96,7 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.supersede": {"write": True, "params": ["old_claim_id", "text", "type", "evidence", "entity", "dry_run"]},
     "akbp.contradict": {"write": True, "params": ["source_claim_id", "target_claim_id", "evidence", "dry_run"]},
     "akbp.crystallize_session": {"write": True, "params": ["transcript", "apply", "dry_run"]},
-    "akbp.session.start": {"write": False, "params": ["task", "query", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings"]},
+    "akbp.session.start": {"write": False, "params": ["task", "query", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings", "fail_on_budget_truncation"]},
     "akbp.session.end": {"write": True, "params": ["transcript", "apply", "dry_run"]},
 }
 
@@ -536,6 +536,8 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         argv.append("--require-citations")
     if method in {"akbp.context", "akbp.session.start"} and params.get("fail_on_warnings"):
         argv.append("--fail-on-warnings")
+    if method in {"akbp.context", "akbp.session.start"} and params.get("fail_on_budget_truncation"):
+        argv.append("--fail-on-budget-truncation")
     if method == "akbp.index" and params.get("incremental"):
         argv.append("--incremental")
     for evidence in params.get("evidence", []) or []:
@@ -854,6 +856,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("fail_on_issues must be a boolean")
     if "fail_on_warnings" in params and not isinstance(params.get("fail_on_warnings"), bool):
         errors.append("fail_on_warnings must be a boolean")
+    if "fail_on_budget_truncation" in params and not isinstance(params.get("fail_on_budget_truncation"), bool):
+        errors.append("fail_on_budget_truncation must be a boolean")
     for list_name in ("evidence", "entity"):
         if list_name not in params:
             continue

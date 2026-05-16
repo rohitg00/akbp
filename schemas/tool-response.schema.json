@@ -1775,6 +1775,7 @@
             "minimum_items",
             "require_citations",
             "fail_on_warnings",
+            "fail_on_budget_truncation",
             "budget_truncated",
             "budget_omitted_items",
             "budget_clipped_items",
@@ -1798,6 +1799,7 @@
               "enum": [
                 "no_context",
                 "uncited_context",
+                "budget_truncated",
                 "warnings_present",
                 "preflight_failed",
                 null
@@ -1811,6 +1813,9 @@
               "type": "boolean"
             },
             "fail_on_warnings": {
+              "type": "boolean"
+            },
+            "fail_on_budget_truncation": {
               "type": "boolean"
             },
             "budget_truncated": {
