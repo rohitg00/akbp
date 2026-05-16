@@ -1,0 +1,107 @@
+{
+  "id": "contested-memory-planning-gate-001",
+  "task": "Verify adapters fail closed before planning from retrieved claims whose lifecycle status is contested.",
+  "profiles": ["adapter-quality", "retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_old_runtime_note",
+        "type": "file",
+        "locator": "notes/old-runtime-memory-policy.md",
+        "title": "Old runtime memory policy"
+      },
+      {
+        "id": "source_review_dispute",
+        "type": "transcript",
+        "locator": "sessions/review-dispute.md",
+        "title": "Memory policy dispute review"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_runtime_memory_can_plan_without_review",
+        "text": "A coding-agent adapter can plan from recalled runtime memory as soon as the memory text matches the task, even if the claim is under active dispute.",
+        "type": "workflow",
+        "status": "contested",
+        "confidence": 0.41,
+        "evidence": ["source_old_runtime_note"],
+        "entities": [
+          "coding-agent",
+          "runtime-memory",
+          "planning",
+          "contested-claim"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_contested_memory_requires_resolution",
+        "text": "Adapters should treat retrieved contested AKBP claims as review blockers and continue without recalled memory for planning until the claim is resolved or superseded.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": ["source_review_dispute"],
+        "entities": [
+          "adapter",
+          "contested-claim",
+          "review-blocker",
+          "trusted-for-planning"
+        ],
+        "scope": "project"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_review_disputes_runtime_memory_plan",
+        "source": "claim_contested_memory_requires_resolution",
+        "target": "claim_runtime_memory_can_plan_without_review",
+        "relation": "contradicts",
+        "confidence": 0.88,
+        "evidence": ["source_review_dispute"]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "context-contested-memory-fail-closed",
+        "method": "akbp.context",
+        "params": {
+          "task": "coding-agent runtime memory planning contested claim",
+          "limit": 1,
+          "min_items": 1,
+          "require_citations": true,
+          "fail_on_warnings": true
+        },
+        "expected_error_code": "cli_error",
+        "expected_error_schema": "#/$defs/cli_error_details",
+        "expected_error_fields": ["method", "exit_code", "stdout", "redacted", "truncated"],
+        "expected_error_values": {
+          "method": "akbp.context",
+          "exit_code": 1,
+          "redacted": false,
+          "truncated": false
+        },
+        "expected_error_stdout_contains": {
+          "items[].id": ["claim_runtime_memory_can_plan_without_review"],
+          "items[].freshness": ["contested"],
+          "warnings[]": ["Retrieved contested claim(s): claim_runtime_memory_can_plan_without_review; resolve or supersede before trusting recalled memory for planning."],
+          "quality.ok": [false],
+          "quality.trusted_for_planning": [false],
+          "quality.fallback_reason": ["warnings_present"],
+          "quality.failed[]": ["warnings:1"]
+        }
+      }
+    ]
+  },
+  "query": "coding-agent runtime memory planning contested claim",
+  "expected": {
+    "must_retrieve": ["claim_runtime_memory_can_plan_without_review"],
+    "must_cite": ["source_old_runtime_note"],
+    "must_cite_in_context": ["source_old_runtime_note"],
+    "must_preserve": ["claim_contested_memory_requires_resolution"],
+    "must_flag_conflict": true,
+    "answer_should_include": [
+      "contested",
+      "review blockers",
+      "planning"
+    ]
+  }
+}

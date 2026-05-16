@@ -1548,11 +1548,24 @@ def source_drift_warnings(base: Path, results: list[dict[str, Any]], limit: int)
     return warnings[:limit]
 
 
+def contested_claim_warnings(results: list[dict[str, Any]], limit: int) -> list[str]:
+    contested = [
+        str(result.get("id"))
+        for result in results
+        if result.get("type") == "claim" and str(result.get("status") or "").lower() == "contested"
+    ]
+    if not contested:
+        return []
+    joined = ", ".join(contested[:limit])
+    return [f"Retrieved contested claim(s): {joined}; resolve or supersede before trusting recalled memory for planning."]
+
+
 def cmd_query(args: argparse.Namespace) -> int:
     base = root(args.path)
     results = collect_results(base, args.query, args.limit)
     inactive_matches = inactive_claim_matches(base, args.query, args.limit)
     warnings = source_drift_warnings(base, results, args.limit)
+    warnings.extend(contested_claim_warnings(results, args.limit))
     if inactive_matches:
         skipped = ", ".join(str(item["id"]) for item in inactive_matches)
         warnings.append(f"Skipped inactive matching claims: {skipped}")
@@ -1688,6 +1701,7 @@ def cmd_context(args: argparse.Namespace) -> int:
     inactive_matches = inactive_claim_matches(base, args.task, args.limit)
     warnings = [] if results else ["No matching AKBP context found."]
     warnings.extend(source_drift_warnings(base, results, args.limit))
+    warnings.extend(contested_claim_warnings(results, args.limit))
     if inactive_matches:
         skipped = ", ".join(str(item["id"]) for item in inactive_matches)
         warnings.append(f"Skipped inactive matching claims: {skipped}")

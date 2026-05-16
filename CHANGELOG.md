@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added contested-claim warnings to query/context retrieval and a fail-closed
+  benchmark fixture so adapters do not plan from disputed recalled memory.
 - Added a local-first adoption probe check to the adoption preflight example so
   installer UIs prove the memory-server comparison contract before positioning
   AKBP as a trusted local project-memory layer.

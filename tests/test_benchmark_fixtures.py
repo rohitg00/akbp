@@ -183,6 +183,23 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("context-pressure-startup", report["tool_output_ids"])
 
+    def test_contested_memory_fixture_fails_closed_before_planning(self):
+        path = FIXTURES / "contested-memory-planning-gate" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.context")
+        self.assertTrue(request["params"]["fail_on_warnings"])
+        self.assertEqual(request["expected_error_code"], "cli_error")
+        self.assertEqual(request["expected_error_stdout_contains"]["items[].freshness"], ["contested"])
+        self.assertEqual(request["expected_error_stdout_contains"]["quality.trusted_for_planning"], [False])
+        self.assertIn(
+            "claim_runtime_memory_can_plan_without_review",
+            request["expected_error_stdout_contains"]["items[].id"],
+        )
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("context-contested-memory-fail-closed", report["tool_output_ids"])
+
     def test_startup_context_relevance_fixture_covers_task_relevant_cited_startup(self):
         path = FIXTURES / "startup-context-relevance" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
