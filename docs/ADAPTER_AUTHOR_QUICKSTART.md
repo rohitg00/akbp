@@ -23,6 +23,15 @@ If a runtime cannot tell the user which KB it is reading or writing, keep it
 read-only. AKBP's durable value comes from reviewable scope, citations, and
 auditability, not from silently accumulating more memory.
 
+For runtimes with a pre-compaction, context-pruning, or session-summary hook,
+wire that hook to `akbp.session.end` with `dry_run:true` before the transcript is
+lost. The hook should stage only durable candidates with source ids, absolute
+dates, lifecycle intent, and review notes. If the preview is empty, uncited,
+redacted, or too broad, keep it as runtime scratch state and do not apply it.
+Only repeat the exact reviewed request with `approved:true` after a visible
+approval step. This gives adapters a concrete compaction safety path without
+turning raw chat history into hidden memory.
+
 When several clients should share memory, point them at the same explicit
 knowledge-base path and use `client-config.multi_client_scope` as the contract.
 Each client keeps its own scratchpads and private logs outside AKBP, reads
