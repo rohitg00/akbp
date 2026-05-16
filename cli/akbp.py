@@ -236,6 +236,62 @@ def adapter_profile_selection(kb_path: str) -> dict[str, Any]:
     }
 
 
+def adapter_tool_schema_budget(
+    kb_path: str,
+    profile: str = "read_only",
+    exposed_methods: list[str] | None = None,
+) -> dict[str, Any]:
+    if exposed_methods is None:
+        exposed_methods = [
+            "akbp.capabilities",
+            "akbp.doctor",
+            "akbp.session.start",
+            "akbp.context",
+            "akbp.search",
+            "akbp.cite",
+            "akbp.source.verify",
+            "akbp.import_check",
+        ]
+    return {
+        "format": "akbp-tool-schema-budget-v1",
+        "purpose": "Keep host tool descriptions bounded by the selected AKBP profile instead of loading every memory and write schema into the model context.",
+        "research_signal": "Recent tool-protocol guidance emphasizes that every exposed tool schema consumes context; AKBP adapters should publish the smallest safe method set and upgrade only after preflight.",
+        "selected_profile": profile,
+        "safe_default": "publish_read_only_allowlist",
+        "schema_strategy": [
+            "Expose only the selected profile's method schemas to the host.",
+            "Keep write-capable methods out of the host tool list until a review surface exists.",
+            "Use akbp.capabilities for discovery instead of embedding all method documentation in the prompt.",
+            "Request bounded startup context with max_chars before planning from recalled memory.",
+        ],
+        "exposed_methods": exposed_methods,
+        "exposed_method_count": len(exposed_methods),
+        "blocked_until_needed": [
+            "akbp.remember",
+            "akbp.source.add",
+            "akbp.ingest",
+            "akbp.import_apply",
+            "akbp.index",
+            "akbp.session.end",
+            "akbp.crystallize_session",
+            "akbp.supersede",
+            "akbp.contradict",
+        ],
+        "upgrade_preflight": [
+            f"akbp --path {kb_path} doctor --profile reviewed-writes",
+            "akbp.capabilities with requires_profiles:[\"reviewed_write\"]",
+            "./examples/structured-output-harness/run.sh",
+        ],
+        "fail_closed_when": [
+            "the host cannot choose tools by profile",
+            "tool schemas are flattened into an uncited prompt summary",
+            "write methods are exposed without dry-run preview and approval handling",
+            "startup context budget warnings cannot be surfaced",
+        ],
+        "fallback": "Expose the read-only allowlist only, retrieve cited context on demand, and keep write-capable schemas disabled.",
+    }
+
+
 def inherited_repo_intake_contract(kb_path: str) -> dict[str, Any]:
     return {
         "format": "akbp-inherited-repo-intake-v1",
@@ -575,6 +631,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         warnings.append("Some artifact paths from akbp.json are missing; run doctor before trusting this KB.")
     kb_arg = shlex.quote(str(kb_root))
     profile_selection = adapter_profile_selection(kb_arg)
+    tool_schema_budget = adapter_tool_schema_budget(kb_arg)
     external_memory_promotion = external_memory_promotion_contract(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
@@ -1003,6 +1060,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "memory_server_bridge": memory_server_bridge,
         "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
+        "tool_schema_budget": tool_schema_budget,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
@@ -2749,6 +2807,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "surface_fields": ["result.ok", "result.accepted_count", "result.rejected_count", "result.errors"],
         },
     ]
+    tool_schema_budget = adapter_tool_schema_budget(
+        kb_path,
+        profile=requested_profile,
+        exposed_methods=[entry["method"] for entry in read_only_bridge_tools],
+    )
     host_tool_manifest = {
         "format": "akbp-tool-host-manifest-v1",
         "purpose": "Generate host-facing read-only tools from AKBP JSONL methods without creating a second memory format.",
@@ -2761,6 +2824,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "knowledge_base_path": kb_path,
         "default_mode": "read_only",
         "approval_boundary": "write tools require a separate reviewed-write surface outside the model-generated tool call",
+        "tool_schema_budget": tool_schema_budget,
         "tools": [
             {
                 "name": entry["tool"],
@@ -2837,6 +2901,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "knowledge_base_path": kb_path,
         "default_mode": "read_only",
         "transport_adapter": "stdio-jsonl-to-host-tools",
+        "tool_schema_budget": tool_schema_budget,
         "response_contract": {
             "preserve_envelope": True,
             "branch_on": "error.code",
@@ -3040,6 +3105,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "host_capability_descriptor": host_capability_descriptor,
         "tool_protocol_bridge_snippets": tool_protocol_bridge_snippets,
         "profile_selection": profile_selection,
+        "tool_schema_budget": tool_schema_budget,
         "runtime_requirements": {
             "local_first": True,
             "network_required": False,
@@ -3765,6 +3831,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "forward_tools": read_only_bridge_tools,
             "host_tool_manifest": host_tool_manifest,
             "client_tool_manifest": client_tool_manifest,
+            "tool_schema_budget": tool_schema_budget,
             "read_only_allowlist": [
                 "akbp.capabilities",
                 "akbp.doctor",

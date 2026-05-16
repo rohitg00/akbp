@@ -89,6 +89,13 @@ control-flow contract: discover capabilities, branch on `ok` and
 `approval_required`, and only repeat the same reviewed method, path, and params
 with `approved:true` after approval or trusted local policy.
 
+The latest scan also reinforced a context-budget point: tool-protocol hosts can
+pay real prompt cost for every exposed method schema. AKBP adapters should not
+publish every memory and write method by default. Discovery and generated client
+configs should make the least-privileged method set explicit, start from the
+read-only allowlist, and expose write-capable schemas only after capability,
+doctor, harness, and review-surface checks pass.
+
 ### 6. Users like high-level memory features, but protocol users need exact artifacts
 
 Common features in the landscape:
@@ -238,6 +245,21 @@ This turns the research-backed adoption gap into setup data: before an adapter
 trusts recalled context, it can show which AKBP path is selected, what belongs
 there, what must stay out, and why write-capable flows remain blocked until
 dry-run review and approval exist.
+
+## Shipped artifact: tool schema budget contract
+
+`akbp discover` and `akbp client-config` now emit `tool_schema_budget`, a
+profile-aware contract for host tool exposure:
+
+- publish only the selected profile's methods
+- keep write-capable schemas blocked until reviewed-write preflight passes
+- use `akbp.capabilities` for discovery instead of pasting every method into
+  the model prompt
+- request bounded startup context before planning from recalled memory
+
+This keeps AKBP adapter setup aligned with recent tool-protocol guidance:
+memory should be available on demand, but schema exposure itself must remain
+bounded and review-aware.
 
 ## Shipped artifact: compaction handoff recall proof
 

@@ -381,6 +381,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(manifest["default_mode"], "read_only")
             self.assertIn("second memory format", manifest["purpose"])
             self.assertIn("separate reviewed-write surface", manifest["approval_boundary"])
+            self.assertEqual(manifest["tool_schema_budget"]["format"], "akbp-tool-schema-budget-v1")
+            self.assertEqual(manifest["tool_schema_budget"]["selected_profile"], "reviewed_write")
+            self.assertEqual(manifest["tool_schema_budget"]["exposed_method_count"], len(forward_tools))
+            self.assertIn("akbp.remember", manifest["tool_schema_budget"]["blocked_until_needed"])
+            self.assertIn("every exposed tool schema consumes context", manifest["tool_schema_budget"]["research_signal"])
             self.assertEqual(
                 [tool["forwards_to"] for tool in manifest["tools"]],
                 config["tool_protocol_bridge"]["read_only_allowlist"],
@@ -417,6 +422,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(client_manifest["knowledge_base_path"], str(kb.resolve()))
             self.assertEqual(client_manifest["default_mode"], "read_only")
             self.assertEqual(client_manifest["transport_adapter"], "stdio-jsonl-to-host-tools")
+            self.assertEqual(client_manifest["tool_schema_budget"], manifest["tool_schema_budget"])
             self.assertTrue(client_manifest["response_contract"]["preserve_envelope"])
             self.assertEqual(client_manifest["response_contract"]["branch_on"], "error.code")
             self.assertTrue(client_manifest["response_contract"]["surface_citations"])
@@ -433,6 +439,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(client_manifest["preflight_requests"], manifest["preflight_requests"])
             self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
+            self.assertEqual(
+                config["tool_protocol_bridge"]["tool_schema_budget"]["exposed_methods"],
+                config["tool_protocol_bridge"]["read_only_allowlist"],
+            )
             self.assertIn("akbp.remember", config["tool_protocol_bridge"]["blocked_write_methods"])
             self.assertIn("akbp.source.add", config["tool_protocol_bridge"]["blocked_write_methods"])
             self.assertIn("akbp.index", config["tool_protocol_bridge"]["blocked_write_methods"])
@@ -504,6 +514,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["startup"]["params"]["requires_profiles"], ["read_only"])
             self.assertEqual(read_only["profile_selection"]["format"], "akbp-adapter-profile-selection-v1")
             self.assertEqual(read_only["profile_selection"]["safe_default"], "read_only")
+            self.assertEqual(read_only["tool_schema_budget"]["safe_default"], "publish_read_only_allowlist")
+            self.assertEqual(read_only["tool_schema_budget"]["selected_profile"], "read_only")
+            self.assertIn("akbp.capabilities", read_only["tool_schema_budget"]["exposed_methods"])
+            self.assertIn("akbp.session.end", read_only["tool_schema_budget"]["blocked_until_needed"])
             profile_names = [profile["profile"] for profile in read_only["profile_selection"]["profiles"]]
             self.assertEqual(profile_names, ["startup_context", "read_only", "reviewed_write"])
             reviewed_profile = read_only["profile_selection"]["profiles"][2]
@@ -628,6 +642,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 run_cli("--path", str(kb), "client-config", "--profile", "startup-context").stdout
             )
             self.assertEqual(startup_context["startup"]["params"]["requires_profiles"], ["startup_context"])
+            self.assertEqual(startup_context["tool_schema_budget"]["selected_profile"], "startup_context")
             self.assertNotIn("write_apply_requires_approval", startup_context["startup"]["params"]["requires"])
             self.assertEqual(startup_context["health_check"]["params"]["profile"], "startup_context")
             self.assertEqual(startup_context["tool_protocol_bridge"]["host_tool_manifest"]["preflight_requests"][1]["params"]["profile"], "startup_context")
@@ -694,6 +709,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("doctor --profile read-only", selection["profiles"][1]["required_preflight"][0])
             self.assertIn("approved:true", " ".join(selection["profiles"][2]["allowed_methods"]))
             self.assertIn("keep the integration read-only", selection["fallback"])
+            schema_budget = discovered["tool_schema_budget"]
+            self.assertEqual(schema_budget["format"], "akbp-tool-schema-budget-v1")
+            self.assertEqual(schema_budget["selected_profile"], "read_only")
+            self.assertEqual(schema_budget["exposed_method_count"], len(schema_budget["exposed_methods"]))
+            self.assertIn("akbp.search", schema_budget["exposed_methods"])
+            self.assertIn("akbp.import_apply", schema_budget["blocked_until_needed"])
+            self.assertIn("profile", " ".join(schema_budget["schema_strategy"]))
+            self.assertIn("read-only allowlist", schema_budget["fallback"])
             memory_bridge = discovered["memory_server_bridge"]
             self.assertEqual(memory_bridge["format"], "akbp-memory-server-bridge-v1")
             self.assertEqual(memory_bridge["safe_default"], "treat_existing_memory_as_ephemeral_until_import_checked")
