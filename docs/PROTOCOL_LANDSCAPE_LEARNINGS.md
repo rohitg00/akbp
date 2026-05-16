@@ -639,3 +639,27 @@ not depend on host-local memory state.
 
 If a host registry cannot express those semantics, the safe integration is
 read-only startup context tools, not a generic automatic memory store.
+
+## Shipped artifact: install friction checks
+
+The latest lightweight scan found the same pull from several adjacent memory
+tools: local setup should feel cheap, often framed as no Docker, no API keys,
+one binary or server, and shared memory across multiple coding clients.
+
+AKBP should meet that setup bar without copying the unsafe part of the pattern.
+`akbp client-config` now exposes
+`memory_landscape_fit.install_friction_checks` so installers can answer three
+first-run questions before positioning AKBP as memory:
+
+- can the user start locally without Docker, a cloud account, API keys, or a
+  hosted database?
+- can multiple clients share the same selected KB without creating hidden
+  per-client durable stores?
+- can setup stay read-only until citations, response envelopes, and review
+  metadata are preserved?
+
+Success criteria:
+
+- quick-start UX stays competitive with local memory servers
+- trust still comes from cited, reviewed AKBP artifacts
+- installers have machine-readable checks instead of prose-only positioning

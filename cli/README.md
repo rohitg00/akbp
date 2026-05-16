@@ -203,7 +203,10 @@ Use `memory_landscape_fit` when users are comparing AKBP with tool-protocol memo
 servers, local memory databases, graph-memory tools, or product-native agent
 memory. The generated checks keep the explanation concrete: inspectable
 artifacts, citations, dry-run preview, approved apply, lifecycle updates, and
-export or import checks.
+export or import checks. Its `install_friction_checks` also cover the recent
+local-memory setup bar: no Docker, no cloud account, no API keys, shared
+multi-client scope, and read-only setup until the structured-output harness
+proves the adapter preserves citations, envelopes, and review metadata.
 Use `harness_adoption_fit` when users expect structured outputs and agent
 harnesses to make memory safer. It maps that expectation to a concrete setup
 gate: run the structured-output harness, preserve response envelopes, citations,

@@ -243,6 +243,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(landscape["format"], "akbp-memory-landscape-fit-v1")
             self.assertIn("tool-protocol memory servers", landscape["purpose"])
             self.assertIn("one-command local setup for coding-agent memory", landscape["observed_user_pull"])
+            self.assertIn("no-Docker and no-API-key local memory installs", landscape["observed_user_pull"])
             self.assertIn("shared memory across tool-protocol-compatible tools", landscape["observed_user_pull"])
             self.assertIn("reviewed durable project knowledge", landscape["akbp_should_own"])
             self.assertIn("cited startup context", landscape["akbp_should_own"])
@@ -251,6 +252,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("portable trust layer", landscape["installer_positioning"])
             self.assertIn("dry_run:true", " ".join(landscape["comparison_checks"]))
             self.assertIn("export-check", " ".join(landscape["comparison_checks"]))
+            friction = landscape["install_friction_checks"]
+            self.assertIn("without Docker", friction[0]["question"])
+            self.assertEqual(friction[0]["verify_with"], "ten_minute_proof.setup_claims")
+            self.assertIn("multi_client_scope.shared_kb_path", friction[1]["akbp_expectation"])
+            self.assertIn("structured-output harness", friction[2]["akbp_expectation"])
+            self.assertIn("harness_adoption_fit.minimum_gate", friction[2]["verify_with"])
             self.assertIn("ephemeral hint source", landscape["fallback"])
             harness_fit = config["harness_adoption_fit"]
             self.assertEqual(harness_fit["format"], "akbp-harness-adoption-fit-v1")

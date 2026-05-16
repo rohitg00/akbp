@@ -3545,6 +3545,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "purpose": "Help adapter installers explain where AKBP fits beside fast tool-protocol memory servers, local SQLite memories, graph memories, context reducers, and product-native agent memory.",
             "observed_user_pull": [
                 "one-command local setup for coding-agent memory",
+                "no-Docker and no-API-key local memory installs",
                 "shared memory across tool-protocol-compatible tools",
                 "knowledge graph or hierarchical recall over long-running projects",
                 "lower context-window pressure at session start",
@@ -3571,6 +3572,23 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Can writes be previewed with dry_run:true before approved:true apply?",
                 "Can stale knowledge be superseded or contradicted without deleting history?",
                 "Can export-check and import-check run without bridge-local state?",
+            ],
+            "install_friction_checks": [
+                {
+                    "question": "Can a new user start without Docker, a cloud account, API keys, or a hosted database?",
+                    "akbp_expectation": "Use local CLI or stdio JSONL against the selected knowledge_base.path.",
+                    "verify_with": "ten_minute_proof.setup_claims",
+                },
+                {
+                    "question": "Can multiple clients share the same reviewed project knowledge without hidden per-client stores?",
+                    "akbp_expectation": "Use multi_client_scope.shared_kb_path and pass startup.params.client for attribution.",
+                    "verify_with": "multi_client_scope",
+                },
+                {
+                    "question": "Can setup stay read-only until citations, response envelopes, and review metadata are preserved?",
+                    "akbp_expectation": "Start from read_only, run the structured-output harness, then enable reviewed_write only after the review surface exists.",
+                    "verify_with": "first_run_sequence and harness_adoption_fit.minimum_gate",
+                },
             ],
             "fallback": "If an adjacent memory tool cannot preserve citations, review metadata, or exportable artifacts, keep AKBP read-only and treat that tool as an ephemeral hint source.",
         },

@@ -122,7 +122,12 @@ tool-protocol exposure, context-window savings, or product-native agent memory. 
 not fight those layers for runtime UX. Use `memory_landscape_fit` from
 `akbp client-config` to explain the split: adjacent tools can stay ephemeral or
 serve low-latency recall, while AKBP remains the cited, reviewed, exportable
-project-knowledge substrate.
+project-knowledge substrate. Use
+`memory_landscape_fit.install_friction_checks` when a user asks why AKBP is not
+just another local memory server: the first-run proof should show no Docker or
+cloud account requirement, one selected KB shared across clients, and a
+read-only setup until the host preserves citations, envelopes, and review
+metadata.
 
 When users ask for structured outputs, harnesses, or predictable agent memory,
 also use `harness_adoption_fit` from `akbp client-config`. It turns that
