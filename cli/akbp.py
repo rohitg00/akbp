@@ -3696,6 +3696,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "evidence": "multi_client_scope plus export-check output",
                 },
                 {
+                    "claim": "a tool-protocol memory server is enough persistent memory",
+                    "akbp_check": "Require transport-level capability discovery plus AKBP source-of-truth artifacts: the server may expose tools, but durable project knowledge must remain cited, review-gated, and export-checkable.",
+                    "evidence": "akbp.capabilities knowledge_capability plus memory_server_bridge.minimum_preflight and export-check output",
+                },
+                {
                     "claim": "branch-aware handoffs prevent stale coding-agent context",
                     "akbp_check": "Require the adapter to record git branch, worktree path, and commit or source ids as review metadata, while keeping repository state in Git and durable decisions in AKBP.",
                     "evidence": "git_native_handoff_branch_scope plus cited session.start context",

@@ -660,12 +660,15 @@ first-run questions before positioning AKBP as memory:
 
 The current scan also found a sharper comparison problem: adjacent memory tools
 often advertise semantic recall, graph memory, token savings, shared memory, or
-local-first safety as feature claims. AKBP should turn those claims into
-verifiable adapter gates instead of accepting them as positioning copy.
+local-first safety as feature claims. The latest scan adds one more common
+shortcut: treating a tool-protocol memory server as sufficient durable
+project memory just because it exposes persistent tools. AKBP should turn those
+claims into verifiable adapter gates instead of accepting them as positioning
+copy.
 `memory_landscape_fit.feature_claim_audit` now maps those claims to checks for
 cited context, runnable search or benchmark proof, preserved context budget
-diagnostics, one selected KB path, export-checkable artifacts, and an
-`approval_required` stop before writes are enabled.
+diagnostics, one selected KB path, tool capability discovery, export-checkable
+artifacts, and an `approval_required` stop before writes are enabled.
 
 Recent Git-backed memory positioning adds a sharper adoption question: can a
 team review agent knowledge like code without losing citations, lifecycle
