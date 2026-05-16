@@ -241,6 +241,11 @@ def adapter_tool_schema_budget(
     profile: str = "read_only",
     exposed_methods: list[str] | None = None,
 ) -> dict[str, Any]:
+    profile_method_limits = {
+        "startup_context": 4,
+        "read_only": 8,
+        "reviewed_write": 8,
+    }
     if exposed_methods is None:
         exposed_methods = [
             "akbp.capabilities",
@@ -252,12 +257,18 @@ def adapter_tool_schema_budget(
             "akbp.source.verify",
             "akbp.import_check",
         ]
+    method_limit = profile_method_limits.get(profile, profile_method_limits["read_only"])
+    overflow_methods = exposed_methods[method_limit:]
     return {
         "format": "akbp-tool-schema-budget-v1",
         "purpose": "Keep host tool descriptions bounded by the selected AKBP profile instead of loading every memory and write schema into the model context.",
         "research_signal": "Recent tool-protocol guidance emphasizes that every exposed tool schema consumes context; AKBP adapters should publish the smallest safe method set and upgrade only after preflight.",
         "selected_profile": profile,
         "safe_default": "publish_read_only_allowlist",
+        "profile_method_limits": profile_method_limits,
+        "max_exposed_methods_for_profile": method_limit,
+        "within_budget": len(exposed_methods) <= method_limit,
+        "budget_check": "pass" if len(exposed_methods) <= method_limit else "fail",
         "schema_strategy": [
             "Expose only the selected profile's method schemas to the host.",
             "Keep write-capable methods out of the host tool list until a review surface exists.",
@@ -266,6 +277,7 @@ def adapter_tool_schema_budget(
         ],
         "exposed_methods": exposed_methods,
         "exposed_method_count": len(exposed_methods),
+        "overflow_methods": overflow_methods,
         "blocked_until_needed": [
             "akbp.remember",
             "akbp.source.add",
@@ -284,6 +296,7 @@ def adapter_tool_schema_budget(
         ],
         "fail_closed_when": [
             "the host cannot choose tools by profile",
+            "exposed_method_count is greater than max_exposed_methods_for_profile",
             "tool schemas are flattened into an uncited prompt summary",
             "write methods are exposed without dry-run preview and approval handling",
             "startup context budget warnings cannot be surfaced",
@@ -3047,10 +3060,21 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "surface_fields": ["result.ok", "result.accepted_count", "result.rejected_count", "result.errors"],
         },
     ]
+    startup_context_methods = ["akbp.capabilities", "akbp.doctor", "akbp.session.start", "akbp.context"]
+    bridge_tools_by_profile = {
+        "startup_context": set(startup_context_methods),
+        "read_only": {entry["method"] for entry in read_only_bridge_tools},
+        "reviewed_write": {entry["method"] for entry in read_only_bridge_tools},
+    }
+    bridge_tools = [
+        entry
+        for entry in read_only_bridge_tools
+        if entry["method"] in bridge_tools_by_profile[requested_profile]
+    ]
     tool_schema_budget = adapter_tool_schema_budget(
         kb_path,
         profile=requested_profile,
-        exposed_methods=[entry["method"] for entry in read_only_bridge_tools],
+        exposed_methods=[entry["method"] for entry in bridge_tools],
     )
     host_tool_manifest = {
         "format": "akbp-tool-host-manifest-v1",
@@ -3075,7 +3099,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "input_schema": entry["params_schema"],
                 "preserve_response_fields": entry["surface_fields"],
             }
-            for entry in read_only_bridge_tools
+            for entry in bridge_tools
         ],
         "preflight_requests": [
             {
@@ -3189,7 +3213,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "input_schema_ref": entry["params_schema"],
                 "preserve_response_fields": entry["surface_fields"],
             }
-            for entry in read_only_bridge_tools
+            for entry in bridge_tools
         ],
         "blocked_write_methods": [
             "akbp.remember",
@@ -3245,7 +3269,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "mode": "read_only",
                 "requires_review_surface": False,
                 "write_policy": "no_writes",
-                "methods": ["akbp.capabilities", "akbp.status", "akbp.session.start", "akbp.context", "akbp.search"],
+                "methods": startup_context_methods,
             },
             "read_only": {
                 "mode": "read_only",
@@ -3509,8 +3533,8 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "safe_default_profile": "read_only",
             "startup_profile": requested_profile,
             "tool_exposure": {
-                "read_only_tools": [entry["tool"] for entry in read_only_bridge_tools],
-                "forwards_to": {entry["tool"]: entry["method"] for entry in read_only_bridge_tools},
+                "read_only_tools": [entry["tool"] for entry in bridge_tools],
+                "forwards_to": {entry["tool"]: entry["method"] for entry in bridge_tools},
                 "blocked_write_methods": client_tool_manifest["blocked_write_methods"],
                 "enable_write_tools_only_when": [
                     "akbp.capabilities negotiation passes for reviewed_write",
@@ -4170,21 +4194,12 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         },
         "tool_protocol_bridge": {
             "mode": "reviewed_write" if requested_profile == "reviewed_write" else "read_only",
-            "forward_tools": read_only_bridge_tools,
+            "forward_tools": bridge_tools,
             "host_tool_manifest": host_tool_manifest,
             "client_tool_manifest": client_tool_manifest,
             "preflight_replay": preflight_replay,
             "tool_schema_budget": tool_schema_budget,
-            "read_only_allowlist": [
-                "akbp.capabilities",
-                "akbp.doctor",
-                "akbp.session.start",
-                "akbp.context",
-                "akbp.search",
-                "akbp.cite",
-                "akbp.source.verify",
-                "akbp.import_check",
-            ],
+            "read_only_allowlist": [entry["method"] for entry in bridge_tools],
             "blocked_write_methods": [
                 "akbp.remember",
                 "akbp.source.add",

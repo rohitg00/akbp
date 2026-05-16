@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added profile-specific host tool schema budgets to generated client configs
+  so startup-context adapters expose only the minimal cited-recall tools before
+  upgrading to broader read-only inspection.
 - Added a local-first adoption probe to generated client configs so installer
   UIs can verify no-Docker/no-cloud setup, cited startup context, approval
   gating, and export-checkable artifacts before positioning AKBP against

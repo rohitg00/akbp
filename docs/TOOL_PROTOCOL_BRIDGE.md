@@ -36,11 +36,20 @@ knowledge capability and trust boundary, not a claim that AKBP is a separate
 host protocol.
 
 The generated `tool_protocol_bridge.host_tool_manifest` is the smallest
-host-facing manifest for tool-protocol bridges. It repeats the stdio command,
-local knowledge-base path, read-only tool names, AKBP method targets, parameter
-schema refs, and response fields the bridge must preserve. Generate host tools
-from that manifest when possible; do not copy the list into a separate memory
-server config that can drift from `akbp.capabilities`.
+host-facing manifest for the selected profile. For `startup_context`, it only
+publishes capability discovery, doctor, session start, and bounded context. For
+`read_only` and `reviewed_write`, it publishes the broader read-only inspection
+surface while keeping write-capable methods blocked. The manifest repeats the
+stdio command, local knowledge-base path, tool names, AKBP method targets,
+parameter schema refs, and response fields the bridge must preserve. Generate
+host tools from that manifest when possible; do not copy the list into a
+separate memory server config that can drift from `akbp.capabilities`.
+
+The same payload includes `tool_schema_budget`. Treat
+`budget_check:"pass"` as the gate before exposing generated host tools. If
+`exposed_method_count` is greater than `max_exposed_methods_for_profile`, or
+`within_budget` is false, keep only the startup-context tools and rerun
+`client-config` for the intended profile.
 
 The same manifest includes `preflight_requests` for the startup checks an
 adapter should run before exposing tools: capability negotiation, doctor, and
@@ -151,6 +160,8 @@ Required behavior:
 - Run `tool_protocol_bridge.host_tool_manifest.preflight_requests` before exposing host tools, and branch on the structured `expect` fields.
 - Use `tool_protocol_bridge.preflight_replay.request_jsonl` as the runnable
   smoke test when the host needs a pasteable setup check instead of a manifest parser.
+- Check `tool_schema_budget.within_budget` before publishing host tools; do
+  not flatten every AKBP method schema into the model prompt by default.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.
