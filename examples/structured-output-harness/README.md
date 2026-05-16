@@ -35,7 +35,7 @@ dry-run review contract ok
 approval-required contract ok
 approved apply contract ok
 approved recall contract ok
-prompt contract harness ok
+prompt and repair contract harness ok
 AKBP structured output harness example passed
 ```
 
@@ -191,12 +191,38 @@ Unapproved writes are a hard stop, not a warning:
 }
 ```
 
+Generated client configs also include a repair map. Adapters may retry only
+schema or envelope mistakes they can fix locally; trust and approval failures
+must stop memory use or writes:
+
+```json
+{
+  "structured_output_repair": {
+    "format": "akbp-structured-output-repair-v1",
+    "retryable_after_local_fix": [
+      {"error_code": "invalid_json", "fix": "repair JSON serialization and resend the same intent without approved:true"},
+      {"error_code": "invalid_request", "fix": "repair the JSONL envelope, request id, method, path, or unknown request-level fields"},
+      {"error_code": "invalid_params", "fix": "repair params using error.details.params_schema, missing fields, unknown fields, and type_errors"},
+      {"error_code": "unknown_method", "fix": "refresh akbp.capabilities, then disable unavailable methods when still missing"}
+    ],
+    "never_auto_repair": [
+      "approval_required",
+      "startup context without citations",
+      "startup context with unsurfaced warnings",
+      "truncated context budget during startup trust gate"
+    ],
+    "write_retry_rule": "After any request or params repair, rerun write-capable methods as dry_run:true and require a fresh review before approved:true apply."
+  }
+}
+```
+
 ## What it proves
 
 - every response keeps the stable `id`, `ok`, `result`, and `error` envelope
 - capability negotiation advertises schema-backed params, structured errors, and reviewed-write policy
 - unsupported capability or profile requests leave `negotiation.satisfied:false` so adapters can disable unavailable flows before planning
 - invalid adapter payloads return `invalid_params` with a method schema reference and concrete field errors the adapter can use for repair
+- generated client config exposes which structured errors are locally repairable and which trust or approval failures must stop memory use or writes
 - adapter readiness exposes the dry-run and approval boundary before writes are enabled
 - startup context includes cited records before the adapter uses memory in a plan
 - startup context budget truncation exposes `budget.truncated`,
@@ -225,6 +251,7 @@ ignores citations, warnings, approval boundaries, or unsupported profiles.
 | Envelope | Every response has exactly `id`, `ok`, `result`, and `error`, and the adapter branches on `ok` before reading nested fields. | The host treats malformed JSON, missing fields, or `ok:false` as usable memory. |
 | Capability negotiation | `result.negotiation.satisfied` is true for the requested features and profiles before the adapter enables that flow. | The host silently falls back from a missing profile to a weaker memory mode. |
 | Repairable params | `invalid_params` includes `params_schema` and concrete `type_errors` that the bridge can map back to its payload. | The host retries by changing free-form prompt text instead of fixing the structured request. |
+| Repair map | `structured_output_repair` marks `invalid_json`, `invalid_request`, `invalid_params`, and `unknown_method` as locally repairable, while `approval_required`, uncited startup context, unsurfaced warnings, and truncated startup context are never auto-repaired. | The host asks the model to continue after a trust or approval failure, or resends a write as `approved:true` after repairing params without a fresh dry-run review. |
 | Startup trust | `akbp.session.start` returns at least one cited item, preserves `result.context.budget`, and surfaces warnings or truncation. | Context is empty, uncited, over budget, or warning-bearing and the runtime still plans from recalled memory. |
 | Review preview | Dry-run writes expose `review_required`, `would_write`, `would_write_paths`, `redacted`, `preview_fingerprint`, and `apply_instruction` to the review surface. | The user or policy cannot inspect or fingerprint the exact durable change before approval. |
 | Approval stop | Non-dry-run writes without `approved:true` return `error.code:"approval_required"` and the adapter stops. | The adapter logs a warning, asks the model to continue, or writes to another memory store. |

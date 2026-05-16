@@ -186,6 +186,16 @@ assert "ok" in prompt_contract["validation"]["branch_on"], prompt_contract
 assert "error.code" in prompt_contract["validation"]["branch_on"], prompt_contract
 assert "result.context.budget" in prompt_contract["validation"]["preserve_fields"], prompt_contract
 
+repair = config["structured_output_repair"]
+assert repair["format"] == "akbp-structured-output-repair-v1", repair
+retryable_codes = {item["error_code"] for item in repair["retryable_after_local_fix"]}
+assert {"invalid_json", "invalid_request", "invalid_params", "unknown_method"} <= retryable_codes, repair
+assert "approval_required" in repair["never_auto_repair"], repair
+assert "truncated context budget during startup trust gate" in repair["never_auto_repair"], repair
+assert "dry_run:true" in repair["write_retry_rule"], repair
+assert "approved:true" in repair["write_retry_rule"], repair
+assert "read-only" in repair["adapter_action"], repair
+
 rules = " ".join(prompt_contract["system_rules"])
 assert "Before planning" in rules, prompt_contract
 assert "Use only cited context" in rules, prompt_contract
@@ -200,7 +210,7 @@ assert steps["check_adapter_readiness"]["expect"]["result.adapter_readiness.revi
 assert steps["retrieve_cited_startup_context"]["expect"]["result.context.budget.max_chars"] == 4000, first_run
 assert steps["enable_writes_only_after_review_surface"]["expect"]["approval_outside_model_tool_call"], first_run
 
-print("prompt contract harness ok")
+print("prompt and repair contract harness ok")
 '
 
 echo "AKBP structured output harness example passed"
