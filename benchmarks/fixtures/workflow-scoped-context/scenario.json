@@ -1,0 +1,97 @@
+{
+  "id": "workflow-scoped-context-001",
+  "task": "Verify adapters with a selected workflow or node retrieve cited startup context scoped to the active workflow instead of broad repository memory.",
+  "profiles": ["adapter-quality", "retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_workflow_scope_review",
+        "type": "file",
+        "locator": "docs/workflow-scope-review.md",
+        "title": "Workflow scoped context review"
+      },
+      {
+        "id": "source_repository_memory_overview",
+        "type": "file",
+        "locator": "docs/repository-memory-overview.md",
+        "title": "Repository memory overview"
+      },
+      {
+        "id": "source_node_runbook",
+        "type": "file",
+        "locator": "workflows/payment-refund-node.md",
+        "title": "Payment refund node runbook"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_workflow_scope_requires_selected_node_context",
+        "text": "When a coding-agent adapter knows the active workflow and selected node, startup context should retrieve the cited workflow-scoped runbook and current node constraints before planning edits.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.91,
+        "evidence": ["source_workflow_scope_review", "source_node_runbook"],
+        "entities": [
+          "workflow-scoped-context",
+          "selected-node",
+          "startup-context",
+          "coding-agent-adapter",
+          "payment-refund-workflow"
+        ],
+        "scope": "workflow/payment-refund"
+      },
+      {
+        "id": "claim_broad_repo_memory_is_background_only",
+        "text": "Broad repository memory can explain project architecture, but it should stay background-only when the active task is scoped to a specific workflow node.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.82,
+        "evidence": ["source_repository_memory_overview"],
+        "entities": [
+          "repository-memory",
+          "workflow-scoped-context",
+          "background-context"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "session-start-workflow-scope",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "edit selected payment refund workflow node with workflow-scoped startup context citations",
+          "limit": 1,
+          "max_chars": 900,
+          "require_citations": true
+        },
+        "expected_result_schema": "#/$defs/session_start_result",
+        "expected_result_fields": ["session_id", "task", "context"],
+        "expected_result_values": {
+          "task": "edit selected payment refund workflow node with workflow-scoped startup context citations"
+        },
+        "expected_result_contains": {
+          "context.items[].id": ["claim_workflow_scope_requires_selected_node_context"],
+          "context.items[].citations[]": ["source_workflow_scope_review", "source_node_runbook"],
+          "context.items[].freshness": ["stable"],
+          "context.quality.ok": [true],
+          "context.quality.require_citations": [true],
+          "context.budget.max_chars": [900]
+        }
+      }
+    ]
+  },
+  "query": "edit selected payment refund workflow node with workflow-scoped startup context citations",
+  "expected": {
+    "must_retrieve": ["claim_workflow_scope_requires_selected_node_context"],
+    "must_cite": ["source_workflow_scope_review", "source_node_runbook"],
+    "must_cite_in_context": ["source_workflow_scope_review", "source_node_runbook"],
+    "answer_should_include": [
+      "selected node",
+      "workflow-scoped",
+      "startup context",
+      "citations",
+      "before planning"
+    ]
+  }
+}

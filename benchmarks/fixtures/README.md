@@ -84,6 +84,7 @@ runtime.
 - `source-truth-drift`: verify changed repository source files are surfaced as review blockers before adapters trust recalled project memory.
 - `startup-context-relevance`: verify persistent memory adapters retrieve task-relevant cited startup context instead of dumping broad memory-server rows into every new session.
 - `write-preview-crystallize-schema`: verify ingest dry-run previews, approved ingest, and approved session crystallization return schema-backed results.
+- `workflow-scoped-context`: verify adapters with a selected workflow or node retrieve cited startup context scoped to that active workflow instead of broad repository memory.
 - `approved-write-apply`: verify approved JSONL write calls return concrete records that adapters can inspect after approval.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes, including import apply, without `approved:true` return structured `approval_required` errors.
 - `unknown-method-rejection` checks that unsupported JSONL tool methods return structured `unknown_method` errors with advertised alternatives.
