@@ -1,8 +1,8 @@
 # Existing memory migration
 
 This example shows the safest path for moving useful facts out of an existing
-agent memory store, hosted coding-agent memory, notes folder, or tool export
-into AKBP.
+agent memory store, hosted coding-agent memory, notes folder, markdown insight
+dump, or tool export into AKBP.
 
 The goal is not to trust another memory system blindly. The goal is to convert reviewed source and claim records into portable AKBP artifacts, preview the write, apply only after approval, then prove later recall works with citations.
 
@@ -59,6 +59,25 @@ Stop the migration when the export has:
 - broad summaries that should be split into smaller reviewed claims
 
 AKBP treats migration as a review gate, not a bulk memory dump. Existing memory can be useful input, but durable AKBP knowledge should remain cited, inspectable, and portable.
+
+## Markdown insight folders
+
+Many teams start with a simpler pattern: an agent finds an architectural
+insight, debugging fix, or ADR candidate and drops it into a local markdown
+folder. Treat that folder as evidence, not as durable truth.
+
+For each useful note:
+
+1. Register the markdown file with `akbp source add`.
+2. Promote only one reviewed, source-backed claim at a time with `akbp remember`.
+3. Rebuild the index and retrieve context with citations before using it in a
+   later session.
+4. Leave broad, uncited, or stale notes in the folder until someone turns them
+   into smaller reviewed claims.
+
+The runnable example includes this path. It creates two markdown notes, promotes
+only the reviewed ADR candidate, and verifies later recall includes the cited
+claim while the unreviewed debug scratch note stays out of durable AKBP memory.
 
 ## Hosted or opaque memory exports
 

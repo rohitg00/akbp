@@ -6,6 +6,9 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 KB="$TMP/migrated-kb"
+NOTES_DIR="$TMP/agent-insights"
+ADR_NOTE="$NOTES_DIR/adr-candidate.md"
+SCRATCH_NOTE="$NOTES_DIR/debug-scratch.md"
 INCOMING="$TMP/existing-memory-export.jsonl"
 BAD_INCOMING="$TMP/bad-existing-memory-export.jsonl"
 OPAQUE_INCOMING="$TMP/opaque-host-memory-export.jsonl"
@@ -14,6 +17,10 @@ CONFIG="$TMP/existing-memory-client-config.json"
 echo "AKBP existing memory migration example"
 
 python3 "$ROOT/cli/akbp.py" --path "$KB" init >/dev/null
+
+mkdir -p "$NOTES_DIR"
+printf '%s\n' "ADR candidate: session memory updates need explicit review before becoming durable project knowledge." > "$ADR_NOTE"
+printf '%s\n' "Scratch: investigate flaky staging behavior before making this durable." > "$SCRATCH_NOTE"
 
 cat > "$INCOMING" <<'JSONL'
 {"kind":"source","id":"source_existing_memory_note","type":"note","locator":"memory-export/session-policy.md","title":"Existing memory session policy"}
@@ -33,7 +40,10 @@ python3 "$ROOT/cli/akbp.py" --path "$KB" import-check "$OPAQUE_INCOMING" --fail-
 python3 "$ROOT/cli/akbp.py" --path "$KB" import-check "$INCOMING" --fail-on-rejected | python3 -c 'import json,sys; data=json.load(sys.stdin); assert data["ok"]; assert data["accepted_count"] == 2; assert data["rejected_count"] == 0; assert data["review"]["ready_for_reviewed_apply"]; assert data["review"]["source_count"] == 1; assert data["review"]["claim_count"] == 1; assert data["review"]["claims_without_evidence"] == []; assert data["review"]["claims_without_source_evidence"] == []; print("migration check ok")'
 python3 "$ROOT/cli/akbp.py" --path "$KB" import-apply "$INCOMING" --dry-run | python3 -c 'import json,sys; data=json.load(sys.stdin); assert data["ok"]; assert data["dry_run"]; assert data["review_required"]; assert data["would_write"]["sources"] == ["source_existing_memory_note"]; assert data["would_write"]["claims"] == ["claim_existing_memory_session_policy"]; assert data["review"]["ready_for_reviewed_apply"]; print("migration preview ok")'
 python3 "$ROOT/cli/akbp.py" --path "$KB" import-apply "$INCOMING" --approved | python3 -c 'import json,sys; data=json.load(sys.stdin); assert data["ok"]; assert data["applied"]; assert data["would_write"]["sources"] == ["source_existing_memory_note"]; assert data["would_write"]["claims"] == ["claim_existing_memory_session_policy"]; assert data["skipped_existing"]["sources"] == []; assert data["skipped_existing"]["claims"] == []; print("migration apply ok")'
+python3 "$ROOT/cli/akbp.py" --path "$KB" source add "$ADR_NOTE" --type file --title "ADR candidate note" >/dev/null
+python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Session memory updates need explicit review before becoming durable project knowledge." --type workflow --confidence 0.9 --evidence "$ADR_NOTE" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" index --incremental >/dev/null
+python3 "$ROOT/cli/akbp.py" --path "$KB" context "review session memory updates from markdown insight notes" --require-citations --min-items 1 | python3 -c 'import json,sys; data=json.load(sys.stdin); text=json.dumps(data); assert "explicit review" in text; assert "debug-scratch" not in text; assert any(item.get("citations") for item in data["items"]); print("markdown insight folder recall ok")'
 python3 "$ROOT/cli/akbp.py" --path "$KB" context "prepare the next agent session memory update" | python3 -c 'import json,sys; data=json.load(sys.stdin); text=json.dumps(data); assert "reviewed at session boundaries" in text; assert "claim_existing_memory_session_policy" in text; print("migration recall ok")'
 python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name existing-memory-migrator --profile read-only > "$CONFIG"
 python3 - "$CONFIG" <<'PY'
