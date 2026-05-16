@@ -243,6 +243,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.import_check", " ".join(promotion["preflight_requests"]))
             self.assertIn("approved:true", promotion["apply_rule"])
             self.assertIn("read-only", promotion["fallback"])
+            adoption_matrix = config["memory_adoption_matrix"]
+            self.assertEqual(adoption_matrix["format"], "akbp-memory-adoption-matrix-v1")
+            self.assertEqual(adoption_matrix["selected_kb_path"], str(kb.resolve()))
+            options = {item["option"]: item for item in adoption_matrix["options"]}
+            self.assertEqual(set(options), {"local_memory_server", "host_native_memory", "akbp"})
+            self.assertIn("fast recall", options["local_memory_server"]["best_for"])
+            self.assertIn("citations", options["local_memory_server"]["trust_gap"])
+            self.assertIn("ephemeral recall", adoption_matrix["default_recommendation"])
+            self.assertIn("akbp --path", adoption_matrix["minimum_green_path"][0])
+            self.assertIn("error.code", " ".join(adoption_matrix["fail_closed_when"]))
             landscape = config["memory_landscape_fit"]
             self.assertEqual(landscape["format"], "akbp-memory-landscape-fit-v1")
             self.assertIn("tool-protocol memory servers", landscape["purpose"])
@@ -977,6 +987,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("resolve_kb", bridge_steps)
             self.assertIn("stage_external_memory", bridge_steps)
             self.assertIn("import-check", bridge_steps["stage_external_memory"]["command"])
+            adoption_matrix = discovered["memory_adoption_matrix"]
+            self.assertEqual(adoption_matrix["format"], "akbp-memory-adoption-matrix-v1")
+            self.assertEqual(adoption_matrix["selected_kb_path"], str(kb.resolve()))
+            options = {item["option"]: item for item in adoption_matrix["options"]}
+            self.assertIn("local_memory_server", options)
+            self.assertIn("host_native_memory", options)
+            self.assertIn("akbp", options)
+            self.assertIn("durable source of truth", adoption_matrix["default_recommendation"])
+            self.assertIn("structured-output-harness", " ".join(adoption_matrix["minimum_green_path"]))
+            self.assertIn("dry_run:true", " ".join(adoption_matrix["fail_closed_when"]))
             bridge_preflight = discovered["tool_protocol_bridge_preflight"]
             self.assertEqual(bridge_preflight["format"], "akbp-discovery-tool-protocol-bridge-v1")
             self.assertEqual(bridge_preflight["safe_default"], "read_only_bridge")

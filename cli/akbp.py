@@ -634,6 +634,58 @@ def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
     }
 
 
+def memory_adoption_matrix(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-memory-adoption-matrix-v1",
+        "purpose": "Give installer UIs a compact choice table for local memory, host-native memory, and AKBP without hiding the trust boundary.",
+        "research_signal": "Recent local agent-memory projects optimize for fast persistent recall; AKBP should make its cited, review-gated, portable value visible in the same first-run surface.",
+        "default_recommendation": "Use AKBP as the durable source of truth, and treat local or host-native memory as ephemeral recall until source-backed records pass review.",
+        "selected_kb_path": kb_path,
+        "options": [
+            {
+                "option": "local_memory_server",
+                "best_for": "fast recall, embeddings, host integration, and runtime continuity",
+                "trust_gap": "may not prove citations, review status, lifecycle state, or portable export before another agent trusts a fact",
+                "akbp_role": "register source-backed candidates, run import-check, preview writes, then approve durable claims into AKBP artifacts",
+                "safe_default": "read_only_substrate",
+            },
+            {
+                "option": "host_native_memory",
+                "best_for": "personal preferences and runtime-specific session continuity",
+                "trust_gap": "often opaque to repository review, CI checks, source verification, and cross-runtime portability",
+                "akbp_role": "treat host memory as hints until AKBP citations confirm project facts",
+                "safe_default": "ephemeral_hint",
+            },
+            {
+                "option": "akbp",
+                "best_for": "reviewed project knowledge, cited startup context, lifecycle updates, and exportable bundles",
+                "trust_gap": "requires explicit source registration, dry-run review, and adapter field preservation before write flows are useful",
+                "akbp_role": "own durable markdown and JSONL artifacts under the selected knowledge-base path",
+                "safe_default": "read_only_until_profile_preflight_passes",
+            },
+        ],
+        "installer_questions": [
+            "Which facts must survive outside one agent runtime?",
+            "Can the host preserve citations, warnings, budget metadata, ok, result, and error.code?",
+            "Can a human or trusted local policy approve a dry-run preview outside autonomous tool execution?",
+            "Can the selected knowledge base export-check cleanly before sharing or migration?",
+        ],
+        "minimum_green_path": [
+            f"akbp --path {kb_path} discover",
+            f"akbp --path {kb_path} doctor --profile read-only",
+            f"akbp --path {kb_path} client-config --profile read-only",
+            "./examples/structured-output-harness/run.sh",
+            f"akbp --path {kb_path} export --output bundle.json && akbp --path {kb_path} export-check bundle.json --fail-on-issues",
+        ],
+        "fail_closed_when": [
+            "startup context is uncited, warning-bearing, empty, or budget-truncated",
+            "the bridge drops error.code, citations, warnings, or dry-run review metadata",
+            "durable memory would live only in an opaque sidecar store",
+            "writes can apply without dry_run:true followed by approved:true",
+        ],
+    }
+
+
 def append_jsonl(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -863,6 +915,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     tool_schema_budget = adapter_tool_schema_budget(kb_arg)
     host_autodetect = host_autodetect_contract(kb_arg)
     external_memory_promotion = external_memory_promotion_contract(kb_arg)
+    adoption_matrix = memory_adoption_matrix(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -1332,6 +1385,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "positioning": positioning,
         "adoption_triage": adoption_triage,
         "memory_server_bridge": memory_server_bridge,
+        "memory_adoption_matrix": adoption_matrix,
         "tool_protocol_bridge_preflight": tool_protocol_bridge_preflight,
         "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
@@ -2932,6 +2986,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     profile_selection = adapter_profile_selection(kb_path)
     host_autodetect = host_autodetect_contract(kb_path, requested_profile)
     external_memory_promotion = external_memory_promotion_contract(kb_path)
+    adoption_matrix = memory_adoption_matrix(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -4107,6 +4162,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             },
             "fallback": "If an adjacent memory tool cannot preserve citations, review metadata, or exportable artifacts, keep AKBP read-only and treat that tool as an ephemeral hint source.",
         },
+        "memory_adoption_matrix": adoption_matrix,
         "harness_adoption_fit": {
             "format": "akbp-harness-adoption-fit-v1",
             "purpose": "Help hosts turn structured-output and agent-harness interest into a concrete AKBP setup gate instead of more prompt text.",

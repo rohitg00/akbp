@@ -28,6 +28,9 @@ The generated config makes the trust boundary visible:
 - include `memory_server_bridge.external_memory_promotion`, a concrete
   source-backed candidate-record contract for promoting existing memory-server
   rows through import-check, dry-run preview, and approved apply
+- include `memory_adoption_matrix`, a compact installer decision table for
+  choosing between local memory servers, host-native memory, and AKBP's
+  reviewed portable artifacts
 - include a hosted-agent policy for managed coding agents that cannot run the
   local stdio server beside AKBP artifacts or cannot show reviewed write
   previews
@@ -89,6 +92,10 @@ AKBP stdio client config example passed
   existing memory servers can stage source-backed candidate records and reject
   missing-source, secret-like, private-chat, cache-only, stale-source, or
   unapproved rows before durable AKBP writes
+- the config exposes `memory_adoption_matrix` so installer UIs can answer
+  "why AKBP instead of another memory store?" with a machine-readable trust
+  boundary: local and host-native memory stay ephemeral until citations, review
+  metadata, and export-checkable artifacts pass
 - host install profiles include managed tool-protocol hosts where read-only startup context is safe but durable writes stay disabled until a separate approval UI exists
 - hosted-agent policy keeps managed cloud or remote tool hosts read-only unless
   a user-controlled bridge preserves AKBP envelopes, citations, warnings, and
