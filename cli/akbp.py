@@ -489,6 +489,79 @@ def inherited_repo_intake_contract(kb_path: str) -> dict[str, Any]:
     }
 
 
+def context_freshness_probe(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-context-freshness-probe-v1",
+        "purpose": "Give adapters a small runnable gate that proves recalled context is still backed by unchanged sources before it influences planning.",
+        "research_signal": "Recent local agent-memory discussions value shared persistent context, but the common failure mode is stale context files that continue to sound authoritative after sources drift.",
+        "safe_default": "verify_sources_before_planning_from_recalled_context",
+        "required_before": [
+            "planning_from_recalled_context",
+            "using inherited handoff notes",
+            "enabling reviewed-write tools from prior context",
+        ],
+        "probe_sequence": [
+            {
+                "step": "verify_sources",
+                "request": {
+                    "id": "freshness-source-verify",
+                    "method": "akbp.source.verify",
+                    "path": kb_path,
+                    "params": {"fail_on_issue": True},
+                },
+                "expect": {
+                    "ok": True,
+                    "result.ok": True,
+                    "result.counts.changed": 0,
+                    "result.counts.missing": 0,
+                },
+                "on_failure": "Treat affected claims as review_required and continue without recalled AKBP context.",
+            },
+            {
+                "step": "retrieve_bounded_cited_context",
+                "request": {
+                    "id": "freshness-session-start",
+                    "method": "akbp.session.start",
+                    "path": kb_path,
+                    "params": {
+                        "task": "current task goals and constraints",
+                        "limit": 5,
+                        "max_chars": 4000,
+                        "min_items": 1,
+                        "require_citations": True,
+                        "fail_on_warnings": True,
+                        "fail_on_budget_truncation": True,
+                    },
+                },
+                "expect": {
+                    "ok": True,
+                    "result.context.items": "non_empty_array",
+                    "result.context.quality.ok": True,
+                    "result.context.budget.truncated": False,
+                },
+                "on_failure": "Proceed without recalled AKBP memory and do not invent prior project decisions.",
+            },
+        ],
+        "context_use_report_fields": [
+            "freshness_probe_ran",
+            "freshness_probe_ok",
+            "source_verify_changed",
+            "source_verify_missing",
+            "affected_claim_ids",
+            "fallback_reason",
+        ],
+        "fallback_reason_values": [
+            "source_changed",
+            "source_missing",
+            "uncited_context",
+            "warnings_present",
+            "budget_truncated",
+            "probe_not_run",
+        ],
+        "adapter_rule": "If the probe fails or is skipped, set used_akbp_context:false in the context-use report and keep write-capable tools disabled for that flow.",
+    }
+
+
 def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
     return {
         "format": "akbp-external-memory-promotion-v1",
@@ -980,6 +1053,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     external_memory_promotion = external_memory_promotion_contract(kb_arg)
     adoption_matrix = memory_adoption_matrix(kb_arg)
     workflow_selector = workflow_context_selector(kb_arg)
+    freshness_probe = context_freshness_probe(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -1494,6 +1568,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "tool_schema_budget": tool_schema_budget,
         "host_autodetect": host_autodetect,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
+        "context_freshness_probe": freshness_probe,
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
@@ -3120,6 +3195,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     external_memory_promotion = external_memory_promotion_contract(kb_path)
     adoption_matrix = memory_adoption_matrix(kb_path)
     workflow_selector = workflow_context_selector(kb_path)
+    freshness_probe = context_freshness_probe(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -4657,6 +4733,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
         },
         "inherited_repo_intake": inherited_repo_intake_contract(kb_path),
+        "context_freshness_probe": freshness_probe,
         "ten_minute_proof": {
             "format": "akbp-ten-minute-proof-v1",
             "purpose": "Let installer UIs prove AKBP's user value before positioning it as another memory store.",
