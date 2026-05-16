@@ -147,6 +147,12 @@ survives compaction, truncation, or restart. The host should run cited
 `akbp.session.start` recovery, preserve warnings and budget diagnostics, record
 which AKBP items influenced the plan, and pass the `compaction-handoff-recall`
 benchmark before planning from recovered memory. Use
+`memory_landscape_fit.coding_agent_reliability_gate` when a user is taking over
+an inherited repo, running parallel agent sessions, switching hosts or models,
+or reporting inconsistent coding-agent output. The host should run discovery,
+read-only doctor, cited `akbp.session.start` with warnings treated as blockers,
+and a context-use report before planning from recalled memory. Durable findings
+still need dry-run review and exact `approved:true` replay. Use
 `memory_landscape_fit.install_friction_checks` when a user asks why AKBP is not
 just another local memory server: the first-run proof should show no Docker or
 cloud account requirement, one selected KB shared across clients, and a

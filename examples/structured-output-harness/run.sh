@@ -206,6 +206,8 @@ assert context_use["format"] == "akbp-context-use-report-v1", context_use
 assert "before any plan" in context_use["emit_when"], context_use
 assert context_use["required_fields"] == [
     "used_akbp_context",
+    "akbp_scope_fingerprint",
+    "akbp_scope_inputs",
     "akbp_context_item_ids",
     "akbp_citation_ids",
     "akbp_context_quality_ok",

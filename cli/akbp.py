@@ -3960,6 +3960,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "knowledge graph or hierarchical recall over long-running projects",
                 "lower context-window pressure at session start",
                 "persistent project facts that survive across agent runs",
+                "reliability gates for inherited or unstable coding-agent sessions",
             ],
             "akbp_should_own": [
                 "reviewed durable project knowledge",
@@ -3983,6 +3984,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Can stale knowledge be superseded or contradicted without deleting history?",
                 "Can export-check and import-check run without bridge-local state?",
                 "Can branch or worktree-specific handoffs carry cited source ids without making AKBP the Git state owner?",
+                "Can a host prove recalled context passed quality gates before a coding agent plans from it?",
             ],
             "feature_claim_audit": [
                 {
@@ -4039,6 +4041,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "claim": "agents can safely decide what to remember automatically",
                     "akbp_check": "Require a human or trusted local policy gate before durable promotion, with dry-run review metadata and an audit event for every approved write.",
                     "evidence": "memory_control_claim_gate plus review-gated-writes benchmark output",
+                },
+                {
+                    "claim": "persistent memory makes unreliable coding-agent sessions safer",
+                    "akbp_check": "Require a reliability gate before planning: discover the KB, run read-only doctor, retrieve cited startup context with fail_on_warnings, emit a context-use report, and keep writes behind dry-run plus approved:true.",
+                    "evidence": "coding_agent_reliability_gate plus inherited-repo-intake, startup-context-relevance, and source-truth-drift benchmark output",
                 },
             ],
             "git_native_handoff_branch_scope": {
@@ -4285,6 +4292,62 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "audit output is unavailable or discarded by the adapter",
                 ],
                 "fallback": "Keep write-capable methods disabled and use AKBP only for read-only cited startup context until explicit review control exists.",
+            },
+            "coding_agent_reliability_gate": {
+                "format": "akbp-coding-agent-reliability-gate-v1",
+                "purpose": "Turn coding-agent reliability concerns into a concrete adapter preflight before recalled memory can influence planning.",
+                "run_when": [
+                    "taking over an inherited repository",
+                    "resuming after compaction or session restart",
+                    "running several agent sessions in parallel",
+                    "switching models, hosts, or local memory backends",
+                    "user reports degraded or inconsistent coding-agent output",
+                ],
+                "required_sequence": [
+                    {
+                        "step": "discover_scope",
+                        "check": "Run akbp discover or resolve an explicit knowledge_base.path; do not infer a hidden memory store.",
+                    },
+                    {
+                        "step": "readiness",
+                        "check": "Run akbp doctor --profile read-only and keep writes disabled unless requested_profile_ready passes.",
+                    },
+                    {
+                        "step": "cited_startup",
+                        "check": "Call akbp.session.start with require_citations:true, fail_on_warnings:true, max_chars, and a task scoped to the current repo or workflow.",
+                    },
+                    {
+                        "step": "context_use_report",
+                        "check": "Emit adapter_prompt_contract.context_use_report before any plan that uses recalled AKBP context.",
+                    },
+                    {
+                        "step": "reviewed_promotion",
+                        "check": "Promote only durable findings through dry_run:true review and exact approved:true replay.",
+                    },
+                ],
+                "must_preserve": [
+                    "result.context.items[].id",
+                    "result.context.items[].citations",
+                    "result.context.quality.trusted_for_planning",
+                    "result.context.warnings",
+                    "result.context.budget.truncated",
+                    "adapter context-use report fields",
+                    "approval_required errors for unapproved writes",
+                ],
+                "fail_closed_when": [
+                    "startup context is empty, uncited, warning-bearing, or budget-truncated",
+                    "the adapter cannot show which AKBP items influenced the plan",
+                    "source verification reports drift for cited files",
+                    "parallel sessions would write durable memory without a reviewed apply step",
+                    "the host compresses cited AKBP records into uncited prose",
+                ],
+                "verification": [
+                    "python3 benchmarks/run_benchmarks.py --fixtures benchmarks/fixtures/inherited-repo-intake --akbp",
+                    "python3 benchmarks/run_benchmarks.py --fixtures benchmarks/fixtures/startup-context-relevance --akbp",
+                    "python3 benchmarks/run_benchmarks.py --fixtures benchmarks/fixtures/source-truth-drift --akbp",
+                    "./examples/structured-output-harness/run.sh",
+                ],
+                "fallback": "Continue without recalled AKBP memory and keep durable writes disabled until the reliability gate passes.",
             },
             "install_friction_checks": [
                 {
