@@ -1730,7 +1730,18 @@ def import_review_summary(
         next_actions.append("Link imported claims to registered source ids before treating the import as reviewed memory.")
     if ready:
         next_actions.append("Run import-apply --dry-run, review would_write ids, then repeat with --approved.")
+    blocking_reasons = []
+    if errors:
+        blocking_reasons.append("malformed_json")
+    if rejected:
+        blocking_reasons.append("rejected_records")
+    if claims_without_evidence:
+        blocking_reasons.append("claims_without_evidence")
+    if claims_without_source_evidence:
+        blocking_reasons.append("claims_without_source_evidence")
     return {
+        "review_status": "ready" if ready else "blocked",
+        "blocking_reasons": blocking_reasons,
         "ready_for_reviewed_apply": ready,
         "source_count": len(source_ids),
         "claim_count": len(claims),

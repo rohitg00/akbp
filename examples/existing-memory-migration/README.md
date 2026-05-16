@@ -41,8 +41,10 @@ Before applying it:
    server to AKBP.
 
 `import-check` and `import-apply --dry-run` include a `review` section for
-adapter UIs and CI logs. Treat `review.ready_for_reviewed_apply:true` as the
-minimum green light before presenting an approval button. If
+adapter UIs and CI logs. Show `review.review_status` and
+`review.blocking_reasons` first, then treat
+`review.ready_for_reviewed_apply:true` as the minimum green light before
+presenting an approval button. If
 `claims_without_evidence` is non-empty, the import may still be syntactically
 valid, but it has not met AKBP's trust bar for durable project memory.
 
@@ -73,6 +75,7 @@ Use this promotion rule:
   private logs out of AKBP
 - require `review.ready_for_reviewed_apply:true` before any approval UI offers
   `import-apply --approved`
+- show `review.blocking_reasons` when apply is blocked
 - if `claims_without_evidence` or `claims_without_source_evidence` is
   non-empty, send the export back for source review instead of applying it
 

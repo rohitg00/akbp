@@ -1255,6 +1255,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "review_status",
+        "blocking_reasons",
         "ready_for_reviewed_apply",
         "source_count",
         "claim_count",
@@ -1264,6 +1266,25 @@
         "next_actions"
       ],
       "properties": {
+        "review_status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "blocked"
+          ]
+        },
+        "blocking_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "malformed_json",
+              "rejected_records",
+              "claims_without_evidence",
+              "claims_without_source_evidence"
+            ]
+          }
+        },
         "ready_for_reviewed_apply": {
           "type": "boolean"
         },

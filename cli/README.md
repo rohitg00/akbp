@@ -54,6 +54,7 @@ This implementation writes portable markdown and JSONL artifacts. It is intentio
 Import apply review checklist:
 
 - Run `akbp import-check export.jsonl --fail-on-rejected` when automation must stop on any rejected object.
+- Use `review.review_status` and `review.blocking_reasons` as the first UI/CI explanation for whether apply is allowed.
 - Treat `review.ready_for_reviewed_apply:false` as a hard stop: `import-apply` will not write those records, even with `--approved`.
 - Confirm `accepted_count`, `rejected_count`, and `error_count` before applying.
 - Stop when `review.claims_without_evidence` or `review.claims_without_source_evidence` is non-empty.

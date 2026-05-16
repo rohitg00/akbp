@@ -416,6 +416,8 @@ class RepoQualityTest(unittest.TestCase):
             "import-apply",
             "--dry-run",
             "--approved",
+            "review.review_status",
+            "review.blocking_reasons",
         ]:
             self.assertIn(required, combined)
         self.assertIn("./examples/existing-memory-migration/run.sh", makefile)

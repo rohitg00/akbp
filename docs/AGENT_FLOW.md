@@ -52,7 +52,7 @@ After review or approval, apply the same crystallization and refresh the index:
 - Keep runtime scratch, raw transcripts, command logs, and temporary plans outside AKBP unless they are promoted through the reviewed session-memory boundary in `docs/SESSION_MEMORY_BOUNDARY.md`.
 - Check JSONL exports with `akbp import-check export.jsonl` before turning them into durable claims or sources. The check rejects claims that cite unknown `source_...` evidence ids and flags accepted claims whose evidence does not link to a registered source id. Use `--fail-on-rejected` for CI or adapter gates that must stop on any rejected object.
 - Preview accepted source and claim imports with `akbp import-apply export.jsonl --dry-run`; apply with `--approved` only after reviewing the dry-run output.
-- Before applying imports, confirm `accepted_count`, `rejected_count`, `error_count`, `review.claims_without_evidence`, `review.claims_without_source_evidence`, `would_write.sources`, and `would_write.claims`.
+- Before applying imports, confirm `accepted_count`, `rejected_count`, `error_count`, `review.review_status`, `review.blocking_reasons`, `review.claims_without_evidence`, `review.claims_without_source_evidence`, `would_write.sources`, and `would_write.claims`.
 - Stop instead of applying when import check reports rejected objects, malformed JSONL, unsupported kinds, or secret-like values.
 - Start source imports with `akbp ingest --dry-run` or JSONL `akbp.ingest` plus request-level `dry_run:true`, then apply only after review with request-level `approved:true`.
 - Ingest redacts common token and key patterns before writing imported pages and optional claims.
