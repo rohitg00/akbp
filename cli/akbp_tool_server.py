@@ -239,6 +239,7 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
     "adapter_quality": {
         "harness": "examples/structured-output-harness/run.sh",
         "contract": "preserve_structured_envelope_citations_review_metadata_and_errors",
+        "evidence_gate": "capabilities_doctor_cited_startup_context_dry_run_preview_and_approval_required",
         "preflight_methods": ["akbp.capabilities", "akbp.doctor", "akbp.session.start"],
         "required_before": ["planning_from_recalled_context", "exposing_reviewed_write_tools"],
         "must_preserve_fields": [
@@ -250,6 +251,7 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
             "dry_run review metadata",
             "approval_required",
         ],
+        "required_reports": ["context_use_report", "preflight_verdict"],
         "fail_closed_policy": "Keep the integration read-only and continue without recalled memory when the harness fails.",
     },
 }

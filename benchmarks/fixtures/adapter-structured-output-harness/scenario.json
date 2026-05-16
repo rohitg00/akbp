@@ -63,6 +63,8 @@
           "knowledge_capability.writes.approval_required_error": ["approval_required"],
           "knowledge_capability.adapter_quality.preflight_methods[]": ["akbp.capabilities", "akbp.doctor", "akbp.session.start"],
           "knowledge_capability.adapter_quality.required_before[]": ["planning_from_recalled_context", "exposing_reviewed_write_tools"],
+          "knowledge_capability.adapter_quality.evidence_gate": ["capabilities_doctor_cited_startup_context_dry_run_preview_and_approval_required"],
+          "knowledge_capability.adapter_quality.required_reports[]": ["context_use_report", "preflight_verdict"],
           "negotiation.satisfied": [true],
           "profiles.startup_context[]": ["akbp.session.start", "akbp.context"],
           "profiles.reviewed_write[]": ["akbp.remember", "akbp.session.end"],

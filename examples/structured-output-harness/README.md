@@ -49,6 +49,12 @@ preflight by checking stdout instead of hard-coding a separate marker list.
 The harness also replays `tool_protocol_bridge.preflight_replay.request_jsonl`
 from the generated client config and checks it against the generated
 `preflight_verdict` expectations before reporting success.
+The `akbp.capabilities` response also advertises
+`knowledge_capability.adapter_quality.evidence_gate` and
+`required_reports` so a host can treat the harness as a concrete trust gate:
+discover capabilities, run doctor, retrieve cited startup context, preview any
+write, stop on `approval_required`, and emit both `context_use_report` and
+`preflight_verdict` before letting recalled memory affect planning.
 
 ## Response snippets adapters should preserve
 
