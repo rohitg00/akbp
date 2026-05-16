@@ -51,6 +51,7 @@ examples:
 	./examples/inherited-repo-intake/run.sh
 	./examples/stdio-client-config/run.sh
 	./examples/context-compaction-recovery/run.sh
+	./examples/context-freshness-probe/run.sh
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score

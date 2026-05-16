@@ -154,6 +154,9 @@ For inherited or older agent-written repositories, `examples/inherited-repo-inta
 adds the takeover-specific gate: verify source freshness before trusting cited
 startup context, and keep stale or changed handoffs as review blockers instead
 of planning from outdated memory.
+`examples/context-freshness-probe/` isolates that freshness gate into a small
+adapter preflight: verified sources plus cited startup context pass, while
+changed source evidence fails closed before recalled memory affects planning.
 
 For adapter quality gates, `examples/structured-output-harness/` shows how to
 machine-check response envelopes, capability negotiation, cited startup context,

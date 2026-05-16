@@ -769,3 +769,20 @@ safely guide work after compaction or restart.
 If the host can only resume from an uncited compacted chat summary, the safe
 fallback is to start fresh or continue without recalled AKBP memory until cited
 recovery context can be shown.
+
+## Shipped artifact: context freshness probe example
+
+Recent memory-server and coding-agent setup patterns keep pushing toward shared
+persistent context, but the failure mode is still stale context that sounds
+authoritative after its source files drift.
+
+`examples/context-freshness-probe/` turns AKBP's freshness contract into a
+runnable adapter preflight. It proves the green path with `akbp.source.verify`
+and cited `akbp.session.start`, then mutates the source note and verifies that
+strict startup context fails closed before stale recalled memory can influence
+planning.
+
+Adapters should treat this as the minimum freshness gate for inherited memory,
+handoff notes, or startup context from a previous session: verify sources, fetch
+bounded cited context, and continue without recalled AKBP memory when either
+step fails.
