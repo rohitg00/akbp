@@ -60,6 +60,7 @@ runtime.
 - `import-safety`: validate JSONL import objects, normal plus strict `akbp.import_check` responses, and rejected `akbp.import_apply` preview result shapes before durable writes.
 - `long-document-ingest`: verify longer source documents produce section-level ingest signals through dry-run review, approved apply, indexing, and retrieval.
 - `memory-server-bridge`: verify tool-protocol memory server or runtime-cache rows become durable AKBP knowledge only after source-backed import-check, dry-run review, explicit approval, indexing, and cited context recall.
+- `native-memory-interop`: verify product-native memory and external memory tools stay ephemeral until AKBP retrieves cited startup context, promotes source-backed facts through dry-run review and approved apply, and uses lifecycle relations for conflicts.
 - `multi-agent-consistency`: verify shared agent knowledge preserves supersession history while retrieving the current cited decision for later agents.
 - `export-bundle-compatibility`: validate portable bundle manifest counts, artifact hash shape, safety flags, and strict failure results.
 - `existing-memory-migration`: verify existing agent-memory exports are imported only when source-backed, dry-run reviewed, and explicitly approved.

@@ -1,0 +1,169 @@
+{
+  "id": "native-memory-interop-001",
+  "profiles": ["adapter-quality", "retrieval-quality"],
+  "task": "Verify that adapters treat product-native memory and external memory tools as unreviewed hints until AKBP can retrieve cited startup context, preview a durable write, require approval, and preserve lifecycle conflict handling.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_adoption_native_memory_interop",
+        "type": "file",
+        "locator": "docs/ADOPTION_DECISION_GUIDE.md",
+        "title": "Adoption decision guide"
+      },
+      {
+        "id": "source_tool_bridge_native_memory_interop",
+        "type": "file",
+        "locator": "docs/TOOL_PROTOCOL_BRIDGE.md",
+        "title": "Tool protocol bridge guide"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_native_memory_is_hint_source",
+        "text": "When a coding agent already has product-native memory or external memory tools, AKBP should be read first as cited startup context and native memory should stay an ephemeral hint source until citations confirm durable project facts.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_adoption_native_memory_interop",
+          "source_tool_bridge_native_memory_interop"
+        ],
+        "entities": [
+          "product-native memory",
+          "external memory tools",
+          "cited startup context",
+          "ephemeral hints"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_native_memory_promotion_requires_review",
+        "text": "Durable project facts from product-native memory must be promoted through dry_run:true review, explicit approved:true apply, source evidence, and index refresh before later sessions treat them as AKBP knowledge.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_adoption_native_memory_interop"
+        ],
+        "entities": [
+          "product-native memory",
+          "dry_run:true",
+          "approved:true",
+          "source evidence",
+          "index refresh"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_native_memory_conflict_needs_lifecycle",
+        "text": "If product-native memory disagrees with an active AKBP claim, the adapter should surface the conflict and supersede or contradict the AKBP claim only after source-backed review.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.86,
+        "evidence": [
+          "source_adoption_native_memory_interop"
+        ],
+        "entities": [
+          "product-native memory",
+          "conflict",
+          "supersede or contradict",
+          "source-backed review"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "caps-native-memory-interop",
+        "method": "akbp.capabilities",
+        "approved": false,
+        "params": {
+          "client": "native-memory-interop-fixture",
+          "requires": [
+            "capability_negotiation",
+            "approval_required_errors",
+            "method_param_schemas"
+          ],
+          "requires_profiles": [
+            "read_only"
+          ]
+        },
+        "expected_result_fields": [
+          "methods",
+          "features",
+          "profiles",
+          "negotiation",
+          "knowledge_capability"
+        ],
+        "expected_result_schema": "#/$defs/capabilities_result",
+        "expected_result_contains": {
+          "negotiation.satisfied": [
+            true
+          ],
+          "negotiation.unsupported_features[]": [],
+          "negotiation.unsupported_profiles[]": [],
+          "features.approval_required_errors": [
+            true
+          ],
+          "knowledge_capability.trust_model": [
+            "cited_review_gated_memory"
+          ],
+          "profiles.read_only[]": [
+            "akbp.session.start"
+          ]
+        }
+      },
+      {
+        "id": "context-native-memory-interop",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "product-native memory external memory tools cited startup context ephemeral hints dry_run approved conflict supersede contradict",
+          "limit": 5,
+          "require_citations": true
+        },
+        "expected_result_fields": [
+          "query",
+          "items",
+          "quality"
+        ],
+        "expected_result_schema": "#/$defs/context_result",
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_native_memory_is_hint_source",
+            "claim_native_memory_promotion_requires_review",
+            "claim_native_memory_conflict_needs_lifecycle"
+          ],
+          "items[].citations[]": [
+            "source_adoption_native_memory_interop"
+          ],
+          "quality.trusted_for_planning": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  "query": "How should AKBP interoperate with product-native memory or external memory tools?",
+  "expected": {
+    "must_retrieve": [
+      "claim_native_memory_is_hint_source",
+      "claim_native_memory_promotion_requires_review",
+      "claim_native_memory_conflict_needs_lifecycle"
+    ],
+    "must_cite": [
+      "source_adoption_native_memory_interop"
+    ],
+    "must_cite_in_context": [
+      "source_adoption_native_memory_interop"
+    ],
+    "answer_should_include": [
+      "product-native memory",
+      "ephemeral hints",
+      "cited startup context",
+      "dry_run:true",
+      "approved:true",
+      "supersede or contradict"
+    ]
+  }
+}

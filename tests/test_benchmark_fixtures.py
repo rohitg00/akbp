@@ -868,6 +868,32 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("bridge-context-after-index", report["tool_output_ids"])
 
+    def test_native_memory_interop_fixture_covers_product_memory_boundaries(self):
+        path = FIXTURES / "native-memory-interop" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
+        self.assertIn("native-memory-interop", fixture_readme)
+        self.assertEqual(data["profiles"], ["adapter-quality", "retrieval-quality"])
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        caps = requests["caps-native-memory-interop"]
+        context = requests["context-native-memory-interop"]
+        self.assertEqual(caps["method"], "akbp.capabilities")
+        self.assertIn("negotiation.satisfied", caps["expected_result_contains"])
+        self.assertIn("features.approval_required_errors", caps["expected_result_contains"])
+        self.assertIn("profiles.read_only[]", caps["expected_result_contains"])
+        self.assertEqual(context["method"], "akbp.context")
+        self.assertTrue(context["params"]["require_citations"])
+        self.assertIn("claim_native_memory_is_hint_source", data["expected"]["must_retrieve"])
+        self.assertIn("claim_native_memory_promotion_requires_review", data["expected"]["must_retrieve"])
+        self.assertIn("claim_native_memory_conflict_needs_lifecycle", data["expected"]["must_retrieve"])
+        self.assertIn("source_adoption_native_memory_interop", data["expected"]["must_cite_in_context"])
+        self.assertIn("ephemeral hints", data["expected"]["answer_should_include"])
+        self.assertIn("approved:true", data["expected"]["answer_should_include"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("context-native-memory-interop", report["tool_output_ids"])
+        self.assertIn("claim_native_memory_conflict_needs_lifecycle", report["context_item_ids"])
+
     def test_runner_filters_fixtures_by_profile(self):
         report = benchmark_runner.run(FIXTURES, score=True, real_akbp=True, profile="adapter-quality")
         self.assertTrue(report["ok"], report)
