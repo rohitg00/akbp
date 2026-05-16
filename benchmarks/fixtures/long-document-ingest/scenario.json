@@ -75,7 +75,7 @@
             "Approval gate"
           ],
           "created_claims[]": [
-            "claim_36227255080c15cb"
+            "claim_7256603cc5474f7d"
           ]
         },
         "expected_result_schema": "#/$defs/ingest_result"
@@ -105,7 +105,7 @@
         },
         "expected_result_contains": {
           "indexed_keys[]": [
-            "claim:claim_36227255080c15cb",
+            "claim:claim_7256603cc5474f7d",
             "page:wiki/imports/agent-runbook.md"
           ]
         },
@@ -125,7 +125,7 @@
         ],
         "expected_result_contains": {
           "items[].id": [
-            "claim_36227255080c15cb"
+            "claim_7256603cc5474f7d"
           ]
         },
         "expected_result_schema": "#/$defs/context_result"

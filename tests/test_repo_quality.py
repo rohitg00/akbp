@@ -210,6 +210,9 @@ class RepoQualityTest(unittest.TestCase):
             '"id": "remember-blocked"',
             '"code": "approval_required"',
             "Unapproved writes are a hard stop, not a warning",
+            "preflight replay verdict ok",
+            "tool_protocol_bridge.preflight_replay.request_jsonl",
+            "preflight_verdict",
         ]:
             self.assertIn(required, text)
 

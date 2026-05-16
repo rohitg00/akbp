@@ -38,6 +38,7 @@ approved apply contract ok
 approved recall contract ok
 context-use report contract ok
 prompt and repair contract harness ok
+preflight replay verdict ok
 AKBP structured output harness example passed
 ```
 
@@ -45,6 +46,9 @@ Generated `akbp client-config` includes these markers in
 `harness_adoption_fit.minimum_gate.success_markers` and
 `adapter_contract_harness.success_markers`, so adapter installers can verify the
 preflight by checking stdout instead of hard-coding a separate marker list.
+The harness also replays `tool_protocol_bridge.preflight_replay.request_jsonl`
+from the generated client config and checks it against the generated
+`preflight_verdict` expectations before reporting success.
 
 ## Response snippets adapters should preserve
 

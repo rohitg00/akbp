@@ -150,9 +150,9 @@ assert manifest["preflight_requests"][2]["params"]["max_chars"] == 4000, config
 assert manifest["preflight_requests"][2]["params"]["min_items"] == 1, config
 assert manifest["preflight_requests"][2]["params"]["require_citations"] is True, config
 assert manifest["preflight_requests"][2]["params"]["fail_on_warnings"] is True, config
-assert manifest["preflight_requests"][2]["expect"]["result.quality.minimum_items"] == 1, config
-assert manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"] is True, config
-assert manifest["preflight_requests"][2]["expect"]["result.quality.fail_on_warnings"] is True, config
+assert manifest["preflight_requests"][2]["expect"]["result.context.quality.minimum_items"] == 1, config
+assert manifest["preflight_requests"][2]["expect"]["result.context.quality.require_citations"] is True, config
+assert manifest["preflight_requests"][2]["expect"]["result.context.quality.fail_on_warnings"] is True, config
 assert client_manifest["preflight_requests"] == manifest["preflight_requests"], config
 assert config["session_start"]["id"] == "session-start-1", config
 assert config["session_start"]["method"] == "akbp.session.start", config
@@ -225,8 +225,8 @@ assert config["health_check"]["blocking_field"] == "summary.errors", config
 assert config["verification"][0]["run"] == "startup", config
 assert config["verification"][1]["run"] == "health_check", config
 assert config["verification"][2]["run"] == "session_start", config
-assert config["verification"][2]["expect"]["result.quality.require_citations"] is True, config
-assert config["verification"][2]["expect"]["result.quality.fail_on_warnings"] is True, config
+assert config["verification"][2]["expect"]["result.context.quality.require_citations"] is True, config
+assert config["verification"][2]["expect"]["result.context.quality.fail_on_warnings"] is True, config
 assert "Branch on error.code" in config["response_contract"]["error_rules"][0], config
 assert config["response_contract"]["schemas"]["methods"] == "schemas/tool-methods.schema.json", config
 assert config["safety"]["write_policy"] == "dry_run_then_approved", config

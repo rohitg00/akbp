@@ -7,6 +7,7 @@ trap 'rm -rf "$TMP"' EXIT
 
 KB="$TMP/kb"
 NOTE="$TMP/harness-note.md"
+CONFIG="$TMP/client-config.json"
 
 echo "AKBP structured output harness example"
 
@@ -14,6 +15,7 @@ python3 "$ROOT/cli/akbp.py" --path "$KB" init >/dev/null
 printf '%s\n' "Adapter harnesses should validate response envelopes, schema-backed fields, citations, and approval stop signals before trusting memory." > "$NOTE"
 python3 "$ROOT/cli/akbp.py" --path "$KB" source add "$NOTE" --type file --title "Adapter harness note" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" remember "Adapter harnesses should validate structured AKBP responses before trusting recalled context or applying writes." --type workflow --confidence 0.92 --evidence "$NOTE" >/dev/null
+python3 "$ROOT/cli/akbp.py" --path "$KB" remember "AKBP startup context should cite current task goals and constraints before an adapter plans from memory." --type workflow --confidence 0.91 --evidence "$NOTE" >/dev/null
 python3 "$ROOT/cli/akbp.py" --path "$KB" index --incremental >/dev/null
 
 python3 "$ROOT/tool-server/akbp_tool_server.py" <<JSONL | python3 -c '
@@ -170,11 +172,13 @@ print("approved recall contract ok")
 {"id":"recall-approved","method":"akbp.context","path":"$KB","params":{"task":"response shape validation fails","limit":5,"max_chars":500}}
 JSONL
 
-python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name structured-output-harness --profile reviewed-writes | python3 -c '
+python3 "$ROOT/cli/akbp.py" --path "$KB" client-config --name structured-output-harness --profile reviewed-writes > "$CONFIG"
+
+python3 -c '
 import json
 import sys
 
-config = json.load(sys.stdin)
+config = json.load(open(sys.argv[1], encoding="utf-8"))
 
 prompt_contract = config["adapter_prompt_contract"]
 assert prompt_contract["format"] == "akbp-adapter-prompt-contract-v1", prompt_contract
@@ -257,6 +261,51 @@ assert steps["retrieve_cited_startup_context"]["expect"]["result.context.budget.
 assert steps["enable_writes_only_after_review_surface"]["expect"]["approval_outside_model_tool_call"], first_run
 
 print("prompt and repair contract harness ok")
+' "$CONFIG"
+
+python3 -c 'import json,sys; config=json.load(open(sys.argv[1], encoding="utf-8")); sys.stdout.write(config["tool_protocol_bridge"]["preflight_replay"]["request_jsonl"])' "$CONFIG" \
+  | python3 "$ROOT/tool-server/akbp_tool_server.py" \
+  | python3 -c '
+import json
+import sys
+
+rows = [json.loads(line) for line in sys.stdin if line.strip()]
+by_id = {row["id"]: row for row in rows}
+
+def get_path(data, dotted):
+    cur = data
+    for part in dotted.split("."):
+        assert isinstance(cur, dict) and part in cur, (dotted, data)
+        cur = cur[part]
+    return cur
+
+for required_id in ("capabilities-1", "doctor-1", "session-start-1"):
+    assert required_id in by_id, by_id
+
+caps = by_id["capabilities-1"]
+assert caps["ok"] is True, caps
+assert get_path(caps, "result.negotiation.satisfied") is True, caps
+assert get_path(caps, "result.features.method_param_schemas") is True, caps
+
+doctor = by_id["doctor-1"]
+assert doctor["ok"] is True, doctor
+assert get_path(doctor, "result.requested_profile") == "reviewed_write", doctor
+assert get_path(doctor, "result.requested_profile_ready") is True, doctor
+assert get_path(doctor, "result.adapter_readiness.reviewed_write_ready") is True, doctor
+
+start = by_id["session-start-1"]
+assert start["ok"] is True, start
+context = get_path(start, "result.context")
+items = context["items"]
+assert isinstance(items, list) and items, start
+assert all(item.get("citations") for item in items), start
+assert context["warnings"] == [], start
+assert context["budget"]["max_chars"] == 4000, start
+quality = get_path(start, "result.context.quality")
+assert quality["minimum_items"] == 1, start
+assert quality["require_citations"] is True, start
+assert quality["fail_on_warnings"] is True, start
+print("preflight replay verdict ok")
 '
 
 echo "AKBP structured output harness example passed"

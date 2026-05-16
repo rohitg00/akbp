@@ -1928,6 +1928,13 @@ def imported_page_path(base: Path, source: Path) -> Path:
     return base / "wiki" / "imports" / f"{slugify(source.stem)}.md"
 
 
+def portable_file_locator(raw_locator: str, resolved_path: Path) -> str:
+    try:
+        return resolved_path.relative_to(Path.cwd().resolve()).as_posix()
+    except ValueError:
+        return raw_locator
+
+
 def heading_summary(text: str, limit: int = 12) -> list[str]:
     candidates = []
     for line in text.splitlines():
@@ -1947,7 +1954,8 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         return 1
     raw_text = source_path.read_text(encoding="utf-8", errors="ignore")
     safe_text = redact_text(raw_text)
-    source_id = stable_id("source", args.type, str(source_path))
+    source_locator = portable_file_locator(args.file, source_path)
+    source_id = stable_id("source", args.type, source_locator)
     page = imported_page_path(base, source_path)
     raw_title = args.title or source_path.stem.replace("-", " ").replace("_", " ").title()
     title = redact_text(raw_title)
@@ -1976,12 +1984,12 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         return 0
 
     ensure_dirs(base)
-    source = add_source_record(base, str(source_path), args.type, title, args.scope)
+    source = add_source_record(base, source_locator, args.type, title, args.scope)
     body = [
         f"# Imported Source: {title}",
         "",
         f"Source ID: `{source['id']}`",
-        f"Original locator: `{source_path}`",
+        f"Original locator: `{source_locator}`",
         f"Imported at: {now_iso()}",
         "",
         "## Extracted signals",
@@ -3356,9 +3364,9 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "result.context.items": "array",
                     "result.context.warnings": "array",
                     "result.context.budget.max_chars": 4000,
-                    "result.quality.minimum_items": 1,
-                    "result.quality.require_citations": True,
-                    "result.quality.fail_on_warnings": True,
+                    "result.context.quality.minimum_items": 1,
+                    "result.context.quality.require_citations": True,
+                    "result.context.quality.fail_on_warnings": True,
                 },
             },
         ],
@@ -3390,7 +3398,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "result.context.items[].citations",
             "result.context.warnings",
             "result.context.budget",
-            "result.quality",
+            "result.context.quality",
         ],
         "on_failure": "Do not expose host tools. Keep the integration read-only or continue without recalled AKBP context until preflight passes.",
     }
@@ -3414,8 +3422,8 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "every trusted item has citations",
                 "result.context.warnings is empty when fail_on_warnings is true",
                 "result.context.budget.max_chars is present and no greater than the requested bound",
-                "result.quality.require_citations is true",
-                "result.quality.fail_on_warnings is true",
+                "result.context.quality.require_citations is true",
+                "result.context.quality.fail_on_warnings is true",
             ],
             "on_failure": "Continue without recalled AKBP memory and do not expose host tools that depend on startup context.",
         },
@@ -4334,6 +4342,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "approval-required contract ok",
                     "approved apply contract ok",
                     "approved recall contract ok",
+                    "preflight replay verdict ok",
                     "prompt and repair contract harness ok",
                     "AKBP structured output harness example passed",
                 ],
@@ -4593,7 +4602,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                         "ok": True,
                         "result.context.items": "array",
                         "result.context.budget.max_chars": 4000,
-                        "result.quality.fail_on_warnings": True,
+                        "result.context.quality.fail_on_warnings": True,
                     },
                     "on_failure": "Continue without recalled memory, surface the warning, and do not invent prior project decisions.",
                 },
@@ -4628,6 +4637,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "approved recall contract ok",
                 "context-use report contract ok",
                 "prompt and repair contract harness ok",
+                "preflight replay verdict ok",
                 "AKBP structured output harness example passed",
             ],
             "proves": [
@@ -4640,6 +4650,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "dry-run write previews expose review_required, apply_instruction, and would_write",
                 "unapproved writes stop with error.code approval_required",
                 "approved apply plus index refresh returns cited recall for the reviewed claim",
+                "generated preflight_replay JSONL passes the generated preflight_verdict gate",
             ],
             "stop_policy": "Fail closed: keep write-capable host tools disabled and continue read-only until the harness passes.",
         },
@@ -4862,10 +4873,10 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "result.context.items": "array",
                     "result.context.warnings": "array",
                     "result.context.budget.max_chars": 4000,
-                    "result.quality.minimum_items": 1,
-                    "result.quality.require_citations": True,
-                    "result.quality.fail_on_warnings": True,
-                    "result.quality.fail_on_budget_truncation": True,
+                    "result.context.quality.minimum_items": 1,
+                    "result.context.quality.require_citations": True,
+                    "result.context.quality.fail_on_warnings": True,
+                    "result.context.quality.fail_on_budget_truncation": True,
                 },
                 "on_failure": "Continue without recalled context and surface the structured error.",
             },

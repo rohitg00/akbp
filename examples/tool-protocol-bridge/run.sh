@@ -55,7 +55,7 @@ assert manifest["preflight_requests"][2]["method"] == "akbp.session.start", mani
 assert manifest["preflight_requests"][2]["params"]["max_chars"] == 4000, manifest
 assert manifest["preflight_requests"][2]["params"]["min_items"] == 1, manifest
 assert manifest["preflight_requests"][2]["params"]["require_citations"] is True, manifest
-assert manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"] is True, manifest
+assert manifest["preflight_requests"][2]["expect"]["result.context.quality.require_citations"] is True, manifest
 assert config["tool_protocol_bridge"]["client_tool_manifest"]["preflight_requests"] == manifest["preflight_requests"], config
 verdict = config["tool_protocol_bridge"]["preflight_verdict"]
 assert verdict["format"] == "akbp-preflight-verdict-v1", verdict

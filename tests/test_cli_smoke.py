@@ -369,6 +369,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(harness_fit["minimum_gate"]["command"], "./examples/structured-output-harness/run.sh")
             self.assertIn("AKBP structured output harness example passed", harness_fit["minimum_gate"]["success_markers"])
             self.assertIn("budget fail-closed contract ok", harness_fit["minimum_gate"]["success_markers"])
+            self.assertIn("preflight replay verdict ok", harness_fit["minimum_gate"]["success_markers"])
             self.assertIn("planning from recalled AKBP context", harness_fit["minimum_gate"]["must_pass_before"])
             self.assertIn("error.code", harness_fit["minimum_gate"]["required_fields"])
             self.assertIn("verified memory harness boundary", harness_fit["installer_positioning"])
@@ -565,9 +566,9 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(manifest["preflight_requests"][2]["params"]["min_items"], 1)
             self.assertTrue(manifest["preflight_requests"][2]["params"]["require_citations"])
             self.assertTrue(manifest["preflight_requests"][2]["params"]["fail_on_warnings"])
-            self.assertEqual(manifest["preflight_requests"][2]["expect"]["result.quality.minimum_items"], 1)
-            self.assertTrue(manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"])
-            self.assertTrue(manifest["preflight_requests"][2]["expect"]["result.quality.fail_on_warnings"])
+            self.assertEqual(manifest["preflight_requests"][2]["expect"]["result.context.quality.minimum_items"], 1)
+            self.assertTrue(manifest["preflight_requests"][2]["expect"]["result.context.quality.require_citations"])
+            self.assertTrue(manifest["preflight_requests"][2]["expect"]["result.context.quality.fail_on_warnings"])
             preflight_replay = config["tool_protocol_bridge"]["preflight_replay"]
             self.assertEqual(preflight_replay["format"], "akbp-preflight-replay-v1")
             self.assertEqual(preflight_replay["request_count"], 3)
@@ -640,9 +641,9 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["verification"][1]["expect"]["result.summary.errors"], 0)
             self.assertEqual(config["verification"][2]["expect"]["result.context.items"], "array")
             self.assertEqual(config["verification"][2]["expect"]["result.context.budget.max_chars"], 4000)
-            self.assertEqual(config["verification"][2]["expect"]["result.quality.minimum_items"], 1)
-            self.assertTrue(config["verification"][2]["expect"]["result.quality.require_citations"])
-            self.assertTrue(config["verification"][2]["expect"]["result.quality.fail_on_warnings"])
+            self.assertEqual(config["verification"][2]["expect"]["result.context.quality.minimum_items"], 1)
+            self.assertTrue(config["verification"][2]["expect"]["result.context.quality.require_citations"])
+            self.assertTrue(config["verification"][2]["expect"]["result.context.quality.fail_on_warnings"])
             self.assertEqual(config["quality_gates"]["startup_context"]["minimum_items"], 1)
             self.assertTrue(config["quality_gates"]["startup_context"]["require_citations"])
             self.assertEqual(config["quality_gates"]["startup_context"]["max_chars"], 4000)
@@ -734,6 +735,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(read_only["adapter_contract_harness"]["command"], "./examples/structured-output-harness/run.sh")
             self.assertIn(
                 "prompt and repair contract harness ok",
+                read_only["adapter_contract_harness"]["success_markers"],
+            )
+            self.assertIn(
+                "preflight replay verdict ok",
                 read_only["adapter_contract_harness"]["success_markers"],
             )
             self.assertIn(
