@@ -10,10 +10,10 @@
         "title": "AKBP inherited repo intake use case"
       },
       {
-        "id": "source_session_start_harness",
+        "id": "source_inherited_repo_example",
         "type": "file",
-        "locator": "examples/session-start-harness/README.md",
-        "title": "Session-start harness example"
+        "locator": "examples/inherited-repo-intake/README.md",
+        "title": "Inherited repo intake example"
       },
       {
         "id": "source_adapter_quickstart",
@@ -39,7 +39,7 @@
         "type": "workflow",
         "status": "stable",
         "confidence": 0.9,
-        "evidence": ["source_session_start_harness", "source_use_cases_inherited_repo"],
+        "evidence": ["source_inherited_repo_example", "source_use_cases_inherited_repo"],
         "entities": ["inherited repo", "akbp.session.start", "cited context", "empty_context_policy", "uncited_context_policy"],
         "scope": "project"
       },
@@ -117,7 +117,7 @@
     ],
     "must_cite": [
       "source_use_cases_inherited_repo",
-      "source_session_start_harness",
+      "source_inherited_repo_example",
       "source_adapter_quickstart"
     ],
     "must_cite_in_context": [

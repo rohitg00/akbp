@@ -366,19 +366,24 @@ class RepoQualityTest(unittest.TestCase):
     def test_inherited_repo_intake_documents_source_drift_gate(self):
         text = (ROOT / "examples" / "inherited-repo-intake" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "inherited-repo-intake" / "run.sh").read_text(encoding="utf-8")
+        use_cases = (ROOT / "docs" / "USE_CASES.md").read_text(encoding="utf-8")
+        fixture = (ROOT / "benchmarks" / "fixtures" / "inherited-repo-intake" / "scenario.json").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-        combined = text + script + readme
+        combined = text + script + use_cases + fixture + readme
         for required in [
             "AKBP inherited repo intake example",
+            "examples/inherited-repo-intake/",
             "read-only inherited repo startup ok",
             "unapproved inherited repo write blocked ok",
             "cited inherited repo context ok",
             "source verify --fail-on-issue",
             "stale inherited repo evidence requires review ok",
             "stale inherited repo context blocked ok",
+            "source-drift blocking",
             "review_affected_claims",
             "source-drifted context",
+            "source_inherited_repo_example",
             "AKBP inherited repo intake example passed",
         ]:
             self.assertIn(required, combined)

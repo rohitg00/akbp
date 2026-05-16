@@ -52,12 +52,13 @@ This page maps the public examples to real use cases people can understand quick
 
 **AKBP use case:** run `akbp discover`, `akbp doctor --profile read-only`, and `akbp.session.start` before planning. If the knowledge base is missing, unindexed, uncited, or not adapter-ready, stay read-only and show the setup gaps instead of inventing project history.
 
-**Demo:** `examples/session-start-harness/`
+**Demo:** `examples/inherited-repo-intake/`
 
 **What it proves:**
 
 - an agent can find the nearest AKBP folder before trusting memory
 - adapter readiness gates planning on cited startup context
+- changed source evidence blocks stale recalled context before planning
 - unfamiliar repos get a safe first step instead of automatic durable writes
 
 ## 5. Workflow-aware context freshness
@@ -199,7 +200,7 @@ make demo
 examples/akbp-bench/run.sh
 examples/repo-memory-demo/run.sh
 examples/markdown-folder-intake/run.sh
-examples/session-start-harness/run.sh
+examples/inherited-repo-intake/run.sh
 examples/context-freshness-probe/run.sh
 examples/memory-ci/run.sh
 examples/git-native-agent-handoff/run.sh
@@ -208,4 +209,4 @@ examples/existing-memory-migration/run.sh
 examples/read-only-adapter/run.sh
 ```
 
-That path shows the protocol, the benchmark, the repo use case, reviewed ADR and architecture-note intake, inherited-repo intake, context freshness before planning, the CI gate, repo-backed agent handoff, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.
+That path shows the protocol, the benchmark, the repo use case, reviewed ADR and architecture-note intake, inherited-repo intake with source-drift blocking, context freshness before planning, the CI gate, repo-backed agent handoff, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.
