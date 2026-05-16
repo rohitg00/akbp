@@ -39,6 +39,10 @@ The same manifest includes `preflight_requests` for the startup checks an
 adapter should run before exposing tools: capability negotiation, doctor, and
 bounded startup context. Use these generated JSONL requests as the executable
 harness contract instead of reconstructing preflight calls from prose.
+It also includes `preflight_replay.request_jsonl`, a copyable newline-delimited
+request block for smoke-testing the local JSONL server before a host publishes
+tools. Treat any failed replay, missing citations, unsurfaced warnings, or
+lost `error.code` as a bridge failure and keep AKBP read-only.
 
 For managed tool-protocol hosts, use the generated `managed_tool_host_bridge` section instead
 of hand-writing a separate memory-server contract. It reuses the same local
@@ -138,6 +142,8 @@ Required behavior:
   allowlist unless there is a user-controlled bridge and visible reviewed-write
   approval path.
 - Run `tool_protocol_bridge.host_tool_manifest.preflight_requests` before exposing host tools, and branch on the structured `expect` fields.
+- Use `tool_protocol_bridge.preflight_replay.request_jsonl` as the runnable
+  smoke test when the host needs a pasteable setup check instead of a manifest parser.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.

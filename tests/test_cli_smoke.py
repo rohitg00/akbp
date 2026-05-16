@@ -426,6 +426,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(manifest["preflight_requests"][2]["expect"]["result.quality.minimum_items"], 1)
             self.assertTrue(manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"])
             self.assertTrue(manifest["preflight_requests"][2]["expect"]["result.quality.fail_on_warnings"])
+            preflight_replay = config["tool_protocol_bridge"]["preflight_replay"]
+            self.assertEqual(preflight_replay["format"], "akbp-preflight-replay-v1")
+            self.assertEqual(preflight_replay["request_count"], 3)
+            replay_lines = [json.loads(line) for line in preflight_replay["request_jsonl"].splitlines()]
+            self.assertEqual([line["id"] for line in replay_lines], ["capabilities-1", "doctor-1", "session-start-1"])
+            self.assertEqual(replay_lines[0]["method"], "akbp.capabilities")
+            self.assertNotIn("expect", replay_lines[0])
+            self.assertEqual(replay_lines[0]["path"], str(kb.resolve()))
+            self.assertTrue(replay_lines[2]["params"]["require_citations"])
+            self.assertIn("result.context.items[].citations", preflight_replay["must_preserve"])
+            self.assertIn("Do not expose host tools", preflight_replay["on_failure"])
+            self.assertEqual(config["tool_protocol_bridge_snippets"]["preflight_replay"], preflight_replay)
             client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
             self.assertEqual(client_manifest["format"], "akbp-client-tool-manifest-v1")
             self.assertEqual(client_manifest["server"], {"name": "stdio-adapter-test", **config["server"]})
@@ -447,6 +459,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.remember", client_manifest["blocked_write_methods"])
             self.assertIn("dry-run previews", client_manifest["approval_boundary"])
             self.assertEqual(client_manifest["preflight_requests"], manifest["preflight_requests"])
+            self.assertEqual(client_manifest["preflight_replay"], preflight_replay)
             self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertEqual(
@@ -640,6 +653,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["first_run_sequence"]["steps"][0]["expect"]["knowledge_base.path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["tool_protocol_bridge"]["host_tool_manifest"]["knowledge_base_path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["tool_protocol_bridge"]["host_tool_manifest"]["preflight_requests"][0]["path"], "<AKBP_KB_PATH>")
+            portable_replay = [
+                json.loads(line)
+                for line in portable["tool_protocol_bridge"]["preflight_replay"]["request_jsonl"].splitlines()
+            ]
+            self.assertEqual(portable_replay[0]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["startup"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")

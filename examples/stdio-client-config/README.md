@@ -35,6 +35,7 @@ The generated config makes the trust boundary visible:
   bridge rather than claiming the JSONL reference server is a direct host-native
   tool server
 - include manifest-level `preflight_requests` that adapters can execute before exposing host tools
+- include `preflight_replay.request_jsonl`, a copyable JSONL smoke test for adapter installers that need to verify the bridge before generating host tools
 - retrieve context with `akbp.session.start`
 - keep durable writes blocked unless the adapter implements dry-run review and `approved:true`
 - keep hosted or autonomous tool integrations read-only unless a separate human approval step exists outside the tool call
@@ -97,6 +98,7 @@ AKBP stdio client config example passed
   stays read-only and write apply remains blocked without a separate review
   surface
 - host-tool and client-tool manifests include executable preflight requests for capability negotiation, doctor, and bounded startup context
+- generated bridge snippets include copyable preflight JSONL so installers can replay the exact startup checks against the local server before exposing tools
 - the config tells adapter authors which calls to run and which result fields must pass before trusting setup
 - reviewed-write configs keep the dry-run and approval boundary explicit
 - configs describe the host trust boundary so adapter authors do not accidentally treat autonomous tool execution as reviewed writes

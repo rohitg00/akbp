@@ -2985,6 +2985,37 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             },
         ],
     }
+    preflight_jsonl_requests = [
+        {
+            "id": request["id"],
+            "method": request["method"],
+            "path": request["path"],
+            "params": request["params"],
+        }
+        for request in host_tool_manifest["preflight_requests"]
+    ]
+    preflight_replay = {
+        "format": "akbp-preflight-replay-v1",
+        "purpose": "Give adapter installers a copyable JSONL smoke test before host tools are exposed.",
+        "transport": "stdio-jsonl",
+        "request_jsonl": "\n".join(json.dumps(request, separators=(",", ":")) for request in preflight_jsonl_requests) + "\n",
+        "request_count": len(preflight_jsonl_requests),
+        "expected_markers": [
+            "capabilities-1 ok true",
+            "doctor-1 requested_profile_ready true",
+            "session-start-1 cited context items returned",
+        ],
+        "must_preserve": [
+            "ok",
+            "result",
+            "error.code",
+            "result.context.items[].citations",
+            "result.context.warnings",
+            "result.context.budget",
+            "result.quality",
+        ],
+        "on_failure": "Do not expose host tools. Keep the integration read-only or continue without recalled AKBP context until preflight passes.",
+    }
     client_tool_manifest = {
         "format": "akbp-client-tool-manifest-v1",
         "purpose": "Generate host-compatible read-only tools from AKBP JSONL methods while preserving citations, structured errors, and the reviewed-write boundary.",
@@ -3029,6 +3060,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         ],
         "approval_boundary": "Do not expose write methods as host tools until the host can render dry-run previews and collect approval outside the model-generated tool call.",
         "preflight_requests": host_tool_manifest["preflight_requests"],
+        "preflight_replay": preflight_replay,
     }
     host_capability_descriptor = {
         "format": "akbp-host-capability-descriptor-v1",
@@ -3141,6 +3173,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "keep durable write apply disabled unless a separate reviewed-write surface exists",
         ],
         "preflight_requests": host_tool_manifest["preflight_requests"],
+        "preflight_replay": preflight_replay,
         "tool_manifest_ref": "tool_protocol_bridge.host_tool_manifest",
         "fallback": "If no bridge is available, use the stdio JSONL adapter path directly and keep the integration read-only.",
     }
@@ -3928,6 +3961,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "forward_tools": read_only_bridge_tools,
             "host_tool_manifest": host_tool_manifest,
             "client_tool_manifest": client_tool_manifest,
+            "preflight_replay": preflight_replay,
             "tool_schema_budget": tool_schema_budget,
             "read_only_allowlist": [
                 "akbp.capabilities",
