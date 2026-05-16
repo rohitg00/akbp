@@ -81,6 +81,28 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(config["server"]["command"], "python3")
             self.assertEqual(config["server"]["args"], ["-m", "akbp_tool_server"])
             self.assertEqual(config["knowledge_base"]["path"], str(kb.resolve()))
+            scope = config["knowledge_base_scope"]
+            self.assertEqual(scope["format"], "akbp-knowledge-base-scope-contract-v1")
+            self.assertEqual(config["knowledge_base"]["scope_contract"], scope)
+            self.assertEqual(scope["selected_kb_path"], str(kb.resolve()))
+            self.assertEqual(scope["safe_default_scope"], "repo_local_project_kb")
+            scope_options = {item["scope"]: item for item in scope["scope_options"]}
+            self.assertEqual(
+                set(scope_options),
+                {
+                    "repo_local_project_kb",
+                    "team_shared_project_kb",
+                    "personal_assistant_kb",
+                    "transcript_sidecar_kb",
+                    "migration_staging_kb",
+                },
+            )
+            self.assertIn("AKBP.md", scope_options["repo_local_project_kb"]["durable_source_of_truth"])
+            self.assertIn("private AKBP path", scope_options["personal_assistant_kb"]["durable_source_of_truth"])
+            self.assertIn("raw transcript dumps by default", scope_options["transcript_sidecar_kb"]["keep_out"])
+            self.assertIn("import-check", scope_options["migration_staging_kb"]["first_preflight"])
+            self.assertIn("selected_scope", scope["required_adapter_output"])
+            self.assertIn("public project KB", " ".join(scope["fail_closed_when"]))
             self.assertEqual(config["knowledge_capability"]["type"], "durable_agent_knowledge")
             self.assertEqual(config["knowledge_capability"]["default_mode"], "read_only")
             self.assertEqual(config["knowledge_capability"]["write_mode"], "reviewed_write_only")
@@ -1110,6 +1132,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("durable source of truth", adoption_matrix["default_recommendation"])
             self.assertIn("structured-output-harness", " ".join(adoption_matrix["minimum_green_path"]))
             self.assertIn("dry_run:true", " ".join(adoption_matrix["fail_closed_when"]))
+            scope = discovered["knowledge_base_scope"]
+            self.assertEqual(scope["format"], "akbp-knowledge-base-scope-contract-v1")
+            self.assertEqual(scope["selected_kb_path"], str(kb.resolve()))
+            self.assertEqual(scope["safe_default_scope"], "repo_local_project_kb")
+            self.assertIn("selected_kb_path", scope["required_adapter_output"])
+            self.assertIn("scope is explicit", scope["fallback"])
             bridge_preflight = discovered["tool_protocol_bridge_preflight"]
             self.assertEqual(bridge_preflight["format"], "akbp-discovery-tool-protocol-bridge-v1")
             self.assertEqual(bridge_preflight["safe_default"], "read_only_bridge")

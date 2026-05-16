@@ -759,6 +759,75 @@ def memory_adoption_matrix(kb_path: str) -> dict[str, Any]:
     }
 
 
+def knowledge_base_scope_contract(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-knowledge-base-scope-contract-v1",
+        "purpose": "Force adapters and installer UIs to choose which durable knowledge base is trusted before recalled memory influences planning.",
+        "research_signal": "Recent coding-agent memory tools optimize for shared local servers and quick tool-protocol setup; AKBP needs the scope decision to be explicit so project, team, personal, transcript, and migration memory do not collapse into one opaque store.",
+        "selected_kb_path": kb_path,
+        "safe_default_scope": "repo_local_project_kb",
+        "scope_options": [
+            {
+                "scope": "repo_local_project_kb",
+                "use_when": "A coding agent needs durable decisions, workflows, incidents, release rules, or architecture context for one repository.",
+                "durable_source_of_truth": "AKBP.md, akbp.json, claims, sources, relations, and wiki pages in or beside the repository.",
+                "keep_out": ["personal preferences unrelated to the repo", "private chat exports", "runtime scratchpads"],
+                "first_preflight": f"akbp --path {kb_path} doctor --profile read-only",
+            },
+            {
+                "scope": "team_shared_project_kb",
+                "use_when": "Multiple people or agents need the same reviewed project knowledge.",
+                "durable_source_of_truth": "reviewed AKBP artifacts committed or exported through a team review path.",
+                "keep_out": ["one person's unreviewed local notes", "private assistant memory", "uncited agent summaries"],
+                "first_preflight": "run source verification and export-check before sharing the bundle",
+            },
+            {
+                "scope": "personal_assistant_kb",
+                "use_when": "A local assistant needs user preferences or recurring workflow context across projects.",
+                "durable_source_of_truth": "a private AKBP path outside public repositories.",
+                "keep_out": ["public repo artifacts", "team decisions without approval", "credentials or private messages"],
+                "first_preflight": "keep adapters read-only until the private path and redaction policy are explicit",
+            },
+            {
+                "scope": "transcript_sidecar_kb",
+                "use_when": "A watcher or hook summarizes completed sessions after work finishes.",
+                "durable_source_of_truth": "reviewed claims promoted from akbp.session.end or akbp.crystallize_session previews.",
+                "keep_out": ["raw transcript dumps by default", "temporary plans", "private logs"],
+                "first_preflight": "preview with dry_run:true and require approved:true before durable apply",
+            },
+            {
+                "scope": "migration_staging_kb",
+                "use_when": "Existing notes, memory exports, or sidecar stores need cleanup before reuse.",
+                "durable_source_of_truth": "import-check accepted records plus reviewed import-apply output.",
+                "keep_out": ["uncited records", "secret-like values", "opaque embedding or cache ids"],
+                "first_preflight": f"akbp --path {kb_path} import-check <candidate-memory.jsonl> --fail-on-rejected",
+            },
+        ],
+        "boundary_rules": [
+            "Resolve one selected_kb_path before retrieving context.",
+            "Keep runtime scratch, host-native memory, and bridge caches outside durable AKBP artifacts unless promoted through review.",
+            "Do not mix personal, team, migration, and repo-local memory in a public project KB.",
+            "When the selected repository, branch, worktree, team boundary, or privacy boundary changes, rerun discover and startup context.",
+            "Treat a missing scope decision as no trusted recalled AKBP context.",
+        ],
+        "required_adapter_output": [
+            "selected_scope",
+            "selected_kb_path",
+            "durable_source_of_truth",
+            "excluded_memory_classes",
+            "scope_preflight_status",
+        ],
+        "fail_closed_when": [
+            "selected_scope is missing",
+            "selected_kb_path is implicit or changes between preflight and session start",
+            "personal or private memory would be written to a public project KB",
+            "team-shared memory lacks source verification or review",
+            "migration data has not passed import-check",
+        ],
+        "fallback": "Use AKBP as read-only startup context only, or continue without recalled AKBP memory until the scope is explicit and preflight passes.",
+    }
+
+
 def workflow_context_selector(kb_path: str) -> dict[str, Any]:
     return {
         "format": "akbp-workflow-context-selector-v1",
@@ -1052,6 +1121,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     host_autodetect = host_autodetect_contract(kb_arg)
     external_memory_promotion = external_memory_promotion_contract(kb_arg)
     adoption_matrix = memory_adoption_matrix(kb_arg)
+    scope_contract = knowledge_base_scope_contract(kb_arg)
     workflow_selector = workflow_context_selector(kb_arg)
     freshness_probe = context_freshness_probe(kb_arg)
     positioning = {
@@ -1562,6 +1632,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "adoption_triage": adoption_triage,
         "memory_server_bridge": memory_server_bridge,
         "memory_adoption_matrix": adoption_matrix,
+        "knowledge_base_scope": scope_contract,
         "tool_protocol_bridge_preflight": tool_protocol_bridge_preflight,
         "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
@@ -3194,6 +3265,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     host_autodetect = host_autodetect_contract(kb_path, requested_profile)
     external_memory_promotion = external_memory_promotion_contract(kb_path)
     adoption_matrix = memory_adoption_matrix(kb_path)
+    scope_contract = knowledge_base_scope_contract(kb_path)
     workflow_selector = workflow_context_selector(kb_path)
     freshness_probe = context_freshness_probe(kb_path)
     adapter_prompt_contract = {
@@ -3836,6 +3908,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "path": kb_path,
             "card": card_path,
             "portable_template": bool(args.portable),
+            "scope_contract": scope_contract,
         },
         "knowledge_capability": {
             "type": "durable_agent_knowledge",
@@ -4104,6 +4177,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "export or import checks depend on bridge-local state",
             ],
         },
+        "knowledge_base_scope": scope_contract,
         "memory_landscape_fit": {
             "format": "akbp-memory-landscape-fit-v1",
             "purpose": "Help adapter installers explain where AKBP fits beside fast tool-protocol memory servers, local SQLite memories, graph memories, context reducers, and product-native agent memory.",
