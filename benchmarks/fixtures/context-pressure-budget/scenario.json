@@ -1,0 +1,70 @@
+{
+  "id": "context-pressure-budget-001",
+  "task": "Verify startup context under token pressure reports truncation while preserving the highest-value cited memory item.",
+  "profiles": ["retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_context_pressure_handoff",
+        "type": "transcript",
+        "locator": "handoffs/context-pressure-handoff.md",
+        "title": "Context pressure handoff"
+      },
+      {
+        "id": "source_context_pressure_noise",
+        "type": "file",
+        "locator": "handoffs/context-pressure-noise.md",
+        "title": "Adjacent context pressure note"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_context_pressure_requires_bounded_startup",
+        "text": "Coding agents under context pressure should retrieve a bounded startup context with citations before planning instead of reloading broad transcripts or trusting uncited summaries.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.92,
+        "evidence": ["source_context_pressure_handoff"],
+        "entities": ["context-pressure", "startup-context", "citations", "coding-agent"]
+      },
+      {
+        "id": "claim_context_pressure_extra_background",
+        "text": "Long background notes about adjacent agent memory experiments can be useful during review but should be omitted from tight startup context when they do not directly answer the current task.",
+        "type": "observation",
+        "status": "working",
+        "confidence": 0.7,
+        "evidence": ["source_context_pressure_noise"],
+        "entities": ["context-pressure", "background-notes", "agent-memory"]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "context-pressure-startup",
+        "method": "akbp.context",
+        "params": {
+          "task": "context pressure startup citations coding agent",
+          "limit": 5,
+          "max_chars": 120,
+          "min_items": 1,
+          "require_citations": true
+        },
+        "expected_result_fields": ["items", "quality", "budget", "warnings"],
+        "expected_result_schema": "#/$defs/context_result",
+        "expected_result_contains": {
+          "items[].id": ["claim_context_pressure_requires_bounded_startup"],
+          "items[].citations[]": ["source_context_pressure_handoff"],
+          "quality.ok": [true],
+          "budget.max_chars": [120],
+          "budget.truncated": [true]
+        }
+      }
+    ]
+  },
+  "query": "context pressure startup citations coding agent",
+  "expected": {
+    "must_retrieve": ["claim_context_pressure_requires_bounded_startup"],
+    "must_cite": ["source_context_pressure_handoff"],
+    "must_cite_in_context": ["source_context_pressure_handoff"],
+    "answer_should_include": ["context pressure", "bounded startup context", "citations"]
+  }
+}

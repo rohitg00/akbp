@@ -156,6 +156,22 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("context-after-ingest", report["tool_output_ids"])
 
+    def test_context_pressure_budget_fixture_covers_truncated_startup_context(self):
+        path = FIXTURES / "context-pressure-budget" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.context")
+        self.assertEqual(request["params"]["max_chars"], 120)
+        self.assertEqual(request["expected_result_schema"], "#/$defs/context_result")
+        self.assertEqual(request["expected_result_contains"]["budget.truncated"], [True])
+        self.assertIn(
+            "source_context_pressure_handoff",
+            request["expected_result_contains"]["items[].citations[]"],
+        )
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("context-pressure-startup", report["tool_output_ids"])
+
 
     def test_unknown_method_rejection_fixture_covers_available_methods(self):
         path = FIXTURES / "unknown-method-rejection" / "scenario.json"
