@@ -277,6 +277,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("temporal knowledge graphs make project memory trustworthy", claim_audit)
             self.assertIn("memory survives compaction or session restart", claim_audit)
             self.assertIn("local-first memory is safe by default", claim_audit)
+            self.assertIn("agents can safely decide what to remember automatically", claim_audit)
             self.assertIn("runnable search or benchmark proof", claim_audit["semantic, graph, or hierarchical memory improves recall"]["akbp_check"])
             self.assertIn("result.context.budget", claim_audit["memory reduces context-window cost"]["evidence"])
             self.assertIn("akbp.session.start", claim_audit["memory survives compaction or session restart"]["akbp_check"])
@@ -290,6 +291,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("cited claims", claim_audit["temporal knowledge graphs make project memory trustworthy"]["akbp_check"])
             self.assertIn("graph-jsonl-records", claim_audit["temporal knowledge graphs make project memory trustworthy"]["evidence"])
             self.assertIn("approval_required", claim_audit["local-first memory is safe by default"]["evidence"])
+            self.assertIn("human or trusted local policy gate", claim_audit["agents can safely decide what to remember automatically"]["akbp_check"])
+            self.assertIn("memory_control_claim_gate", claim_audit["agents can safely decide what to remember automatically"]["evidence"])
             branch_scope = landscape["git_native_handoff_branch_scope"]
             self.assertEqual(branch_scope["format"], "akbp-git-native-handoff-branch-scope-v1")
             self.assertIn("feature branches", branch_scope["purpose"])
@@ -760,6 +763,21 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("compaction-handoff-recall", compaction_gate["required_checks"][0])
             self.assertIn("adapter context-use report", compaction_gate["must_preserve"][5])
             self.assertIn("uncited compacted chat summary", compaction_gate["fail_closed_when"][3])
+            control_gate = read_only["memory_landscape_fit"]["memory_control_claim_gate"]
+            self.assertEqual(control_gate["format"], "akbp-memory-control-claim-gate-v1")
+            self.assertIn("automatic memory-write claims", control_gate["purpose"])
+            self.assertIn("background memory writes", control_gate["run_before_claiming"])
+            control_steps = {step["step"]: step for step in control_gate["required_sequence"]}
+            self.assertIn("propose", control_steps)
+            self.assertIn("review", control_steps)
+            self.assertIn("approve", control_steps)
+            self.assertIn("audit", control_steps)
+            self.assertIn("dry_run:true", control_steps["propose"]["check"])
+            self.assertIn("approved:true", control_steps["approve"]["check"])
+            self.assertIn("audit event", control_steps["audit"]["check"])
+            self.assertIn("request-level approved:true", control_gate["must_preserve"])
+            self.assertIn("without dry_run preview", control_gate["fail_closed_when"][0])
+            self.assertIn("read-only cited startup context", control_gate["fallback"])
             prompt_contract = read_only["adapter_prompt_contract"]
             self.assertEqual(prompt_contract["format"], "akbp-adapter-prompt-contract-v1")
             self.assertEqual(prompt_contract["profile"], "read_only")

@@ -3916,6 +3916,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "akbp_check": "Require no Docker, cloud account, or secrets for the first-run proof, then keep writes read-only until dry-run review is preserved.",
                     "evidence": "ten_minute_proof.setup_claims plus approval_required response",
                 },
+                {
+                    "claim": "agents can safely decide what to remember automatically",
+                    "akbp_check": "Require a human or trusted local policy gate before durable promotion, with dry-run review metadata and an audit event for every approved write.",
+                    "evidence": "memory_control_claim_gate plus review-gated-writes benchmark output",
+                },
             ],
             "git_native_handoff_branch_scope": {
                 "format": "akbp-git-native-handoff-branch-scope-v1",
@@ -4115,6 +4120,50 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "the adapter cannot report which recalled AKBP items influenced the plan",
                 ],
                 "fallback": "Start a fresh session or continue without recalled AKBP memory until cited recovery context can be shown.",
+            },
+            "memory_control_claim_gate": {
+                "format": "akbp-memory-control-claim-gate-v1",
+                "purpose": "Turn automatic memory-write claims into an adoption gate that proves the user or trusted local policy controls durable AKBP state.",
+                "run_before_claiming": [
+                    "automatic long-term memory",
+                    "self-improving coding-agent memory",
+                    "background memory writes",
+                    "hands-free durable project recall",
+                ],
+                "required_sequence": [
+                    {
+                        "step": "propose",
+                        "check": "Run the write-capable method with dry_run:true and preserve review_required, would_write, warnings, and source ids.",
+                    },
+                    {
+                        "step": "review",
+                        "check": "Show the proposed durable claim, evidence, lifecycle state, target artifact paths, and redaction warnings outside the model-generated tool call.",
+                    },
+                    {
+                        "step": "approve",
+                        "check": "Repeat the exact reviewed method, path, params, and cited evidence with approved:true only after human approval or an explicit trusted local policy.",
+                    },
+                    {
+                        "step": "audit",
+                        "check": "Preserve the AKBP audit event and run source verification, export-check, or the review-gated-writes benchmark before another runtime trusts the memory.",
+                    },
+                ],
+                "must_preserve": [
+                    "dry_run:true preview response",
+                    "result.review_required or equivalent review metadata",
+                    "result.would_write target artifact paths",
+                    "source ids or citations for promoted claims",
+                    "request-level approved:true",
+                    "audit event for approved durable writes",
+                ],
+                "fail_closed_when": [
+                    "the agent can apply durable writes without dry_run preview",
+                    "the review surface hides citations, source ids, target paths, or redaction warnings",
+                    "approval happens inside an autonomous model-generated tool call only",
+                    "approved apply changes the request after review",
+                    "audit output is unavailable or discarded by the adapter",
+                ],
+                "fallback": "Keep write-capable methods disabled and use AKBP only for read-only cited startup context until explicit review control exists.",
             },
             "install_friction_checks": [
                 {

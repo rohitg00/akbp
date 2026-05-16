@@ -728,6 +728,24 @@ the safe positioning is narrower: treat that graph as an ephemeral index and
 trust only AKBP claims, lifecycle links, citations, and export-checkable JSONL
 artifacts.
 
+## Shipped artifact: memory control claim gate
+
+The latest scan also repeated a trust concern that shows up whenever coding
+agents gain persistent memory: users want useful recall, but they do not want an
+agent silently deciding which session fragments become durable project truth.
+
+`akbp client-config` now exposes
+`memory_landscape_fit.memory_control_claim_gate`. The gate turns automatic or
+self-improving memory-write claims into a reviewed promotion sequence: propose
+with `dry_run:true`, show evidence and target artifact paths outside the model
+tool call, replay the exact reviewed request with `approved:true` only after
+human approval or trusted local policy, then preserve audit output before
+another runtime trusts the memory.
+
+If a host can apply background writes without preview, hides citations or
+redaction warnings, approves inside an autonomous model-generated tool call, or
+drops audit events, AKBP should stay read-only for that host.
+
 ## Shipped artifact: compaction survival claim gate
 
 Recent memory-server pitches increasingly claim that project memory survives

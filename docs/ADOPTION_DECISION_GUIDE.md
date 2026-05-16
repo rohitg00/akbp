@@ -137,6 +137,11 @@ safety. Those claims should become concrete checks: cited context plus a runnabl
 search or benchmark proof, preserved budget diagnostics, one selected
 `knowledge_base.path`, export-checkable artifacts, and an `approval_required`
 failure before any approved write path is enabled. Use
+`memory_landscape_fit.memory_control_claim_gate` when a host advertises automatic
+or self-improving memory writes. The host should prove the reviewed promotion
+sequence: dry-run preview, visible review of evidence and artifact paths,
+explicit human approval or trusted local policy, exact `approved:true` replay,
+and an audit event before another runtime trusts the new memory. Use
 `memory_landscape_fit.compaction_survival_claim_gate` when a host claims memory
 survives compaction, truncation, or restart. The host should run cited
 `akbp.session.start` recovery, preserve warnings and budget diagnostics, record
