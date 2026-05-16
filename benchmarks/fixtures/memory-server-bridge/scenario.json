@@ -1,0 +1,277 @@
+{
+  "id": "memory-server-bridge-001",
+  "profiles": ["adapter-quality", "retrieval-quality"],
+  "task": "Verify that AKBP can sit beside a tool-protocol memory server or runtime cache without treating external recall as durable knowledge until it is source-backed, dry-run reviewed, explicitly approved, indexed, and recalled with citations after explicit approval.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_adapter_quickstart_bridge",
+        "type": "file",
+        "locator": "docs/ADAPTER_AUTHOR_QUICKSTART.md",
+        "title": "Adapter author quickstart"
+      },
+      {
+        "id": "source_adoption_bridge_guide",
+        "type": "file",
+        "locator": "docs/ADOPTION_DECISION_GUIDE.md",
+        "title": "Adoption decision guide"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_bridge_starts_read_only",
+        "text": "Hosts that already have a tool-protocol memory server, local database, or runtime cache should keep AKBP read-only until they can preserve citations, warnings, response envelopes, and review metadata.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.88,
+        "evidence": [
+          "source_adapter_quickstart_bridge",
+          "source_adoption_bridge_guide"
+        ],
+        "entities": [
+          "tool-protocol memory server",
+          "runtime cache",
+          "read-only",
+          "citations",
+          "review metadata"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "bridge-import-check",
+        "method": "akbp.import_check",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/memory-server-bridge/import-export.jsonl",
+          "fail_on_rejected": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "fail_on_rejected",
+          "accepted",
+          "rejected",
+          "errors",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0,
+          "fail_on_rejected": true
+        },
+        "expected_result_schema": "#/$defs/import_check_result",
+        "expected_result_contains": {
+          "accepted[].id": [
+            "source_tool_memory_bridge_note",
+            "claim_tool_memory_bridge_requires_reviewed_promotion"
+          ],
+          "review.ready_for_reviewed_apply": [
+            true
+          ]
+        }
+      },
+      {
+        "id": "bridge-import-preview",
+        "method": "akbp.import_apply",
+        "approved": false,
+        "params": {
+          "file": "benchmarks/fixtures/memory-server-bridge/import-export.jsonl",
+          "dry_run": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "review_required",
+          "apply_instruction",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": true,
+          "applied": false,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0,
+          "review_required": true
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "would_write.sources[]": [
+            "source_tool_memory_bridge_note"
+          ],
+          "would_write.claims[]": [
+            "claim_tool_memory_bridge_requires_reviewed_promotion"
+          ],
+          "review.ready_for_reviewed_apply": [
+            true
+          ]
+        }
+      },
+      {
+        "id": "bridge-import-approved",
+        "method": "akbp.import_apply",
+        "approved": true,
+        "params": {
+          "file": "benchmarks/fixtures/memory-server-bridge/import-export.jsonl"
+        },
+        "expected_result_fields": [
+          "ok",
+          "file",
+          "dry_run",
+          "applied",
+          "checked",
+          "accepted_count",
+          "rejected_count",
+          "error_count",
+          "would_write",
+          "skipped_existing",
+          "review"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "dry_run": false,
+          "applied": true,
+          "checked": 2,
+          "accepted_count": 2,
+          "rejected_count": 0,
+          "error_count": 0
+        },
+        "expected_result_schema": "#/$defs/import_apply_result",
+        "expected_result_contains": {
+          "would_write.sources[]": [
+            "source_tool_memory_bridge_note"
+          ],
+          "would_write.claims[]": [
+            "claim_tool_memory_bridge_requires_reviewed_promotion"
+          ],
+          "review.ready_for_reviewed_apply": [
+            true
+          ]
+        }
+      },
+      {
+        "id": "bridge-index-after-import",
+        "method": "akbp.index",
+        "approved": true,
+        "params": {
+          "incremental": true
+        },
+        "expected_result_fields": [
+          "ok",
+          "db",
+          "rows",
+          "indexed",
+          "indexed_keys",
+          "skipped",
+          "skipped_keys",
+          "removed",
+          "removed_keys",
+          "incremental"
+        ],
+        "expected_result_values": {
+          "ok": true,
+          "incremental": true
+        },
+        "expected_result_schema": "#/$defs/index_result",
+        "expected_result_contains": {
+          "skipped_keys[]": [
+            "claim:claim_tool_memory_bridge_requires_reviewed_promotion"
+          ]
+        }
+      },
+      {
+        "id": "bridge-context-after-index",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "use tool-protocol memory server bridge import-check dry-run explicit approval approved cited context",
+          "limit": 5,
+          "require_citations": true
+        },
+        "expected_result_fields": [
+          "query",
+          "items",
+          "quality"
+        ],
+        "expected_result_schema": "#/$defs/context_result",
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_tool_memory_bridge_requires_reviewed_promotion"
+          ],
+          "items[].citations[]": [
+            "source_tool_memory_bridge_note"
+          ],
+          "quality.trusted_for_planning": [
+            true
+          ]
+        }
+      },
+      {
+        "id": "bridge-context-after-import",
+        "method": "akbp.context",
+        "approved": false,
+        "params": {
+          "task": "use tool-protocol memory server bridge import-check dry-run approved cited context",
+          "limit": 5,
+          "require_citations": true
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_schema": "#/$defs/context_result",
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_tool_memory_bridge_requires_reviewed_promotion"
+          ],
+          "items[].citations[]": [
+            "source_tool_memory_bridge_note"
+          ]
+        }
+      }
+    ]
+  },
+  "query": "How should AKBP bridge memory from a tool-protocol memory server or runtime cache?",
+  "expected": {
+    "must_retrieve": [
+      "claim_bridge_starts_read_only"
+    ],
+    "must_cite": [
+      "source_adapter_quickstart_bridge",
+      "source_adoption_bridge_guide"
+    ],
+    "must_apply_tool_methods": [
+      "akbp.import_apply",
+      "akbp.index"
+    ],
+    "must_dry_run_tool_methods": [
+      "akbp.import_apply"
+    ],
+    "answer_should_include": [
+      "tool-protocol memory server",
+      "runtime cache",
+      "import-check",
+      "dry-run review",
+      "explicit approval",
+      "cited context"
+    ]
+  }
+}

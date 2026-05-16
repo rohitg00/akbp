@@ -812,6 +812,31 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("claim_adapter_harness_checks_shapes", report["query_result_ids"])
 
+    def test_memory_server_bridge_fixture_covers_reviewed_promotion(self):
+        path = FIXTURES / "memory-server-bridge" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        fixture_readme = (FIXTURES / "README.md").read_text(encoding="utf-8")
+        self.assertIn("memory-server-bridge", fixture_readme)
+        self.assertEqual(data["profiles"], ["adapter-quality", "retrieval-quality"])
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        check = requests["bridge-import-check"]
+        preview = requests["bridge-import-preview"]
+        apply = requests["bridge-import-approved"]
+        index = requests["bridge-index-after-import"]
+        context = requests["bridge-context-after-index"]
+        self.assertEqual(check["method"], "akbp.import_check")
+        self.assertEqual(check["expected_result_contains"]["review.ready_for_reviewed_apply"], [True])
+        self.assertTrue(preview["params"]["dry_run"])
+        self.assertFalse(preview["approved"])
+        self.assertTrue(apply["approved"])
+        self.assertEqual(index["method"], "akbp.index")
+        self.assertEqual(index["expected_result_contains"]["skipped_keys[]"], ["claim:claim_tool_memory_bridge_requires_reviewed_promotion"])
+        self.assertIn("source_tool_memory_bridge_note", context["expected_result_contains"]["items[].citations[]"])
+        self.assertIn("explicit approval", data["expected"]["answer_should_include"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("bridge-context-after-index", report["tool_output_ids"])
+
     def test_runner_filters_fixtures_by_profile(self):
         report = benchmark_runner.run(FIXTURES, score=True, real_akbp=True, profile="adapter-quality")
         self.assertTrue(report["ok"], report)
