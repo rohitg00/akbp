@@ -114,6 +114,24 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.remember", descriptor["blocked_until_review_surface"])
             self.assertIn("schemas/tool-methods.schema.json", descriptor["schema_refs"]["methods"])
             self.assertIn("requires_profiles", descriptor["host_integration_rules"][0])
+            registration = config["memory_capability_registration_manifest"]
+            self.assertEqual(registration["format"], "akbp-memory-capability-registration-manifest-v1")
+            self.assertEqual(registration["register_as"]["capability"], "memory")
+            self.assertEqual(registration["register_as"]["subtype"], "durable_project_knowledge")
+            self.assertEqual(registration["register_as"]["profile"], "reviewed_write")
+            self.assertIn("citations, source ids", registration["advertise_only_when"][2])
+            self.assertIn("akbp.session.start", registration["registration_tools"]["startup_context"])
+            self.assertIn("akbp.remember", registration["registration_tools"]["review_preview"])
+            self.assertIn("uncited chat-history memory", registration["must_not_register_as"])
+            self.assertIn("startup-context and search tools", registration["fallback_registration"])
+            self.assertEqual(
+                descriptor["memory_capability_registration_manifest"],
+                registration,
+            )
+            self.assertEqual(
+                config["memory_capability_projection"]["registration_manifest_ref"],
+                "memory_capability_registration_manifest",
+            )
             bridge_snippets = config["tool_protocol_bridge_snippets"]
             self.assertEqual(bridge_snippets["format"], "akbp-tool-protocol-bridge-snippets-v1")
             self.assertFalse(bridge_snippets["direct_host_native_server"])

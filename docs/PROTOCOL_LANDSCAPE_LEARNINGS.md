@@ -647,6 +647,10 @@ registries safe labels plus the required semantics: AKBP artifacts remain the
 source of truth, startup recall must be cited, writes stay review-gated,
 structured errors and budget fields are preserved, and export/import checks do
 not depend on host-local memory state.
+`memory_capability_registration_manifest` is the compact registration form for
+hosts that only accept a generic memory capability: advertise AKBP as durable
+project knowledge only when citations, source ids, envelopes, budgets, and the
+review boundary survive the host mapping.
 
 If a host registry cannot express those semantics, the safe integration is
 read-only startup context tools, not a generic automatic memory store.

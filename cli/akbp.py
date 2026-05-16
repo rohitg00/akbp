@@ -3622,7 +3622,39 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         ],
         "fallback": "If the host memory capability cannot express citations, structured errors, context budgets, and reviewed writes, register only read-only startup-context tools.",
     }
+    memory_capability_registration_manifest = {
+        "format": "akbp-memory-capability-registration-manifest-v1",
+        "purpose": "Give host registries a compact allowlist for advertising AKBP as memory without hiding the review and citation contract.",
+        "register_as": {
+            "capability": "memory",
+            "subtype": "durable_project_knowledge",
+            "transport": "stdio-jsonl",
+            "profile": requested_profile,
+            "safe_default_profile": "read_only",
+        },
+        "advertise_only_when": [
+            "capability negotiation is satisfied for the selected profile",
+            "doctor reports the requested profile ready",
+            "the host can preserve citations, source ids, warnings, and context budget fields",
+            "the host can preserve ok/error.code response envelopes",
+            "write-capable tools are disabled until a separate review surface exists",
+        ],
+        "registration_tools": {
+            "startup_context": ["akbp.capabilities", "akbp.doctor", "akbp.session.start", "akbp.context"],
+            "read_only": [entry["method"] for entry in read_only_bridge_tools],
+            "review_preview": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
+        },
+        "must_not_register_as": [
+            "automatic background memory",
+            "uncited chat-history memory",
+            "host-owned vector database",
+            "scratchpad synchronization",
+        ],
+        "fallback_registration": "Register only startup-context and search tools when the host memory registry cannot express citations, envelopes, budgets, and reviewed writes.",
+    }
+    memory_capability_projection["registration_manifest_ref"] = "memory_capability_registration_manifest"
     host_capability_descriptor["memory_capability_projection"] = memory_capability_projection
+    host_capability_descriptor["memory_capability_registration_manifest"] = memory_capability_registration_manifest
     tool_protocol_bridge_snippets = {
         "format": "akbp-tool-protocol-bridge-snippets-v1",
         "purpose": "Give tool-protocol-capable hosts copyable bridge inputs without claiming the reference JSONL server is itself a host-native tool server.",
@@ -3726,6 +3758,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         },
         "host_capability_descriptor": host_capability_descriptor,
         "memory_capability_projection": memory_capability_projection,
+        "memory_capability_registration_manifest": memory_capability_registration_manifest,
         "tool_protocol_bridge_snippets": tool_protocol_bridge_snippets,
         "profile_selection": profile_selection,
         "tool_schema_budget": tool_schema_budget,

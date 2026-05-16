@@ -159,6 +159,10 @@ export-checkable project knowledge.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.
+It includes `memory_capability_registration_manifest` for hosts with a
+generic memory registry. Register AKBP as memory only when the host can preserve
+citations, source ids, response envelopes, context budgets, and reviewed-write
+boundaries; otherwise expose only read-only startup-context and search tools.
 It includes `host_install_profiles` so adapter installers can show concrete
 read-only setup commands for terminal agents, editor agents, and runtimes that
 already have a memory server or cache. These profiles keep the first tool
