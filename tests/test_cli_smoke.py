@@ -482,6 +482,18 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("Do not expose host tools", budget_gate["fail_closed_action"])
             self.assertIn("akbp.remember", manifest["tool_schema_budget"]["blocked_until_needed"])
             self.assertIn("every exposed tool schema consumes context", manifest["tool_schema_budget"]["research_signal"])
+            schema_plan = manifest["tool_schema_budget"]["schema_exposure_plan"]
+            self.assertEqual(schema_plan["format"], "akbp-schema-exposure-plan-v1")
+            self.assertEqual(schema_plan["selected_profile"], "reviewed_write")
+            self.assertEqual(
+                [item["method"] for item in schema_plan["publish_now"]],
+                config["tool_protocol_bridge"]["read_only_allowlist"],
+            )
+            self.assertTrue(schema_plan["publish_now"][0]["schema_ref"].endswith("#/$defs/akbp.capabilities.params"))
+            deferred = {item["method"] for item in schema_plan["defer_until_review_surface"]}
+            self.assertIn("akbp.remember", deferred)
+            self.assertIn("akbp.session.end", deferred)
+            self.assertIn("deferred schema is published", " ".join(schema_plan["fail_closed_when"]))
             self.assertEqual(
                 [tool["forwards_to"] for tool in manifest["tools"]],
                 config["tool_protocol_bridge"]["read_only_allowlist"],
@@ -885,6 +897,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(schema_budget["max_exposed_methods_for_profile"], 8)
             self.assertIn("akbp.search", schema_budget["exposed_methods"])
             self.assertIn("akbp.import_apply", schema_budget["blocked_until_needed"])
+            schema_plan = schema_budget["schema_exposure_plan"]
+            self.assertEqual(schema_plan["format"], "akbp-schema-exposure-plan-v1")
+            self.assertEqual(schema_plan["selected_profile"], "read_only")
+            self.assertEqual(
+                [item["method"] for item in schema_plan["publish_now"]],
+                schema_budget["exposed_methods"],
+            )
+            self.assertIn("akbp.import_apply", {item["method"] for item in schema_plan["defer_until_review_surface"]})
+            self.assertIn("host prompt contains schemas outside publish_now", " ".join(schema_plan["fail_closed_when"]))
             self.assertIn("exposed_method_count is greater than max_exposed_methods_for_profile", schema_budget["fail_closed_when"])
             self.assertIn("profile", " ".join(schema_budget["schema_strategy"]))
             self.assertIn("read-only allowlist", schema_budget["fallback"])

@@ -50,6 +50,12 @@ The same payload includes `tool_schema_budget`. Treat
 `exposed_method_count` is greater than `max_exposed_methods_for_profile`, or
 `within_budget` is false, keep only the startup-context tools and rerun
 `client-config` for the intended profile.
+Use `tool_schema_budget.schema_exposure_plan.publish_now` as the exact list of
+method schema refs the host may publish for the selected profile. Keep schemas
+listed under `defer_until_review_surface` out of the host prompt and direct tool
+manifest until dry-run review, explicit approval, and exact `approved:true`
+apply are preserved. This keeps schema budget claims testable instead of relying
+on prose instructions.
 
 The same manifest includes `preflight_requests` for the startup checks an
 adapter should run before exposing tools: capability negotiation, doctor, and
@@ -162,6 +168,9 @@ Required behavior:
   smoke test when the host needs a pasteable setup check instead of a manifest parser.
 - Check `tool_schema_budget.within_budget` before publishing host tools; do
   not flatten every AKBP method schema into the model prompt by default.
+- Publish only the method schemas listed in
+  `tool_schema_budget.schema_exposure_plan.publish_now`; deferred schemas stay
+  disabled until the reviewed-write trust gate passes.
 - Use the generated `maintenance` checks to verify sources, rerun `akbp.doctor`, check export bundles, and refresh retrieval after approved writes instead of treating setup as a one-time install.
 - Pass a caller-selected local knowledge-base path instead of hard-coding a private machine path.
 - Enforce bounded requests before forwarding to the JSONL server.

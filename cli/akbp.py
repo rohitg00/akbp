@@ -259,6 +259,45 @@ def adapter_tool_schema_budget(
         ]
     method_limit = profile_method_limits.get(profile, profile_method_limits["read_only"])
     overflow_methods = exposed_methods[method_limit:]
+    blocked_until_needed = [
+        "akbp.remember",
+        "akbp.source.add",
+        "akbp.ingest",
+        "akbp.import_apply",
+        "akbp.index",
+        "akbp.session.end",
+        "akbp.crystallize_session",
+        "akbp.supersede",
+        "akbp.contradict",
+    ]
+    schema_ref_base = "schemas/tool-methods.schema.json#/$defs/"
+    schema_exposure_plan = {
+        "format": "akbp-schema-exposure-plan-v1",
+        "purpose": "Tell host adapters which AKBP method schemas may be published for the selected profile, and which schemas must stay out of the host prompt until a later trust gate passes.",
+        "selected_profile": profile,
+        "publish_now": [
+            {
+                "method": method,
+                "schema_ref": f"{schema_ref_base}{method}.params",
+                "reason": "selected profile allowlist",
+            }
+            for method in exposed_methods[:method_limit]
+        ],
+        "defer_until_review_surface": [
+            {
+                "method": method,
+                "schema_ref": f"{schema_ref_base}{method}.params",
+                "reason": "write-capable or lifecycle-changing method",
+            }
+            for method in blocked_until_needed
+        ],
+        "fail_closed_when": [
+            "a deferred schema is published as a direct host tool",
+            "a host prompt contains schemas outside publish_now for the selected profile",
+            "published schema refs are copied into prose and lose method names or bounds",
+            "write-capable schemas are enabled before dry-run review and approved:true apply are preserved",
+        ],
+    }
     return {
         "format": "akbp-tool-schema-budget-v1",
         "purpose": "Keep host tool descriptions bounded by the selected AKBP profile instead of loading every memory and write schema into the model context.",
@@ -298,17 +337,8 @@ def adapter_tool_schema_budget(
             ],
             "fail_closed_action": "Do not expose host tools; regenerate client-config for a narrower profile or keep AKBP available only through explicit JSONL calls.",
         },
-        "blocked_until_needed": [
-            "akbp.remember",
-            "akbp.source.add",
-            "akbp.ingest",
-            "akbp.import_apply",
-            "akbp.index",
-            "akbp.session.end",
-            "akbp.crystallize_session",
-            "akbp.supersede",
-            "akbp.contradict",
-        ],
+        "schema_exposure_plan": schema_exposure_plan,
+        "blocked_until_needed": blocked_until_needed,
         "upgrade_preflight": [
             f"akbp --path {kb_path} doctor --profile reviewed-writes",
             "akbp.capabilities with requires_profiles:[\"reviewed_write\"]",
