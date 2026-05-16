@@ -31,11 +31,13 @@ python3 "$ROOT/cli/akbp.py" --path "$KB" init >/dev/null
 declare -a REQUESTS=(
   '{"id":"caps","method":"akbp.capabilities","path":"'"$KB"'","params":{"client":"markdown-folder-intake-example","requires":["method_param_schemas","write_apply_requires_approval"]}}'
 )
+declare -a SOURCE_IDS=()
 
 while IFS= read -r note; do
   title="$(basename "$note" .md | tr '-' ' ')"
   source_json="$(python3 "$ROOT/cli/akbp.py" --path "$KB" source add "$note" --type file --title "$title")"
   source_id="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])' <<<"$source_json")"
+  SOURCE_IDS+=("$source_id")
   case "$(basename "$note")" in
     adr-cache-policy.md)
       claim="API cache entries must expire after 10 minutes unless route-specific runbooks override the default."
@@ -58,6 +60,12 @@ while IFS= read -r note; do
     '{"id":"remember-approved-'"$base"'","method":"akbp.remember","path":"'"$KB"'","approved":true,"params":'"$params"'}'
   )
 done < <(find "$NOTES" -type f -name '*.md' | sort)
+
+for source_id in "${SOURCE_IDS[@]}"; do
+  REQUESTS+=(
+    '{"id":"source-verify-'"$source_id"'","method":"akbp.source.verify","path":"'"$KB"'","params":{"source_id":"'"$source_id"'","fail_on_issue":true}}'
+  )
+done
 
 REQUESTS+=(
   '{"id":"index-approved","method":"akbp.index","path":"'"$KB"'","approved":true,"params":{"incremental":true}}'
@@ -97,6 +105,20 @@ for key, row in by_id.items():
 assert len(approved_claims) == 2, approved_claims
 print("registered markdown sources ok")
 print("review-gated markdown promotion ok")
+
+verified_sources = []
+for key, row in by_id.items():
+    if key.startswith("source-verify-"):
+        result = row["result"]
+        assert result["ok"], result
+        assert result["changed"] == [], result
+        assert result["missing"] == [], result
+        assert result["attention"]["requires_review"] is False, result
+        assert result["verified"][0]["affected_claims"], result
+        verified_sources.append(result["source_id"])
+
+assert len(verified_sources) == 2, verified_sources
+print("verified markdown sources ok")
 
 indexed = by_id["index-approved"]["result"]
 assert indexed["indexed"] >= 2, indexed
