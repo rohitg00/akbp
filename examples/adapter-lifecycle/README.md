@@ -16,6 +16,7 @@ Expected success markers:
 AKBP adapter lifecycle example
 capabilities ok
 session start ok
+cited startup gate ok
 session end preview ok
 unapproved session end blocked
 session end apply ok
@@ -38,6 +39,18 @@ The response includes:
 - a context pack from the same retrieval path as `akbp.context`
 
 Adapters should show or inject this context before planning. Do not treat an empty context pack as failure; it just means no relevant durable claims were found yet.
+
+When an adapter will let recalled AKBP context influence planning, use the
+gated startup shape instead:
+
+```json
+{"id":"lifecycle-start-gated","method":"akbp.session.start","path":".","params":{"task":"prepare the release candidate","limit":5,"min_items":1,"require_citations":true,"fail_on_warnings":true}}
+```
+
+Only plan from memory when `result.context.quality.trusted_for_planning` is
+`true` and the returned items include citations. If this gate fails, continue
+without recalled AKBP memory or show the structured error; do not silently
+promote uncited or truncated context into the agent plan.
 
 ## 2. Preview shutdown memory before writing
 
@@ -75,6 +88,7 @@ Then retrieve again before relying on the newly written memory:
 
 - Call `akbp.capabilities` first and check `akbp.session.start`, `akbp.session.end`, and `params_schema` references.
 - Use `akbp.session.start` for startup retrieval.
+- Require cited, warning-free startup context before memory-assisted planning.
 - Use `akbp.session.end` for shutdown memory.
 - Start shutdown with `dry_run:true`.
 - Require `approved:true` before durable apply.

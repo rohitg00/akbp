@@ -46,6 +46,15 @@ assert first["citations"], first
 assert "akbp.session.start before planning" in first["summary"], first
 print("session start ok")
 
+gated = by_id["lifecycle-start-gated"]
+assert gated["ok"], gated
+gated_context = gated["result"]["context"]
+assert gated_context["quality"]["trusted_for_planning"], gated_context
+assert gated_context["quality"]["fallback_reason"] is None, gated_context
+assert gated_context["items"], gated_context
+assert gated_context["items"][0]["citations"], gated_context
+print("cited startup gate ok")
+
 preview = by_id["lifecycle-end-preview"]
 assert preview["ok"], preview
 preview_result = preview["result"]
@@ -85,6 +94,7 @@ print("lifecycle recall ok")
 '
 {"id":"caps","method":"akbp.capabilities","path":"$KB","params":{"client":"adapter-lifecycle-example","requires":["method_param_schemas","capability_negotiation","write_apply_requires_approval"],"requires_profiles":["startup_context","reviewed_write"]}}
 {"id":"lifecycle-start","method":"akbp.session.start","path":"$KB","params":{"task":"plan adapter session start wiring","limit":5}}
+{"id":"lifecycle-start-gated","method":"akbp.session.start","path":"$KB","params":{"task":"plan adapter session start wiring","limit":5,"min_items":1,"require_citations":true,"fail_on_warnings":true}}
 {"id":"lifecycle-end-preview","method":"akbp.session.end","path":"$KB","dry_run":true,"params":{"transcript":"$TRANSCRIPT","apply":true}}
 {"id":"lifecycle-end-blocked","method":"akbp.session.end","path":"$KB","params":{"transcript":"$TRANSCRIPT","apply":true}}
 {"id":"lifecycle-end-apply","method":"akbp.session.end","path":"$KB","approved":true,"params":{"transcript":"$TRANSCRIPT","apply":true}}
