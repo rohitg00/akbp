@@ -82,6 +82,19 @@ assert config["knowledge_capability"]["type"] == "durable_agent_knowledge", conf
 assert config["knowledge_capability"]["default_mode"] == "read_only", config
 assert "bridge-owned memory format" in config["knowledge_capability"]["not_a"], config
 assert "source_backed_claims" in config["knowledge_capability"]["guarantees"], config
+projection = config["memory_capability_projection"]
+assert projection["format"] == "akbp-memory-capability-projection-v1", projection
+assert projection["capability_type"] == "memory", projection
+assert projection["subtype"] == "durable_project_knowledge", projection
+assert projection["safe_default_profile"] == "read_only", projection
+assert projection["startup_method"] == "akbp.session.start", projection
+assert projection["write_boundary"]["direct_writes_enabled"] is False, projection
+assert projection["write_boundary"]["preview_flag"] == "dry_run", projection
+assert projection["write_boundary"]["apply_flag"] == "approved", projection
+assert "akbp.context" in projection["read_methods"], projection
+assert "result.context.items[].citations" in projection["host_must_preserve"], projection
+assert "uncited chat history" in projection["do_not_map_as"], projection
+assert config["host_capability_descriptor"]["memory_capability_projection"] == projection, config
 print("bridge config contract ok")
 PY
 

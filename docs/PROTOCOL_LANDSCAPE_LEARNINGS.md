@@ -96,6 +96,15 @@ configs should make the least-privileged method set explicit, start from the
 read-only allowlist, and expose write-capable schemas only after capability,
 doctor, harness, and review-surface checks pass.
 
+The newest bridge-oriented scan reinforced a second adapter issue: some hosts
+classify integrations through a generic memory-capability registry rather than a
+custom AKBP-aware adapter. AKBP should give those hosts a compact projection
+that says exactly what can be mapped safely: durable project knowledge, cited
+startup reads, read-only default methods, disabled direct writes, and
+`dry_run` plus exact `approved:true` replay for reviewed writes. If the host
+cannot preserve citations, `error.code`, context budgets, and review metadata,
+the projection should fail closed to startup-context tools only.
+
 ### 6. Users like high-level memory features, but protocol users need exact artifacts
 
 Common features in the landscape:

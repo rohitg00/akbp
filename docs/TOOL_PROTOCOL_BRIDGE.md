@@ -35,6 +35,15 @@ apply of the exact reviewed request. This descriptor is intentionally about the
 knowledge capability and trust boundary, not a claim that AKBP is a separate
 host protocol.
 
+When a host only has a generic memory-capability slot, use
+`memory_capability_projection` from `akbp client-config`. It gives the host a
+minimal mapping: AKBP is durable project knowledge, `akbp.session.start` is the
+startup read, read-only methods are the safe default, direct writes are disabled,
+and write-capable methods stay behind `dry_run` preview plus exact
+`approved:true` replay. If the host memory slot cannot represent citations,
+structured `error.code`, context budgets, or reviewed-write metadata, register
+only read-only startup-context tools.
+
 The generated `tool_protocol_bridge.host_tool_manifest` is the smallest
 host-facing manifest for the selected profile. For `startup_context`, it only
 publishes capability discovery, doctor, session start, and bounded context. For
@@ -156,6 +165,9 @@ Required behavior:
   review-gated project knowledge; if the host cannot express citations,
   structured errors, context budgets, or reviewed writes, expose read-only
   startup context tools instead of a generic memory store.
+- Preserve `memory_capability_projection` when the host has a generic memory
+  registry. Treat its `read_methods`, `startup_method`, `write_boundary`,
+  and `host_must_preserve` fields as the host mapping contract.
 - Generate read-only host wrappers from `tool_protocol_bridge.forward_tools` when available, preserving each entry's `method`, `params_schema`, and `surface_fields`.
 - For managed tool-protocol hosts, generate the local server entry and read-only tool
   exposure from `managed_tool_host_bridge` so the host config cannot drift from AKBP

@@ -3350,6 +3350,55 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "methods": "schemas/tool-methods.schema.json",
         },
     }
+    memory_capability_projection = {
+        "format": "akbp-memory-capability-projection-v1",
+        "purpose": "Give hosts with a generic memory-capability slot a minimal AKBP projection without weakening AKBP into bridge-owned memory.",
+        "capability_type": "memory",
+        "subtype": "durable_project_knowledge",
+        "selected_profile": requested_profile,
+        "safe_default_profile": "read_only",
+        "source_of_truth": "AKBP markdown and JSONL artifacts under knowledge_base.path",
+        "read_methods": [
+            "akbp.capabilities",
+            "akbp.doctor",
+            "akbp.session.start",
+            "akbp.context",
+            "akbp.search",
+            "akbp.cite",
+            "akbp.source.verify",
+            "akbp.import_check",
+        ],
+        "startup_method": "akbp.session.start",
+        "write_boundary": {
+            "direct_writes_enabled": False,
+            "preview_methods": ["akbp.remember", "akbp.ingest", "akbp.source.add", "akbp.session.end"],
+            "preview_flag": "dry_run",
+            "apply_flag": "approved",
+            "apply_rule": "Only replay the exact reviewed method, path, and params after approval outside the model-generated tool call.",
+        },
+        "host_must_preserve": [
+            "response envelope id/ok/result/error",
+            "error.code",
+            "result.context.items[].citations",
+            "result.context.warnings",
+            "result.context.budget",
+            "dry-run review metadata",
+        ],
+        "trust_gate": [
+            "capability negotiation is satisfied for the selected profile",
+            "doctor reports requested_profile_ready true",
+            "startup context is cited or the host continues without recalled AKBP memory",
+            "write-capable methods remain disabled until a separate review surface exists",
+        ],
+        "do_not_map_as": [
+            "uncited chat history",
+            "automatic background memory",
+            "runtime scratchpad",
+            "host-owned vector cache",
+        ],
+        "fallback": "If the host memory capability cannot express citations, structured errors, context budgets, and reviewed writes, register only read-only startup-context tools.",
+    }
+    host_capability_descriptor["memory_capability_projection"] = memory_capability_projection
     tool_protocol_bridge_snippets = {
         "format": "akbp-tool-protocol-bridge-snippets-v1",
         "purpose": "Give tool-protocol-capable hosts copyable bridge inputs without claiming the reference JSONL server is itself a host-native tool server.",
@@ -3451,6 +3500,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
         },
         "host_capability_descriptor": host_capability_descriptor,
+        "memory_capability_projection": memory_capability_projection,
         "tool_protocol_bridge_snippets": tool_protocol_bridge_snippets,
         "profile_selection": profile_selection,
         "tool_schema_budget": tool_schema_budget,
