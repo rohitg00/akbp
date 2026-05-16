@@ -150,11 +150,11 @@
       {
         "id": "remember-preview-structured-harness",
         "method": "akbp.remember",
+        "dry_run": true,
         "params": {
           "text": "Adapter harnesses should fail closed when response shape validation fails.",
           "type": "workflow",
-          "evidence": ["source_tool_contract_harness"],
-          "dry_run": true
+          "evidence": ["source_tool_contract_harness"]
         },
         "expected_result_schema": "#/$defs/dry_run_review_result",
         "expected_result_fields": ["dry_run", "method", "argv", "would_write", "review_required", "apply_instruction"],

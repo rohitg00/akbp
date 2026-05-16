@@ -55,6 +55,17 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertEqual(request["expected_result_contains"]["relations[].id"], ["relation_protocol_uses_tool_server"])
         self.assertIn("claim_graph_records_export", data["expected"]["must_retrieve"])
 
+    def test_adapter_harness_fixture_uses_request_level_dry_run(self):
+        path = FIXTURES / "adapter-structured-output-harness" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        preview = requests["remember-preview-structured-harness"]
+        self.assertTrue(preview["dry_run"])
+        self.assertNotIn("dry_run", preview["params"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("remember-preview-structured-harness", report["tool_output_ids"])
+
     def test_import_apply_malformed_fixture_covers_failure_shape(self):
         path = FIXTURES / "import-apply-malformed" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -788,7 +799,8 @@ class BenchmarkFixtureTest(unittest.TestCase):
             "https://raw.githubusercontent.com/rohitg00/akbp/main/schemas/tool-methods.schema.json#/$defs/akbp.session.start.params",
         )
         preview = requests["remember-preview-structured-harness"]
-        self.assertTrue(preview["params"]["dry_run"])
+        self.assertTrue(preview["dry_run"])
+        self.assertNotIn("dry_run", preview["params"])
         self.assertEqual(preview["expected_result_schema"], "#/$defs/dry_run_review_result")
         self.assertEqual(preview["expected_result_values"]["review_required"], True)
         rejected = requests["remember-unapproved-structured-harness"]

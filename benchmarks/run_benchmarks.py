@@ -209,6 +209,7 @@ def run_tool_server(requests: list[dict[str, Any]], kb: Path) -> list[dict[str, 
             "id": request["id"],
             "path": str(kb),
             "method": request["method"],
+            "dry_run": bool(request.get("dry_run")),
             "approved": bool(request.get("approved")),
             "params": request.get("params", {}),
         }
@@ -436,7 +437,11 @@ def score_scenario(data: dict[str, Any], *, real_akbp: bool = False) -> dict[str
         for method in expected["must_reject_tool_methods"]:
             add("must_reject_tool_method", method in rejected_methods, method)
     if expected.get("must_dry_run_tool_methods"):
-        dry_run_methods = {request.get("method") for request in setup.get("tool_server_requests", []) or [] if request.get("params", {}).get("dry_run") is True}
+        dry_run_methods = {
+            request.get("method")
+            for request in setup.get("tool_server_requests", []) or []
+            if request.get("dry_run") is True or request.get("params", {}).get("dry_run") is True
+        }
         for method in expected["must_dry_run_tool_methods"]:
             add("must_dry_run_tool_method", method in dry_run_methods, method)
 
@@ -530,7 +535,12 @@ def check_scenario(data: dict[str, Any]) -> list[str]:
     for method in expected.get("must_reject_tool_methods", []) or []:
         if method not in rejected_methods:
             issues.append(f"expected must_reject_tool_methods missing rejection request for {method}")
-    dry_run_methods = {request.get("method") for request in tool_requests if isinstance(request.get("params"), dict) and request.get("params", {}).get("dry_run") is True}
+    dry_run_methods = {
+        request.get("method")
+        for request in tool_requests
+        if request.get("dry_run") is True
+        or (isinstance(request.get("params"), dict) and request.get("params", {}).get("dry_run") is True)
+    }
     for method in expected.get("must_dry_run_tool_methods", []) or []:
         if method not in dry_run_methods:
             issues.append(f"expected must_dry_run_tool_methods missing dry-run request for {method}")
