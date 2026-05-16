@@ -169,6 +169,13 @@ preference into a setup gate: run the structured-output harness, preserve
 response envelopes, citations, budget metadata, dry-run review fields, and
 `error.code`, and keep AKBP read-only until those checks pass.
 
+When an editor, workflow tool, or coding agent has an active file, component,
+workflow, or selected node, use `workflow_context_selector` from `akbp client-config`
+before planning. The adapter should pass the active selection into scoped
+`akbp.session.start`, require citations and budget metadata, rerun retrieval
+when the selection changes, and continue without recalled AKBP memory when the
+scoped context is empty, uncited, warning-bearing, or truncated.
+
 Use `structured_output_repair` from `akbp client-config` when wiring retries.
 Adapters may repair malformed JSON, request envelopes, unsupported methods after
 capability refresh, or invalid params using `error.details.params_schema`. They

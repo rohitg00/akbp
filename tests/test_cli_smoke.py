@@ -1,4 +1,5 @@
 import json
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -790,6 +791,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(prompt_contract["planning_gate"]["required_before_planning"])
             self.assertIn("do not invent prior decisions", prompt_contract["planning_gate"]["fallback"])
             self.assertIn("source ids", " ".join(prompt_contract["system_rules"]))
+            workflow_selector = prompt_contract["workflow_context_selector"]
+            self.assertEqual(workflow_selector["format"], "akbp-workflow-context-selector-v1")
+            self.assertEqual(workflow_selector, read_only["workflow_context_selector"])
+            self.assertEqual(workflow_selector["query_template"]["method"], "akbp.session.start")
+            self.assertEqual(workflow_selector["query_template"]["path"], str(kb.resolve()))
+            self.assertTrue(workflow_selector["query_template"]["params"]["require_citations"])
+            self.assertIn("active_artifact_path_or_id", workflow_selector["required_adapter_input"])
+            self.assertIn("rerun scoped startup context", " ".join(workflow_selector["selection_rules"]))
+            self.assertIn("budget truncation", " ".join(workflow_selector["fail_closed_when"]))
             trust_gate = prompt_contract["startup_trust_gate"]
             self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")
             self.assertTrue(trust_gate["required_before_planning"])
@@ -861,6 +871,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(portable["health_check"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["session_start"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["adapter_prompt_contract"]["startup_request"]["path"], "<AKBP_KB_PATH>")
+            self.assertEqual(portable["workflow_context_selector"]["query_template"]["path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["multi_client_scope"]["shared_kb_path"], "<AKBP_KB_PATH>")
             self.assertEqual(portable["tool_protocol_bridge_snippets"]["server_process"]["env"]["AKBP_KB_PATH"], "<AKBP_KB_PATH>")
             self.assertEqual(
@@ -1110,6 +1121,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp_citation_ids", context_use["required_fields"])
             self.assertIn("budget_truncated", context_use["fallback_reason_values"])
             self.assertIn("trace back to result.context.items", " ".join(context_use["rules"]))
+            workflow_selector = prompt_contract["workflow_context_selector"]
+            self.assertEqual(workflow_selector["format"], "akbp-workflow-context-selector-v1")
+            self.assertEqual(workflow_selector, discovered["workflow_context_selector"])
+            self.assertEqual(workflow_selector["query_template"]["method"], "akbp.session.start")
+            self.assertEqual(workflow_selector["query_template"]["path"], shlex.quote(str(kb.resolve())))
+            self.assertIn("selected_step_or_node_when_available", workflow_selector["required_adapter_input"])
+            self.assertIn("active selection changes", " ".join(workflow_selector["selection_rules"]))
+            self.assertIn("uncited", " ".join(workflow_selector["fail_closed_when"]))
             trust_gate = prompt_contract["startup_trust_gate"]
             self.assertEqual(trust_gate["format"], "akbp-startup-trust-gate-v1")
             self.assertTrue(trust_gate["required_before_planning"])

@@ -686,6 +686,53 @@ def memory_adoption_matrix(kb_path: str) -> dict[str, Any]:
     }
 
 
+def workflow_context_selector(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-workflow-context-selector-v1",
+        "purpose": "Help adapters turn an active workflow, file, task, or UI selection into bounded cited AKBP startup context before planning.",
+        "research_signal": "Recent workflow-aware agent tooling lets users select a workflow or node before asking for edits; AKBP should make that selection explicit and cited instead of relying on a broad memory dump.",
+        "safe_default": "retrieve_cited_scope_before_planning",
+        "required_adapter_input": [
+            "user_task",
+            "active_artifact_path_or_id",
+            "workflow_or_component_name",
+            "selected_step_or_node_when_available",
+        ],
+        "query_template": {
+            "method": "akbp.session.start",
+            "path": kb_path,
+            "params": {
+                "task": "current task + active artifact + selected workflow/component",
+                "limit": 5,
+                "max_chars": 4000,
+                "min_items": 1,
+                "require_citations": True,
+                "fail_on_warnings": True,
+            },
+        },
+        "selection_rules": [
+            "Include the selected workflow, node, file, branch, or component in the task string before retrieval.",
+            "Prefer cited workflow, decision, warning, and source-backed fact claims over broad project summaries.",
+            "Surface context budget and warnings before using recalled context in a plan.",
+            "When the active selection changes, rerun scoped startup context instead of reusing stale recall.",
+        ],
+        "trusted_when": [
+            "response ok is true",
+            "at least one returned item has citations or source ids",
+            "result.context.budget.truncated is false",
+            "result.context.warnings is empty or has been surfaced and accepted by the host policy",
+        ],
+        "fail_closed_when": [
+            "active artifact or workflow selection is missing for a scoped task",
+            "returned context is empty or uncited",
+            "warnings cannot be surfaced before planning",
+            "budget truncation hides the selected workflow context",
+            "the adapter rewrites the selected scope into an uncited prose summary",
+        ],
+        "fallback": "Continue without recalled AKBP context for that scoped task and keep write-capable tools disabled until cited scoped retrieval passes.",
+    }
+
+
 def append_jsonl(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -916,6 +963,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     host_autodetect = host_autodetect_contract(kb_arg)
     external_memory_promotion = external_memory_promotion_contract(kb_arg)
     adoption_matrix = memory_adoption_matrix(kb_arg)
+    workflow_selector = workflow_context_selector(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -1256,6 +1304,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "not_applicable",
             ],
         },
+        "workflow_context_selector": workflow_selector,
         "startup_trust_gate": {
             "format": "akbp-startup-trust-gate-v1",
             "purpose": "Give discovery-based installers deterministic checks before they let recalled AKBP context influence planning.",
@@ -1395,6 +1444,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
+        "workflow_context_selector": workflow_selector,
         "response_contract": response_contract,
         "recommended_commands": {
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
@@ -2987,6 +3037,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     host_autodetect = host_autodetect_contract(kb_path, requested_profile)
     external_memory_promotion = external_memory_promotion_contract(kb_path)
     adoption_matrix = memory_adoption_matrix(kb_path)
+    workflow_selector = workflow_context_selector(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -3049,6 +3100,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "not_applicable",
             ],
         },
+        "workflow_context_selector": workflow_selector,
         "startup_trust_gate": {
             "format": "akbp-startup-trust-gate-v1",
             "purpose": "Give adapter harnesses deterministic checks before they let recalled AKBP context influence planning.",
@@ -3872,6 +3924,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "feature_claim_audit": [
                 {
+                    "claim": "workflow-aware context lets agents safely edit selected workflows or components",
+                    "akbp_check": "Require the adapter to pass active artifact and workflow selection into scoped akbp.session.start, then trust only cited, warning-free context before planning.",
+                    "evidence": "adapter_prompt_contract.workflow_context_selector plus session-start context items with citations",
+                },
+                {
                     "claim": "semantic, graph, or hierarchical memory improves recall",
                     "akbp_check": "Require cited context items, lifecycle state, and a runnable search or benchmark proof before planning from the recall.",
                     "evidence": "context results with citations plus benchmark or smoke output",
@@ -4587,6 +4644,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "adapter_action": "Keep AKBP read-only when a failure is not in retryable_after_local_fix; do not ask the model to reinterpret prose errors as permission to continue.",
         },
         "adapter_prompt_contract": adapter_prompt_contract,
+        "workflow_context_selector": workflow_selector,
         "startup": {
             "id": "capabilities-1",
             "method": "akbp.capabilities",

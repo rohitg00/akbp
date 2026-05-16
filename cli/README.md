@@ -215,6 +215,11 @@ harnesses to make memory safer. It maps that expectation to a concrete setup
 gate: run the structured-output harness, preserve response envelopes, citations,
 budget metadata, dry-run review fields, and `error.code`, then keep AKBP
 read-only until the gate passes.
+Use `workflow_context_selector` when the host has an active workflow, file,
+component, or selected node before the user asks the agent to explain, edit, or
+debug it. Pass that selection into scoped `akbp.session.start`, require cited
+bounded context, and continue without recalled AKBP context when the selected
+scope is missing, uncited, warning-bearing, or budget-truncated.
 Use `structured_output_repair.max_local_repair_attempts` as the retry budget
 for schema or envelope fixes. When that one local repair attempt is exhausted,
 surface the structured error and keep AKBP read-only for that flow.
