@@ -122,6 +122,32 @@
         }
       },
       {
+        "id": "session-start-truncated-fail-closed-structured-harness",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "adapter structured output harness",
+          "limit": 5,
+          "max_chars": 24,
+          "min_items": 1,
+          "require_citations": true,
+          "fail_on_warnings": true
+        },
+        "expected_error_code": "cli_error",
+        "expected_error_schema": "#/$defs/cli_error_details",
+        "expected_error_fields": ["method", "exit_code", "stdout", "redacted", "truncated"],
+        "expected_error_values": {
+          "method": "akbp.session.start",
+          "exit_code": 1
+        },
+        "expected_error_stdout_contains": {
+          "budget.max_chars": [24],
+          "budget.truncated": [true],
+          "quality.ok": [false],
+          "quality.fail_on_warnings": [true],
+          "quality.failed[]": ["warnings:1"]
+        }
+      },
+      {
         "id": "remember-preview-structured-harness",
         "method": "akbp.remember",
         "params": {

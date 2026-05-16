@@ -30,6 +30,7 @@ The scenario file includes:
 - `expected_error_fields`: fields that must exist in structured `error.details`
 - `expected_error_values`: exact values that must match in structured `error.details`
 - `expected_error_contains`: nested-path contains checks for structured `error.details`, including arrays such as `allowed[]` and `type_errors[]`
+- `expected_error_stdout_contains`: nested-path contains checks after parsing JSON `error.details.stdout`, for fail-closed commands that preserve diagnostics in CLI stdout
 
 Any field checked in `expected_result_values` or `expected_error_values` must also be listed in the corresponding field list, so fixtures document the complete contract they validate.
 

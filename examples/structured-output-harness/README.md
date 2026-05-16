@@ -31,6 +31,7 @@ invalid params repair contract ok
 doctor contract ok
 startup context contract ok
 budget truncation contract ok
+budget fail-closed contract ok
 dry-run review contract ok
 approval-required contract ok
 approved apply contract ok
@@ -155,6 +156,30 @@ the truncation diagnostics and fail closed before planning from partial memory:
 }
 ```
 
+When the adapter requests `fail_on_warnings:true`, the same truncation warning
+must flip the startup quality gate to `ok:false` and return a structured
+`cli_error`. The host can parse the redacted stdout context, record why memory
+was rejected, and continue without recalled memory instead of planning from
+partial context:
+
+```json
+{
+  "id": "session-start-truncated-fail-closed",
+  "ok": false,
+  "result": null,
+  "error": {
+    "code": "cli_error",
+    "details": {
+      "method": "akbp.session.start",
+      "exit_code": 1,
+      "stdout": "{\"budget\":{\"max_chars\":24,\"truncated\":true},\"quality\":{\"ok\":false,\"failed\":[\"warnings:1\"],\"fail_on_warnings\":true},\"warnings\":[\"Context budget truncated: clipped 1 item(s) and omitted 2 item(s); increase max_chars or lower limit for more detail.\",\"Context quality gate failed: warnings:1\"]}",
+      "redacted": false,
+      "truncated": false
+    }
+  }
+}
+```
+
 Dry-run write previews must expose enough review metadata for a user or trusted
 policy to approve the exact apply:
 
@@ -236,6 +261,8 @@ must stop memory use or writes:
 - startup context budget truncation exposes `budget.truncated`,
   `truncated_items`, and warnings that adapters can use to fail closed before
   planning from partial memory
+- `fail_on_warnings:true` turns those warnings into a machine-checkable failed
+  startup quality gate
 - dry-run write previews include `review_required`, `apply_instruction`, and `would_write`
 - dry-run write previews include `preview_fingerprint` so adapters can bind
   the later approved apply to the reviewed method, path, and params

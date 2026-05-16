@@ -753,6 +753,13 @@ class BenchmarkFixtureTest(unittest.TestCase):
         session_start = requests["session-start-structured-harness"]
         self.assertEqual(session_start["expected_result_values"]["task"], "adapter structured output harness")
         self.assertEqual(session_start["expected_result_contains"]["context.budget.max_chars"], [400])
+        fail_closed = requests["session-start-truncated-fail-closed-structured-harness"]
+        self.assertTrue(fail_closed["params"]["fail_on_warnings"])
+        self.assertEqual(fail_closed["expected_error_code"], "cli_error")
+        self.assertEqual(fail_closed["expected_error_schema"], "#/$defs/cli_error_details")
+        self.assertEqual(fail_closed["expected_error_stdout_contains"]["budget.truncated"], [True])
+        self.assertEqual(fail_closed["expected_error_stdout_contains"]["quality.ok"], [False])
+        self.assertEqual(fail_closed["expected_error_stdout_contains"]["quality.failed[]"], ["warnings:1"])
         invalid_params = requests["session-start-invalid-params-structured-harness"]
         self.assertEqual(invalid_params["expected_error_code"], "invalid_params")
         self.assertEqual(invalid_params["expected_error_schema"], "#/$defs/invalid_params_details")

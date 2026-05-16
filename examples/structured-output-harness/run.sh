@@ -102,6 +102,17 @@ assert any("Context budget truncated" in warning for warning in truncated_contex
 assert truncated_context["quality"]["ok"] is True, truncated
 print("budget truncation contract ok")
 
+truncated_fail_closed = envelope("session-start-truncated-fail-closed")
+assert not truncated_fail_closed["ok"], truncated_fail_closed
+assert truncated_fail_closed["error"]["code"] == "cli_error", truncated_fail_closed
+fail_closed_context = json.loads(truncated_fail_closed["error"]["details"]["stdout"])
+assert fail_closed_context["budget"]["truncated"] is True, truncated_fail_closed
+assert fail_closed_context["quality"]["ok"] is False, truncated_fail_closed
+assert fail_closed_context["quality"]["fail_on_warnings"] is True, truncated_fail_closed
+assert "warnings:1" in fail_closed_context["quality"]["failed"], truncated_fail_closed
+assert any("Context quality gate failed" in warning for warning in fail_closed_context["warnings"]), truncated_fail_closed
+print("budget fail-closed contract ok")
+
 preview = envelope("remember-preview")
 assert preview["ok"], preview
 review = preview["result"]
@@ -151,6 +162,7 @@ print("approved recall contract ok")
 {"id":"doctor","method":"akbp.doctor","path":"$KB"}
 {"id":"session-start","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":500}}
 {"id":"session-start-truncated","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":24,"min_items":1,"require_citations":true}}
+{"id":"session-start-truncated-fail-closed","method":"akbp.session.start","path":"$KB","params":{"task":"adapter structured output harness","limit":5,"max_chars":24,"min_items":1,"require_citations":true,"fail_on_warnings":true}}
 {"id":"remember-preview","method":"akbp.remember","path":"$KB","dry_run":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"remember-blocked","method":"akbp.remember","path":"$KB","params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}
 {"id":"remember-approved","method":"akbp.remember","path":"$KB","approved":true,"params":{"text":"Adapter harnesses should fail closed when AKBP response shape validation fails.","type":"workflow","evidence":["$NOTE"]}}

@@ -192,6 +192,16 @@ def missing_nested_contains(payload: Any, expected: dict[str, list[Any]]) -> dic
     return missing
 
 
+def parse_json_field(payload: dict[str, Any], field: str) -> Any:
+    value = payload.get(field)
+    if not isinstance(value, str):
+        return {}
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        return {}
+
+
 def run_tool_server(requests: list[dict[str, Any]], kb: Path) -> list[dict[str, Any]]:
     envelopes = []
     for request in requests:
@@ -329,10 +339,11 @@ def score_real_akbp(data: dict[str, Any]) -> dict[str, Any]:
             mismatched = {key: {"expected": value, "actual": details.get(key)} for key, value in (request.get("expected_error_values", {}) or {}).items() if details.get(key) != value}
             schema_issues = schema_shape_issues(details, schema_def(request["expected_error_schema"])) if request.get("expected_error_schema") else []
             missing_contains = missing_nested_contains(details, request.get("expected_error_contains", {}) or {})
+            stdout_contains = missing_nested_contains(parse_json_field(details, "stdout"), request.get("expected_error_stdout_contains", {}) or {})
             checks.append({
                 "name": "akbp_tool_rejection_shape",
-                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched and not schema_issues and not missing_contains,
-                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "missing_contains": missing_contains, "schema_issues": schema_issues, "schema": request.get("expected_error_schema"), "code": error.get("code")},
+                "ok": output.get("ok") is False and error.get("code") == request.get("expected_error_code") and not missing and not mismatched and not schema_issues and not missing_contains and not stdout_contains,
+                "details": {"id": request.get("id"), "method": request.get("method"), "missing": missing, "mismatched": mismatched, "missing_contains": missing_contains, "missing_stdout_contains": stdout_contains, "schema_issues": schema_issues, "schema": request.get("expected_error_schema"), "code": error.get("code")},
             })
             continue
         result = output.get("result") if isinstance(output.get("result"), dict) else {}
