@@ -374,6 +374,8 @@ The repo includes:
 - `examples/jsonl-quickstart/` for the canonical tool-server sequence: capabilities, session start, dry-run write, approval gate, approved apply, index, context, and export
 - `examples/adapter-lifecycle/` for `akbp.session.start` and `akbp.session.end` wiring
 - `examples/structured-output-harness/` for adapter response-contract checks before trusting recalled context or enabling reviewed writes
+- `examples/tool-protocol-bridge/` for read-only bridge preflight before exposing AKBP through a tool host
+- `examples/existing-memory-migration/` for promoting source-backed records from an existing memory server or hosted memory export
 - `examples/git-native-agent-handoff/` for repo-backed agent handoffs with cited context and review-gated shutdown memory
 - `examples/multi-agent-consistency-demo/` for cross-agent retrieval and supersession
 - `examples/rich-context-artifact/` for a static review surface backed by JSONL proposals
@@ -456,6 +458,8 @@ akbp/
 - Adoption reviewer: run `examples/adoption-preflight/run.sh`.
 - JSONL tool author: run `examples/jsonl-quickstart/run.sh`.
 - Adapter quality reviewer: run `examples/structured-output-harness/run.sh`.
+- Tool-host bridge reviewer: run `examples/tool-protocol-bridge/run.sh`.
+- Existing memory migration reviewer: run `examples/existing-memory-migration/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/` and `examples/structured-output-harness/`.
 - Session-memory reviewer: read `docs/SESSION_MEMORY_BOUNDARY.md`.

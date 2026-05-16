@@ -400,8 +400,9 @@ class RepoQualityTest(unittest.TestCase):
     def test_existing_memory_migration_documents_opaque_host_promotion_gate(self):
         text = (ROOT / "examples" / "existing-memory-migration" / "README.md").read_text(encoding="utf-8")
         script = (ROOT / "examples" / "existing-memory-migration" / "run.sh").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-        combined = text + script
+        combined = text + script + readme
         for required in [
             "AKBP existing memory migration example",
             "hosted coding-agent memory",
@@ -418,6 +419,9 @@ class RepoQualityTest(unittest.TestCase):
             "--approved",
             "review.review_status",
             "review.blocking_reasons",
+            "examples/existing-memory-migration/",
+            "Existing memory migration reviewer",
+            "examples/existing-memory-migration/run.sh",
         ]:
             self.assertIn(required, combined)
         self.assertIn("./examples/existing-memory-migration/run.sh", makefile)
