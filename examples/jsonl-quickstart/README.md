@@ -15,12 +15,18 @@ response JSONL files:
 AKBP_JSONL_QUICKSTART_TRACE_DIR=/tmp/akbp-jsonl-trace ./examples/jsonl-quickstart/run.sh
 sed -n '1,120p' /tmp/akbp-jsonl-trace/requests.jsonl
 sed -n '1,120p' /tmp/akbp-jsonl-trace/responses.jsonl
+sed -n '1,160p' /tmp/akbp-jsonl-trace/adapter-contract.json
 ```
 
 The trace is useful when wiring a new host because it shows the concrete
 envelope shape, `dry_run:true` preview, `approval_required` stop, `approved:true`
 apply, index refresh, cited recall, portable export, and `export-check`
 verification in the order an adapter should preserve.
+The generated `adapter-contract.json` is the compact checklist for a bridge or
+installer: preserve the JSONL envelope, citations, context budget, review fields,
+structured `error.code`, and export safety fields; fail closed when citations are
+missing, `approval_required` appears, write replay cannot preserve the reviewed
+method/path/params, or `export-check` reports issues.
 
 Expected success markers:
 

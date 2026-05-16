@@ -236,6 +236,8 @@ runnable sequence for adapter authors:
 - reject an unapproved write with `approval_required`
 - apply the same memory only with `approved:true`
 - refresh retrieval, recall cited context, and export a portable bundle
+- capture an `adapter-contract.json` trace manifest with the response fields,
+  hard stops, and validation command a bridge must preserve
 
 This addresses the low-friction setup lesson from adjacent memory tools without
 weakening AKBP's review-gated protocol boundary.

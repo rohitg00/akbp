@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added an adapter-contract manifest to JSONL quickstart trace capture so
+  adapter authors can inspect the required request order, preserved response
+  fields, hard stops, and validation command alongside requests and responses.
 - Expanded the structured-output harness to verify generated tool-schema
   budgets and deferred write-schema exposure before adapters trust recalled
   context or expose write-capable host tools.

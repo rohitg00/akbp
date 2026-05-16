@@ -1421,6 +1421,12 @@ class RepoQualityTest(unittest.TestCase):
             "AKBP_JSONL_QUICKSTART_TRACE_DIR",
             "requests.jsonl",
             "responses.jsonl",
+            "adapter-contract.json",
+            "akbp-jsonl-adapter-contract-v1",
+            "preserve_fields",
+            "hard_stops",
+            "Do not treat approval_required as a warning",
+            "Do not trust a portable bundle until export_check returns ok:true with no issues",
         ]:
             self.assertIn(required, combined)
         self.assertIn("examples/jsonl-quickstart/", readme)

@@ -123,6 +123,52 @@ if [[ -n "$TRACE_DIR" ]]; then
   mkdir -p "$TRACE_DIR"
   cp "$REQUESTS" "$TRACE_DIR/requests.jsonl"
   cp "$RESPONSES" "$TRACE_DIR/responses.jsonl"
+  cat > "$TRACE_DIR/adapter-contract.json" <<'JSON'
+{
+  "format": "akbp-jsonl-adapter-contract-v1",
+  "source": "examples/jsonl-quickstart/run.sh",
+  "purpose": "Copy/paste contract for hosts translating AKBP JSONL into an adapter or tool bridge.",
+  "request_order": [
+    "akbp.capabilities",
+    "akbp.session.start",
+    "akbp.remember dry_run:true",
+    "akbp.remember unapproved hard stop",
+    "akbp.remember approved:true",
+    "akbp.index approved:true",
+    "akbp.context",
+    "akbp.export",
+    "akbp.export_check"
+  ],
+  "preserve_fields": [
+    "id",
+    "ok",
+    "result",
+    "error.code",
+    "result.negotiation.satisfied",
+    "result.context.items[].citations",
+    "result.context.budget",
+    "result.dry_run",
+    "result.review_required",
+    "result.apply_instruction",
+    "error.details.review_required",
+    "result.manifest.safety"
+  ],
+  "hard_stops": [
+    "Do not plan from startup context when citations are missing.",
+    "Do not treat approval_required as a warning.",
+    "Do not expose write-capable methods until dry-run preview and exact approved:true replay are preserved.",
+    "Do not trust a portable bundle until export_check returns ok:true with no issues."
+  ],
+  "validation": {
+    "command": "AKBP_JSONL_QUICKSTART_TRACE_DIR=/tmp/akbp-jsonl-trace ./examples/jsonl-quickstart/run.sh",
+    "expected_files": [
+      "requests.jsonl",
+      "responses.jsonl",
+      "adapter-contract.json"
+    ]
+  }
+}
+JSON
   echo "JSONL trace written to $TRACE_DIR"
 fi
 
