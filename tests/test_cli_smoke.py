@@ -678,6 +678,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("doctor --profile read-only", selection["profiles"][1]["required_preflight"][0])
             self.assertIn("approved:true", " ".join(selection["profiles"][2]["allowed_methods"]))
             self.assertIn("keep the integration read-only", selection["fallback"])
+            memory_bridge = discovered["memory_server_bridge"]
+            self.assertEqual(memory_bridge["format"], "akbp-memory-server-bridge-v1")
+            self.assertEqual(memory_bridge["safe_default"], "treat_existing_memory_as_ephemeral_until_import_checked")
+            self.assertIn("fast local recall", memory_bridge["use_existing_memory_for"])
+            self.assertIn("akbp.import_check accepts the record without secret, schema, or evidence issues", memory_bridge["promote_to_akbp_when"])
+            self.assertIn("memory rows have no source ids, citations, or review metadata", memory_bridge["fail_closed_when"])
+            bridge_steps = {step["name"]: step for step in memory_bridge["minimum_preflight"]}
+            self.assertIn("resolve_kb", bridge_steps)
+            self.assertIn("stage_external_memory", bridge_steps)
+            self.assertIn("import-check", bridge_steps["stage_external_memory"]["command"])
+            self.assertIn("reviewed portable artifact layer", memory_bridge["adapter_message"])
             inherited_intake = discovered["inherited_repo_intake"]
             self.assertEqual(inherited_intake["format"], "akbp-inherited-repo-intake-v1")
             self.assertIn("agent-written repository", inherited_intake["purpose"])

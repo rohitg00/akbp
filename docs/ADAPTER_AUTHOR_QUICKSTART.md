@@ -57,6 +57,12 @@ pasteable system rules: call `akbp.session.start` before planning from memory,
 trust only cited items, continue without recalled memory when context is empty
 or uncited, preview writes with `dry_run:true`, apply only the exact reviewed
 request with `approved:true`, and branch on `ok` plus `error.code`.
+Discovery also returns `memory_server_bridge` for hosts that already have a
+tool-protocol memory server, local database, or runtime cache. Treat that existing
+memory as ephemeral until it can pass AKBP's evidence and review boundary:
+resolve the explicit KB path, run read-only doctor, validate the structured
+response boundary, then stage exported memory through `akbp import-check`
+before any durable apply.
 
 ## 1. Generate a read-only client config first
 
@@ -204,6 +210,13 @@ Minimum startup gate:
 
 If any check fails, leave read-only mode enabled and explain the missing capability instead of attempting writes.
 If `akbp.doctor` returns `adapter_readiness.reviewed_write_ready:false`, keep write flows disabled even when capability negotiation succeeded. Capability discovery tells you what the server supports; doctor tells you whether this specific knowledge base is ready to trust.
+
+When bridging from an existing memory server, do not promote recalled rows
+directly into AKBP. Use the server for fast local recall, then promote only
+source-backed candidate facts that preserve citations, warnings, response
+envelopes, and review metadata. If the bridge cannot preserve `ok`,
+`error.code`, citations, budget fields, or `approval_required`, keep AKBP
+read-only and continue without recalled durable memory.
 
 For a runnable startup harness, use:
 

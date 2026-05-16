@@ -582,6 +582,54 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "durable state would live only in bridge-local cache",
         ],
     }
+    memory_server_bridge = {
+        "format": "akbp-memory-server-bridge-v1",
+        "purpose": "Give installers a concrete boundary when an existing tool-protocol memory server, local database, or runtime cache is already present.",
+        "research_signal": "Recent agent-memory projects make persistent tool-protocol servers and local databases easy to connect, but they rarely prove which recalled facts are cited, reviewed, portable, and safe to share across runtimes.",
+        "safe_default": "treat_existing_memory_as_ephemeral_until_import_checked",
+        "use_existing_memory_for": [
+            "fast local recall",
+            "runtime-specific scratchpads",
+            "session continuity inside one host",
+            "candidate durable facts that still need AKBP evidence and review",
+        ],
+        "promote_to_akbp_when": [
+            "the fact has source evidence or can be registered with akbp.source.add",
+            "akbp.import_check accepts the record without secret, schema, or evidence issues",
+            "a dry-run preview exposes review metadata and would-write paths",
+            "approved apply happens outside the model-generated tool call",
+        ],
+        "fail_closed_when": [
+            "memory rows have no source ids, citations, or review metadata",
+            "the bridge cannot preserve ok, error.code, warnings, citations, and budget fields",
+            "the source has changed or cannot be verified",
+            "the memory server would become the only durable source of truth",
+            "the host tries to auto-approve writes from recalled memory",
+        ],
+        "minimum_preflight": [
+            {
+                "name": "resolve_kb",
+                "command": f"akbp --path {kb_arg} discover",
+                "expect": "The bridge knows the explicit AKBP path and does not create hidden durable state.",
+            },
+            {
+                "name": "check_read_only_profile",
+                "command": f"akbp --path {kb_arg} doctor --profile read-only",
+                "expect": "AKBP is healthy enough for cited read-only recall before any import or write flow.",
+            },
+            {
+                "name": "validate_response_boundary",
+                "command": "./examples/structured-output-harness/run.sh",
+                "expect": "The host preserves envelopes, citations, warnings, budget fields, dry-run review metadata, and approval_required errors.",
+            },
+            {
+                "name": "stage_external_memory",
+                "command": f"akbp --path {kb_arg} import-check <memory-export.jsonl> --fail-on-rejected",
+                "expect": "Existing memory is reviewed as an import candidate before durable apply.",
+            },
+        ],
+        "adapter_message": "Use the memory server for fast recall, but use AKBP as the reviewed portable artifact layer. When the bridge cannot prove citations and approval, stay read-only.",
+    }
     first_run_proof = {
         "goal": "prove cited, review-gated recall before enabling durable writes",
         "safe_default": "read_only",
@@ -826,6 +874,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         },
         "positioning": positioning,
         "adoption_triage": adoption_triage,
+        "memory_server_bridge": memory_server_bridge,
         "profile_selection": profile_selection,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "first_run_proof": first_run_proof,
