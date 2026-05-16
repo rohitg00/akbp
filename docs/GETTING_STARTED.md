@@ -79,6 +79,10 @@ also emit `ten_minute_proof`: a machine-readable checklist that proves AKBP is
 local-first, needs no Docker, cloud account, or secrets, retrieves cited
 startup context, blocks unapproved writes, and exports a checked portable
 bundle.
+They also emit `inherited_repo_intake`, a machine-readable takeover checklist
+for repositories with older agent-written changes, handoff notes, or memory
+exports: resolve the KB, stay read-only, verify sources, and require cited
+warning-free context before planning from inherited memory.
 
 Expected success markers:
 

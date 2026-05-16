@@ -305,6 +305,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("approval_required", " ".join(ten_minute["success_markers"]))
             self.assertIn("adapter_contract_harness", " ".join(ten_minute["success_markers"]))
             self.assertIn("read-only", ten_minute["fallback"])
+            inherited_intake = config["inherited_repo_intake"]
+            self.assertEqual(inherited_intake["format"], "akbp-inherited-repo-intake-v1")
+            self.assertEqual(inherited_intake["safe_default"], "read_only_until_sources_verify")
+            self.assertIn("source verify --fail-on-issue", json.dumps(inherited_intake["preflight_sequence"]))
+            self.assertIn("changed or missing source evidence", inherited_intake["trust_gate"]["fail_closed_on"])
+            self.assertEqual(inherited_intake["example"], "./examples/inherited-repo-intake/run.sh")
             self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
             self.assertEqual(config["startup"]["path"], str(kb.resolve()))
@@ -653,6 +659,12 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("doctor --profile read-only", selection["profiles"][1]["required_preflight"][0])
             self.assertIn("approved:true", " ".join(selection["profiles"][2]["allowed_methods"]))
             self.assertIn("keep the integration read-only", selection["fallback"])
+            inherited_intake = discovered["inherited_repo_intake"]
+            self.assertEqual(inherited_intake["format"], "akbp-inherited-repo-intake-v1")
+            self.assertIn("agent-written repository", inherited_intake["purpose"])
+            self.assertIn("source verify --fail-on-issue", json.dumps(inherited_intake["preflight_sequence"]))
+            self.assertIn("uncited inherited notes", inherited_intake["trust_gate"]["fail_closed_on"])
+            self.assertEqual(inherited_intake["example"], "./examples/inherited-repo-intake/run.sh")
             self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
             ten_minute = discovered["ten_minute_proof"]
             self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")

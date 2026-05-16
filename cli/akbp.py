@@ -235,6 +235,60 @@ def adapter_profile_selection(kb_path: str) -> dict[str, Any]:
         "fallback": "When profile readiness, capability negotiation, citations, or review metadata are missing, keep the integration read-only and show the structured failure.",
     }
 
+
+def inherited_repo_intake_contract(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-inherited-repo-intake-v1",
+        "purpose": "Let a coding agent take over an inherited or agent-written repository without trusting stale, uncited, or hidden memory.",
+        "research_signal": "Recent coding-agent users are inheriting AI-written repositories and asking for persistent repo context that knows when stored assumptions are stale.",
+        "safe_default": "read_only_until_sources_verify",
+        "trigger_when": [
+            "the repository has older AI-generated changes, handoff notes, or memory exports",
+            "the current agent did not create the prior context it is about to use",
+            "stored context could affect rollback, release, architecture, or safety decisions",
+            "the adapter cannot prove which files or sources still match the remembered claims",
+        ],
+        "preflight_sequence": [
+            {
+                "step": "resolve_kb",
+                "command": f"akbp --path {kb_path} discover",
+                "expect": "found true and the selected knowledge base path is explicit.",
+            },
+            {
+                "step": "check_read_only_profile",
+                "command": f"akbp --path {kb_path} doctor --profile read-only",
+                "expect": "requested_profile_ready is true before recalled memory can influence planning.",
+            },
+            {
+                "step": "verify_sources",
+                "command": f"akbp --path {kb_path} source verify --fail-on-issue",
+                "expect": "missing or changed inherited sources block trusted startup context.",
+            },
+            {
+                "step": "retrieve_cited_context",
+                "command": f"akbp --path {kb_path} context '<takeover task>' --limit 5 --require-citations --fail-on-warnings",
+                "expect": "context is non-empty, cited, and warning-free before planning from it.",
+            },
+        ],
+        "trust_gate": {
+            "trusted_when": [
+                "source verification passes",
+                "startup context carries citations or source ids",
+                "context warnings are empty or surfaced before planning",
+                "the adapter preserves ok, error.code, citations, and budget metadata",
+            ],
+            "fail_closed_on": [
+                "changed or missing source evidence",
+                "uncited inherited notes",
+                "truncated context that the adapter cannot surface",
+                "write-capable tools enabled before read-only takeover checks pass",
+            ],
+            "fallback": "Proceed as a fresh repo intake, keep AKBP read-only, and do not act on inherited memory until sources are reviewed.",
+        },
+        "example": "./examples/inherited-repo-intake/run.sh",
+    }
+
+
 def append_jsonl(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -773,6 +827,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "positioning": positioning,
         "adoption_triage": adoption_triage,
         "profile_selection": profile_selection,
+        "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
@@ -3198,6 +3253,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Show the selected scope and trust boundary in setup UI before enabling recalled context.",
             ],
         },
+        "inherited_repo_intake": inherited_repo_intake_contract(kb_path),
         "ten_minute_proof": {
             "format": "akbp-ten-minute-proof-v1",
             "purpose": "Let installer UIs prove AKBP's user value before positioning it as another memory store.",
