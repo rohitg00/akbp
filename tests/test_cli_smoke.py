@@ -229,6 +229,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("structured outputs", harness_fit["observed_user_pull"][0])
             self.assertIn("negotiate capabilities", " ".join(harness_fit["akbp_harness_role"]))
             self.assertEqual(harness_fit["minimum_gate"]["command"], "./examples/structured-output-harness/run.sh")
+            self.assertIn("AKBP structured output harness example passed", harness_fit["minimum_gate"]["success_markers"])
             self.assertIn("planning from recalled AKBP context", harness_fit["minimum_gate"]["must_pass_before"])
             self.assertIn("error.code", harness_fit["minimum_gate"]["required_fields"])
             self.assertIn("verified memory harness boundary", harness_fit["installer_positioning"])
@@ -518,6 +519,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertFalse(read_only["first_run_sequence"]["steps"][4]["required"])
             self.assertTrue(read_only["adapter_contract_harness"]["recommended"])
             self.assertEqual(read_only["adapter_contract_harness"]["command"], "./examples/structured-output-harness/run.sh")
+            self.assertIn(
+                "prompt and repair contract harness ok",
+                read_only["adapter_contract_harness"]["success_markers"],
+            )
             self.assertIn("approval_required", " ".join(read_only["adapter_contract_harness"]["proves"]))
             self.assertIn("read-only", read_only["adapter_contract_harness"]["stop_policy"])
             prompt_contract = read_only["adapter_prompt_contract"]

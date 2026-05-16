@@ -39,6 +39,11 @@ prompt and repair contract harness ok
 AKBP structured output harness example passed
 ```
 
+Generated `akbp client-config` includes these markers in
+`harness_adoption_fit.minimum_gate.success_markers` and
+`adapter_contract_harness.success_markers`, so adapter installers can verify the
+preflight by checking stdout instead of hard-coding a separate marker list.
+
 ## Response snippets adapters should preserve
 
 Use these as copyable shape checks in host adapters. Field values such as ids,

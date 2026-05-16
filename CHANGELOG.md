@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added structured-output harness success markers to generated client configs
+  so adapter installers can verify the setup gate without duplicating stdout
+  marker lists.
 - Added a source-of-truth drift benchmark fixture so adapter trust gates prove
   changed repository evidence blocks planning from recalled project memory.
 - Tightened generated adapter startup trust gates so discovery, client configs,
