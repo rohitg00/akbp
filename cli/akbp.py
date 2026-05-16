@@ -3672,6 +3672,33 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "verify_with": "first_run_sequence and harness_adoption_fit.minimum_gate",
                 },
             ],
+            "local_first_adoption_probe": {
+                "format": "akbp-local-first-adoption-probe-v1",
+                "purpose": "Give installer UIs and adapter authors a concrete first-run proof that AKBP is local-only, visible, cited, and review-gated before they compare it with opaque memory servers.",
+                "run_before_positioning_claims": True,
+                "commands": [
+                    "akbp discover",
+                    "akbp doctor --profile read-only",
+                    "akbp client-config --profile read-only",
+                    "./examples/structured-output-harness/run.sh",
+                    "akbp export --output <bundle.json> && akbp export-check <bundle.json>",
+                ],
+                "must_prove": [
+                    "no Docker, cloud account, hosted database, network access, or secrets are required after install",
+                    "one explicit knowledge_base.path owns the durable markdown and JSONL artifacts",
+                    "startup context is bounded and cited before the adapter plans from memory",
+                    "unapproved durable writes fail with error.code approval_required",
+                    "portable artifacts can be exported and checked without bridge-local state",
+                ],
+                "fail_closed_when": [
+                    "the host hides the AKBP response envelope or error.code",
+                    "the host stores durable memory only in an opaque sidecar database",
+                    "startup context is empty, uncited, warning-bearing, or budget-truncated",
+                    "write tools can apply without dry_run:true followed by approved:true",
+                    "export-check cannot verify the selected knowledge base artifacts",
+                ],
+                "fallback": "Advertise AKBP as read-only startup context only, and treat adjacent memory stores as ephemeral hints until the probe passes.",
+            },
             "fallback": "If an adjacent memory tool cannot preserve citations, review metadata, or exportable artifacts, keep AKBP read-only and treat that tool as an ephemeral hint source.",
         },
         "harness_adoption_fit": {

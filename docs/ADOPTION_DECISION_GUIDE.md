@@ -135,6 +135,16 @@ cloud account requirement, one selected KB shared across clients, and a
 read-only setup until the host preserves citations, envelopes, and review
 metadata.
 
+Use `memory_landscape_fit.local_first_adoption_probe` before making local-first
+positioning claims in an installer or adapter UI. The probe maps the claim to
+commands a user can actually run: `akbp discover`, `akbp doctor --profile
+read-only`, `akbp client-config --profile read-only`,
+`./examples/structured-output-harness/run.sh`, and an `export-check` against
+the selected knowledge base. If any step hides `error.code`, drops citations,
+stores durable memory only in an opaque sidecar database, or cannot verify the
+exported artifacts, keep AKBP read-only and treat adjacent memory tools as
+ephemeral hints.
+
 When users ask for structured outputs, harnesses, or predictable agent memory,
 also use `harness_adoption_fit` from `akbp client-config`. It turns that
 preference into a setup gate: run the structured-output harness, preserve

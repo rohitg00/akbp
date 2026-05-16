@@ -79,6 +79,12 @@ also emit `ten_minute_proof`: a machine-readable checklist that proves AKBP is
 local-first, needs no Docker, cloud account, or secrets, retrieves cited
 startup context, blocks unapproved writes, and exports a checked portable
 bundle.
+The generated `client-config` also includes
+`memory_landscape_fit.local_first_adoption_probe`, a smaller machine-checkable
+probe for installers comparing AKBP with local memory servers. Run it before
+claiming the setup is local-first: it requires discovery, read-only doctor
+checks, generated client config, the structured-output harness, and an
+`export-check` against the selected knowledge base.
 They also emit `inherited_repo_intake`, a machine-readable takeover checklist
 for repositories with older agent-written changes, handoff notes, or memory
 exports: resolve the KB, stay read-only, verify sources, and require cited

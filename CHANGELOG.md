@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a local-first adoption probe to generated client configs so installer
+  UIs can verify no-Docker/no-cloud setup, cited startup context, approval
+  gating, and export-checkable artifacts before positioning AKBP against
+  opaque memory servers.
 - Added a memory feature-claim audit to generated client configs so adapter
   installers can verify semantic recall, graph memory, context-window savings,
   shared memory, and local-first safety claims before trusting recalled project

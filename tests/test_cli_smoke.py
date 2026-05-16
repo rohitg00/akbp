@@ -267,6 +267,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("multi_client_scope.shared_kb_path", friction[1]["akbp_expectation"])
             self.assertIn("structured-output harness", friction[2]["akbp_expectation"])
             self.assertIn("harness_adoption_fit.minimum_gate", friction[2]["verify_with"])
+            local_probe = landscape["local_first_adoption_probe"]
+            self.assertEqual(local_probe["format"], "akbp-local-first-adoption-probe-v1")
+            self.assertTrue(local_probe["run_before_positioning_claims"])
+            self.assertIn("akbp discover", local_probe["commands"])
+            self.assertIn("akbp doctor --profile read-only", local_probe["commands"])
+            self.assertIn("./examples/structured-output-harness/run.sh", local_probe["commands"])
+            self.assertIn("no Docker", local_probe["must_prove"][0])
+            self.assertIn("knowledge_base.path", local_probe["must_prove"][1])
+            self.assertIn("approval_required", local_probe["must_prove"][3])
+            self.assertIn("opaque sidecar database", local_probe["fail_closed_when"][1])
+            self.assertIn("read-only startup context", local_probe["fallback"])
             self.assertIn("ephemeral hint source", landscape["fallback"])
             harness_fit = config["harness_adoption_fit"]
             self.assertEqual(harness_fit["format"], "akbp-harness-adoption-fit-v1")
