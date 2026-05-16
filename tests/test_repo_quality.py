@@ -160,6 +160,27 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/session-start-harness/run.sh", makefile)
 
+    def test_use_cases_surface_context_freshness_probe(self):
+        use_cases = (ROOT / "docs" / "USE_CASES.md").read_text(encoding="utf-8")
+        example_readme = (ROOT / "examples" / "context-freshness-probe" / "README.md").read_text(encoding="utf-8")
+        example_script = (ROOT / "examples" / "context-freshness-probe" / "run.sh").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = use_cases + example_readme + example_script
+        for required in [
+            "Workflow-aware context freshness",
+            "examples/context-freshness-probe/",
+            "AKBP context freshness probe example passed",
+            "source verification",
+            "cited startup context",
+            "changed evidence",
+            "fail closed",
+            "continue without recalled AKBP context",
+            "akbp.source.verify",
+            "akbp.session.start",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/context-freshness-probe/run.sh", makefile)
+
     def test_docs_define_adapter_output_quality_harness(self):
         benchmark = (ROOT / "docs" / "BENCHMARK.md").read_text(encoding="utf-8")
         quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")

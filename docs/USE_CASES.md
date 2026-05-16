@@ -46,7 +46,22 @@ This page maps the public examples to real use cases people can understand quick
 - adapter readiness gates planning on cited startup context
 - unfamiliar repos get a safe first step instead of automatic durable writes
 
-## 4. Memory quality benchmark
+## 4. Workflow-aware context freshness
+
+**Problem:** agents can select the right repo or workflow but still plan from stale recalled memory when the cited source changed after the claim was written.
+
+**AKBP use case:** verify source freshness, retrieve cited startup context scoped to the active task, and fail closed when changed evidence would make recalled memory unsafe.
+
+**Demo:** `examples/context-freshness-probe/`
+
+**What it proves:**
+
+- source verification runs before memory-assisted planning
+- cited startup context can be trusted only while its sources still match
+- changed evidence becomes a review blocker instead of silent stale recall
+- adapters get a concrete fallback: continue without recalled AKBP context and keep write-capable methods disabled for that flow
+
+## 5. Memory quality benchmark
 
 **Problem:** agent memory claims are usually vague and hard to evaluate.
 
@@ -60,7 +75,7 @@ This page maps the public examples to real use cases people can understand quick
 - benchmarks can use real protocol artifacts
 - AKBP can grow into a reusable evaluation harness
 
-## 5. Memory CI for teams
+## 6. Memory CI for teams
 
 **Problem:** project memory can rot, leak unsafe content, or drift away from source evidence.
 
@@ -74,7 +89,7 @@ This page maps the public examples to real use cases people can understand quick
 - unsafe imports are checked before apply
 - teams can enforce review-gated writes
 
-## 6. Rich handoff and review artifacts
+## 7. Rich handoff and review artifacts
 
 **Problem:** long agent summaries are hard to review and often mix facts, guesses, and proposed updates.
 
@@ -88,7 +103,7 @@ This page maps the public examples to real use cases people can understand quick
 - AKBP remains the source of truth
 - proposed updates still pass import-check and approval gates
 
-## 7. Knowledge base health snapshot
+## 8. Knowledge base health snapshot
 
 **Problem:** users and adapters need a fast way to see whether a knowledge base is useful, stale, indexed, and source-backed.
 
@@ -101,7 +116,7 @@ This page maps the public examples to real use cases people can understand quick
 - source drift is visible before agents trust stale knowledge
 - setup UIs can keep hosts read-only until the status payload reports a safe adapter profile
 
-## 8. Adapter integration
+## 9. Adapter integration
 
 **Problem:** agent runtimes need a predictable way to request context, propose writes, and close sessions without inventing their own memory format.
 
@@ -115,7 +130,7 @@ This page maps the public examples to real use cases people can understand quick
 - write safety is protocol-level behavior
 - session memory becomes portable files
 
-## 9. Portable knowledge bundles
+## 10. Portable knowledge bundles
 
 **Problem:** memory is trapped in one tool or workspace.
 
@@ -129,7 +144,7 @@ This page maps the public examples to real use cases people can understand quick
 - bundles can be checked before trust
 - import is review-gated
 
-## 10. Existing memory migration
+## 11. Existing memory migration
 
 **Problem:** useful facts already live in notes, agent memory exports, and prior tool stores, but bulk-importing them blindly creates stale or uncited memory.
 
@@ -143,7 +158,7 @@ This page maps the public examples to real use cases people can understand quick
 - missing evidence is rejected before import
 - migration stays review-gated instead of becoming a memory dump
 
-## 11. Read-only adapter rollout
+## 12. Read-only adapter rollout
 
 **Problem:** new adapters often need safe retrieval first, before they have enough UI to review durable writes.
 
@@ -170,6 +185,7 @@ make demo
 examples/akbp-bench/run.sh
 examples/repo-memory-demo/run.sh
 examples/session-start-harness/run.sh
+examples/context-freshness-probe/run.sh
 examples/memory-ci/run.sh
 examples/git-native-agent-handoff/run.sh
 examples/multi-agent-consistency-demo/run.sh
@@ -177,4 +193,4 @@ examples/existing-memory-migration/run.sh
 examples/read-only-adapter/run.sh
 ```
 
-That path shows the protocol, the benchmark, the repo use case, inherited-repo intake, the CI gate, repo-backed agent handoff, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.
+That path shows the protocol, the benchmark, the repo use case, inherited-repo intake, context freshness before planning, the CI gate, repo-backed agent handoff, cross-agent consistency, reviewed migration from existing memory, and read-only adapter rollout.
