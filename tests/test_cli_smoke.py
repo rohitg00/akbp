@@ -325,6 +325,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("negotiate capabilities", " ".join(harness_fit["akbp_harness_role"]))
             self.assertEqual(harness_fit["minimum_gate"]["command"], "./examples/structured-output-harness/run.sh")
             self.assertIn("AKBP structured output harness example passed", harness_fit["minimum_gate"]["success_markers"])
+            self.assertIn("budget fail-closed contract ok", harness_fit["minimum_gate"]["success_markers"])
             self.assertIn("planning from recalled AKBP context", harness_fit["minimum_gate"]["must_pass_before"])
             self.assertIn("error.code", harness_fit["minimum_gate"]["required_fields"])
             self.assertIn("verified memory harness boundary", harness_fit["installer_positioning"])

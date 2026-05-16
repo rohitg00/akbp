@@ -3988,6 +3988,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "doctor contract ok",
                     "startup context contract ok",
                     "budget truncation contract ok",
+                    "budget fail-closed contract ok",
                     "dry-run review contract ok",
                     "approval-required contract ok",
                     "approved apply contract ok",
