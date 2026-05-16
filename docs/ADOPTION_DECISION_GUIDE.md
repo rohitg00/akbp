@@ -131,6 +131,12 @@ not fight those layers for runtime UX. Use `memory_landscape_fit` from
 `akbp client-config` to explain the split: adjacent tools can stay ephemeral or
 serve low-latency recall, while AKBP remains the cited, reviewed, exportable
 project-knowledge substrate. Use
+`memory_landscape_fit.context_pressure_triage` when startup recall competes
+with the current task for context budget. The adapter should classify the
+result as trusted bounded context, narrower retrieval needed, untrusted hint, or
+no-memory path. If citations, scope fingerprints, warnings, or budget fields do
+not survive, continue from repository source of truth instead of filling the
+prompt with broad memory. Use
 `memory_landscape_fit.feature_claim_audit` when an adapter advertises semantic
 recall, graph memory, context-window savings, multi-agent sharing, or local-first
 safety. Those claims should become concrete checks: cited context plus a runnable

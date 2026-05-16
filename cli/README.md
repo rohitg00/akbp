@@ -159,7 +159,10 @@ It includes `memory_landscape_fit` so installer UIs can position AKBP beside
 fast tool-protocol memory servers, local SQLite memories, graph memories, context
 reducers, and product-native agent memory. Use it to explain the split: adjacent
 memory tools can handle speed and runtime UX, while AKBP owns cited, reviewed,
-export-checkable project knowledge.
+export-checkable project knowledge. The `context_pressure_triage` block gives
+adapters a deterministic fallback when recalled context is too broad, uncited,
+warning-bearing, or over budget: rerun narrower retrieval or continue without
+recalled memory instead of stuffing unreliable memory into the prompt.
 It also includes `knowledge_capability` so hosts can classify AKBP as a
 portable, cited, review-gated knowledge substrate instead of a chat dump,
 runtime scratchpad, uncited vector cache, or bridge-owned memory format.

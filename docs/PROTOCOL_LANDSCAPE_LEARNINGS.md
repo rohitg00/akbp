@@ -709,6 +709,15 @@ budget fields, strips citations during summarization, or claims token savings
 without showing `original_summary_chars` and `summary_chars`, the integration
 must fail closed and avoid marketing AKBP as context-efficient for that host.
 
+The current scan also showed the sharper product question: when memory and the
+current task compete for context budget, the adapter needs a decision map, not
+more prose. `akbp client-config` now exposes
+`memory_landscape_fit.context_pressure_triage`. It classifies recalled context
+as trusted bounded context, narrower retrieval needed, untrusted hint, or no
+memory path. The fail-closed rule is deliberately plain: preserve citations,
+scope fingerprints, quality, warnings, and budget metadata, or continue from
+repository source of truth without recalled memory.
+
 Success criteria:
 
 - quick-start UX stays competitive with local memory servers

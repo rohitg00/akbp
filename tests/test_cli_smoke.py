@@ -801,6 +801,19 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("result.context.budget.original_summary_chars", context_efficiency["must_preserve"])
             self.assertIn("trusted items keep citations", " ".join(context_efficiency["pass_when"]))
             self.assertIn("citations disappear", " ".join(context_efficiency["fail_closed_when"]))
+            context_pressure = read_only["memory_landscape_fit"]["context_pressure_triage"]
+            self.assertEqual(context_pressure["format"], "akbp-context-pressure-triage-v1")
+            self.assertIn("tight context budgets", context_pressure["purpose"])
+            self.assertIn("budget_truncated", " ".join(context_pressure["run_when"]))
+            self.assertIn("adapter_prompt_contract.context_use_report", context_pressure["required_inputs"])
+            pressure_decisions = {decision["class"]: decision for decision in context_pressure["decisions"]}
+            self.assertIn("trusted_bounded_context", pressure_decisions)
+            self.assertIn("rerun_scoped_retrieval", pressure_decisions)
+            self.assertIn("untrusted_memory_hint", pressure_decisions)
+            self.assertIn("no_memory_path", pressure_decisions)
+            self.assertIn("rerun akbp.session.start", pressure_decisions["rerun_scoped_retrieval"]["action"])
+            self.assertIn("citation ids", context_pressure["must_not"][0])
+            self.assertIn("uncited or over-budget context", context_pressure["fallback"])
             compaction_gate = read_only["memory_landscape_fit"]["compaction_survival_claim_gate"]
             self.assertEqual(compaction_gate["format"], "akbp-compaction-survival-claim-gate-v1")
             self.assertEqual(compaction_gate["required_request"]["method"], "akbp.session.start")

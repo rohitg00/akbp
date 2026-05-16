@@ -4360,6 +4360,53 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 ],
                 "fallback": "Do not claim context savings for AKBP in that host; continue with read-only cited context or no recalled memory.",
             },
+            "context_pressure_triage": {
+                "format": "akbp-context-pressure-triage-v1",
+                "purpose": "Give adapters a deterministic decision map for memory under tight context budgets instead of stuffing more recalled text into the prompt.",
+                "run_when": [
+                    "startup context is close to the host prompt budget",
+                    "akbp.session.start returns budget_truncated or warnings",
+                    "the active task changed after scoped retrieval",
+                    "an adjacent memory tool returns broad uncited recall",
+                ],
+                "required_inputs": [
+                    "adapter_prompt_contract.context_use_report",
+                    "result.context.items[].id",
+                    "result.context.items[].citations",
+                    "result.context.quality.trusted_for_planning",
+                    "result.context.budget",
+                    "workflow_context_selector.scope_fingerprint when scoped context is used",
+                ],
+                "decisions": [
+                    {
+                        "class": "trusted_bounded_context",
+                        "condition": "context is cited, warning-free, within budget, and scope_fingerprint still matches",
+                        "action": "Use the cited AKBP items and record their ids in the context-use report before planning.",
+                    },
+                    {
+                        "class": "rerun_scoped_retrieval",
+                        "condition": "context is relevant but budget-truncated, over-broad, or the active artifact selection changed",
+                        "action": "Discard the prior context pack and rerun akbp.session.start with a narrower task, lower limit, max_chars, and current scope inputs.",
+                    },
+                    {
+                        "class": "untrusted_memory_hint",
+                        "condition": "recall is uncited, warning-bearing, source-drifted, or only available from an opaque adjacent memory store",
+                        "action": "Treat it as scratchpad input only; do not plan from it or promote it until source-backed dry-run review succeeds.",
+                    },
+                    {
+                        "class": "no_memory_path",
+                        "condition": "no cited AKBP context survives the budget or quality gate",
+                        "action": "Continue from repository source of truth and current task context without recalled AKBP memory.",
+                    },
+                ],
+                "must_not": [
+                    "summarize away citation ids to fit the prompt",
+                    "merge personal, team, migration, and repo-local memories to fill empty context",
+                    "retry broad memory retrieval in a loop after budget failure",
+                    "treat context pressure as approval to auto-write durable memory",
+                ],
+                "fallback": "Prefer no recalled memory over uncited or over-budget context; the adapter can still use current files, commands, and user-provided task context.",
+            },
             "compaction_survival_claim_gate": {
                 "format": "akbp-compaction-survival-claim-gate-v1",
                 "purpose": "Turn compaction-survival and session-restart memory claims into a recovery proof before an adapter plans from recalled context.",
