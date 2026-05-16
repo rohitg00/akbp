@@ -14,6 +14,7 @@ Use this checklist before publishing or updating an AKBP adapter for any coding 
 - Call `akbp.session.start` at lifecycle startup when available, or `akbp.context` before substantial planning or code changes.
 - Use `akbp.search` for targeted lookup when a user asks about prior decisions, known constraints, or project facts.
 - Cite claims with `akbp.cite` when retrieved knowledge materially affects an answer or implementation.
+- When retrieved memory came from another Git branch or checkout, surface the branch scope and citations before planning from it.
 
 ## Write safety
 
@@ -28,6 +29,7 @@ Use this checklist before publishing or updating an AKBP adapter for any coding 
 - Use ingest dry-run before adding source-backed knowledge.
 - Run `akbp.import_check` before `akbp.import_apply` for JSONL exchanges.
 - Reject imports with secret-like values, malformed JSONL, unknown evidence ids, or failed review counts.
+- Treat branch-local handoff memory as unpromoted until source verification and review confirm it applies to the current checkout.
 - Keep source scope project-local unless the adapter has an explicit broader policy.
 
 ## Privacy and public repo hygiene

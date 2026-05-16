@@ -1,0 +1,130 @@
+{
+  "id": "branch-aware-handoff-001",
+  "task": "Verify branch-local agent memory is retrieved with its branch scope and review gate before an adapter reuses it on another branch.",
+  "profiles": [
+    "adapter-quality",
+    "retrieval-quality"
+  ],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_branch_checkout",
+        "type": "transcript",
+        "locator": "sessions/feature-auth-agent-session.md",
+        "title": "Feature branch agent session"
+      },
+      {
+        "id": "source_branch_review_policy",
+        "type": "file",
+        "locator": "docs/branch-memory-policy.md",
+        "title": "Branch memory review policy"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_branch_memory_scope",
+        "text": "Agent handoff memory created on feature/auth-refresh is branch-local until source verification and review promote it for reuse on main.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.9,
+        "evidence": [
+          "source_branch_checkout",
+          "source_branch_review_policy"
+        ],
+        "entities": [
+          "feature/auth-refresh",
+          "branch-local memory",
+          "main",
+          "source verification",
+          "review promotion"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_branch_memory_review_gate",
+        "text": "Adapters should surface branch scope, source citations, and dry_run review metadata before carrying branch-local memory into a different checkout.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.88,
+        "evidence": [
+          "source_branch_review_policy"
+        ],
+        "entities": [
+          "adapter",
+          "branch scope",
+          "source citations",
+          "dry_run",
+          "different checkout"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "session-start-branch-handoff",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "resume branch-local handoff memory from feature/auth-refresh on main",
+          "limit": 5
+        },
+        "expected_result_fields": [
+          "session_id",
+          "context"
+        ],
+        "expected_result_contains": {
+          "context.items[].id": [
+            "claim_branch_memory_scope",
+            "claim_branch_memory_review_gate"
+          ]
+        },
+        "expected_result_schema": "#/$defs/session_start_result"
+      },
+      {
+        "id": "context-branch-review-gate",
+        "method": "akbp.context",
+        "params": {
+          "task": "branch-local memory dry_run review before reuse on another checkout",
+          "limit": 5,
+          "require_citations": true
+        },
+        "expected_result_fields": [
+          "query",
+          "items"
+        ],
+        "expected_result_contains": {
+          "items[].id": [
+            "claim_branch_memory_scope",
+            "claim_branch_memory_review_gate"
+          ],
+          "items[].citations[]": [
+            "source_branch_checkout",
+            "source_branch_review_policy"
+          ]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      }
+    ]
+  },
+  "query": "How should an adapter handle branch-local handoff memory before reusing it on another checkout?",
+  "expected": {
+    "must_retrieve": [
+      "claim_branch_memory_scope",
+      "claim_branch_memory_review_gate"
+    ],
+    "must_cite": [
+      "source_branch_checkout",
+      "source_branch_review_policy"
+    ],
+    "must_cite_in_context": [
+      "source_branch_checkout",
+      "source_branch_review_policy"
+    ],
+    "answer_should_include": [
+      "branch-local",
+      "feature/auth-refresh",
+      "source verification",
+      "dry_run",
+      "different checkout"
+    ]
+  }
+}

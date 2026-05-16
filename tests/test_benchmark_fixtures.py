@@ -172,6 +172,25 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("context-pressure-startup", report["tool_output_ids"])
 
+    def test_branch_aware_handoff_fixture_covers_branch_scoped_reuse(self):
+        path = FIXTURES / "branch-aware-handoff" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertIn("adapter-quality", data["profiles"])
+        self.assertIn("retrieval-quality", data["profiles"])
+        requests = {request["id"]: request for request in data["setup"]["tool_server_requests"]}
+        startup = requests["session-start-branch-handoff"]
+        context = requests["context-branch-review-gate"]
+        self.assertEqual(startup["method"], "akbp.session.start")
+        self.assertEqual(context["method"], "akbp.context")
+        self.assertTrue(context["params"]["require_citations"])
+        self.assertIn("claim_branch_memory_scope", context["expected_result_contains"]["items[].id"])
+        self.assertIn("source_branch_review_policy", context["expected_result_contains"]["items[].citations[]"])
+        self.assertIn("source_branch_checkout", data["expected"]["must_cite_in_context"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("session-start-branch-handoff", report["tool_output_ids"])
+        self.assertIn("context-branch-review-gate", report["tool_output_ids"])
+
 
     def test_unknown_method_rejection_fixture_covers_available_methods(self):
         path = FIXTURES / "unknown-method-rejection" / "scenario.json"
@@ -785,8 +804,9 @@ class BenchmarkFixtureTest(unittest.TestCase):
         report = benchmark_runner.run(FIXTURES, score=True, real_akbp=True, profile="adapter-quality")
         self.assertTrue(report["ok"], report)
         self.assertEqual(report["profile"], "adapter-quality")
-        self.assertEqual(report["count"], 1)
-        self.assertEqual(report["results"][0]["id"], "adapter-structured-output-harness-001")
+        result_ids = {result["id"] for result in report["results"]}
+        self.assertIn("adapter-structured-output-harness-001", result_ids)
+        self.assertIn("branch-aware-handoff-001", result_ids)
 
     def test_git_native_agent_handoff_fixture_covers_context_and_write_policy(self):
         path = FIXTURES / "git-native-agent-handoff" / "scenario.json"
