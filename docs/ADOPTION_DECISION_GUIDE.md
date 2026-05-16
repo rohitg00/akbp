@@ -95,6 +95,15 @@ artifacts. Disable or warn on integrations that store durable memory only in an
 opaque bridge format, return uncited recalls, or apply writes without
 `dry_run:true` preview followed by explicit `approved:true`.
 
+For each row coming from an existing memory server, use
+`memory_server_bridge.external_memory_promotion.promotion_triage` before
+import or write preview. It maps rows into runtime scratch, evidence-seeking
+hints, reviewable durable candidates, or blocked private/secret content, and it
+requires the adapter to emit a class, action, source-reference status,
+review-surface status, and reason. Missing classification or missing citations
+for a durable candidate should fail closed instead of becoming a prompt-only
+judgment.
+
 If the host has a formal memory-capability registry, also use
 `host_capability_descriptor.tool_protocol_memory_capability`. It gives
 installer-safe labels and the minimum semantics a host must preserve before it

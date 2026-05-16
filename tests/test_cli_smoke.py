@@ -206,6 +206,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
             self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
             self.assertEqual(external_promotion["candidate_record_shape"]["source"]["kind"], "akbp_source_id|file|url|citation")
+            triage = external_promotion["promotion_triage"]
+            self.assertEqual(triage["format"], "akbp-memory-promotion-triage-v1")
+            self.assertIn("deterministic decision map", triage["purpose"])
+            triage_classes = [decision["class"] for decision in triage["decisions"]]
+            self.assertEqual(
+                triage_classes,
+                ["runtime_scratch", "ephemeral_hint", "candidate_durable_claim", "blocked_private_or_secret"],
+            )
+            self.assertIn("source_reference_status", triage["required_adapter_output"])
+            self.assertIn("classification is missing", triage["fail_closed_when"])
             self.assertIn("missing_source", external_promotion["reject_reasons"])
             self.assertIn("source.kind", external_promotion["required_review_fields"])
             promotion_steps = {step["step"]: step for step in external_promotion["promotion_sequence"]}
@@ -737,6 +747,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             external_promotion = discovered["external_memory_promotion"]
             self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
             self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
+            self.assertEqual(
+                external_promotion["promotion_triage"]["decisions"][2]["action"],
+                "import_check_then_dry_run_preview",
+            )
             intake = external_promotion["intake_classification"]
             self.assertEqual(intake["format"], "akbp-memory-intake-classification-v1")
             self.assertEqual(

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a machine-readable external-memory promotion triage contract so adapter
+  installers can classify memory-server rows before import-check or write
+  preview.
 - Added structured-output harness success markers to generated client configs
   so adapter installers can verify the setup gate without duplicating stdout
   marker lists.

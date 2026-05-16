@@ -402,6 +402,53 @@ def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
                 "contradicts": "optional prior claim id",
             },
         },
+        "promotion_triage": {
+            "format": "akbp-memory-promotion-triage-v1",
+            "purpose": "Give adapter installers a deterministic decision map for each external memory row before import-check or write preview.",
+            "decisions": [
+                {
+                    "if": "row is scratch reasoning, a partial plan, a private chat fragment, a raw transcript, cache metadata, or embedding-only state",
+                    "class": "runtime_scratch",
+                    "action": "do_not_import",
+                    "surface_to_user": "optional_untrusted_hint",
+                    "next_step": "keep inside the runtime memory server and leave AKBP unchanged",
+                },
+                {
+                    "if": "row is useful but has no source id, citation, source file, URL, or reviewed user statement",
+                    "class": "ephemeral_hint",
+                    "action": "register_source_before_promotion",
+                    "surface_to_user": "needs_evidence",
+                    "next_step": "use akbp.source.add or attach source metadata before creating a durable claim",
+                },
+                {
+                    "if": "row describes a durable project decision, fact, workflow, blocker, or preference and has source evidence",
+                    "class": "candidate_durable_claim",
+                    "action": "import_check_then_dry_run_preview",
+                    "surface_to_user": "reviewable_candidate",
+                    "next_step": "run import-check, then show dry_run:true review metadata before approved:true apply",
+                },
+                {
+                    "if": "row contains a secret-like value, personal data, private messages, or bridge-only identifiers",
+                    "class": "blocked_private_or_secret",
+                    "action": "reject_and_do_not_echo",
+                    "surface_to_user": "blocked",
+                    "next_step": "redact or discard outside AKBP; never store it as portable project memory",
+                },
+            ],
+            "required_adapter_output": [
+                "class",
+                "action",
+                "source_reference_status",
+                "review_surface_status",
+                "reason",
+            ],
+            "fail_closed_when": [
+                "classification is missing",
+                "source_reference_status is missing or uncited for a durable candidate",
+                "review_surface_status cannot prove dry-run preview visibility",
+                "the row would be applied from autonomous model execution",
+            ],
+        },
         "required_review_fields": [
             "text",
             "type",
