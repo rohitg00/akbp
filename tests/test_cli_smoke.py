@@ -636,6 +636,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             self.assertIn("approval_required", " ".join(read_only["adapter_contract_harness"]["proves"]))
             self.assertIn("read-only", read_only["adapter_contract_harness"]["stop_policy"])
+            context_efficiency = read_only["memory_landscape_fit"]["context_efficiency_claim_gate"]
+            self.assertEqual(context_efficiency["format"], "akbp-context-efficiency-claim-gate-v1")
+            self.assertIn("token savings", context_efficiency["run_before_claiming"])
+            self.assertEqual(context_efficiency["required_request"]["method"], "akbp.session.start")
+            self.assertEqual(context_efficiency["required_request"]["params"]["max_chars"], 4000)
+            self.assertTrue(context_efficiency["required_request"]["params"]["require_citations"])
+            self.assertIn("result.context.budget.original_summary_chars", context_efficiency["must_preserve"])
+            self.assertIn("trusted items keep citations", " ".join(context_efficiency["pass_when"]))
+            self.assertIn("citations disappear", " ".join(context_efficiency["fail_closed_when"]))
             prompt_contract = read_only["adapter_prompt_contract"]
             self.assertEqual(prompt_contract["format"], "akbp-adapter-prompt-contract-v1")
             self.assertEqual(prompt_contract["profile"], "read_only")

@@ -667,6 +667,20 @@ cited context, runnable search or benchmark proof, preserved context budget
 diagnostics, one selected KB path, export-checkable artifacts, and an
 `approval_required` stop before writes are enabled.
 
+## Shipped artifact: context efficiency claim gate
+
+Recent tool-protocol memory positioning also leans on context-window savings:
+serve compact tools, return bounded results, and avoid loading full memory into
+the prompt. AKBP should support that claim only when the adapter proves it.
+
+`akbp client-config` now exposes
+`memory_landscape_fit.context_efficiency_claim_gate`. The gate requires a
+bounded `akbp.session.start` request, preserved budget fields, citations that
+survive budgeting, quality metadata, and surfaced warnings. If a host drops
+budget fields, strips citations during summarization, or claims token savings
+without showing `original_summary_chars` and `summary_chars`, the integration
+must fail closed and avoid marketing AKBP as context-efficient for that host.
+
 Success criteria:
 
 - quick-start UX stays competitive with local memory servers

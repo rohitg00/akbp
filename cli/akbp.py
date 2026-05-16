@@ -3699,6 +3699,52 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "evidence": "ten_minute_proof.setup_claims plus approval_required response",
                 },
             ],
+            "context_efficiency_claim_gate": {
+                "format": "akbp-context-efficiency-claim-gate-v1",
+                "purpose": "Turn context-window savings claims into a repeatable adapter proof instead of a positioning statement.",
+                "run_before_claiming": [
+                    "lower context-window pressure",
+                    "token savings",
+                    "compact startup memory",
+                    "efficient tool-protocol memory",
+                ],
+                "required_request": {
+                    "method": "akbp.session.start",
+                    "params": {
+                        "task": "current task goals and constraints",
+                        "limit": 5,
+                        "max_chars": 4000,
+                        "min_items": 1,
+                        "require_citations": True,
+                        "fail_on_warnings": True,
+                    },
+                },
+                "must_preserve": [
+                    "result.context.items[].citations",
+                    "result.context.budget.max_chars",
+                    "result.context.budget.summary_chars",
+                    "result.context.budget.original_summary_chars",
+                    "result.context.budget.items_before_budget",
+                    "result.context.budget.items_after_budget",
+                    "result.context.budget.truncated",
+                    "result.quality",
+                    "result.context.warnings",
+                ],
+                "pass_when": [
+                    "ok is true",
+                    "result.quality.ok is true",
+                    "result.context.budget.max_chars is less than or equal to the requested bound",
+                    "trusted items keep citations after budgeting",
+                    "warnings are empty or surfaced before planning",
+                ],
+                "fail_closed_when": [
+                    "budget fields are missing or renamed by the host",
+                    "citations disappear after summarization or truncation",
+                    "result.context.budget.truncated is true during startup trust preflight",
+                    "the adapter reports token savings without showing original_summary_chars and summary_chars",
+                ],
+                "fallback": "Do not claim context savings for AKBP in that host; continue with read-only cited context or no recalled memory.",
+            },
             "install_friction_checks": [
                 {
                     "question": "Can a new user start without Docker, a cloud account, API keys, or a hosted database?",
