@@ -3420,6 +3420,38 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             ],
             "stop_policy": "Fail closed: keep write-capable host tools disabled and continue read-only until the harness passes.",
         },
+        "structured_output_repair": {
+            "format": "akbp-structured-output-repair-v1",
+            "purpose": "Tell adapters which failed structured calls can be repaired locally and which failures must stop memory use or writes.",
+            "retryable_after_local_fix": [
+                {
+                    "error_code": "invalid_json",
+                    "fix": "repair JSON serialization and resend the same intent without approved:true",
+                },
+                {
+                    "error_code": "invalid_request",
+                    "fix": "repair the JSONL envelope, request id, method, path, or unknown request-level fields",
+                },
+                {
+                    "error_code": "invalid_params",
+                    "fix": "repair params using error.details.params_schema, missing fields, unknown fields, and type_errors",
+                },
+                {
+                    "error_code": "unknown_method",
+                    "fix": "refresh akbp.capabilities, then disable unavailable methods when still missing",
+                },
+            ],
+            "never_auto_repair": [
+                "approval_required",
+                "startup context without citations",
+                "startup context with unsurfaced warnings",
+                "truncated context budget during startup trust gate",
+                "source verification drift or missing evidence",
+                "import records rejected for secrets, stale sources, or missing citations",
+            ],
+            "write_retry_rule": "After any request or params repair, rerun write-capable methods as dry_run:true and require a fresh review before approved:true apply.",
+            "adapter_action": "Keep AKBP read-only when a failure is not in retryable_after_local_fix; do not ask the model to reinterpret prose errors as permission to continue.",
+        },
         "adapter_prompt_contract": adapter_prompt_contract,
         "startup": {
             "id": "capabilities-1",

@@ -121,6 +121,14 @@ preference into a setup gate: run the structured-output harness, preserve
 response envelopes, citations, budget metadata, dry-run review fields, and
 `error.code`, and keep AKBP read-only until those checks pass.
 
+Use `structured_output_repair` from `akbp client-config` when wiring retries.
+Adapters may repair malformed JSON, request envelopes, unsupported methods after
+capability refresh, or invalid params using `error.details.params_schema`. They
+must not treat approval failures, uncited startup context, unsurfaced warnings,
+budget truncation, source drift, or rejected imports as retryable prompt issues.
+After any params repair on a write-capable method, rerun `dry_run:true` and
+collect a fresh review before `approved:true`.
+
 ## What makes an integration AKBP-compatible
 
 An integration is using AKBP as a protocol when it preserves these properties:

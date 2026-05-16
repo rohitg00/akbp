@@ -290,6 +290,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(first_run["steps"][3]["expect"]["result.context.budget.max_chars"], 4000)
             self.assertTrue(first_run["steps"][4]["required"])
             self.assertTrue(first_run["steps"][4]["expect"]["approval_outside_model_tool_call"])
+            repair = config["structured_output_repair"]
+            self.assertEqual(repair["format"], "akbp-structured-output-repair-v1")
+            retryable_codes = {entry["error_code"] for entry in repair["retryable_after_local_fix"]}
+            self.assertEqual(retryable_codes, {"invalid_json", "invalid_request", "invalid_params", "unknown_method"})
+            self.assertIn("params_schema", repair["retryable_after_local_fix"][2]["fix"])
+            self.assertIn("approval_required", repair["never_auto_repair"])
+            self.assertIn("startup context without citations", repair["never_auto_repair"])
+            self.assertIn("dry_run:true", repair["write_retry_rule"])
+            self.assertIn("read-only", repair["adapter_action"])
             ten_minute = config["ten_minute_proof"]
             self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")
             self.assertIn("local, cited, review-gated, portable memory", ten_minute["user_value_gap"])
