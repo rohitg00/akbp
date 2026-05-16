@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a compaction-survival claim gate to generated client configs so
+  adapters must prove cited session-start recovery, surfaced warnings, budget
+  diagnostics, and context-use reporting before claiming memory survives
+  compaction or restart.
 - Added a temporal graph claim gate to generated client configs so adapter
   installers can verify cited claims, lifecycle state, relation records,
   conformance, export-check, and graph benchmark output before trusting

@@ -727,3 +727,21 @@ If a host can only return graph entities or edges from an opaque memory server,
 the safe positioning is narrower: treat that graph as an ephemeral index and
 trust only AKBP claims, lifecycle links, citations, and export-checkable JSONL
 artifacts.
+
+## Shipped artifact: compaction survival claim gate
+
+Recent memory-server pitches increasingly claim that project memory survives
+conversation compaction, truncation, and session restart. AKBP should make that
+claim testable: recovered memory is useful only when it is cited, lifecycle-aware,
+bounded, and visible in the adapter's context-use report.
+
+`akbp client-config` now exposes
+`memory_landscape_fit.compaction_survival_claim_gate`. The gate requires a
+bounded `akbp.session.start` recovery request, preserved citations, lifecycle
+freshness, warning and budget fields, adapter context-use reporting, and the
+`compaction-handoff-recall` benchmark before an installer claims AKBP memory can
+safely guide work after compaction or restart.
+
+If the host can only resume from an uncited compacted chat summary, the safe
+fallback is to start fresh or continue without recalled AKBP memory until cited
+recovery context can be shown.

@@ -3827,6 +3827,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "evidence": "result.context.budget preserved by the adapter",
                 },
                 {
+                    "claim": "memory survives compaction or session restart",
+                    "akbp_check": "Require a cited recovery preflight with akbp.session.start, surfaced warnings, preserved budget diagnostics, and an adapter context-use report before planning from recovered memory.",
+                    "evidence": "context_compaction_recovery plus compaction-handoff-recall benchmark output",
+                },
+                {
                     "claim": "multiple agents share one project memory",
                     "akbp_check": "Require a single selected knowledge_base.path, client attribution, and export-checkable artifacts instead of hidden per-client stores.",
                     "evidence": "multi_client_scope plus export-check output",
@@ -4013,6 +4018,48 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "the adapter reports token savings without showing original_summary_chars and summary_chars",
                 ],
                 "fallback": "Do not claim context savings for AKBP in that host; continue with read-only cited context or no recalled memory.",
+            },
+            "compaction_survival_claim_gate": {
+                "format": "akbp-compaction-survival-claim-gate-v1",
+                "purpose": "Turn compaction-survival and session-restart memory claims into a recovery proof before an adapter plans from recalled context.",
+                "run_before_claiming": [
+                    "memory survives compaction",
+                    "resume after context truncation",
+                    "zero-loss memory across sessions",
+                    "persistent coding-agent recall after restart",
+                ],
+                "required_request": {
+                    "method": "akbp.session.start",
+                    "params": {
+                        "task": "resume the current task after compaction or restart",
+                        "limit": 5,
+                        "max_chars": 4000,
+                        "min_items": 1,
+                        "require_citations": True,
+                        "fail_on_warnings": True,
+                    },
+                },
+                "required_checks": [
+                    "python3 benchmarks/run_benchmarks.py --fixtures benchmarks/fixtures/compaction-handoff-recall --akbp",
+                    "akbp.session.start returns cited context items with lifecycle freshness",
+                    "adapter_prompt_contract.context_use_report records used item ids, citation ids, warnings, and fallback reason",
+                ],
+                "must_preserve": [
+                    "result.context.items[].id",
+                    "result.context.items[].citations",
+                    "result.context.items[].freshness",
+                    "result.context.quality.trusted_for_planning",
+                    "result.context.budget.truncated",
+                    "adapter context-use report with cited item ids",
+                ],
+                "fail_closed_when": [
+                    "recovered memory has no citations or source ids",
+                    "warnings cannot be surfaced before planning",
+                    "budget truncation hides required context",
+                    "the host resumes from an uncited compacted chat summary",
+                    "the adapter cannot report which recalled AKBP items influenced the plan",
+                ],
+                "fallback": "Start a fresh session or continue without recalled AKBP memory until cited recovery context can be shown.",
             },
             "install_friction_checks": [
                 {

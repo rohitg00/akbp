@@ -137,6 +137,11 @@ safety. Those claims should become concrete checks: cited context plus a runnabl
 search or benchmark proof, preserved budget diagnostics, one selected
 `knowledge_base.path`, export-checkable artifacts, and an `approval_required`
 failure before any approved write path is enabled. Use
+`memory_landscape_fit.compaction_survival_claim_gate` when a host claims memory
+survives compaction, truncation, or restart. The host should run cited
+`akbp.session.start` recovery, preserve warnings and budget diagnostics, record
+which AKBP items influenced the plan, and pass the `compaction-handoff-recall`
+benchmark before planning from recovered memory. Use
 `memory_landscape_fit.install_friction_checks` when a user asks why AKBP is not
 just another local memory server: the first-run proof should show no Docker or
 cloud account requirement, one selected KB shared across clients, and a
