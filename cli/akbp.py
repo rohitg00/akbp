@@ -3676,6 +3676,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Can writes be previewed with dry_run:true before approved:true apply?",
                 "Can stale knowledge be superseded or contradicted without deleting history?",
                 "Can export-check and import-check run without bridge-local state?",
+                "Can branch or worktree-specific handoffs carry cited source ids without making AKBP the Git state owner?",
             ],
             "feature_claim_audit": [
                 {
@@ -3694,11 +3695,43 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "evidence": "multi_client_scope plus export-check output",
                 },
                 {
+                    "claim": "branch-aware handoffs prevent stale coding-agent context",
+                    "akbp_check": "Require the adapter to record git branch, worktree path, and commit or source ids as review metadata, while keeping repository state in Git and durable decisions in AKBP.",
+                    "evidence": "git_native_handoff_branch_scope plus cited session.start context",
+                },
+                {
                     "claim": "local-first memory is safe by default",
                     "akbp_check": "Require no Docker, cloud account, or secrets for the first-run proof, then keep writes read-only until dry-run review is preserved.",
                     "evidence": "ten_minute_proof.setup_claims plus approval_required response",
                 },
             ],
+            "git_native_handoff_branch_scope": {
+                "format": "akbp-git-native-handoff-branch-scope-v1",
+                "purpose": "Keep coding-agent memory useful across feature branches without letting a memory server replace Git history or worktree state.",
+                "adapter_must_capture": [
+                    "repository root or stable project id",
+                    "current branch name when available",
+                    "commit sha or dirty-worktree marker",
+                    "session source ids or cited files behind the handoff",
+                    "client id from startup params",
+                ],
+                "akbp_boundary": [
+                    "store reviewed branch-relevant decisions, warnings, and workflow facts as cited AKBP claims",
+                    "keep code diffs, uncommitted files, and merge state in Git, not AKBP memory",
+                    "use supersede or contradict when a branch-specific claim stops applying",
+                ],
+                "preflight": [
+                    "akbp.session.start with task text that includes branch or worktree goal",
+                    "akbp.context with require_citations before planning from recalled handoff context",
+                    "dry_run akbp.session.end before promoting a session summary",
+                ],
+                "fail_closed_when": [
+                    "branch or worktree identity is missing from the adapter review surface",
+                    "the host promotes uncited transcript summaries as branch facts",
+                    "the adapter treats AKBP as the source of truth for code state",
+                ],
+                "fallback": "Use AKBP only for repository-wide cited context and keep branch-local handoff details in Git until reviewed.",
+            },
             "context_efficiency_claim_gate": {
                 "format": "akbp-context-efficiency-claim-gate-v1",
                 "purpose": "Turn context-window savings claims into a repeatable adapter proof instead of a positioning statement.",

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a branch-scoped handoff gate to generated adapter configs so coding
+  agents capture branch, worktree, commit, and cited source metadata without
+  treating AKBP as the source of truth for Git state.
 - Added a machine-readable tool-schema budget preflight gate to generated
   adapter configs so hosts fail closed before exposing over-broad AKBP tool
   surfaces.
