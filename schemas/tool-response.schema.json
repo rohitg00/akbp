@@ -1200,6 +1200,7 @@
         "source_id",
         "page",
         "signals",
+        "signal_refs",
         "created_claims",
         "redacted",
         "would_write",
@@ -1265,6 +1266,7 @@
         "source_id",
         "page",
         "signals",
+        "signal_refs",
         "created_claims",
         "redacted"
       ],
