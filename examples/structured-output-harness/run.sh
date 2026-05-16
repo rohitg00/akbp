@@ -197,6 +197,19 @@ assert "Continue without recalled AKBP memory" in trust_gate["fallback_action"],
 assert "ok" in prompt_contract["validation"]["branch_on"], prompt_contract
 assert "error.code" in prompt_contract["validation"]["branch_on"], prompt_contract
 assert "result.context.budget" in prompt_contract["validation"]["preserve_fields"], prompt_contract
+context_use = prompt_contract["context_use_report"]
+assert context_use["format"] == "akbp-context-use-report-v1", context_use
+assert "before any plan" in context_use["emit_when"], context_use
+assert context_use["required_fields"] == [
+    "used_akbp_context",
+    "akbp_context_item_ids",
+    "akbp_citation_ids",
+    "warnings_surfaced",
+    "fallback_reason",
+], context_use
+assert "budget_truncated" in context_use["fallback_reason_values"], context_use
+assert "adapter_prompt_contract.context_use_report" in prompt_contract["validation"]["preserve_fields"], prompt_contract
+print("context-use report contract ok")
 
 repair = config["structured_output_repair"]
 assert repair["format"] == "akbp-structured-output-repair-v1", repair

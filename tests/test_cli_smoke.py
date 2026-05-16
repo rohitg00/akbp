@@ -646,6 +646,15 @@ class AkbpCliSmokeTest(unittest.TestCase):
                 "prompt and repair contract harness ok",
                 read_only["adapter_contract_harness"]["success_markers"],
             )
+            self.assertIn(
+                "budget fail-closed contract ok",
+                read_only["adapter_contract_harness"]["success_markers"],
+            )
+            self.assertIn(
+                "context-use report contract ok",
+                read_only["adapter_contract_harness"]["success_markers"],
+            )
+            self.assertIn("context-use reports", " ".join(read_only["adapter_contract_harness"]["proves"]))
             self.assertIn("approval_required", " ".join(read_only["adapter_contract_harness"]["proves"]))
             self.assertIn("read-only", read_only["adapter_contract_harness"]["stop_policy"])
             context_efficiency = read_only["memory_landscape_fit"]["context_efficiency_claim_gate"]
