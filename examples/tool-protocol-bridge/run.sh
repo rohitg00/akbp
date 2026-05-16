@@ -57,6 +57,16 @@ assert manifest["preflight_requests"][2]["params"]["min_items"] == 1, manifest
 assert manifest["preflight_requests"][2]["params"]["require_citations"] is True, manifest
 assert manifest["preflight_requests"][2]["expect"]["result.quality.require_citations"] is True, manifest
 assert config["tool_protocol_bridge"]["client_tool_manifest"]["preflight_requests"] == manifest["preflight_requests"], config
+verdict = config["tool_protocol_bridge"]["preflight_verdict"]
+assert verdict["format"] == "akbp-preflight-verdict-v1", verdict
+assert verdict["required_response_ids"] == ["capabilities-1", "doctor-1", "session-start-1"], verdict
+assert [item["id"] for item in verdict["pass_when"]] == verdict["required_response_ids"], verdict
+assert verdict["pass_when"][0]["expect"]["result.negotiation.satisfied"] is True, verdict
+assert verdict["trusted_context_gate"]["response_id"] == "session-start-1", verdict
+assert "every trusted item has citations" in verdict["trusted_context_gate"]["requires"], verdict
+assert "a required response id is missing" in verdict["fail_closed_on"], verdict
+assert "Do not expose host tools" in verdict["on_fail"], verdict
+assert config["tool_protocol_bridge"]["client_tool_manifest"]["preflight_verdict"] == verdict, config
 
 for entry, host_tool in zip(forward_tools, manifest["tools"]):
     assert entry["mode"] == "read_only", entry

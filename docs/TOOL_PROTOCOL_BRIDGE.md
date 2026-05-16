@@ -74,6 +74,10 @@ It also includes `preflight_replay.request_jsonl`, a copyable newline-delimited
 request block for smoke-testing the local JSONL server before a host publishes
 tools. Treat any failed replay, missing citations, unsurfaced warnings, or
 lost `error.code` as a bridge failure and keep AKBP read-only.
+`tool_protocol_bridge.preflight_verdict` turns the replay output into a
+machine-checkable decision: required response ids must be present, expected
+fields must match, startup context must be cited and within budget, and any
+failure keeps host tools disabled until setup is fixed.
 
 For managed tool-protocol hosts, use the generated `managed_tool_host_bridge` section instead
 of hand-writing a separate memory-server contract. It reuses the same local
@@ -178,6 +182,9 @@ Required behavior:
 - Run `tool_protocol_bridge.host_tool_manifest.preflight_requests` before exposing host tools, and branch on the structured `expect` fields.
 - Use `tool_protocol_bridge.preflight_replay.request_jsonl` as the runnable
   smoke test when the host needs a pasteable setup check instead of a manifest parser.
+- Evaluate `tool_protocol_bridge.preflight_verdict` against the replay responses
+  before exposing host tools; fail closed on missing ids, mismatched expected
+  fields, uncited context, warnings, or budget drift.
 - Check `tool_schema_budget.within_budget` before publishing host tools; do
   not flatten every AKBP method schema into the model prompt by default.
 - Publish only the method schemas listed in

@@ -237,6 +237,8 @@ The `maintenance` section gives adapters a small recurring health loop: verify c
 
 The `tool_protocol_bridge` section is for tool-protocol hosts. It exposes a read-only allowlist for `akbp.session.start`, `akbp.context`, `akbp.search`, `akbp.cite`, source verification, and import checks; lists blocked write methods by default; includes `host_tool_manifest` for hosts that need concrete tool names, descriptions, safety metadata, schema refs, stdio command, and preserved response fields; and documents the reviewed-write wrapper pattern where previews require `dry_run:true` and apply requires `approved:true` for the exact reviewed method, path, and params. See `docs/TOOL_PROTOCOL_BRIDGE.md` before publishing a bridge.
 
+The same bridge payload includes `preflight_replay` and `preflight_verdict`. Use the replay JSONL as the smoke-test input, then evaluate the verdict contract against the responses keyed by id. If any required response is missing, any expected field fails, or startup context is empty, uncited, warning-bearing, or outside budget, keep host tools disabled and surface the structured failure.
+
 For scripts or adapter installers, run a profile-specific preflight before wiring a host:
 
 ```bash

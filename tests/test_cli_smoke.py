@@ -537,6 +537,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("result.context.items[].citations", preflight_replay["must_preserve"])
             self.assertIn("Do not expose host tools", preflight_replay["on_failure"])
             self.assertEqual(config["tool_protocol_bridge_snippets"]["preflight_replay"], preflight_replay)
+            preflight_verdict = config["tool_protocol_bridge"]["preflight_verdict"]
+            self.assertEqual(preflight_verdict["format"], "akbp-preflight-verdict-v1")
+            self.assertEqual(preflight_verdict["required_response_ids"], ["capabilities-1", "doctor-1", "session-start-1"])
+            self.assertEqual([item["id"] for item in preflight_verdict["pass_when"]], preflight_verdict["required_response_ids"])
+            self.assertTrue(preflight_verdict["pass_when"][0]["expect"]["result.negotiation.satisfied"])
+            self.assertEqual(preflight_verdict["trusted_context_gate"]["response_id"], "session-start-1")
+            self.assertIn("every trusted item has citations", preflight_verdict["trusted_context_gate"]["requires"])
+            self.assertIn("ok:false", " ".join(preflight_verdict["fail_closed_on"]))
+            self.assertIn("Do not expose host tools", preflight_verdict["on_fail"])
+            self.assertEqual(config["tool_protocol_bridge_snippets"]["preflight_verdict"], preflight_verdict)
             client_manifest = config["tool_protocol_bridge"]["client_tool_manifest"]
             self.assertEqual(client_manifest["format"], "akbp-client-tool-manifest-v1")
             self.assertEqual(client_manifest["server"], {"name": "stdio-adapter-test", **config["server"]})
@@ -559,6 +569,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("dry-run previews", client_manifest["approval_boundary"])
             self.assertEqual(client_manifest["preflight_requests"], manifest["preflight_requests"])
             self.assertEqual(client_manifest["preflight_replay"], preflight_replay)
+            self.assertEqual(client_manifest["preflight_verdict"], preflight_verdict)
             self.assertIn("result.context.items", forward_tools[2]["surface_fields"])
             self.assertIn("akbp.session.start", config["tool_protocol_bridge"]["read_only_allowlist"])
             self.assertEqual(

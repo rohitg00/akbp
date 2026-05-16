@@ -3240,6 +3240,41 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         ],
         "on_failure": "Do not expose host tools. Keep the integration read-only or continue without recalled AKBP context until preflight passes.",
     }
+    preflight_verdict = {
+        "format": "akbp-preflight-verdict-v1",
+        "purpose": "Let adapter installers turn the generated JSONL replay responses into a deterministic pass/fail decision before exposing host tools.",
+        "input": "Responses from tool_protocol_bridge.preflight_replay.request_jsonl, keyed by response id.",
+        "required_response_ids": [request["id"] for request in host_tool_manifest["preflight_requests"]],
+        "pass_when": [
+            {
+                "id": request["id"],
+                "expect": request["expect"],
+            }
+            for request in host_tool_manifest["preflight_requests"]
+        ],
+        "trusted_context_gate": {
+            "response_id": "session-start-1",
+            "requires": [
+                "ok is true",
+                "result.context.items is a non-empty array",
+                "every trusted item has citations",
+                "result.context.warnings is empty when fail_on_warnings is true",
+                "result.context.budget.max_chars is present and no greater than the requested bound",
+                "result.quality.require_citations is true",
+                "result.quality.fail_on_warnings is true",
+            ],
+            "on_failure": "Continue without recalled AKBP memory and do not expose host tools that depend on startup context.",
+        },
+        "fail_closed_on": [
+            "a required response id is missing",
+            "any response has ok:false",
+            "a dotted expect path is absent or has a different value",
+            "startup context is empty, uncited, warning-bearing, or outside the requested budget",
+            "the host cannot preserve ok, result, error.code, citations, warnings, budget, and quality fields",
+        ],
+        "on_pass": "Expose only the selected profile's read-only host tools; keep write-capable methods blocked until reviewed-write preflight and approval UI checks pass.",
+        "on_fail": "Do not expose host tools. Surface the first failed response id and structured field, then rerun preflight after setup is fixed.",
+    }
     client_tool_manifest = {
         "format": "akbp-client-tool-manifest-v1",
         "purpose": "Generate host-compatible read-only tools from AKBP JSONL methods while preserving citations, structured errors, and the reviewed-write boundary.",
@@ -3285,6 +3320,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         "approval_boundary": "Do not expose write methods as host tools until the host can render dry-run previews and collect approval outside the model-generated tool call.",
         "preflight_requests": host_tool_manifest["preflight_requests"],
         "preflight_replay": preflight_replay,
+        "preflight_verdict": preflight_verdict,
     }
     host_capability_descriptor = {
         "format": "akbp-host-capability-descriptor-v1",
@@ -3447,6 +3483,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         ],
         "preflight_requests": host_tool_manifest["preflight_requests"],
         "preflight_replay": preflight_replay,
+        "preflight_verdict": preflight_verdict,
         "tool_manifest_ref": "tool_protocol_bridge.host_tool_manifest",
         "fallback": "If no bridge is available, use the stdio JSONL adapter path directly and keep the integration read-only.",
     }
@@ -4446,6 +4483,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "host_tool_manifest": host_tool_manifest,
             "client_tool_manifest": client_tool_manifest,
             "preflight_replay": preflight_replay,
+            "preflight_verdict": preflight_verdict,
             "tool_schema_budget": tool_schema_budget,
             "read_only_allowlist": [entry["method"] for entry in bridge_tools],
             "blocked_write_methods": [

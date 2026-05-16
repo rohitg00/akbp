@@ -32,6 +32,9 @@ AKBP tool-protocol bridge preflight passed
 - The generated host and client tool manifests include executable
   `preflight_requests` for capability negotiation, doctor, and bounded startup
   context.
+- `tool_protocol_bridge.preflight_verdict` tells installers how to turn those
+  replay responses into a deterministic pass/fail decision before exposing
+  host tools.
 - Write-capable AKBP methods stay in `blocked_write_methods` unless the host
   implements a separate reviewed-write surface.
 - The bridge can call `akbp.capabilities`, `akbp.doctor`, and
