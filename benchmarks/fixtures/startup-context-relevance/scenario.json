@@ -1,0 +1,128 @@
+{
+  "id": "startup-context-relevance-001",
+  "task": "Verify startup context for persistent memory adapters returns task-relevant cited items instead of broad cross-project memory dumps.",
+  "profiles": ["adapter-quality", "retrieval-quality"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_startup_relevance_review",
+        "type": "transcript",
+        "locator": "research/startup-context-relevance-review.md",
+        "title": "Startup context relevance review"
+      },
+      {
+        "id": "source_cross_project_memory_notes",
+        "type": "file",
+        "locator": "research/cross-project-memory-notes.md",
+        "title": "Cross-project memory notes"
+      },
+      {
+        "id": "source_stale_memory_dump_note",
+        "type": "note",
+        "locator": "research/stale-memory-dump-note.md",
+        "title": "Stale memory dump note"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_startup_context_must_be_task_relevant",
+        "text": "Coding-agent adapters should retrieve task-relevant AKBP startup context with citations and lifecycle freshness before planning instead of loading every persistent memory row from a memory server or runtime cache.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.92,
+        "evidence": ["source_startup_relevance_review"],
+        "entities": [
+          "coding-agent",
+          "adapter",
+          "startup-context",
+          "task-relevance",
+          "citations",
+          "lifecycle",
+          "memory-server"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_cross_project_memory_needs_reviewed_promotion",
+        "text": "Cross-project memory server facts should become durable AKBP project knowledge only after source-backed review and explicit promotion.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.86,
+        "evidence": ["source_cross_project_memory_notes"],
+        "entities": [
+          "cross-project-memory",
+          "memory-server",
+          "review",
+          "promotion"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_startup_can_dump_all_memory_rows",
+        "text": "New coding-agent sessions can preload every available memory-server row at startup because more context is always better.",
+        "type": "workflow",
+        "status": "superseded",
+        "confidence": 0.36,
+        "evidence": ["source_stale_memory_dump_note"],
+        "entities": [
+          "coding-agent",
+          "startup-context",
+          "memory-server",
+          "context-dump"
+        ],
+        "scope": "project",
+        "superseded_by": "claim_startup_context_must_be_task_relevant"
+      }
+    ],
+    "relations": [
+      {
+        "id": "relation_task_relevant_startup_supersedes_memory_dump",
+        "source": "claim_startup_context_must_be_task_relevant",
+        "target": "claim_startup_can_dump_all_memory_rows",
+        "relation": "supersedes",
+        "confidence": 0.9,
+        "evidence": ["source_startup_relevance_review"]
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "session-start-task-relevant-memory",
+        "method": "akbp.session.start",
+        "params": {
+          "task": "new coding-agent session task-relevant startup context citations lifecycle memory-server",
+          "limit": 1,
+          "max_chars": 760,
+          "require_citations": true
+        },
+        "expected_result_fields": ["session_id", "task", "context"],
+        "expected_result_values": {
+          "task": "new coding-agent session task-relevant startup context citations lifecycle memory-server"
+        },
+        "expected_result_contains": {
+          "context.items[].id": ["claim_startup_context_must_be_task_relevant"],
+          "context.items[].citations[]": ["source_startup_relevance_review"],
+          "context.items[].freshness": ["stable"],
+          "context.quality.ok": [true],
+          "context.quality.require_citations": [true],
+          "context.budget.max_chars": [760]
+        },
+        "expected_result_schema": "#/$defs/session_start_result"
+      }
+    ]
+  },
+  "query": "new coding-agent session task-relevant startup context citations lifecycle memory-server",
+  "expected": {
+    "must_retrieve": ["claim_startup_context_must_be_task_relevant"],
+    "must_cite": ["source_startup_relevance_review"],
+    "must_cite_in_context": ["source_startup_relevance_review"],
+    "must_preserve": ["claim_startup_can_dump_all_memory_rows"],
+    "must_not_answer_from": ["claim_startup_can_dump_all_memory_rows"],
+    "answer_should_include": [
+      "task-relevant",
+      "startup context",
+      "citations",
+      "lifecycle",
+      "memory server"
+    ]
+  }
+}

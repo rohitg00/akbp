@@ -183,6 +183,20 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("context-pressure-startup", report["tool_output_ids"])
 
+    def test_startup_context_relevance_fixture_covers_task_relevant_cited_startup(self):
+        path = FIXTURES / "startup-context-relevance" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.session.start")
+        self.assertEqual(request["params"]["limit"], 1)
+        self.assertTrue(request["params"]["require_citations"])
+        self.assertIn("claim_startup_context_must_be_task_relevant", request["expected_result_contains"]["context.items[].id"])
+        self.assertIn("source_startup_relevance_review", request["expected_result_contains"]["context.items[].citations[]"])
+        self.assertIn("claim_startup_can_dump_all_memory_rows", data["expected"]["must_not_answer_from"])
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("session-start-task-relevant-memory", report["tool_output_ids"])
+
     def test_branch_aware_handoff_fixture_covers_branch_scoped_reuse(self):
         path = FIXTURES / "branch-aware-handoff" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

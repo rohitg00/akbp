@@ -154,5 +154,6 @@ Initial scenarios:
 - `approved-write-apply`: verify approved write methods return inspectable claim, source, or relation records.
 - `unapproved-write-rejection`: verify non-dry-run writes, including import apply, without `approved:true` return structured `approval_required` errors.
 - `adapter-structured-output-harness`: verify an adapter quality gate can machine-check capability negotiation, doctor/security posture, bounded startup context, dry-run preview metadata, and `approval_required` write rejection before trusting memory.
+- `startup-context-relevance`: verify new sessions retrieve task-relevant cited startup context instead of preloading every broad memory-server row.
 - `secret-safety`: redact or reject secret-like values before durable writes.
 - `session-crystallization`: retrieve workflow claims from structured coding-agent sessions with citations.
