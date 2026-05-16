@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added explicit context planning trust decisions to context quality payloads so
+  adapters can branch on trusted_for_planning and fallback_reason instead of
+  re-deriving remember/reject behavior from warnings, citations, and budget
+  fields.
 - Added a host auto-detect contract to discovery and generated client configs
   so installer probes stay inventory-only until users review exact host config
   diffs and preflight checks.

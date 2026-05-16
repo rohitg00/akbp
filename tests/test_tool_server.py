@@ -443,6 +443,8 @@ class ToolServerTest(unittest.TestCase):
         self.assertIn("quality", defs["context_result"]["properties"])
         self.assertFalse(defs["context_result"]["properties"]["quality"]["additionalProperties"])
         self.assertIn("ok", defs["context_result"]["properties"]["quality"]["required"])
+        self.assertIn("trusted_for_planning", defs["context_result"]["properties"]["quality"]["required"])
+        self.assertIn("fallback_reason", defs["context_result"]["properties"]["quality"]["required"])
         self.assertFalse(defs["search_result"]["additionalProperties"])
         self.assertIn("backend", defs["search_result"]["required"])
         self.assertIn("results", defs["search_result"]["required"])
@@ -766,6 +768,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[3]["result"]["quality"]["minimum_items"], 1)
             self.assertTrue(lines[3]["result"]["quality"]["require_citations"])
             self.assertFalse(lines[3]["result"]["quality"]["fail_on_warnings"])
+            self.assertTrue(lines[3]["result"]["quality"]["trusted_for_planning"])
+            self.assertIsNone(lines[3]["result"]["quality"]["fallback_reason"])
             self.assertLessEqual(lines[3]["result"]["budget"]["summary_chars"], 24)
             self.assertEqual(
                 lines[3]["result"]["budget"]["truncated_items"],
@@ -1357,6 +1361,8 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(line["error"]["code"], "cli_error")
             context = json.loads(line["error"]["details"]["stdout"])
             self.assertFalse(context["quality"]["ok"])
+            self.assertFalse(context["quality"]["trusted_for_planning"])
+            self.assertEqual(context["quality"]["fallback_reason"], "warnings_present")
             self.assertTrue(context["quality"]["require_citations"])
             self.assertTrue(context["quality"]["fail_on_warnings"])
             self.assertIn("warnings:1", context["quality"]["failed"])

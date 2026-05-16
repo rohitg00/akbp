@@ -1526,6 +1526,18 @@ def apply_context_budget(pack: dict[str, Any], max_chars: int | None) -> dict[st
     return pack
 
 
+def context_fallback_reason(failed: list[str]) -> str | None:
+    if not failed:
+        return None
+    if any(item.startswith("minimum_items:") for item in failed):
+        return "no_context"
+    if any(item.startswith("uncited_items:") for item in failed):
+        return "uncited_context"
+    if any(item.startswith("warnings:") for item in failed):
+        return "warnings_present"
+    return "preflight_failed"
+
+
 def context_quality(pack: dict[str, Any], min_items: int, require_citations: bool, fail_on_warnings: bool = False) -> dict[str, Any]:
     items = pack.get("items", [])
     warnings = pack.get("warnings", [])
@@ -1541,8 +1553,11 @@ def context_quality(pack: dict[str, Any], min_items: int, require_citations: boo
         failed.append(f"uncited_items:{','.join(uncited)}")
     if fail_on_warnings and warnings:
         failed.append(f"warnings:{len(warnings)}")
+    ok = not failed
     return {
-        "ok": not failed,
+        "ok": ok,
+        "trusted_for_planning": ok,
+        "fallback_reason": context_fallback_reason(failed),
         "minimum_items": min_items,
         "require_citations": require_citations,
         "fail_on_warnings": fail_on_warnings,

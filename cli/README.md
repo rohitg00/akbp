@@ -93,7 +93,10 @@ The returned context pack includes a `quality` object. The command exits non-zer
 when the gate fails, for example when no items are found, a returned item has no
 citations, or warnings report source drift, inactive matches, empty retrieval,
 or context-budget truncation. Adapters should then continue without recalled
-AKBP memory instead of inventing prior decisions.
+AKBP memory instead of inventing prior decisions. The same `quality` object
+includes `trusted_for_planning` and `fallback_reason` so adapters can branch
+on the trust decision directly instead of re-deriving it from citations,
+warnings, and budget fields.
 
 ## Discovery
 

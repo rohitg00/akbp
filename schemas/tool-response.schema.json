@@ -1770,6 +1770,8 @@
           "additionalProperties": false,
           "required": [
             "ok",
+            "trusted_for_planning",
+            "fallback_reason",
             "minimum_items",
             "require_citations",
             "fail_on_warnings",
@@ -1781,6 +1783,22 @@
           "properties": {
             "ok": {
               "type": "boolean"
+            },
+            "trusted_for_planning": {
+              "type": "boolean"
+            },
+            "fallback_reason": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "no_context",
+                "uncited_context",
+                "warnings_present",
+                "preflight_failed",
+                null
+              ]
             },
             "minimum_items": {
               "type": "integer",
