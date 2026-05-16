@@ -49,6 +49,7 @@ examples:
 	./examples/read-only-adapter/run.sh
 	./examples/inherited-repo-intake/run.sh
 	./examples/stdio-client-config/run.sh
+	./examples/context-compaction-recovery/run.sh
 
 benchmark-score:
 	python3 benchmarks/run_benchmarks.py --score
