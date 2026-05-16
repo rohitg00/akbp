@@ -2139,6 +2139,27 @@ def heading_summary(text: str, limit: int = 12) -> list[str]:
     return unique_keep_order(candidates, limit)
 
 
+def heading_signal_refs(text: str, limit: int = 12) -> list[dict[str, Any]]:
+    refs: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        cleaned = clean_line(line.lstrip("#"))
+        if not cleaned or cleaned in seen:
+            continue
+        is_heading = line.lstrip().startswith("#")
+        has_signal_word = re.search(r"\b(decision|decided|must|should|prefer|blocker|todo|next|source|claim)\b", cleaned, re.I)
+        if is_heading or has_signal_word:
+            refs.append({
+                "text": cleaned,
+                "line": line_number,
+                "kind": "heading" if is_heading else "signal",
+            })
+            seen.add(cleaned)
+        if len(refs) >= limit:
+            break
+    return refs
+
+
 def cmd_ingest(args: argparse.Namespace) -> int:
     base = root(args.path)
     source_path = Path(args.file).resolve()
@@ -2153,6 +2174,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     raw_title = args.title or source_path.stem.replace("-", " ").replace("_", " ").title()
     title = redact_text(raw_title)
     summary_items = heading_summary(safe_text)
+    signal_refs = heading_signal_refs(safe_text)
     raw_claim_text = args.claim.strip() if args.claim else ""
     safe_claim_text = redact_text(raw_claim_text) if raw_claim_text else ""
     claim_redacted = bool(raw_claim_text and raw_claim_text != safe_claim_text)
@@ -2164,6 +2186,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
             "source_id": source_id,
             "page": str(page.relative_to(base)),
             "signals": summary_items,
+            "signal_refs": signal_refs,
             "created_claims": [claim_id] if claim_id else [],
             "redacted": raw_text != safe_text or claim_redacted,
             "would_write": [
@@ -2219,6 +2242,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         "source_id": source["id"],
         "page": str(page.relative_to(base)),
         "signals": summary_items,
+        "signal_refs": signal_refs,
         "created_claims": created_claims,
         "redacted": raw_text != safe_text or claim_redacted,
     }, indent=2, ensure_ascii=False))

@@ -795,3 +795,22 @@ Adapters should treat this as the minimum freshness gate for inherited memory,
 handoff notes, or startup context from a previous session: verify sources, fetch
 bounded cited context, and continue without recalled AKBP memory when either
 step fails.
+
+## Shipped artifact: ingest signal references
+
+The latest lightweight scan again showed teams putting coding-agent knowledge
+into local markdown folders and then struggling to decide what should become
+durable project memory. AKBP should make that promotion reviewable at the line
+level, not only as a whole-file import.
+
+`akbp.ingest` now returns `signal_refs` alongside the existing `signals` list in
+both dry-run previews and approved apply results. Each signal reference carries
+the extracted text, source line, and kind (`heading` or `signal`). This lets an
+adapter or review UI point to the exact parts of a long markdown source that
+informed the proposed durable claim before a user approves the write.
+
+This keeps the import path aligned with AKBP trust model:
+
+- markdown remains source evidence
+- durable claims still require review and approval
+- adapters can show line-level provenance before applying memory writes

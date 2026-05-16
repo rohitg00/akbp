@@ -1122,6 +1122,32 @@
         }
       }
     },
+    "ingest_signal_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "line",
+        "kind"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "heading",
+            "signal"
+          ]
+        }
+      }
+    },
     "ingest_dry_run_result": {
       "type": "object",
       "additionalProperties": false,
@@ -1156,6 +1182,12 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "signal_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ingest_signal_ref"
           }
         },
         "created_claims": {
@@ -1209,6 +1241,12 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "signal_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ingest_signal_ref"
           }
         },
         "created_claims": {

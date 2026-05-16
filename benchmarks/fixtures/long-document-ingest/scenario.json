@@ -19,6 +19,7 @@
           "source_id",
           "page",
           "signals",
+          "signal_refs",
           "created_claims",
           "redacted",
           "would_write",
@@ -38,6 +39,11 @@
             "Approval gate",
             "Decision: Hook output should be append-only JSONL so later agents can audit the sequence.",
             "Decision: Adapters must repeat the same method, path, and params with approved:true after review."
+          ],
+          "signal_refs[].text": [
+            "Capture hooks",
+            "Compression and recall",
+            "Approval gate"
           ],
           "would_write[]": [
             "raw/sources/sources.jsonl",
@@ -61,6 +67,7 @@
           "source_id",
           "page",
           "signals",
+          "signal_refs",
           "created_claims",
           "redacted"
         ],
@@ -73,6 +80,10 @@
             "Capture hooks",
             "Compression and recall",
             "Approval gate"
+          ],
+          "signal_refs[].kind": [
+            "heading",
+            "signal"
           ],
           "created_claims[]": [
             "claim_7256603cc5474f7d"

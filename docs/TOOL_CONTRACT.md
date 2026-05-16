@@ -222,6 +222,10 @@ Return a portable bundle of protocol artifacts: card, claims, sources, entities,
 
 Re-check recorded file sources against their stored SHA-256 hashes. The result separates verified, changed, missing, and unchecked sources so agents can catch evidence drift before relying on old claims. When a requested `source_id` is not registered, the check returns `ok:false`, reports it in `missing` with `reason:"source_not_found"`, and lists the id in `attention.missing_source_ids`. When drift or missing evidence is found, `attention` lists the changed or missing source ids, unique affected claim ids, and a `recommended_action` adapters can surface before trusting recalled memory.
 
+## `akbp.ingest`
+
+Preview and apply results include `signals` plus `signal_refs`. `signals` is the human-readable review list. `signal_refs` is the machine-readable locator list with extracted text, source line, and signal kind (`heading` or `signal`) so adapters can show which parts of a long markdown source informed the proposed durable claim before approval.
+
 ## `akbp.export_check`
 
 Validate a portable export bundle before another agent trusts it. The check verifies JSON shape, manifest presence, object counts, artifact hash format, safety flags, and secret-like values. Use `fail_on_issues:true` in automation when any issue should stop the workflow.
