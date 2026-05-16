@@ -667,6 +667,16 @@ cited context, runnable search or benchmark proof, preserved context budget
 diagnostics, one selected KB path, export-checkable artifacts, and an
 `approval_required` stop before writes are enabled.
 
+Recent Git-backed memory positioning adds a sharper adoption question: can a
+team review agent knowledge like code without losing citations, lifecycle
+state, and approval gates? `memory_landscape_fit.git_reviewable_promotion_flow`
+turns that into a machine-readable sequence for adapters: choose one KB scope,
+register evidence, preview with `dry_run:true`, review the AKBP markdown and
+JSONL artifact diff in Git, apply the exact reviewed request with
+`approved:true`, and verify the resulting bundle before another runtime trusts
+it. This keeps Git responsible for review and distribution while AKBP remains
+responsible for source-backed durable knowledge.
+
 ## Shipped artifact: context efficiency claim gate
 
 Recent tool-protocol memory positioning also leans on context-window savings:

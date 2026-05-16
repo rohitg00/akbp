@@ -95,6 +95,14 @@ artifacts. Disable or warn on integrations that store durable memory only in an
 opaque bridge format, return uncited recalls, or apply writes without
 `dry_run:true` preview followed by explicit `approved:true`.
 
+When a tool claims Git-backed or version-controlled agent memory, use
+`memory_landscape_fit.git_reviewable_promotion_flow`. Git should be the review
+and distribution layer for AKBP artifacts, not the thing that turns uncited
+summaries into durable truth. The safe path is: select one KB scope, register
+evidence, preview the write with `dry_run:true`, review the AKBP artifact diff,
+repeat the same request with `approved:true`, then run `export-check` or
+conformance before another runtime trusts the memory.
+
 For each row coming from an existing memory server, use
 `memory_server_bridge.external_memory_promotion.promotion_triage` before
 import or write preview. It maps rows into runtime scratch, evidence-seeking

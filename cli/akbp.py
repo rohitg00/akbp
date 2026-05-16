@@ -3700,6 +3700,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "evidence": "git_native_handoff_branch_scope plus cited session.start context",
                 },
                 {
+                    "claim": "Git-backed memory makes agent knowledge reviewable",
+                    "akbp_check": "Require the host to treat Git as the review and distribution layer for AKBP markdown and JSONL artifacts, not as a replacement for citations, lifecycle state, or dry-run approval.",
+                    "evidence": "git_reviewable_promotion_flow plus export-check output",
+                },
+                {
                     "claim": "local-first memory is safe by default",
                     "akbp_check": "Require no Docker, cloud account, or secrets for the first-run proof, then keep writes read-only until dry-run review is preserved.",
                     "evidence": "ten_minute_proof.setup_claims plus approval_required response",
@@ -3731,6 +3736,54 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "the adapter treats AKBP as the source of truth for code state",
                 ],
                 "fallback": "Use AKBP only for repository-wide cited context and keep branch-local handoff details in Git until reviewed.",
+            },
+            "git_reviewable_promotion_flow": {
+                "format": "akbp-git-reviewable-promotion-flow-v1",
+                "purpose": "Let adapters answer Git-backed memory comparisons with a concrete review path: keep source-controlled artifacts inspectable while AKBP enforces citations, lifecycle state, and approved writes.",
+                "use_when": [
+                    "a host advertises Git-backed or version-controlled agent memory",
+                    "a team wants pull-request review for durable project knowledge",
+                    "a memory server exports records that should become portable AKBP artifacts",
+                ],
+                "promotion_sequence": [
+                    {
+                        "step": "select_scope",
+                        "check": "Resolve one knowledge_base.path and keep personal, team, migration, and repo-local memory separate.",
+                    },
+                    {
+                        "step": "register_evidence",
+                        "check": "Add or verify source records before promoting a claim.",
+                    },
+                    {
+                        "step": "preview_write",
+                        "check": "Run the write-capable method with dry_run:true and show planned files, source ids, lifecycle status, and warnings.",
+                    },
+                    {
+                        "step": "review_diff",
+                        "check": "Review changes to AKBP.md, akbp.json, claims, sources, relations, and audit output in Git before approval.",
+                    },
+                    {
+                        "step": "approved_apply",
+                        "check": "Repeat the same method, path, params, and cited evidence with approved:true only after review.",
+                    },
+                    {
+                        "step": "verify_bundle",
+                        "check": "Run export-check or conformance before another runtime trusts the promoted memory.",
+                    },
+                ],
+                "must_not_commit": [
+                    "raw transcripts unless deliberately promoted as reviewed source material",
+                    "secrets, private chats, credentials, or local tool caches",
+                    "bridge-owned opaque indexes as durable source of truth",
+                    "uncited summaries that cannot survive import-check review",
+                ],
+                "fail_closed_when": [
+                    "the Git diff does not show the reviewed AKBP artifacts",
+                    "the promoted claim has no source id or citation",
+                    "the host applies writes before dry-run review",
+                    "export-check fails or depends on bridge-local state",
+                ],
+                "fallback": "Keep the Git-backed memory source read-only and import only cited records through import-check plus reviewed apply.",
             },
             "context_efficiency_claim_gate": {
                 "format": "akbp-context-efficiency-claim-gate-v1",
