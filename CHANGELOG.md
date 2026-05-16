@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a tool-output context budget benchmark fixture so tool-protocol and
+  JSONL adapters can prove compact cited startup context instead of loading raw
+  tool responses, audit logs, or broad memory rows into the model.
 - Added an adapter-contract manifest to JSONL quickstart trace capture so
   adapter authors can inspect the required request order, preserved response
   fields, hard stops, and validation command alongside requests and responses.

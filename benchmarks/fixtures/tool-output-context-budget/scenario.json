@@ -1,0 +1,101 @@
+{
+  "id": "tool-output-context-budget-001",
+  "profiles": ["adapter-quality", "retrieval-quality"],
+  "task": "Verify tool-heavy protocol and JSONL sessions retrieve compact cited startup context with budget diagnostics instead of preloading raw tool output or broad audit logs.",
+  "setup": {
+    "sources": [
+      {
+        "id": "source_tool_output_budget_review",
+        "type": "transcript",
+        "locator": "sessions/tool-output-budget-review.md",
+        "title": "Tool output budget review"
+      },
+      {
+        "id": "source_jsonl_tool_trace",
+        "type": "file",
+        "locator": "logs/jsonl-tool-trace.jsonl",
+        "title": "JSONL tool trace"
+      },
+      {
+        "id": "source_tool_protocol_audit_log",
+        "type": "file",
+        "locator": "logs/tool-protocol-audit-log.jsonl",
+        "title": "Tool protocol audit log"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_tool_output_requires_bounded_cited_context",
+        "text": "Tool-protocol and JSONL adapters should summarize tool-heavy sessions into bounded cited startup context with budget diagnostics instead of loading raw tool responses, tool traces, or audit logs into the model prompt.",
+        "type": "workflow",
+        "status": "stable",
+        "confidence": 0.92,
+        "evidence": ["source_tool_output_budget_review"],
+        "entities": [
+          "tool-protocol",
+          "jsonl-tool-server",
+          "tool-output",
+          "startup-context",
+          "context-budget",
+          "citations",
+          "budget-diagnostics"
+        ],
+        "scope": "project"
+      },
+      {
+        "id": "claim_raw_tool_traces_are_diagnostics_not_startup_context",
+        "text": "Raw JSONL tool traces and tool-protocol audit logs are useful diagnostics, but adapters should keep them out of startup context unless a reviewed claim cites the relevant evidence.",
+        "type": "policy",
+        "status": "stable",
+        "confidence": 0.86,
+        "evidence": ["source_jsonl_tool_trace", "source_tool_protocol_audit_log"],
+        "entities": [
+          "raw-tool-trace",
+          "tool-protocol-audit-log",
+          "diagnostics",
+          "reviewed-claim",
+          "startup-context"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "context-tool-output-budget",
+        "method": "akbp.context",
+        "params": {
+          "task": "tool protocol JSONL tool output startup context budget diagnostics citations",
+          "limit": 5,
+          "max_chars": 180,
+          "min_items": 1,
+          "require_citations": true
+        },
+        "expected_result_fields": ["query", "items", "quality", "budget", "warnings"],
+        "expected_result_schema": "#/$defs/context_result",
+        "expected_result_contains": {
+          "items[].id": ["claim_tool_output_requires_bounded_cited_context"],
+          "items[].citations[]": ["source_tool_output_budget_review"],
+          "quality.ok": [true],
+          "quality.require_citations": [true],
+          "quality.budget_truncated": [true],
+          "budget.max_chars": [180],
+          "budget.truncated": [true]
+        }
+      }
+    ]
+  },
+  "query": "tool protocol JSONL tool output startup context budget diagnostics citations",
+  "expected": {
+    "must_retrieve": ["claim_tool_output_requires_bounded_cited_context"],
+    "must_cite": ["source_tool_output_budget_review"],
+    "must_cite_in_context": ["source_tool_output_budget_review"],
+    "must_preserve": ["claim_raw_tool_traces_are_diagnostics_not_startup_context"],
+    "answer_should_include": [
+      "tool-heavy sessions",
+      "bounded cited startup context",
+      "budget diagnostics",
+      "raw tool responses",
+      "audit logs"
+    ]
+  }
+}

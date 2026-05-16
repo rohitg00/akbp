@@ -183,6 +183,30 @@ class BenchmarkFixtureTest(unittest.TestCase):
         self.assertTrue(report["ok"], report)
         self.assertIn("context-pressure-startup", report["tool_output_ids"])
 
+    def test_tool_output_context_budget_fixture_covers_tool_heavy_startup_context(self):
+        path = FIXTURES / "tool-output-context-budget" / "scenario.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        request = data["setup"]["tool_server_requests"][0]
+        self.assertEqual(request["method"], "akbp.context")
+        self.assertEqual(request["params"]["max_chars"], 180)
+        self.assertTrue(request["params"]["require_citations"])
+        self.assertEqual(request["expected_result_schema"], "#/$defs/context_result")
+        self.assertIn(
+            "claim_tool_output_requires_bounded_cited_context",
+            request["expected_result_contains"]["items[].id"],
+        )
+        self.assertIn(
+            "source_tool_output_budget_review",
+            request["expected_result_contains"]["items[].citations[]"],
+        )
+        self.assertIn(
+            "claim_raw_tool_traces_are_diagnostics_not_startup_context",
+            data["expected"]["must_preserve"],
+        )
+        report = benchmark_runner.score_real_akbp(data)
+        self.assertTrue(report["ok"], report)
+        self.assertIn("context-tool-output-budget", report["tool_output_ids"])
+
     def test_contested_memory_fixture_fails_closed_before_planning(self):
         path = FIXTURES / "contested-memory-planning-gate" / "scenario.json"
         data = json.loads(path.read_text(encoding="utf-8"))

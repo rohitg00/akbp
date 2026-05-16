@@ -181,6 +181,14 @@ preference into a setup gate: run the structured-output harness, preserve
 response envelopes, citations, budget metadata, dry-run review fields, and
 `error.code`, and keep AKBP read-only until those checks pass.
 
+When tool-protocol or JSONL output threatens to crowd out the task, treat raw
+tool responses and audit logs as evidence or diagnostics, not startup context.
+The adapter should call `akbp.session.start` or `akbp.context` with a narrow
+task, `require_citations:true`, and a bounded `max_chars`; then surface the
+returned `budget` fields. The `tool-output-context-budget` fixture checks this
+path so a host can prove compact cited context before claiming context-window
+savings.
+
 When an editor, workflow tool, or coding agent has an active file, component,
 workflow, or selected node, use `workflow_context_selector` from `akbp client-config`
 before planning. The adapter should pass the active selection into scoped
