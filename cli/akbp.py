@@ -1316,6 +1316,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "doctor": f"akbp --path {kb_arg} doctor --profile read-only",
             "client_config": f"akbp --path {kb_arg} client-config --profile read-only",
             "session_start": f"akbp --path {kb_arg} context '<task>' --max-chars 4000",
+            "adapter_harness": "./examples/structured-output-harness/run.sh",
         },
         "warnings": warnings,
     }, indent=2, ensure_ascii=False))

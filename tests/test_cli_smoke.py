@@ -1036,6 +1036,10 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("structured-output-harness", proof_steps["validate_adapter_response_contract"]["command"])
             self.assertIn("dry-run preview", " ".join(discovered["first_run_proof"]["enable_reviewed_writes_when"]))
             self.assertIn("doctor --profile read-only", discovered["recommended_commands"]["doctor"])
+            self.assertEqual(
+                discovered["recommended_commands"]["adapter_harness"],
+                "./examples/structured-output-harness/run.sh",
+            )
             self.assertEqual(discovered["missing_artifacts"], [])
 
             missing = subprocess.run(

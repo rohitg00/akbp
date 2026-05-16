@@ -171,6 +171,9 @@ writes behind dry-run preview plus approved apply.
 gate for installer UIs: preserve the JSONL response envelope, fail closed on
 uncited or truncated startup context, stop on `approval_required`, and run the
 structured-output harness before exposing write-capable tools.
+`recommended_commands.adapter_harness` points directly to the runnable harness
+so installers can make that response-contract check part of the first discovery
+flow instead of hunting through docs.
 
 To run the adapter harness as a single adoption gate:
 
