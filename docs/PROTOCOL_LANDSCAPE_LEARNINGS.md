@@ -822,3 +822,21 @@ This keeps the import path aligned with AKBP trust model:
 - markdown remains source evidence
 - durable claims still require review and approval
 - adapters can show line-level provenance before applying memory writes
+
+## Shipped artifact: plain markdown and cache comparison gate
+
+The latest scan surfaced a practical adoption objection: some users see agent
+memory projects and ask why a project-understanding markdown file or built-in
+runtime cache is not enough.
+
+AKBP should accept the premise where it is true. Plain markdown and host caches
+are good scratchpads for one runtime. The protocol boundary matters when the
+knowledge must be cited, reviewed, lifecycle-aware, export-checkable, and reused
+across runtimes.
+
+`akbp client-config` now exposes
+`memory_landscape_fit.plain_markdown_cache_comparison`. Adapter installers can
+use it to show the difference without overclaiming: use markdown or cache for
+temporary recall, and use AKBP only when durable project knowledge needs cited
+`akbp.session.start`, an `approval_required` write gate, and portable
+`export-check` evidence.

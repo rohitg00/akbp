@@ -4212,6 +4212,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "knowledge graph or hierarchical recall over long-running projects",
                 "lower context-window pressure at session start",
                 "persistent project facts that survive across agent runs",
+                "plain project-understanding markdown or built-in token cache instead of another memory layer",
                 "reliability gates for inherited or unstable coding-agent sessions",
             ],
             "akbp_should_own": [
@@ -4237,6 +4238,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Can export-check and import-check run without bridge-local state?",
                 "Can branch or worktree-specific handoffs carry cited source ids without making AKBP the Git state owner?",
                 "Can a host prove recalled context passed quality gates before a coding agent plans from it?",
+                "Can the integration show when plain markdown or a runtime cache is sufficient, and when AKBP adds citations, lifecycle, review, and export checks?",
             ],
             "feature_claim_audit": [
                 {
@@ -4268,6 +4270,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "claim": "a tool-protocol memory server is enough persistent memory",
                     "akbp_check": "Require transport-level capability discovery plus AKBP source-of-truth artifacts: the server may expose tools, but durable project knowledge must remain cited, review-gated, and export-checkable.",
                     "evidence": "akbp.capabilities knowledge_capability plus memory_server_bridge.minimum_preflight and export-check output",
+                },
+                {
+                    "claim": "plain project markdown or built-in token cache is enough",
+                    "akbp_check": "Use plain markdown or runtime cache for scratchpad context, but require AKBP when the memory must be source-backed, lifecycle-aware, review-gated, export-checkable, and reusable across runtimes.",
+                    "evidence": "plain_markdown_cache_comparison plus cited akbp.session.start, approval_required, and export-check output",
                 },
                 {
                     "claim": "branch-aware handoffs prevent stale coding-agent context",
@@ -4664,7 +4671,41 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "akbp_expectation": "Start from read_only, run the structured-output harness, then enable reviewed_write only after the review surface exists.",
                     "verify_with": "first_run_sequence and harness_adoption_fit.minimum_gate",
                 },
+                {
+                    "question": "Can the installer explain why this is more than a project markdown file or built-in token cache?",
+                    "akbp_expectation": "Show the plain_markdown_cache_comparison: markdown and caches are fine for scratchpad context, while AKBP is for cited, reviewed, lifecycle-aware, export-checkable project knowledge.",
+                    "verify_with": "memory_landscape_fit.plain_markdown_cache_comparison",
+                },
             ],
+            "plain_markdown_cache_comparison": {
+                "format": "akbp-plain-markdown-cache-comparison-v1",
+                "purpose": "Answer the common adoption objection that a project-understanding markdown file or built-in token cache is enough.",
+                "use_plain_markdown_or_cache_when": [
+                    "the note is temporary scratchpad context",
+                    "one runtime owns the whole workflow",
+                    "the user does not need citations, lifecycle state, review, or export",
+                    "the context can be replaced without preserving history",
+                ],
+                "use_akbp_when": [
+                    "the decision or constraint should be cited before future agents plan from it",
+                    "multiple runtimes need the same durable project knowledge",
+                    "stale facts should be superseded or contradicted without deleting history",
+                    "writes must be previewed with dry_run:true and applied only with approved:true",
+                    "the knowledge base must export-check or import-check outside the original adapter",
+                ],
+                "minimum_proof": [
+                    "akbp.session.start returns cited bounded context",
+                    "an unapproved durable write returns error.code approval_required",
+                    "akbp export-check verifies portable markdown and JSONL artifacts",
+                ],
+                "fail_closed_when": [
+                    "the adapter cannot show citations for recalled project memory",
+                    "the cache hides stale or overwritten decisions",
+                    "durable writes bypass dry_run review",
+                    "export-check cannot verify the artifacts without adapter-local state",
+                ],
+                "fallback": "Use markdown or the runtime cache as an ephemeral hint source and keep AKBP read-only until cited review and export checks are available.",
+            },
             "local_first_adoption_probe": {
                 "format": "akbp-local-first-adoption-probe-v1",
                 "purpose": "Give installer UIs and adapter authors a concrete first-run proof that AKBP is local-only, visible, cited, and review-gated before they compare it with opaque memory servers.",

@@ -71,6 +71,28 @@ If a recalled item cannot pass those checks, show it as an untrusted hint or
 continue without recalled memory. Do not promote it into durable AKBP state
 until it has source evidence and a dry-run review path.
 
+## AKBP vs plain markdown or token cache
+
+Plain markdown and runtime token caches are useful. A project-understanding
+markdown file is often the fastest scratchpad for a single agent, and a built-in
+cache can reduce repeated context cost inside one host. AKBP should not replace
+those paths when the user only needs temporary recall.
+
+Use `memory_landscape_fit.plain_markdown_cache_comparison` when an installer or
+reviewer asks why AKBP is more than a markdown file or cache. The split is:
+
+| Need | Plain markdown or cache is enough | AKBP adds value when |
+| --- | --- | --- |
+| Scratchpad context | One runtime needs a temporary summary | Future agents must see cited project decisions before planning |
+| Speed | The host only needs faster local recall | The memory must survive host changes and export/import review |
+| Updates | Replacing the latest summary is acceptable | Stale facts need supersede or contradict lifecycle records |
+| Trust | The user can manually inspect one note | Writes need `dry_run:true`, explicit `approved:true`, audit output, and source ids |
+
+The minimum proof is concrete: `akbp.session.start` returns bounded cited
+context, an unapproved durable write fails with `error.code approval_required`,
+and `export-check` verifies the markdown and JSONL artifacts without adapter
+local state.
+
 ## Default setup choices
 
 Start with the smallest trustworthy setup:
