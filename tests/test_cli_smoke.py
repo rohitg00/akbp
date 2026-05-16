@@ -202,6 +202,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("import-check", modes["migration_review"]["required_gate"])
             self.assertIn("error.code", " ".join(memory_bridge["must_preserve"]))
             self.assertIn("opaque format", " ".join(memory_bridge["disable_or_warn_when"]))
+            external_promotion = memory_bridge["external_memory_promotion"]
+            self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
+            self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
+            self.assertEqual(external_promotion["candidate_record_shape"]["source"]["kind"], "akbp_source_id|file|url|citation")
+            self.assertIn("missing_source", external_promotion["reject_reasons"])
+            self.assertIn("source.kind", external_promotion["required_review_fields"])
+            promotion_steps = {step["step"]: step for step in external_promotion["promotion_sequence"]}
+            self.assertIn("check_import", promotion_steps)
+            self.assertIn("import-check", promotion_steps["check_import"]["command"])
+            self.assertIn("approved:true", promotion_steps["approved_apply"]["command"])
+            self.assertEqual(memory_bridge["promotion_contract_ref"], "memory_server_bridge.external_memory_promotion")
             promotion = memory_bridge["promotion_contract"]
             self.assertIn("reviewed durable knowledge", promotion["purpose"])
             self.assertIn("source-backed facts", promotion["candidate_records"])
@@ -689,10 +700,20 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("fast local recall", memory_bridge["use_existing_memory_for"])
             self.assertIn("akbp.import_check accepts the record without secret, schema, or evidence issues", memory_bridge["promote_to_akbp_when"])
             self.assertIn("memory rows have no source ids, citations, or review metadata", memory_bridge["fail_closed_when"])
+            self.assertEqual(memory_bridge["promotion_contract_ref"], "external_memory_promotion")
             bridge_steps = {step["name"]: step for step in memory_bridge["minimum_preflight"]}
             self.assertIn("resolve_kb", bridge_steps)
             self.assertIn("stage_external_memory", bridge_steps)
             self.assertIn("import-check", bridge_steps["stage_external_memory"]["command"])
+            external_promotion = discovered["external_memory_promotion"]
+            self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
+            self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
+            self.assertIn("source.value", external_promotion["required_review_fields"])
+            self.assertIn("runtime_cache_metadata_only", external_promotion["reject_reasons"])
+            promotion_steps = {step["step"]: step for step in external_promotion["promotion_sequence"]}
+            self.assertIn("check_import", promotion_steps)
+            self.assertIn("import-check", promotion_steps["check_import"]["command"])
+            self.assertIn("ephemeral hint", external_promotion["fallback"])
             self.assertIn("reviewed portable artifact layer", memory_bridge["adapter_message"])
             inherited_intake = discovered["inherited_repo_intake"]
             self.assertEqual(inherited_intake["format"], "akbp-inherited-repo-intake-v1")

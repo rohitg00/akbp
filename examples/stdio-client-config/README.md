@@ -25,6 +25,9 @@ The generated config makes the trust boundary visible:
 - include a tool-protocol bridge allowlist and blocked write methods
 - include a managed tool-host bridge contract for stdio-compatible hosts
   without turning AKBP into an opaque memory store
+- include `memory_server_bridge.external_memory_promotion`, a concrete
+  source-backed candidate-record contract for promoting existing memory-server
+  rows through import-check, dry-run preview, and approved apply
 - include a hosted-agent policy for managed coding agents that cannot run the
   local stdio server beside AKBP artifacts or cannot show reviewed write
   previews
@@ -81,6 +84,10 @@ AKBP stdio client config example passed
   same local stdio server, run preflight requests, preserve structured
   responses, and keep writes blocked until reviewed-write readiness and a
   separate approval surface exist
+- the config exposes `memory_server_bridge.external_memory_promotion` so
+  existing memory servers can stage source-backed candidate records and reject
+  missing-source, secret-like, private-chat, cache-only, stale-source, or
+  unapproved rows before durable AKBP writes
 - host install profiles include managed tool-protocol hosts where read-only startup context is safe but durable writes stay disabled until a separate approval UI exists
 - hosted-agent policy keeps managed cloud or remote tool hosts read-only unless
   a user-controlled bridge preserves AKBP envelopes, citations, warnings, and

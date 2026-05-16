@@ -289,6 +289,66 @@ def inherited_repo_intake_contract(kb_path: str) -> dict[str, Any]:
     }
 
 
+def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-external-memory-promotion-v1",
+        "purpose": "Give bridges a concrete candidate-record shape for promoting existing memory-server rows into reviewed AKBP artifacts.",
+        "safe_default": "import_check_before_apply",
+        "candidate_record_shape": {
+            "text": "durable claim text",
+            "type": "decision|fact|workflow|preference|observation",
+            "source": {
+                "kind": "akbp_source_id|file|url|citation",
+                "value": "source id, evidence path, URL, or citation locator",
+            },
+            "confidence": "number from 0.0 to 1.0 when known",
+            "status": "working|approved|deprecated",
+            "lifecycle": {
+                "supersedes": "optional prior claim id",
+                "contradicts": "optional prior claim id",
+            },
+        },
+        "required_review_fields": [
+            "text",
+            "type",
+            "source.kind",
+            "source.value",
+            "dry-run warnings",
+            "would-write artifact paths",
+        ],
+        "reject_reasons": [
+            "missing_source",
+            "secret_like_value",
+            "private_or_chat_only_context",
+            "runtime_cache_metadata_only",
+            "source_verification_failed",
+            "approval_missing",
+        ],
+        "promotion_sequence": [
+            {
+                "step": "stage_export",
+                "expect": "Export candidate memories into JSONL using candidate_record_shape; keep embeddings and cache ids out of durable fields.",
+            },
+            {
+                "step": "check_import",
+                "command": f"akbp --path {kb_path} import-check <memory-export.jsonl> --fail-on-rejected",
+                "expect": "Rejected rows are visible before any durable AKBP write.",
+            },
+            {
+                "step": "preview_apply",
+                "command": "akbp.import_apply with dry_run:true or akbp.remember with dry_run:true",
+                "expect": "The reviewer sees warnings and would-write paths without changing artifacts.",
+            },
+            {
+                "step": "approved_apply",
+                "command": "Repeat the exact reviewed request with approved:true",
+                "expect": "Only reviewed records become AKBP claims, sources, or lifecycle relations.",
+            },
+        ],
+        "fallback": "If a bridge cannot emit source-backed candidate records, keep existing memory as an ephemeral hint and do not promote it into AKBP.",
+    }
+
+
 def append_jsonl(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -515,6 +575,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         warnings.append("Some artifact paths from akbp.json are missing; run doctor before trusting this KB.")
     kb_arg = shlex.quote(str(kb_root))
     profile_selection = adapter_profile_selection(kb_arg)
+    external_memory_promotion = external_memory_promotion_contract(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -628,6 +689,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
                 "expect": "Existing memory is reviewed as an import candidate before durable apply.",
             },
         ],
+        "promotion_contract_ref": "external_memory_promotion",
         "adapter_message": "Use the memory server for fast recall, but use AKBP as the reviewed portable artifact layer. When the bridge cannot prove citations and approval, stay read-only.",
     }
     first_run_proof = {
@@ -875,6 +937,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "positioning": positioning,
         "adoption_triage": adoption_triage,
         "memory_server_bridge": memory_server_bridge,
+        "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "first_run_proof": first_run_proof,
@@ -2423,6 +2486,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     kb_path = "<AKBP_KB_PATH>" if args.portable else str(base)
     card_path = f"{kb_path}/akbp.json" if args.portable else str(base / "akbp.json")
     profile_selection = adapter_profile_selection(kb_path)
+    external_memory_promotion = external_memory_promotion_contract(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -3065,6 +3129,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
             "safe_default": "read_only_substrate",
             "durable_state_owner": "AKBP markdown and JSONL artifacts under knowledge_base.path",
             "bridge_role": "transport_and_policy_glue_only",
+            "external_memory_promotion": external_memory_promotion,
             "promotion_contract": {
                 "purpose": "Let an existing memory server promote only reviewed durable knowledge into AKBP instead of bulk-copying opaque runtime memory.",
                 "candidate_records": [
@@ -3096,6 +3161,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "apply_rule": "Apply only the exact reviewed record with approved:true after the host shows the dry-run preview outside the model tool call.",
                 "fallback": "Keep the bridge read-only when citations, review metadata, or explicit approval are missing.",
             },
+            "promotion_contract_ref": "memory_server_bridge.external_memory_promotion",
             "integration_modes": [
                 {
                     "mode": "runtime_cache_plus_akbp",
