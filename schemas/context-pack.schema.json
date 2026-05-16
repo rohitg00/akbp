@@ -30,8 +30,13 @@
         "ok": { "type": "boolean" },
         "minimum_items": { "type": "integer", "minimum": 0 },
         "require_citations": { "type": "boolean" },
+        "fail_on_warnings": { "type": "boolean" },
+        "budget_truncated": { "type": "boolean" },
+        "budget_omitted_items": { "type": "integer", "minimum": 0 },
+        "budget_clipped_items": { "type": "integer", "minimum": 0 },
         "items": { "type": "integer", "minimum": 0 },
         "uncited_items": { "type": "array", "items": { "type": "string" } },
+        "warnings": { "type": "integer", "minimum": 0 },
         "failed": { "type": "array", "items": { "type": "string" } }
       }
     },

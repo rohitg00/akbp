@@ -247,6 +247,7 @@ KNOWLEDGE_CAPABILITY: dict[str, Any] = {
             "error.code",
             "result.context.items[].citations",
             "result.quality",
+            "result.quality.budget_truncated",
             "dry_run review metadata",
             "approval_required",
         ],

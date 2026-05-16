@@ -170,7 +170,10 @@ Expected behavior:
 - `blocked` fails with `error.code:"approval_required"`.
 - `approved` writes only because request-level approval is explicit.
 - `status` returns counts, latest claims, source health, index presence, and conformance.
-- `ctx` returns later-session context from the approved knowledge base.
+- `ctx` returns later-session context from the approved knowledge base, with
+  `quality.budget_truncated`, `quality.budget_omitted_items`, and
+  `quality.budget_clipped_items` available for adapters that need to fail
+  closed when startup context was clipped.
 
 This is the adapter contract in one minute: retrieve before planning, dry-run before writing, require approval before durable memory, then recall cited context next session.
 

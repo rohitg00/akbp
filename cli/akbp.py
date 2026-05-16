@@ -1650,6 +1650,8 @@ def context_fallback_reason(failed: list[str]) -> str | None:
 def context_quality(pack: dict[str, Any], min_items: int, require_citations: bool, fail_on_warnings: bool = False) -> dict[str, Any]:
     items = pack.get("items", [])
     warnings = pack.get("warnings", [])
+    budget = pack.get("budget") if isinstance(pack.get("budget"), dict) else {}
+    budget_truncated = bool(budget.get("truncated"))
     uncited = [
         str(item.get("id"))
         for item in items
@@ -1670,6 +1672,9 @@ def context_quality(pack: dict[str, Any], min_items: int, require_citations: boo
         "minimum_items": min_items,
         "require_citations": require_citations,
         "fail_on_warnings": fail_on_warnings,
+        "budget_truncated": budget_truncated,
+        "budget_omitted_items": int(budget.get("omitted_items") or 0),
+        "budget_clipped_items": int(budget.get("clipped_items") or 0),
         "items": len(items),
         "uncited_items": uncited,
         "warnings": len(warnings),

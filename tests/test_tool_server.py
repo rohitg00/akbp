@@ -768,6 +768,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(lines[3]["result"]["quality"]["minimum_items"], 1)
             self.assertTrue(lines[3]["result"]["quality"]["require_citations"])
             self.assertFalse(lines[3]["result"]["quality"]["fail_on_warnings"])
+            self.assertTrue(lines[3]["result"]["quality"]["budget_truncated"])
+            self.assertEqual(lines[3]["result"]["quality"]["budget_omitted_items"], lines[3]["result"]["budget"]["omitted_items"])
+            self.assertEqual(lines[3]["result"]["quality"]["budget_clipped_items"], lines[3]["result"]["budget"]["clipped_items"])
             self.assertTrue(lines[3]["result"]["quality"]["trusted_for_planning"])
             self.assertIsNone(lines[3]["result"]["quality"]["fallback_reason"])
             self.assertLessEqual(lines[3]["result"]["budget"]["summary_chars"], 24)
@@ -1365,6 +1368,9 @@ class ToolServerTest(unittest.TestCase):
             self.assertEqual(context["quality"]["fallback_reason"], "warnings_present")
             self.assertTrue(context["quality"]["require_citations"])
             self.assertTrue(context["quality"]["fail_on_warnings"])
+            self.assertTrue(context["quality"]["budget_truncated"])
+            self.assertEqual(context["quality"]["budget_omitted_items"], context["budget"]["omitted_items"])
+            self.assertEqual(context["quality"]["budget_clipped_items"], context["budget"]["clipped_items"])
             self.assertIn("warnings:1", context["quality"]["failed"])
 
     def test_crystallize_session_method(self):

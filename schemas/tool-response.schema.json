@@ -1775,6 +1775,9 @@
             "minimum_items",
             "require_citations",
             "fail_on_warnings",
+            "budget_truncated",
+            "budget_omitted_items",
+            "budget_clipped_items",
             "items",
             "uncited_items",
             "warnings",
@@ -1809,6 +1812,17 @@
             },
             "fail_on_warnings": {
               "type": "boolean"
+            },
+            "budget_truncated": {
+              "type": "boolean"
+            },
+            "budget_omitted_items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "budget_clipped_items": {
+              "type": "integer",
+              "minimum": 0
             },
             "items": {
               "type": "integer",
