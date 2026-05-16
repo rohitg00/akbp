@@ -45,6 +45,7 @@ examples:
 	./examples/portable-bundle/run.sh
 	./examples/rich-context-artifact/run.sh
 	./examples/existing-memory-migration/run.sh
+	./examples/markdown-folder-intake/run.sh
 	./examples/source-intake/run.sh
 	./examples/read-only-adapter/run.sh
 	./examples/inherited-repo-intake/run.sh

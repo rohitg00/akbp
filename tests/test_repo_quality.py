@@ -429,6 +429,33 @@ class RepoQualityTest(unittest.TestCase):
             self.assertIn(required, combined)
         self.assertIn("./examples/existing-memory-migration/run.sh", makefile)
 
+    def test_markdown_folder_intake_documents_reviewed_promotion_flow(self):
+        text = (ROOT / "examples" / "markdown-folder-intake" / "README.md").read_text(encoding="utf-8")
+        script = (ROOT / "examples" / "markdown-folder-intake" / "run.sh").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        combined = text + script + readme
+        for required in [
+            "AKBP markdown folder intake example",
+            "AKBP markdown folder intake example passed",
+            "Treat the existing markdown folder as evidence",
+            "source add",
+            "akbp.remember",
+            "dry_run",
+            "remember-blocked",
+            "remember-approved",
+            "approval_required",
+            "index-approved",
+            "akbp.session.start",
+            "registered markdown sources ok",
+            "review-gated markdown promotion ok",
+            "cited markdown context ok",
+            "Markdown folder migration reviewer",
+            "examples/markdown-folder-intake/run.sh",
+        ]:
+            self.assertIn(required, combined)
+        self.assertIn("./examples/markdown-folder-intake/run.sh", makefile)
+
     def test_github_copilot_adapter_documents_cloud_agent_read_only_boundary(self):
         readme = (ROOT / "adapters" / "github-copilot" / "README.md").read_text(encoding="utf-8")
         instructions = (ROOT / "adapters" / "github-copilot" / "instructions.md").read_text(encoding="utf-8")

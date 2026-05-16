@@ -463,6 +463,7 @@ akbp/
 - Adapter quality reviewer: run `examples/structured-output-harness/run.sh`.
 - Tool-host bridge reviewer: run `examples/tool-protocol-bridge/run.sh`.
 - Existing memory migration reviewer: run `examples/existing-memory-migration/run.sh`.
+- Markdown folder migration reviewer: run `examples/markdown-folder-intake/run.sh`.
 - Obsidian user: read `docs/OBSIDIAN.md`, then inspect `examples/obsidian-vault/`.
 - Adapter author: read `docs/ADAPTER_AUTHOR_QUICKSTART.md`, then inspect `examples/adapter-lifecycle/` and `examples/structured-output-harness/`.
 - Session-memory reviewer: read `docs/SESSION_MEMORY_BOUNDARY.md`.
