@@ -170,6 +170,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("separate human approval", host_profiles["managed_tool_protocol_host"]["enable_writes_after"])
             self.assertEqual(host_profiles["existing_memory_server"]["first_tool"], "akbp_context")
             self.assertIn("ephemeral cache", host_profiles["existing_memory_server"]["setup_commands"][0])
+            autodetect = config["host_autodetect"]
+            self.assertEqual(autodetect["format"], "akbp-host-autodetect-contract-v1")
+            self.assertEqual(autodetect["safe_default"], "inventory_only")
+            self.assertEqual(autodetect["selected_profile"], "reviewed_write")
+            self.assertIn("supports_review_surface", autodetect["inventory_fields"])
+            self.assertIn("write host config files", autodetect["blocked_probe_actions"])
+            self.assertIn("show the exact host config diff", " ".join(autodetect["required_install_review"]))
+            self.assertIn("read-only setup commands", autodetect["fallback"])
             managed_bridge = config["managed_tool_host_bridge"]
             self.assertEqual(managed_bridge["format"], "akbp-managed-tool-host-bridge-v1")
             self.assertEqual(managed_bridge["server_config"]["transport"], "stdio")
@@ -671,6 +679,11 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(portable["multi_client_scope"]["safe_for_public_templates"])
             self.assertTrue(portable["distribution"]["safe_to_commit"])
             self.assertEqual(portable["distribution"]["replace_before_run"], ["<AKBP_KB_PATH>"])
+            self.assertIn(
+                "akbp --path <AKBP_KB_PATH> client-config --profile read-only",
+                portable["host_autodetect"]["required_install_review"],
+            )
+            self.assertIn("placeholders", portable["host_autodetect"]["public_template_rule"])
 
             startup_context = json.loads(
                 run_cli("--path", str(kb), "client-config", "--profile", "startup-context").stdout
@@ -751,6 +764,14 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("akbp.import_apply", schema_budget["blocked_until_needed"])
             self.assertIn("profile", " ".join(schema_budget["schema_strategy"]))
             self.assertIn("read-only allowlist", schema_budget["fallback"])
+            autodetect = discovered["host_autodetect"]
+            self.assertEqual(autodetect["format"], "akbp-host-autodetect-contract-v1")
+            self.assertEqual(autodetect["safe_default"], "inventory_only")
+            self.assertEqual(autodetect["selected_profile"], "read_only")
+            self.assertIn("supports_stdio_tools", autodetect["inventory_fields"])
+            self.assertIn("write host config files", autodetect["blocked_probe_actions"])
+            self.assertIn("client-config --profile read-only", " ".join(autodetect["required_install_review"]))
+            self.assertIn("do not mutate host config", autodetect["fallback"])
             memory_bridge = discovered["memory_server_bridge"]
             self.assertEqual(memory_bridge["format"], "akbp-memory-server-bridge-v1")
             self.assertEqual(memory_bridge["safe_default"], "treat_existing_memory_as_ephemeral_until_import_checked")

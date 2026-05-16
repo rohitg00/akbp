@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added a host auto-detect contract to discovery and generated client configs
+  so installer probes stay inventory-only until users review exact host config
+  diffs and preflight checks.
 - Added inherited-repo takeover risk triage to discovery output so adapters can
   classify stale, uncited, or private prior memory before planning from it.
 - Added a machine-readable external-memory promotion triage contract so adapter

@@ -292,6 +292,47 @@ def adapter_tool_schema_budget(
     }
 
 
+def host_autodetect_contract(kb_path: str, profile: str = "read_only") -> dict[str, Any]:
+    return {
+        "format": "akbp-host-autodetect-contract-v1",
+        "purpose": "Let installers discover candidate coding-agent hosts without silently editing host configs, hooks, prompts, or memory stores.",
+        "research_signal": "Recent coding-agent memory tools emphasize auto-detecting installed agents and configuring them quickly; AKBP should support fast setup while making every host change explicit and reviewable.",
+        "safe_default": "inventory_only",
+        "selected_profile": profile,
+        "inventory_fields": [
+            "host_type",
+            "config_path",
+            "supports_stdio_tools",
+            "supports_instruction_file",
+            "supports_pre_tool_hook",
+            "supports_review_surface",
+        ],
+        "allowed_probe_actions": [
+            "read documented host config locations",
+            "detect whether the host can launch stdio JSONL tools",
+            "detect whether the host can preserve response envelopes, citations, warnings, budget fields, and error.code",
+            "report the explicit AKBP knowledge base path that would be wired into the host",
+        ],
+        "blocked_probe_actions": [
+            "write host config files",
+            "install hooks, skills, extensions, or background services",
+            "enable reviewed_write tools",
+            "copy private runtime memory into AKBP",
+            "create a second durable memory store owned by the adapter",
+        ],
+        "required_install_review": [
+            f"akbp --path {kb_path} discover",
+            f"akbp --path {kb_path} doctor --profile read-only",
+            f"akbp --path {kb_path} client-config --profile read-only",
+            "show the exact host config diff before writing anything",
+            "run generated preflight_requests after the user applies the diff",
+        ],
+        "profile_upgrade_rule": "Auto-detect may recommend reviewed_write only when the host reports a separate review surface; it must not enable write tools by detection alone.",
+        "public_template_rule": "Published adapter templates must use placeholders for local paths and must not contain private maintenance tool names, local cache paths, or generated user memory.",
+        "fallback": "If host capabilities cannot be verified, output inventory and read-only setup commands only; do not mutate host config.",
+    }
+
+
 def inherited_repo_intake_contract(kb_path: str) -> dict[str, Any]:
     return {
         "format": "akbp-inherited-repo-intake-v1",
@@ -757,6 +798,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     kb_arg = shlex.quote(str(kb_root))
     profile_selection = adapter_profile_selection(kb_arg)
     tool_schema_budget = adapter_tool_schema_budget(kb_arg)
+    host_autodetect = host_autodetect_contract(kb_arg)
     external_memory_promotion = external_memory_promotion_contract(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
@@ -1186,6 +1228,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
         "tool_schema_budget": tool_schema_budget,
+        "host_autodetect": host_autodetect,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
@@ -2744,6 +2787,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     kb_path = "<AKBP_KB_PATH>" if args.portable else str(base)
     card_path = f"{kb_path}/akbp.json" if args.portable else str(base / "akbp.json")
     profile_selection = adapter_profile_selection(kb_path)
+    host_autodetect = host_autodetect_contract(kb_path, requested_profile)
     external_memory_promotion = external_memory_promotion_contract(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
@@ -3391,6 +3435,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "enable_writes_after": "migration or promotion flow passes import-check or dry-run preview without secret or citation warnings",
             },
         ],
+        "host_autodetect": host_autodetect,
         "managed_tool_host_bridge": {
             "format": "akbp-managed-tool-host-bridge-v1",
             "purpose": "Let tool-protocol-compatible hosts launch AKBP as a local stdio knowledge tool while preserving AKBP's cited, review-gated memory boundary.",
