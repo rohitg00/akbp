@@ -106,6 +106,7 @@ Included examples:
 - `examples/adapter-lifecycle/`
 - `examples/adapter-lifecycle/run.sh`
 - `examples/git-native-agent-handoff/`
+- `examples/git-native-agent-handoff/run.sh`, including branch-scoped handoff citation checks
 - `examples/coding-agent/`
 - `examples/research/`
 - `examples/personal/`

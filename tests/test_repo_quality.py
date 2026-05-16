@@ -1438,16 +1438,21 @@ class RepoQualityTest(unittest.TestCase):
             "akbp.capabilities",
             "akbp.session.start",
             "akbp.session.end",
+            "akbp.cite",
             "dry_run:true",
             "approved:true",
             "akbp.index",
             "Keep repository state in Git",
+            "branch name",
         ]:
             self.assertIn(required, text)
         self.assertIn("AKBP git-native handoff example passed", script)
         self.assertIn('"method":"akbp.session.start"', script)
+        self.assertIn('"method":"akbp.cite"', script)
+        self.assertIn("feature/adapter-review", script)
         self.assertIn('"method":"akbp.session.end"', script)
         self.assertIn("Use `akbp.session.start`", transcript)
+        self.assertIn("Use `akbp.cite`", transcript)
         self.assertIn("Use `akbp.session.end`", transcript)
         self.assertIn("examples/git-native-agent-handoff/", readme)
         self.assertIn("examples/git-native-agent-handoff/", release_notes)
