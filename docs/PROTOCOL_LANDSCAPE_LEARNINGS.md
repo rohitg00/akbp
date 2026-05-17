@@ -840,3 +840,9 @@ use it to show the difference without overclaiming: use markdown or cache for
 temporary recall, and use AKBP only when durable project knowledge needs cited
 `akbp.session.start`, an `approval_required` write gate, and portable
 `export-check` evidence.
+
+`examples/project-understanding-bridge/` turns that comparison into a runnable
+proof. It starts with one plain `project-understanding.md`, registers it as
+evidence, dry-runs the durable promotion, proves unapproved writes stop on
+`approval_required`, applies only reviewed claims, retrieves cited startup
+context, and export-checks the resulting bundle.

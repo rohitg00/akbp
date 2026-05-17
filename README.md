@@ -154,6 +154,10 @@ For inherited or older agent-written repositories, `examples/inherited-repo-inta
 adds the takeover-specific gate: verify source freshness before trusting cited
 startup context, and keep stale or changed handoffs as review blockers instead
 of planning from outdated memory.
+`examples/project-understanding-bridge/` answers the common
+`project-understanding.md` objection with a runnable proof: keep plain
+markdown as scratchpad evidence, promote only reviewed claims, block unapproved
+writes, retrieve cited startup context, and export-check the portable bundle.
 `examples/context-freshness-probe/` isolates that freshness gate into a small
 adapter preflight: verified sources plus cited startup context pass, while
 changed source evidence fails closed before recalled memory affects planning.
@@ -382,6 +386,7 @@ The repo includes:
 - `examples/structured-output-harness/` for adapter response-contract checks before trusting recalled context or enabling reviewed writes
 - `examples/tool-protocol-bridge/` for read-only bridge preflight before exposing AKBP through a tool host
 - `examples/existing-memory-migration/` for promoting source-backed records from an existing memory server or hosted memory export
+- `examples/project-understanding-bridge/` for promoting a plain project-understanding markdown file into cited, reviewed, export-checkable AKBP knowledge
 - `examples/git-native-agent-handoff/` for repo-backed agent handoffs with cited context and review-gated shutdown memory
 - `examples/multi-agent-consistency-demo/` for cross-agent retrieval and supersession
 - `examples/rich-context-artifact/` for a static review surface backed by JSONL proposals
