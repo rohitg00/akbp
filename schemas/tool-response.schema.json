@@ -2073,7 +2073,10 @@
           "enum": [
             "startup_context",
             "read_only",
-            "reviewed_write"
+            "reviewed_write",
+            "lifecycle",
+            "portability",
+            "maintenance"
           ]
         },
         "requested_profile_ready": {
@@ -2263,10 +2266,16 @@
             "startup_context_ready",
             "read_only_ready",
             "reviewed_write_ready",
+            "lifecycle_ready",
+            "portability_ready",
+            "maintenance_ready",
             "blocking_checks",
             "startup_context_missing",
             "read_only_missing",
-            "reviewed_write_missing"
+            "reviewed_write_missing",
+            "lifecycle_missing",
+            "portability_missing",
+            "maintenance_missing"
           ],
           "properties": {
             "recommended_profile": {
@@ -2287,6 +2296,15 @@
             "reviewed_write_ready": {
               "type": "boolean"
             },
+            "lifecycle_ready": {
+              "type": "boolean"
+            },
+            "portability_ready": {
+              "type": "boolean"
+            },
+            "maintenance_ready": {
+              "type": "boolean"
+            },
             "blocking_checks": {
               "type": "array",
               "items": { "type": "string" }
@@ -2300,6 +2318,18 @@
               "items": { "type": "string" }
             },
             "reviewed_write_missing": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "lifecycle_missing": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "portability_missing": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "maintenance_missing": {
               "type": "array",
               "items": { "type": "string" }
             }
@@ -2337,7 +2367,10 @@
           "enum": [
             "startup_context",
             "read_only",
-            "reviewed_write"
+            "reviewed_write",
+            "lifecycle",
+            "portability",
+            "maintenance"
           ]
         },
         "requested_profile_ready": {
@@ -2365,10 +2398,16 @@
             "startup_context_ready",
             "read_only_ready",
             "reviewed_write_ready",
+            "lifecycle_ready",
+            "portability_ready",
+            "maintenance_ready",
             "blocking_checks",
             "startup_context_missing",
             "read_only_missing",
-            "reviewed_write_missing"
+            "reviewed_write_missing",
+            "lifecycle_missing",
+            "portability_missing",
+            "maintenance_missing"
           ],
           "properties": {
             "recommended_profile": {
@@ -2387,6 +2426,15 @@
               "type": "boolean"
             },
             "reviewed_write_ready": {
+              "type": "boolean"
+            },
+            "lifecycle_ready": {
+              "type": "boolean"
+            },
+            "portability_ready": {
+              "type": "boolean"
+            },
+            "maintenance_ready": {
               "type": "boolean"
             },
             "blocking_checks": {
@@ -2408,6 +2456,24 @@
               }
             },
             "reviewed_write_missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "lifecycle_missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "portability_missing": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "maintenance_missing": {
               "type": "array",
               "items": {
                 "type": "string"

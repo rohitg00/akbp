@@ -2931,15 +2931,29 @@ def cmd_lint(args: argparse.Namespace) -> int:
     return 1 if any(i["severity"] == "error" for i in issues) else 0
 
 
+ADAPTER_PROFILE_CHOICES = [
+    "startup-context",
+    "read-only",
+    "reviewed-writes",
+    "lifecycle",
+    "portability",
+    "maintenance",
+]
+
+ADAPTER_PROFILE_MAP = {
+    "startup-context": "startup_context",
+    "read-only": "read_only",
+    "reviewed-writes": "reviewed_write",
+    "lifecycle": "lifecycle",
+    "portability": "portability",
+    "maintenance": "maintenance",
+}
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     base = root(args.path)
     profile_key = None
     profile_ready = None
-    profile_map = {
-        "startup-context": "startup_context",
-        "read-only": "read_only",
-        "reviewed-writes": "reviewed_write",
-    }
     card = load_card(base)
     privacy = card.get("privacy", {}) if isinstance(card, dict) else {}
     default_scope = privacy.get("default_scope") if isinstance(privacy, dict) else None
@@ -2970,7 +2984,7 @@ def cmd_status(args: argparse.Namespace) -> int:
             conformance_level = level
             break
     if getattr(args, "profile", None):
-        profile_key = profile_map[args.profile]
+        profile_key = ADAPTER_PROFILE_MAP[args.profile]
         profile_ready = bool(adapter_readiness[f"{profile_key}_ready"])
     print(json.dumps({
         "path": str(base),
@@ -3175,6 +3189,9 @@ def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
     startup_context_ready = not blocking and not startup_context_missing
     read_only_ready = not blocking and not read_only_missing
     reviewed_write_ready = not blocking and not warnings
+    lifecycle_ready = reviewed_write_ready
+    portability_ready = read_only_ready
+    maintenance_ready = read_only_ready
     if reviewed_write_ready:
         recommended_profile = "reviewed_write"
     elif read_only_ready:
@@ -3188,10 +3205,16 @@ def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
         "startup_context_ready": startup_context_ready,
         "read_only_ready": read_only_ready,
         "reviewed_write_ready": reviewed_write_ready,
+        "lifecycle_ready": lifecycle_ready,
+        "portability_ready": portability_ready,
+        "maintenance_ready": maintenance_ready,
         "blocking_checks": [check["id"] for check in blocking],
         "startup_context_missing": startup_context_missing,
         "read_only_missing": read_only_missing,
         "reviewed_write_missing": reviewed_write_missing,
+        "lifecycle_missing": reviewed_write_missing,
+        "portability_missing": read_only_missing,
+        "maintenance_missing": read_only_missing,
     }
 
 
@@ -3227,14 +3250,9 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     blocking = [check for check in failing if check["severity"] == "error"]
     profile_key = None
     profile_ready = None
-    profile_map = {
-        "startup-context": "startup_context",
-        "read-only": "read_only",
-        "reviewed-writes": "reviewed_write",
-    }
     adapter_readiness = doctor_adapter_readiness(checks)
     if args.profile:
-        profile_key = profile_map[args.profile]
+        profile_key = ADAPTER_PROFILE_MAP[args.profile]
         profile_ready = bool(adapter_readiness[f"{profile_key}_ready"])
     print(json.dumps({
         "path": str(base),
@@ -6202,7 +6220,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=5, help="number of recent claims and source issues to include")
     s.add_argument(
         "--profile",
-        choices=["startup-context", "read-only", "reviewed-writes"],
+        choices=ADAPTER_PROFILE_CHOICES,
         help="include readiness for a requested adapter workflow profile without running the full doctor report",
     )
     s.set_defaults(func=cmd_status)
@@ -6211,7 +6229,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=5, help="number of next steps to include")
     s.add_argument(
         "--profile",
-        choices=["startup-context", "read-only", "reviewed-writes"],
+        choices=ADAPTER_PROFILE_CHOICES,
         help="also fail when the requested adapter workflow profile is not ready",
     )
     s.set_defaults(func=cmd_doctor)

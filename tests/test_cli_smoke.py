@@ -1346,8 +1346,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertFalse(doctor["adapter_readiness"]["read_only_ready"])
             self.assertFalse(doctor["adapter_readiness"]["reviewed_write_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["lifecycle_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["portability_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["maintenance_ready"])
             self.assertEqual(doctor["adapter_readiness"]["startup_context_missing"], [])
             self.assertIn("index", doctor["adapter_readiness"]["read_only_missing"])
+            self.assertIn("index", doctor["adapter_readiness"]["portability_missing"])
+            self.assertIn("index", doctor["adapter_readiness"]["maintenance_missing"])
 
             read_only = subprocess.run(
                 [sys.executable, str(CLI), "--path", str(kb), "doctor", "--profile", "read-only"],
@@ -1366,6 +1371,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             self.assertEqual(startup_context["requested_profile"], "startup_context")
             self.assertTrue(startup_context["requested_profile_ready"])
+
+            portability = subprocess.run(
+                [sys.executable, str(CLI), "--path", str(kb), "doctor", "--profile", "portability"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(portability.returncode, 1)
+            portability_doctor = json.loads(portability.stdout)
+            self.assertEqual(portability_doctor["requested_profile"], "portability")
+            self.assertFalse(portability_doctor["requested_profile_ready"])
 
     def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):
         with tempfile.TemporaryDirectory() as d:
@@ -1650,6 +1666,9 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertTrue(doctor["adapter_readiness"]["read_only_ready"])
             self.assertTrue(doctor["adapter_readiness"]["reviewed_write_ready"])
+            self.assertTrue(doctor["adapter_readiness"]["lifecycle_ready"])
+            self.assertTrue(doctor["adapter_readiness"]["portability_ready"])
+            self.assertTrue(doctor["adapter_readiness"]["maintenance_ready"])
             self.assertEqual(doctor["adapter_readiness"]["blocking_checks"], [])
             self.assertEqual(doctor["summary"]["errors"], 0)
             self.assertEqual(doctor["next_steps"], [])

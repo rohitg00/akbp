@@ -527,6 +527,9 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
         "startup_context": "startup-context",
         "read_only": "read-only",
         "reviewed_write": "reviewed-writes",
+        "lifecycle": "lifecycle",
+        "portability": "portability",
+        "maintenance": "maintenance",
     }
     mapping = {
         "akbp.status": ["status", "--limit", str(params.get("limit", 5))],
@@ -787,8 +790,8 @@ def param_type_errors(method: str, params: dict[str, Any]) -> list[str]:
         errors.append("claim_type must be one of: " + ", ".join(sorted(CLAIM_TYPES)))
     if "level" in params and method == "akbp.conformance" and params.get("level") not in CONFORMANCE_LEVELS:
         errors.append("level must be one of: " + ", ".join(sorted(CONFORMANCE_LEVELS)))
-    if "profile" in params and method in {"akbp.doctor", "akbp.status"} and params.get("profile") not in {"startup_context", "read_only", "reviewed_write"}:
-        errors.append("profile must be one of: read_only, reviewed_write, startup_context")
+    if "profile" in params and method in {"akbp.doctor", "akbp.status"} and params.get("profile") not in CAPABILITY_PROFILES:
+        errors.append("profile must be one of: " + ", ".join(sorted(CAPABILITY_PROFILES)))
     if "client" in params:
         client = params.get("client")
         if not isinstance(client, str):

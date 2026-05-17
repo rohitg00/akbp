@@ -796,26 +796,43 @@ class ToolServerTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             kb = Path(d) / "kb"
             run_cli("--path", str(kb), "init")
-            request = {
-                "id": "doctor-startup",
-                "path": str(kb),
-                "method": "akbp.doctor",
-                "params": {"profile": "startup_context"},
-            }
+            requests = "\n".join([
+                json.dumps({
+                    "id": "doctor-startup",
+                    "path": str(kb),
+                    "method": "akbp.doctor",
+                    "params": {"profile": "startup_context"},
+                }),
+                json.dumps({
+                    "id": "doctor-maintenance",
+                    "path": str(kb),
+                    "method": "akbp.doctor",
+                    "params": {"profile": "maintenance"},
+                }),
+            ]) + "\n"
             proc = subprocess.run(
                 [sys.executable, str(SERVER)],
-                input=json.dumps(request) + "\n",
+                input=requests,
                 text=True,
                 capture_output=True,
-                check=True,
+                check=False,
             )
-            row = json.loads(proc.stdout)
-            self.assertTrue(row["ok"])
-            assert_matches_required_schema(self, row["result"], schema_def("doctor_result"))
-            self.assertEqual(row["result"]["requested_profile"], "startup_context")
-            self.assertTrue(row["result"]["requested_profile_ready"])
-            self.assertTrue(row["result"]["adapter_readiness"]["startup_context_ready"])
-            self.assertFalse(row["result"]["ready_for_adapter"])
+            self.assertEqual(proc.returncode, 0)
+            rows = [json.loads(line) for line in proc.stdout.splitlines()]
+            startup = rows[0]
+            self.assertTrue(startup["ok"])
+            assert_matches_required_schema(self, startup["result"], schema_def("doctor_result"))
+            self.assertEqual(startup["result"]["requested_profile"], "startup_context")
+            self.assertTrue(startup["result"]["requested_profile_ready"])
+            self.assertTrue(startup["result"]["adapter_readiness"]["startup_context_ready"])
+            self.assertFalse(startup["result"]["ready_for_adapter"])
+            maintenance = rows[1]
+            self.assertFalse(maintenance["ok"])
+            self.assertEqual(maintenance["error"]["code"], "cli_error")
+            details = maintenance["error"]["details"]
+            self.assertEqual(details["method"], "akbp.doctor")
+            self.assertIn("requested_profile", details["stdout"])
+            self.assertIn("maintenance", details["stdout"])
 
     def test_capabilities_negotiates_required_features(self):
         request = json.dumps({
