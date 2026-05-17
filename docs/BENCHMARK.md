@@ -87,6 +87,12 @@ Generated wiki pages should be useful to humans.
 
 Pass criteria: page has summary, evidence links, related pages, current status, and open questions.
 
+### 11. Tool-output presentation parity
+
+`akbp.search` and `akbp.context` are called twice over the same indexed knowledge base: once with `output_mode: "inline"`, once with `output_mode: "file"`. File-mode responses carry an artifact path, sha256, byte size, and line count; the JSONL artifact contains one metadata header line plus one line per result or context item.
+
+Pass criteria: both modes return the same retrieved item identifiers and citations, the file-mode response validates against `#/$defs/search_result_file` or `#/$defs/context_result_file`, and the artifact exists, parses as JSONL, and lists the same items the inline response would have inlined. Motivated by recent agent-harness research showing tool-output presentation choice shifts agentic retrieval scores even with identical evidence (Sen et al., arXiv:2605.15184). See `docs/HARNESS_AND_PRESENTATION.md`.
+
 ## Baseline fixtures
 
 The repo includes small conformance fixtures under `examples/level-0/`, `examples/level-1/`, and `examples/level-3/`. These are not performance benchmarks. They are compatibility fixtures for future benchmark and adapter testing.

@@ -1395,7 +1395,7 @@ class RepoQualityTest(unittest.TestCase):
         self.assertIn("empty `fts_query`", contract)
         self.assertNotIn('"modes": ["bm25", "vector", "graph"]', contract)
         self.assertNotIn('"scope": "default"', contract)
-        self.assertEqual(set(search_props), {"query", "limit"})
+        self.assertEqual(set(search_props), {"query", "limit", "output_mode", "output_dir"})
 
     def test_tool_contract_write_params_match_current_reference_params(self):
         contract = (ROOT / "docs" / "TOOL_CONTRACT.md").read_text(encoding="utf-8")

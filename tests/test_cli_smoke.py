@@ -2341,6 +2341,78 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("docs/AGENT_FLOW.md", summary["files"])
             self.assertIn("cli/akbp.py", summary["files"])
 
+    def test_search_file_mode_writes_grep_friendly_artifact(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            (kb / "notes.md").write_text("release rollback owner runbook\n", encoding="utf-8")
+            run_cli(
+                "--path", str(kb), "source", "add", "notes.md", "--type", "file", "--title", "Notes",
+            )
+            run_cli(
+                "--path", str(kb), "remember",
+                "Each release window must declare a rollback owner.",
+                "--type", "decision",
+                "--evidence", "notes.md",
+            )
+            run_cli("--path", str(kb), "index")
+            artifacts = Path(d) / "out"
+            inline = json.loads(run_cli(
+                "--path", str(kb), "search", "rollback owner", "--output-mode", "inline",
+            ).stdout)
+            self.assertEqual(inline["output_mode"], "inline")
+            self.assertTrue(inline["results"])
+            inline_ids = {row["id"] for row in inline["results"]}
+
+            filed = json.loads(run_cli(
+                "--path", str(kb), "search", "rollback owner",
+                "--output-mode", "file",
+                "--output-dir", str(artifacts),
+            ).stdout)
+            self.assertEqual(filed["output_mode"], "file")
+            artifact = filed["artifact"]
+            self.assertEqual(artifact["format"], "jsonl")
+            self.assertEqual(artifact["kind"], "search")
+            artifact_path = Path(artifact["path"])
+            self.assertTrue(artifact_path.exists())
+            lines = artifact_path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), artifact["lines"])
+            meta = json.loads(lines[0])["meta"]
+            self.assertEqual(meta["kind"], "search")
+            self.assertEqual(meta["item_count"], filed["result_count"])
+            file_ids = {json.loads(line)["id"] for line in lines[1:]}
+            self.assertEqual(inline_ids, file_ids)
+
+    def test_context_file_mode_envelope_preserves_quality(self):
+        with tempfile.TemporaryDirectory() as d:
+            kb = Path(d) / "kb"
+            run_cli("--path", str(kb), "init")
+            (kb / "notes.md").write_text("release rollback owner deployment window\n", encoding="utf-8")
+            run_cli(
+                "--path", str(kb), "source", "add", "notes.md", "--type", "file", "--title", "Notes",
+            )
+            run_cli(
+                "--path", str(kb), "remember",
+                "Each release window must declare a rollback owner before deployment.",
+                "--type", "decision",
+                "--evidence", "notes.md",
+            )
+            run_cli("--path", str(kb), "index")
+            artifacts = Path(d) / "out"
+            filed = json.loads(run_cli(
+                "--path", str(kb), "context", "release rollback owner deployment window",
+                "--output-mode", "file",
+                "--output-dir", str(artifacts),
+            ).stdout)
+            self.assertEqual(filed["output_mode"], "file")
+            self.assertIn("quality", filed)
+            self.assertGreater(filed["item_count"], 0)
+            artifact_path = Path(filed["artifact"]["path"])
+            self.assertTrue(artifact_path.exists())
+            meta = json.loads(artifact_path.read_text(encoding="utf-8").splitlines()[0])["meta"]
+            self.assertEqual(meta["kind"], "context")
+            self.assertEqual(meta["query"], filed["query"])
+
 
 if __name__ == "__main__":
     unittest.main()

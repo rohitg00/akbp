@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Added `output_mode` (`inline` default, `file` opt-in) and `output_dir`
+  parameters to `akbp.search` and `akbp.context`. File mode writes a
+  grep-friendly JSONL artifact (one metadata header line plus one line per
+  result or context item) to `output_dir`, `AKBP_OUTPUT_DIR`, or
+  `<cwd>/.akbp/artifacts`, and returns a compact envelope with the artifact
+  path, sha256, byte size, and line count instead of inlining results. Added
+  `#/$defs/search_result_file` and `#/$defs/context_result_file` response
+  schemas, a `tool-output-presentation` benchmark fixture validating that
+  inline and file mode preserve the same cited evidence, CLI smoke tests for
+  both modes, a `docs/HARNESS_AND_PRESENTATION.md` position note responding to
+  Sen et al. (arXiv:2605.15184) on agent-harness presentation effects, and
+  corresponding TOOL_CONTRACT and BENCHMARK doc updates.
 - Added an adapter-contract manifest to JSONL quickstart trace capture so
   adapter authors can inspect the required request order, preserved response
   fields, hard stops, and validation command alongside requests and responses.

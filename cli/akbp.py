@@ -2039,6 +2039,8 @@ def cmd_context(args: argparse.Namespace) -> int:
     )
     if not pack["quality"]["ok"]:
         pack["warnings"].append("Context quality gate failed: " + "; ".join(pack["quality"]["failed"]))
+    output_mode = getattr(args, "output_mode", "inline") or "inline"
+    output_dir = getattr(args, "output_dir", None)
     if args.markdown:
         print(f"# AKBP Context Pack\n\nQuery: {pack['query']}\nGenerated: {pack['generated_at']}\n")
         for item in pack["items"]:
@@ -2048,7 +2050,21 @@ def cmd_context(args: argparse.Namespace) -> int:
                 print("Citations: " + ", ".join(item["citations"]) + "\n")
         for warning in pack["warnings"]:
             print(f"> Warning: {warning}")
+    elif output_mode == "file":
+        artifact = write_presentation_artifact(pack, output_dir, kind="context")
+        response = {
+            "query": pack.get("query"),
+            "generated_at": pack.get("generated_at"),
+            "output_mode": "file",
+            "artifact": artifact,
+            "item_count": len(pack.get("items") or []),
+            "warnings": pack.get("warnings") or [],
+            "quality": pack.get("quality"),
+        }
+        print(json.dumps(response, indent=2, ensure_ascii=False))
     else:
+        pack = dict(pack)
+        pack["output_mode"] = "inline"
         print(json.dumps(pack, indent=2, ensure_ascii=False))
     return 0 if pack["quality"]["ok"] else 1
 
@@ -5600,6 +5616,49 @@ def fts_query(query: str) -> str:
     return " ".join(parts)
 
 
+OUTPUT_MODES = ("inline", "file")
+
+
+def write_presentation_artifact(
+    payload: dict[str, Any],
+    output_dir: str | None,
+    kind: str,
+) -> dict[str, Any]:
+    """Write a JSONL artifact for file-mode tool output.
+
+    The artifact format is one JSON object per line: the first line carries
+    metadata, each remaining line carries one result item. This shape is
+    grep/ripgrep-friendly so a downstream harness can scan, filter, or jq
+    the artifact without re-parsing a nested response envelope.
+    """
+    target_dir = Path(output_dir) if output_dir else Path(os.environ.get("AKBP_OUTPUT_DIR") or Path.cwd() / ".akbp" / "artifacts")
+    target_dir.mkdir(parents=True, exist_ok=True)
+    items_key = "results" if kind == "search" else "items"
+    items = payload.get(items_key) or []
+    meta = {k: v for k, v in payload.items() if k != items_key}
+    meta["kind"] = kind
+    meta["item_count"] = len(items)
+    lines = [json.dumps({"meta": meta}, ensure_ascii=False)]
+    for index, item in enumerate(items):
+        line_obj = dict(item)
+        line_obj["__index"] = index
+        lines.append(json.dumps(line_obj, ensure_ascii=False))
+    text = "\n".join(lines) + "\n"
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    ts = now_iso().replace(":", "").replace("-", "")
+    filename = f"akbp-{kind}-{ts}-{digest[:8]}.jsonl"
+    artifact_path = target_dir / filename
+    artifact_path.write_text(text, encoding="utf-8")
+    return {
+        "path": str(artifact_path),
+        "sha256": digest,
+        "bytes": len(text.encode("utf-8")),
+        "lines": len(lines),
+        "format": "jsonl",
+        "kind": kind,
+    }
+
+
 def cmd_search(args: argparse.Namespace) -> int:
     base = root(args.path)
     db_path = base / ".akbp" / "state.db"
@@ -5608,11 +5667,14 @@ def cmd_search(args: argparse.Namespace) -> int:
     if inactive_matches:
         skipped = ", ".join(str(item["id"]) for item in inactive_matches)
         warnings.append(f"Skipped inactive matching claims: {skipped}")
+    output_mode = getattr(args, "output_mode", "inline") or "inline"
+    output_dir = getattr(args, "output_dir", None)
     if not db_path.exists():
         return cmd_query(args)
     query_used = fts_query(args.query)
     if not query_used:
-        print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": [], "warnings": warnings}, indent=2, ensure_ascii=False))
+        payload = {"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": [], "warnings": warnings}
+        emit_search_response(payload, output_mode, output_dir)
         return 0
     results = collect_fts_results(base, args.query, args.limit)
     if results is None:
@@ -5622,8 +5684,28 @@ def cmd_search(args: argparse.Namespace) -> int:
         {k: item[k] for k in ("type", "id", "path", "snippet", "rank") if k in item}
         for item in results
     ]
-    print(json.dumps({"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": compact_results, "warnings": warnings}, indent=2, ensure_ascii=False))
+    payload = {"query": args.query, "backend": "sqlite_fts5", "fts_query": query_used, "results": compact_results, "warnings": warnings}
+    emit_search_response(payload, output_mode, output_dir)
     return 0
+
+
+def emit_search_response(payload: dict[str, Any], output_mode: str, output_dir: str | None) -> None:
+    if output_mode == "file":
+        artifact = write_presentation_artifact(payload, output_dir, kind="search")
+        response = {
+            "query": payload.get("query"),
+            "backend": payload.get("backend"),
+            "fts_query": payload.get("fts_query"),
+            "output_mode": "file",
+            "artifact": artifact,
+            "result_count": len(payload.get("results") or []),
+            "warnings": payload.get("warnings") or [],
+        }
+        print(json.dumps(response, indent=2, ensure_ascii=False))
+        return
+    payload = dict(payload)
+    payload["output_mode"] = "inline"
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
 
@@ -6059,6 +6141,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--fail-on-warnings", action="store_true", help="fail when the context pack includes warnings")
     s.add_argument("--fail-on-budget-truncation", action="store_true", help="fail when max-chars clips or omits context items")
     s.add_argument("--markdown", action="store_true")
+    s.add_argument("--output-mode", choices=OUTPUT_MODES, default="inline", help="inline returns the full pack on stdout; file writes a JSONL artifact and prints a path + sha256 envelope")
+    s.add_argument("--output-dir", help="directory for file-mode artifacts (default: $AKBP_OUTPUT_DIR or ./.akbp/artifacts)")
     s.set_defaults(func=cmd_context)
 
     s = sub.add_parser("index")
@@ -6068,6 +6152,8 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("search")
     s.add_argument("query")
     s.add_argument("--limit", type=int, default=10)
+    s.add_argument("--output-mode", choices=OUTPUT_MODES, default="inline", help="inline returns full results on stdout; file writes a JSONL artifact and prints a path + sha256 envelope")
+    s.add_argument("--output-dir", help="directory for file-mode artifacts (default: $AKBP_OUTPUT_DIR or ./.akbp/artifacts)")
     s.set_defaults(func=cmd_search)
 
     s = sub.add_parser("export")

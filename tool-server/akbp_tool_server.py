@@ -79,9 +79,9 @@ METHODS: dict[str, dict[str, Any]] = {
     "akbp.status": {"write": False, "params": ["limit", "profile"]},
     "akbp.doctor": {"write": False, "params": ["profile"]},
     "akbp.query": {"write": False, "params": ["query", "limit"]},
-    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings", "fail_on_budget_truncation"]},
+    "akbp.context": {"write": False, "params": ["task", "limit", "max_chars", "min_items", "require_citations", "fail_on_warnings", "fail_on_budget_truncation", "output_mode", "output_dir"]},
     "akbp.index": {"write": True, "params": ["incremental", "dry_run"]},
-    "akbp.search": {"write": False, "params": ["query", "limit"]},
+    "akbp.search": {"write": False, "params": ["query", "limit", "output_mode", "output_dir"]},
     "akbp.remember": {"write": True, "params": ["text", "type", "evidence", "entity", "dry_run"]},
     "akbp.conformance": {"write": False, "params": ["level"]},
     "akbp.export": {"write": False, "params": []},
@@ -556,6 +556,10 @@ def build_argv(method: str, params: dict[str, Any]) -> list[str]:
     argv = [str(a) for a in mapping[method] if a != ""]
     if method in {"akbp.doctor", "akbp.status"} and params.get("profile"):
         argv.extend(["--profile", doctor_profile_args[str(params["profile"])]])
+    if method in {"akbp.search", "akbp.context"} and params.get("output_mode"):
+        argv.extend(["--output-mode", str(params["output_mode"])])
+    if method in {"akbp.search", "akbp.context"} and params.get("output_dir"):
+        argv.extend(["--output-dir", str(params["output_dir"])])
     if method in {"akbp.context", "akbp.session.start"} and "max_chars" in params:
         argv.extend(["--max-chars", str(params["max_chars"])])
     if method in {"akbp.context", "akbp.session.start"} and "min_items" in params:

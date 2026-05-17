@@ -9,6 +9,7 @@ __pycache__/
 .akbp/state.db
 .akbp/*.db
 .akbp/*.sqlite
+.akbp/artifacts/
 
 # Local maintenance outputs only
 reports/
