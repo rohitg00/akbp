@@ -177,6 +177,16 @@ Expected behavior:
 
 This is the adapter contract in one minute: retrieve before planning, dry-run before writing, require approval before durable memory, then recall cited context next session.
 
+## Harness-first adapter gate
+
+Recent agent-memory and harness-engineering discussions point to the same adoption risk: structured prompts help only when the host proves it preserved the structured response. Before an adapter uses AKBP recall to influence planning, or exposes reviewed write tools, run the structured-output harness as a trust gate:
+
+```bash
+make adapter-harness
+```
+
+Treat a pass as permission to continue the integration, not as permission to auto-write memory. The gate proves the host can preserve response envelopes, schema-backed error details, cited startup context, budget warnings, dry-run preview metadata, and `approval_required` stop signals. If any of those checks fail, keep AKBP read-only and continue from repository source of truth until the adapter is fixed.
+
 ## Choose your next path
 
 - New user: run `make demo`, then read `docs/AKBP_WORKFLOW.md`.

@@ -108,6 +108,13 @@ Start with the smallest trustworthy setup:
 The safe first integration is read-only: call capability discovery, run
 `akbp.session.start` or `akbp.context`, and do not enable write methods
 until the host can display dry-run previews and collect explicit approval.
+Make this a harness-first preflight for any real adapter: run
+`make adapter-harness` before recalled AKBP context can influence planning or
+before reviewed write tools are exposed. A passing harness proves the host
+preserves envelopes, citations, budget diagnostics, dry-run preview metadata,
+schema-backed errors, and `approval_required` stop signals. A failing harness
+means the adapter should stay read-only and continue from repository source of
+truth.
 
 When AKBP is added beside an existing memory server, local index, or tool
 bridge, generate `akbp client-config` and use its `memory_server_bridge`
