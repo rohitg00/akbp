@@ -300,6 +300,7 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("one-command local setup for coding-agent memory", landscape["observed_user_pull"])
             self.assertIn("no-Docker and no-API-key local memory installs", landscape["observed_user_pull"])
             self.assertIn("shared memory across tool-protocol-compatible tools", landscape["observed_user_pull"])
+            self.assertIn("plain project-understanding markdown or built-in token cache instead of another memory layer", landscape["observed_user_pull"])
             self.assertIn("reliability gates for inherited or unstable coding-agent sessions", landscape["observed_user_pull"])
             self.assertIn("reviewed durable project knowledge", landscape["akbp_should_own"])
             self.assertIn("cited startup context", landscape["akbp_should_own"])
@@ -310,11 +311,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("export-check", " ".join(landscape["comparison_checks"]))
             self.assertIn("branch or worktree-specific handoffs", " ".join(landscape["comparison_checks"]))
             self.assertIn("quality gates before a coding agent plans", " ".join(landscape["comparison_checks"]))
+            self.assertIn("plain markdown or a runtime cache is sufficient", " ".join(landscape["comparison_checks"]))
             claim_audit = {item["claim"]: item for item in landscape["feature_claim_audit"]}
             self.assertIn("semantic, graph, or hierarchical memory improves recall", claim_audit)
             self.assertIn("memory reduces context-window cost", claim_audit)
             self.assertIn("multiple agents share one project memory", claim_audit)
             self.assertIn("a tool-protocol memory server is enough persistent memory", claim_audit)
+            self.assertIn("plain project markdown or built-in token cache is enough", claim_audit)
             self.assertIn("branch-aware handoffs prevent stale coding-agent context", claim_audit)
             self.assertIn("Git-backed memory makes agent knowledge reviewable", claim_audit)
             self.assertIn("temporal knowledge graphs make project memory trustworthy", claim_audit)
@@ -331,6 +334,8 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("single selected knowledge_base.path", claim_audit["multiple agents share one project memory"]["akbp_check"])
             self.assertIn("capability discovery", claim_audit["a tool-protocol memory server is enough persistent memory"]["akbp_check"])
             self.assertIn("memory_server_bridge.minimum_preflight", claim_audit["a tool-protocol memory server is enough persistent memory"]["evidence"])
+            self.assertIn("source-backed", claim_audit["plain project markdown or built-in token cache is enough"]["akbp_check"])
+            self.assertIn("plain_markdown_cache_comparison", claim_audit["plain project markdown or built-in token cache is enough"]["evidence"])
             self.assertIn("worktree path", claim_audit["branch-aware handoffs prevent stale coding-agent context"]["akbp_check"])
             self.assertIn("Git as the review and distribution layer", claim_audit["Git-backed memory makes agent knowledge reviewable"]["akbp_check"])
             self.assertIn("git_reviewable_promotion_flow", claim_audit["Git-backed memory makes agent knowledge reviewable"]["evidence"])
@@ -394,6 +399,16 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("multi_client_scope.shared_kb_path", friction[1]["akbp_expectation"])
             self.assertIn("structured-output harness", friction[2]["akbp_expectation"])
             self.assertIn("harness_adoption_fit.minimum_gate", friction[2]["verify_with"])
+            self.assertIn("project markdown file", friction[3]["question"])
+            self.assertEqual(friction[3]["verify_with"], "memory_landscape_fit.plain_markdown_cache_comparison")
+            markdown_cache = landscape["plain_markdown_cache_comparison"]
+            self.assertEqual(markdown_cache["format"], "akbp-plain-markdown-cache-comparison-v1")
+            self.assertIn("project-understanding markdown file", markdown_cache["purpose"])
+            self.assertIn("temporary scratchpad context", markdown_cache["use_plain_markdown_or_cache_when"][0])
+            self.assertIn("cited before future agents plan", markdown_cache["use_akbp_when"][0])
+            self.assertIn("error.code approval_required", markdown_cache["minimum_proof"][1])
+            self.assertIn("export-check", markdown_cache["fail_closed_when"][3])
+            self.assertIn("ephemeral hint source", markdown_cache["fallback"])
             local_probe = landscape["local_first_adoption_probe"]
             self.assertEqual(local_probe["format"], "akbp-local-first-adoption-probe-v1")
             self.assertTrue(local_probe["run_before_positioning_claims"])
@@ -519,6 +534,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("freshness_probe_ok", freshness_probe["context_use_report_fields"])
             self.assertIn("source_changed", freshness_probe["fallback_reason_values"])
             self.assertIn("used_akbp_context:false", freshness_probe["adapter_rule"])
+            report = config["context_use_report"]
+            self.assertEqual(report["format"], "akbp-context-use-report-v1")
+            self.assertEqual(report["selected_kb_path"], str(kb.resolve()))
+            self.assertIn("used_akbp_context", report["required_fields"])
+            self.assertIn("write_tools_enabled", report["required_fields"])
+            self.assertIn("review_surface_missing", report["fallback_reason_values"])
+            self.assertFalse(report["example"]["used_akbp_context"])
             self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
             self.assertEqual(config["startup"]["path"], str(kb.resolve()))
@@ -1150,6 +1172,20 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("error.code", " ".join(bridge_preflight["must_preserve"]))
             self.assertIn("dry-run preview", " ".join(bridge_preflight["enable_reviewed_writes_after"]))
             self.assertIn("read-only startup context", bridge_preflight["fallback"])
+            managed_boundary = discovered["managed_tool_host_boundary"]
+            self.assertEqual(
+                managed_boundary["format"],
+                "akbp-discovery-managed-tool-host-boundary-v1",
+            )
+            self.assertEqual(managed_boundary["safe_default"], "read_only_hosted_startup_context")
+            self.assertIn("client-config --profile read-only", managed_boundary["next_command"])
+            self.assertIn("remote", " ".join(managed_boundary["use_when"]))
+            self.assertEqual(managed_boundary["hosted_read_only_allowlist"], bridge_preflight["read_only_methods"])
+            self.assertEqual(managed_boundary["blocked_until_review_surface"], bridge_preflight["blocked_direct_methods"])
+            self.assertIn("error.code", " ".join(managed_boundary["must_preserve"]))
+            self.assertIn("approved:true", " ".join(managed_boundary["enable_writes_only_when"]))
+            self.assertIn("tool execution is treated as approval", managed_boundary["unsafe_to_enable_writes_when"])
+            self.assertIn("read-only startup context", managed_boundary["fallback"])
             external_promotion = discovered["external_memory_promotion"]
             self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
             self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")
@@ -1202,6 +1238,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(freshness_probe["probe_sequence"][1]["request"]["method"], "akbp.session.start")
             self.assertIn("affected_claim_ids", freshness_probe["context_use_report_fields"])
             self.assertIn("probe_not_run", freshness_probe["fallback_reason_values"])
+            report = discovered["context_use_report"]
+            self.assertEqual(report["format"], "akbp-context-use-report-v1")
+            self.assertEqual(report["selected_kb_path"], shlex.quote(str(kb.resolve())))
+            self.assertIn("used_akbp_context", report["required_fields"])
+            self.assertIn("budget", report["required_fields"])
+            self.assertIn("quality_gate_failed", report["fallback_reason_values"])
+            self.assertIn("keep write tools disabled", report["fail_closed_action"])
             self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
             ten_minute = discovered["ten_minute_proof"]
             self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")
@@ -1331,8 +1374,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertFalse(doctor["adapter_readiness"]["read_only_ready"])
             self.assertFalse(doctor["adapter_readiness"]["reviewed_write_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["lifecycle_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["portability_ready"])
+            self.assertFalse(doctor["adapter_readiness"]["maintenance_ready"])
             self.assertEqual(doctor["adapter_readiness"]["startup_context_missing"], [])
             self.assertIn("index", doctor["adapter_readiness"]["read_only_missing"])
+            self.assertIn("index", doctor["adapter_readiness"]["portability_missing"])
+            self.assertIn("index", doctor["adapter_readiness"]["maintenance_missing"])
 
             read_only = subprocess.run(
                 [sys.executable, str(CLI), "--path", str(kb), "doctor", "--profile", "read-only"],
@@ -1351,6 +1399,17 @@ class AkbpCliSmokeTest(unittest.TestCase):
             )
             self.assertEqual(startup_context["requested_profile"], "startup_context")
             self.assertTrue(startup_context["requested_profile_ready"])
+
+            portability = subprocess.run(
+                [sys.executable, str(CLI), "--path", str(kb), "doctor", "--profile", "portability"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(portability.returncode, 1)
+            portability_doctor = json.loads(portability.stdout)
+            self.assertEqual(portability_doctor["requested_profile"], "portability")
+            self.assertFalse(portability_doctor["requested_profile_ready"])
 
     def test_source_verify_uses_cwd_fallback_for_relative_file_sources(self):
         with tempfile.TemporaryDirectory() as d:
@@ -1635,6 +1694,9 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertTrue(doctor["adapter_readiness"]["startup_context_ready"])
             self.assertTrue(doctor["adapter_readiness"]["read_only_ready"])
             self.assertTrue(doctor["adapter_readiness"]["reviewed_write_ready"])
+            self.assertTrue(doctor["adapter_readiness"]["lifecycle_ready"])
+            self.assertTrue(doctor["adapter_readiness"]["portability_ready"])
+            self.assertTrue(doctor["adapter_readiness"]["maintenance_ready"])
             self.assertEqual(doctor["adapter_readiness"]["blocking_checks"], [])
             self.assertEqual(doctor["summary"]["errors"], 0)
             self.assertEqual(doctor["next_steps"], [])

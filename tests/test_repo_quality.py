@@ -206,9 +206,14 @@ class RepoQualityTest(unittest.TestCase):
         benchmark = (ROOT / "docs" / "BENCHMARK.md").read_text(encoding="utf-8")
         quickstart = (ROOT / "docs" / "ADAPTER_AUTHOR_QUICKSTART.md").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        combined = benchmark + quickstart + readme
+        getting_started = (ROOT / "docs" / "GETTING_STARTED.md").read_text(encoding="utf-8")
+        adoption = (ROOT / "docs" / "ADOPTION_DECISION_GUIDE.md").read_text(encoding="utf-8")
+        combined = benchmark + quickstart + readme + getting_started + adoption
         for required in [
             "agent output quality harness",
+            "Harness-first adapter gate",
+            "harness-first preflight",
+            "make adapter-harness",
             "structured prompts",
             "schema-backed JSONL responses",
             "akbp.capabilities",
@@ -220,6 +225,7 @@ class RepoQualityTest(unittest.TestCase):
             "expected_error_code",
             "review_required",
             "apply_instruction",
+            "approval_required",
         ]:
             self.assertIn(required, combined)
 
@@ -1241,6 +1247,8 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "examples" / "structured-output-harness" / "README.md").read_text(encoding="utf-8")
         for required in [
             "## Adapter confidence scorecard",
+            "scorecard_gates",
+            "minimum_pass",
             "Capability negotiation",
             "Repairable params",
             "Startup trust",

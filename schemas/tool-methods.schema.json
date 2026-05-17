@@ -517,7 +517,10 @@
           "enum": [
             "startup_context",
             "read_only",
-            "reviewed_write"
+            "reviewed_write",
+            "lifecycle",
+            "portability",
+            "maintenance"
           ],
           "description": "Optional adapter readiness profile to evaluate in the lightweight status response."
         }
@@ -533,7 +536,10 @@
           "enum": [
             "startup_context",
             "read_only",
-            "reviewed_write"
+            "reviewed_write",
+            "lifecycle",
+            "portability",
+            "maintenance"
           ],
           "description": "Optional adapter readiness profile to evaluate, using capability profile names."
         }

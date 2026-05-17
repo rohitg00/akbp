@@ -55,6 +55,9 @@ The `akbp.capabilities` response also advertises
 discover capabilities, run doctor, retrieve cited startup context, preview any
 write, stop on `approval_required`, and emit both `context_use_report` and
 `preflight_verdict` before letting recalled memory affect planning.
+It also advertises `knowledge_capability.adapter_quality.scorecard_gates` and
+`minimum_pass`, letting installers compare the machine-readable capability
+contract against the adapter confidence scorecard below.
 
 ## Response snippets adapters should preserve
 

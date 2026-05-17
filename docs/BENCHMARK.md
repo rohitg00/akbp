@@ -161,6 +161,7 @@ Initial scenarios:
 - `unapproved-write-rejection`: verify non-dry-run writes, including import apply, without `approved:true` return structured `approval_required` errors.
 - `adapter-structured-output-harness`: verify an adapter quality gate can machine-check capability negotiation, doctor/security posture, bounded startup context, dry-run preview metadata, and `approval_required` write rejection before trusting memory.
 - `startup-context-relevance`: verify new sessions retrieve task-relevant cited startup context instead of preloading every broad memory-server row.
+- `tool-output-context-budget`: verify tool-heavy protocol and JSONL sessions retrieve compact cited startup context with budget diagnostics instead of preloading raw tool responses, audit logs, or broad memory rows.
 - `workflow-scoped-context`: verify adapters with a selected workflow or node retrieve cited startup context scoped to that active workflow instead of broad repository memory.
 - `secret-safety`: redact or reject secret-like values before durable writes.
 - `session-crystallization`: retrieve workflow claims from structured coding-agent sessions with citations.

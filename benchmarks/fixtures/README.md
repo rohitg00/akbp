@@ -47,6 +47,7 @@ runtime.
 - `bounded-context-citation-lifecycle`: verify bounded startup context keeps citations and lifecycle freshness while skipping superseded long-context memory.
 - `branch-aware-handoff`: verify branch-local handoff memory preserves branch scope, citations, and review gates before reuse on another checkout.
 - `context-pressure-budget`: verify tight startup context reports budget truncation while preserving the highest-value cited memory item.
+- `tool-output-context-budget`: verify tool-heavy protocol and JSONL sessions retrieve compact cited startup context instead of loading raw tool output or broad audit logs.
 - `contested-memory-planning-gate`: verify adapters fail closed before planning from retrieved claims whose lifecycle status is contested.
 - `compaction-handoff-recall`: verify compaction handoffs retrieve the current cited decision instead of stale relative-date memory.
 - `git-native-agent-handoff`: verify git-native agent adapters retrieve cited handoff context and review-gated write policy before continuing repository work.

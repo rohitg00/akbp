@@ -562,6 +562,70 @@ def context_freshness_probe(kb_path: str) -> dict[str, Any]:
     }
 
 
+def context_use_report_contract(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-context-use-report-v1",
+        "purpose": "Give adapters a compact audit record for every decision to use or reject recalled AKBP context before planning.",
+        "research_signal": "Persistent coding-agent memory is useful only when the host can explain why recalled context was trusted, clipped, or ignored for the current task.",
+        "safe_default": "emit_report_before_planning_from_recalled_context",
+        "selected_kb_path": kb_path,
+        "required_when": [
+            "akbp.session.start or akbp.context returns items",
+            "the adapter drops recalled context because citations, warnings, budget, or freshness checks fail",
+            "write-capable tools are enabled or disabled based on recalled context readiness",
+        ],
+        "required_fields": {
+            "selected_kb_path": "Resolved AKBP knowledge-base path used for the request.",
+            "task": "Task or query string passed to akbp.session.start or akbp.context.",
+            "used_akbp_context": "Boolean. True only when cited context passed freshness, quality, and budget gates.",
+            "context_item_count": "Number of context items returned before adapter-side filtering.",
+            "cited_item_count": "Number of returned items with citations preserved by the host.",
+            "warning_count": "Number of AKBP warnings surfaced to the adapter or user.",
+            "budget": "Returned context budget object, including max_chars and truncation or omission counters.",
+            "quality": "Returned context quality object when available.",
+            "freshness_probe_ran": "Boolean. True when source verification or equivalent freshness gate ran for this flow.",
+            "freshness_probe_ok": "Boolean. True only when source freshness passed.",
+            "fallback_reason": "Null when used_akbp_context is true; otherwise one of fallback_reason_values.",
+            "write_tools_enabled": "Boolean. True only after profile readiness, capability negotiation, and review surface checks pass.",
+        },
+        "fallback_reason_values": [
+            "source_changed",
+            "source_missing",
+            "uncited_context",
+            "warnings_present",
+            "budget_truncated",
+            "quality_gate_failed",
+            "profile_not_ready",
+            "capability_negotiation_failed",
+            "review_surface_missing",
+            "probe_not_run",
+            "empty_context",
+        ],
+        "minimum_pass_condition": [
+            "used_akbp_context is true",
+            "cited_item_count is greater than zero",
+            "warning_count is zero when fail_on_warnings is required",
+            "budget.truncated is false and budget.omitted_items is zero when strict startup context is required",
+            "freshness_probe_ok is true for inherited, migrated, or stale-prone repositories",
+        ],
+        "fail_closed_action": "Continue without recalled AKBP context, keep write tools disabled for the flow, and show fallback_reason instead of silently planning from memory.",
+        "example": {
+            "selected_kb_path": kb_path,
+            "task": "prepare the next release",
+            "used_akbp_context": False,
+            "context_item_count": 2,
+            "cited_item_count": 2,
+            "warning_count": 1,
+            "budget": {"max_chars": 4000, "truncated": False, "omitted_items": 0},
+            "quality": {"ok": False, "warnings": ["source verification has not run"]},
+            "freshness_probe_ran": False,
+            "freshness_probe_ok": False,
+            "fallback_reason": "probe_not_run",
+            "write_tools_enabled": False,
+        },
+    }
+
+
 def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
     return {
         "format": "akbp-external-memory-promotion-v1",
@@ -1124,6 +1188,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     scope_contract = knowledge_base_scope_contract(kb_arg)
     workflow_selector = workflow_context_selector(kb_arg)
     freshness_probe = context_freshness_probe(kb_arg)
+    context_use_report = context_use_report_contract(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -1283,6 +1348,40 @@ def cmd_discover(args: argparse.Namespace) -> int:
             "the structured-output harness and bridge preflight both pass",
         ],
         "fallback": "If the host cannot preserve these fields, expose AKBP as read-only startup context or continue without recalled AKBP memory.",
+    }
+    managed_tool_host_boundary = {
+        "format": "akbp-discovery-managed-tool-host-boundary-v1",
+        "purpose": "Let hosted or managed tool-protocol installers decide the safe AKBP boundary before generating a full client-config manifest.",
+        "research_signal": "Recent managed tool-runtime signals make agent tools easy to publish remotely, but tool reachability is not the same as approval to write durable project memory.",
+        "safe_default": "read_only_hosted_startup_context",
+        "next_command": f"akbp --path {kb_arg} client-config --profile read-only",
+        "use_when": [
+            "the agent host is remote, managed, or cannot run the local stdio server beside AKBP artifacts",
+            "the host can call a user-controlled bridge but may not have a local review surface",
+            "an installer wants to publish host-native tools from AKBP without exposing direct write methods",
+        ],
+        "hosted_read_only_allowlist": tool_protocol_bridge_preflight["read_only_methods"],
+        "blocked_until_review_surface": tool_protocol_bridge_preflight["blocked_direct_methods"],
+        "must_preserve": [
+            "AKBP response envelope ok/result/error",
+            "error.code for approval_required and invalid_params",
+            "citations, source ids, warnings, and context budget fields",
+            "dry-run review metadata and would-write paths before any approved write",
+        ],
+        "enable_writes_only_when": [
+            "the host reaches a user-controlled AKBP bridge",
+            "doctor --profile reviewed-writes passes for the selected KB",
+            "the host shows dry-run review metadata outside autonomous tool execution",
+            "approved apply repeats the exact reviewed method, path, and params with approved:true",
+            "the structured-output harness passes across the host boundary",
+        ],
+        "unsafe_to_enable_writes_when": [
+            "tool execution is treated as approval",
+            "the host cannot surface dry-run review metadata to a human reviewer",
+            "the bridge stores durable memory outside AKBP artifacts",
+            "the host drops citations, warnings, budget fields, ok, or error.code",
+        ],
+        "fallback": "Expose only read-only startup context or skip AKBP memory for that run until the hosted boundary can preserve citations, structured errors, budgets, and review metadata.",
     }
     first_run_proof = {
         "goal": "prove cited, review-gated recall before enabling durable writes",
@@ -1634,12 +1733,14 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "memory_adoption_matrix": adoption_matrix,
         "knowledge_base_scope": scope_contract,
         "tool_protocol_bridge_preflight": tool_protocol_bridge_preflight,
+        "managed_tool_host_boundary": managed_tool_host_boundary,
         "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
         "tool_schema_budget": tool_schema_budget,
         "host_autodetect": host_autodetect,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "context_freshness_probe": freshness_probe,
+        "context_use_report": context_use_report,
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
@@ -2947,15 +3048,29 @@ def cmd_lint(args: argparse.Namespace) -> int:
     return 1 if any(i["severity"] == "error" for i in issues) else 0
 
 
+ADAPTER_PROFILE_CHOICES = [
+    "startup-context",
+    "read-only",
+    "reviewed-writes",
+    "lifecycle",
+    "portability",
+    "maintenance",
+]
+
+ADAPTER_PROFILE_MAP = {
+    "startup-context": "startup_context",
+    "read-only": "read_only",
+    "reviewed-writes": "reviewed_write",
+    "lifecycle": "lifecycle",
+    "portability": "portability",
+    "maintenance": "maintenance",
+}
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     base = root(args.path)
     profile_key = None
     profile_ready = None
-    profile_map = {
-        "startup-context": "startup_context",
-        "read-only": "read_only",
-        "reviewed-writes": "reviewed_write",
-    }
     card = load_card(base)
     privacy = card.get("privacy", {}) if isinstance(card, dict) else {}
     default_scope = privacy.get("default_scope") if isinstance(privacy, dict) else None
@@ -2986,7 +3101,7 @@ def cmd_status(args: argparse.Namespace) -> int:
             conformance_level = level
             break
     if getattr(args, "profile", None):
-        profile_key = profile_map[args.profile]
+        profile_key = ADAPTER_PROFILE_MAP[args.profile]
         profile_ready = bool(adapter_readiness[f"{profile_key}_ready"])
     print(json.dumps({
         "path": str(base),
@@ -3191,6 +3306,9 @@ def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
     startup_context_ready = not blocking and not startup_context_missing
     read_only_ready = not blocking and not read_only_missing
     reviewed_write_ready = not blocking and not warnings
+    lifecycle_ready = reviewed_write_ready
+    portability_ready = read_only_ready
+    maintenance_ready = read_only_ready
     if reviewed_write_ready:
         recommended_profile = "reviewed_write"
     elif read_only_ready:
@@ -3204,10 +3322,16 @@ def doctor_adapter_readiness(checks: list[dict[str, Any]]) -> dict[str, Any]:
         "startup_context_ready": startup_context_ready,
         "read_only_ready": read_only_ready,
         "reviewed_write_ready": reviewed_write_ready,
+        "lifecycle_ready": lifecycle_ready,
+        "portability_ready": portability_ready,
+        "maintenance_ready": maintenance_ready,
         "blocking_checks": [check["id"] for check in blocking],
         "startup_context_missing": startup_context_missing,
         "read_only_missing": read_only_missing,
         "reviewed_write_missing": reviewed_write_missing,
+        "lifecycle_missing": reviewed_write_missing,
+        "portability_missing": read_only_missing,
+        "maintenance_missing": read_only_missing,
     }
 
 
@@ -3243,14 +3367,9 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     blocking = [check for check in failing if check["severity"] == "error"]
     profile_key = None
     profile_ready = None
-    profile_map = {
-        "startup-context": "startup_context",
-        "read-only": "read_only",
-        "reviewed-writes": "reviewed_write",
-    }
     adapter_readiness = doctor_adapter_readiness(checks)
     if args.profile:
-        profile_key = profile_map[args.profile]
+        profile_key = ADAPTER_PROFILE_MAP[args.profile]
         profile_ready = bool(adapter_readiness[f"{profile_key}_ready"])
     print(json.dumps({
         "path": str(base),
@@ -3308,6 +3427,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     scope_contract = knowledge_base_scope_contract(kb_path)
     workflow_selector = workflow_context_selector(kb_path)
     freshness_probe = context_freshness_probe(kb_path)
+    context_use_report = context_use_report_contract(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -4228,6 +4348,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "knowledge graph or hierarchical recall over long-running projects",
                 "lower context-window pressure at session start",
                 "persistent project facts that survive across agent runs",
+                "plain project-understanding markdown or built-in token cache instead of another memory layer",
                 "reliability gates for inherited or unstable coding-agent sessions",
             ],
             "akbp_should_own": [
@@ -4253,6 +4374,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                 "Can export-check and import-check run without bridge-local state?",
                 "Can branch or worktree-specific handoffs carry cited source ids without making AKBP the Git state owner?",
                 "Can a host prove recalled context passed quality gates before a coding agent plans from it?",
+                "Can the integration show when plain markdown or a runtime cache is sufficient, and when AKBP adds citations, lifecycle, review, and export checks?",
             ],
             "feature_claim_audit": [
                 {
@@ -4284,6 +4406,11 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "claim": "a tool-protocol memory server is enough persistent memory",
                     "akbp_check": "Require transport-level capability discovery plus AKBP source-of-truth artifacts: the server may expose tools, but durable project knowledge must remain cited, review-gated, and export-checkable.",
                     "evidence": "akbp.capabilities knowledge_capability plus memory_server_bridge.minimum_preflight and export-check output",
+                },
+                {
+                    "claim": "plain project markdown or built-in token cache is enough",
+                    "akbp_check": "Use plain markdown or runtime cache for scratchpad context, but require AKBP when the memory must be source-backed, lifecycle-aware, review-gated, export-checkable, and reusable across runtimes.",
+                    "evidence": "plain_markdown_cache_comparison plus cited akbp.session.start, approval_required, and export-check output",
                 },
                 {
                     "claim": "branch-aware handoffs prevent stale coding-agent context",
@@ -4680,7 +4807,41 @@ def cmd_client_config(args: argparse.Namespace) -> int:
                     "akbp_expectation": "Start from read_only, run the structured-output harness, then enable reviewed_write only after the review surface exists.",
                     "verify_with": "first_run_sequence and harness_adoption_fit.minimum_gate",
                 },
+                {
+                    "question": "Can the installer explain why this is more than a project markdown file or built-in token cache?",
+                    "akbp_expectation": "Show the plain_markdown_cache_comparison: markdown and caches are fine for scratchpad context, while AKBP is for cited, reviewed, lifecycle-aware, export-checkable project knowledge.",
+                    "verify_with": "memory_landscape_fit.plain_markdown_cache_comparison",
+                },
             ],
+            "plain_markdown_cache_comparison": {
+                "format": "akbp-plain-markdown-cache-comparison-v1",
+                "purpose": "Answer the common adoption objection that a project-understanding markdown file or built-in token cache is enough.",
+                "use_plain_markdown_or_cache_when": [
+                    "the note is temporary scratchpad context",
+                    "one runtime owns the whole workflow",
+                    "the user does not need citations, lifecycle state, review, or export",
+                    "the context can be replaced without preserving history",
+                ],
+                "use_akbp_when": [
+                    "the decision or constraint should be cited before future agents plan from it",
+                    "multiple runtimes need the same durable project knowledge",
+                    "stale facts should be superseded or contradicted without deleting history",
+                    "writes must be previewed with dry_run:true and applied only with approved:true",
+                    "the knowledge base must export-check or import-check outside the original adapter",
+                ],
+                "minimum_proof": [
+                    "akbp.session.start returns cited bounded context",
+                    "an unapproved durable write returns error.code approval_required",
+                    "akbp export-check verifies portable markdown and JSONL artifacts",
+                ],
+                "fail_closed_when": [
+                    "the adapter cannot show citations for recalled project memory",
+                    "the cache hides stale or overwritten decisions",
+                    "durable writes bypass dry_run review",
+                    "export-check cannot verify the artifacts without adapter-local state",
+                ],
+                "fallback": "Use markdown or the runtime cache as an ephemeral hint source and keep AKBP read-only until cited review and export checks are available.",
+            },
             "local_first_adoption_probe": {
                 "format": "akbp-local-first-adoption-probe-v1",
                 "purpose": "Give installer UIs and adapter authors a concrete first-run proof that AKBP is local-only, visible, cited, and review-gated before they compare it with opaque memory servers.",
@@ -4895,6 +5056,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         },
         "inherited_repo_intake": inherited_repo_intake_contract(kb_path),
         "context_freshness_probe": freshness_probe,
+        "context_use_report": context_use_report,
         "ten_minute_proof": {
             "format": "akbp-ten-minute-proof-v1",
             "purpose": "Let installer UIs prove AKBP's user value before positioning it as another memory store.",
@@ -6247,7 +6409,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=5, help="number of recent claims and source issues to include")
     s.add_argument(
         "--profile",
-        choices=["startup-context", "read-only", "reviewed-writes"],
+        choices=ADAPTER_PROFILE_CHOICES,
         help="include readiness for a requested adapter workflow profile without running the full doctor report",
     )
     s.set_defaults(func=cmd_status)
@@ -6256,7 +6418,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--limit", type=int, default=5, help="number of next steps to include")
     s.add_argument(
         "--profile",
-        choices=["startup-context", "read-only", "reviewed-writes"],
+        choices=ADAPTER_PROFILE_CHOICES,
         help="also fail when the requested adapter workflow profile is not ready",
     )
     s.set_defaults(func=cmd_doctor)

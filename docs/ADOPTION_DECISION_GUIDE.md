@@ -71,6 +71,28 @@ If a recalled item cannot pass those checks, show it as an untrusted hint or
 continue without recalled memory. Do not promote it into durable AKBP state
 until it has source evidence and a dry-run review path.
 
+## AKBP vs plain markdown or token cache
+
+Plain markdown and runtime token caches are useful. A project-understanding
+markdown file is often the fastest scratchpad for a single agent, and a built-in
+cache can reduce repeated context cost inside one host. AKBP should not replace
+those paths when the user only needs temporary recall.
+
+Use `memory_landscape_fit.plain_markdown_cache_comparison` when an installer or
+reviewer asks why AKBP is more than a markdown file or cache. The split is:
+
+| Need | Plain markdown or cache is enough | AKBP adds value when |
+| --- | --- | --- |
+| Scratchpad context | One runtime needs a temporary summary | Future agents must see cited project decisions before planning |
+| Speed | The host only needs faster local recall | The memory must survive host changes and export/import review |
+| Updates | Replacing the latest summary is acceptable | Stale facts need supersede or contradict lifecycle records |
+| Trust | The user can manually inspect one note | Writes need `dry_run:true`, explicit `approved:true`, audit output, and source ids |
+
+The minimum proof is concrete: `akbp.session.start` returns bounded cited
+context, an unapproved durable write fails with `error.code approval_required`,
+and `export-check` verifies the markdown and JSONL artifacts without adapter
+local state.
+
 ## Default setup choices
 
 Start with the smallest trustworthy setup:
@@ -86,6 +108,13 @@ Start with the smallest trustworthy setup:
 The safe first integration is read-only: call capability discovery, run
 `akbp.session.start` or `akbp.context`, and do not enable write methods
 until the host can display dry-run previews and collect explicit approval.
+Make this a harness-first preflight for any real adapter: run
+`make adapter-harness` before recalled AKBP context can influence planning or
+before reviewed write tools are exposed. A passing harness proves the host
+preserves envelopes, citations, budget diagnostics, dry-run preview metadata,
+schema-backed errors, and `approval_required` stop signals. A failing harness
+means the adapter should stay read-only and continue from repository source of
+truth.
 
 When AKBP is added beside an existing memory server, local index, or tool
 bridge, generate `akbp client-config` and use its `memory_server_bridge`
@@ -181,6 +210,14 @@ preference into a setup gate: run the structured-output harness, preserve
 response envelopes, citations, budget metadata, dry-run review fields, and
 `error.code`, and keep AKBP read-only until those checks pass.
 
+When tool-protocol or JSONL output threatens to crowd out the task, treat raw
+tool responses and audit logs as evidence or diagnostics, not startup context.
+The adapter should call `akbp.session.start` or `akbp.context` with a narrow
+task, `require_citations:true`, and a bounded `max_chars`; then surface the
+returned `budget` fields. The `tool-output-context-budget` fixture checks this
+path so a host can prove compact cited context before claiming context-window
+savings.
+
 When an editor, workflow tool, or coding agent has an active file, component,
 workflow, or selected node, use `workflow_context_selector` from `akbp client-config`
 before planning. The adapter should pass the active selection into scoped
@@ -218,11 +255,14 @@ may still be useful, but it is not delivering the AKBP trust model.
 
 1. Run `make demo` to see the review-gated flow.
 2. Read `docs/GETTING_STARTED.md` to choose knowledge-base scope.
-3. Run `examples/adoption-preflight/run.sh` to verify the first-run trust gate.
-4. Use `akbp client-config --profile read-only` for the first adapter setup.
-5. Enable reviewed writes only after the host can show `review_required`,
+3. If the project already has a `project-understanding.md`, run
+   `examples/project-understanding-bridge/run.sh` to see the scratchpad-to-AKBP
+   promotion boundary.
+4. Run `examples/adoption-preflight/run.sh` to verify the first-run trust gate.
+5. Use `akbp client-config --profile read-only` for the first adapter setup.
+6. Enable reviewed writes only after the host can show `review_required`,
    `apply_instruction`, planned writes, warnings, and skipped records.
-6. Add export or import checks before moving knowledge across tools.
+7. Add export or import checks before moving knowledge across tools.
 
 The adoption goal is simple: a real user should understand what will be stored,
 why it is trusted, how it can be reviewed, and how another runtime can consume
