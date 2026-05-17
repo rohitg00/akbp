@@ -19,3 +19,11 @@ Run it from the repository root:
 Adapters should run an equivalent gate before inherited or recalled AKBP context
 influences planning. If the probe fails, continue without recalled AKBP memory
 and keep write-capable methods disabled for that flow.
+
+`akbp discover` and `akbp client-config` also expose
+`context_use_report`. Emit that report before planning from recalled context so
+the host records the selected KB path, task, item and citation counts, warnings,
+budget and quality fields, freshness result, fallback reason, and whether write
+tools stayed disabled. If the report cannot prove cited, fresh, warning-free
+context, set `used_akbp_context:false` and continue from repository source of
+truth.

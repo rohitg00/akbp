@@ -534,6 +534,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("freshness_probe_ok", freshness_probe["context_use_report_fields"])
             self.assertIn("source_changed", freshness_probe["fallback_reason_values"])
             self.assertIn("used_akbp_context:false", freshness_probe["adapter_rule"])
+            report = config["context_use_report"]
+            self.assertEqual(report["format"], "akbp-context-use-report-v1")
+            self.assertEqual(report["selected_kb_path"], str(kb.resolve()))
+            self.assertIn("used_akbp_context", report["required_fields"])
+            self.assertIn("write_tools_enabled", report["required_fields"])
+            self.assertIn("review_surface_missing", report["fallback_reason_values"])
+            self.assertFalse(report["example"]["used_akbp_context"])
             self.assertEqual(config["startup"]["id"], "capabilities-1")
             self.assertEqual(config["startup"]["method"], "akbp.capabilities")
             self.assertEqual(config["startup"]["path"], str(kb.resolve()))
@@ -1231,6 +1238,13 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertEqual(freshness_probe["probe_sequence"][1]["request"]["method"], "akbp.session.start")
             self.assertIn("affected_claim_ids", freshness_probe["context_use_report_fields"])
             self.assertIn("probe_not_run", freshness_probe["fallback_reason_values"])
+            report = discovered["context_use_report"]
+            self.assertEqual(report["format"], "akbp-context-use-report-v1")
+            self.assertEqual(report["selected_kb_path"], shlex.quote(str(kb.resolve())))
+            self.assertIn("used_akbp_context", report["required_fields"])
+            self.assertIn("budget", report["required_fields"])
+            self.assertIn("quality_gate_failed", report["fallback_reason_values"])
+            self.assertIn("keep write tools disabled", report["fail_closed_action"])
             self.assertEqual(discovered["first_run_proof"]["safe_default"], "read_only")
             ten_minute = discovered["ten_minute_proof"]
             self.assertEqual(ten_minute["format"], "akbp-ten-minute-proof-v1")

@@ -562,6 +562,70 @@ def context_freshness_probe(kb_path: str) -> dict[str, Any]:
     }
 
 
+def context_use_report_contract(kb_path: str) -> dict[str, Any]:
+    return {
+        "format": "akbp-context-use-report-v1",
+        "purpose": "Give adapters a compact audit record for every decision to use or reject recalled AKBP context before planning.",
+        "research_signal": "Persistent coding-agent memory is useful only when the host can explain why recalled context was trusted, clipped, or ignored for the current task.",
+        "safe_default": "emit_report_before_planning_from_recalled_context",
+        "selected_kb_path": kb_path,
+        "required_when": [
+            "akbp.session.start or akbp.context returns items",
+            "the adapter drops recalled context because citations, warnings, budget, or freshness checks fail",
+            "write-capable tools are enabled or disabled based on recalled context readiness",
+        ],
+        "required_fields": {
+            "selected_kb_path": "Resolved AKBP knowledge-base path used for the request.",
+            "task": "Task or query string passed to akbp.session.start or akbp.context.",
+            "used_akbp_context": "Boolean. True only when cited context passed freshness, quality, and budget gates.",
+            "context_item_count": "Number of context items returned before adapter-side filtering.",
+            "cited_item_count": "Number of returned items with citations preserved by the host.",
+            "warning_count": "Number of AKBP warnings surfaced to the adapter or user.",
+            "budget": "Returned context budget object, including max_chars and truncation or omission counters.",
+            "quality": "Returned context quality object when available.",
+            "freshness_probe_ran": "Boolean. True when source verification or equivalent freshness gate ran for this flow.",
+            "freshness_probe_ok": "Boolean. True only when source freshness passed.",
+            "fallback_reason": "Null when used_akbp_context is true; otherwise one of fallback_reason_values.",
+            "write_tools_enabled": "Boolean. True only after profile readiness, capability negotiation, and review surface checks pass.",
+        },
+        "fallback_reason_values": [
+            "source_changed",
+            "source_missing",
+            "uncited_context",
+            "warnings_present",
+            "budget_truncated",
+            "quality_gate_failed",
+            "profile_not_ready",
+            "capability_negotiation_failed",
+            "review_surface_missing",
+            "probe_not_run",
+            "empty_context",
+        ],
+        "minimum_pass_condition": [
+            "used_akbp_context is true",
+            "cited_item_count is greater than zero",
+            "warning_count is zero when fail_on_warnings is required",
+            "budget.truncated is false and budget.omitted_items is zero when strict startup context is required",
+            "freshness_probe_ok is true for inherited, migrated, or stale-prone repositories",
+        ],
+        "fail_closed_action": "Continue without recalled AKBP context, keep write tools disabled for the flow, and show fallback_reason instead of silently planning from memory.",
+        "example": {
+            "selected_kb_path": kb_path,
+            "task": "prepare the next release",
+            "used_akbp_context": False,
+            "context_item_count": 2,
+            "cited_item_count": 2,
+            "warning_count": 1,
+            "budget": {"max_chars": 4000, "truncated": False, "omitted_items": 0},
+            "quality": {"ok": False, "warnings": ["source verification has not run"]},
+            "freshness_probe_ran": False,
+            "freshness_probe_ok": False,
+            "fallback_reason": "probe_not_run",
+            "write_tools_enabled": False,
+        },
+    }
+
+
 def external_memory_promotion_contract(kb_path: str) -> dict[str, Any]:
     return {
         "format": "akbp-external-memory-promotion-v1",
@@ -1124,6 +1188,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     scope_contract = knowledge_base_scope_contract(kb_arg)
     workflow_selector = workflow_context_selector(kb_arg)
     freshness_probe = context_freshness_probe(kb_arg)
+    context_use_report = context_use_report_contract(kb_arg)
     positioning = {
         "primary_role": "portable_reviewable_knowledge_artifacts",
         "not_a_hidden_memory_store": True,
@@ -1675,6 +1740,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "host_autodetect": host_autodetect,
         "inherited_repo_intake": inherited_repo_intake_contract(kb_arg),
         "context_freshness_probe": freshness_probe,
+        "context_use_report": context_use_report,
         "first_run_proof": first_run_proof,
         "ten_minute_proof": ten_minute_proof,
         "adapter_prompt_contract": adapter_prompt_contract,
@@ -3345,6 +3411,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
     scope_contract = knowledge_base_scope_contract(kb_path)
     workflow_selector = workflow_context_selector(kb_path)
     freshness_probe = context_freshness_probe(kb_path)
+    context_use_report = context_use_report_contract(kb_path)
     adapter_prompt_contract = {
         "format": "akbp-adapter-prompt-contract-v1",
         "purpose": "Give the host runtime concrete prompt rules that preserve AKBP's cited, review-gated knowledge contract.",
@@ -4973,6 +5040,7 @@ def cmd_client_config(args: argparse.Namespace) -> int:
         },
         "inherited_repo_intake": inherited_repo_intake_contract(kb_path),
         "context_freshness_probe": freshness_probe,
+        "context_use_report": context_use_report,
         "ten_minute_proof": {
             "format": "akbp-ten-minute-proof-v1",
             "purpose": "Let installer UIs prove AKBP's user value before positioning it as another memory store.",
