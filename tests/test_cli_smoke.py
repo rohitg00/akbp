@@ -1165,6 +1165,20 @@ class AkbpCliSmokeTest(unittest.TestCase):
             self.assertIn("error.code", " ".join(bridge_preflight["must_preserve"]))
             self.assertIn("dry-run preview", " ".join(bridge_preflight["enable_reviewed_writes_after"]))
             self.assertIn("read-only startup context", bridge_preflight["fallback"])
+            managed_boundary = discovered["managed_tool_host_boundary"]
+            self.assertEqual(
+                managed_boundary["format"],
+                "akbp-discovery-managed-tool-host-boundary-v1",
+            )
+            self.assertEqual(managed_boundary["safe_default"], "read_only_hosted_startup_context")
+            self.assertIn("client-config --profile read-only", managed_boundary["next_command"])
+            self.assertIn("remote", " ".join(managed_boundary["use_when"]))
+            self.assertEqual(managed_boundary["hosted_read_only_allowlist"], bridge_preflight["read_only_methods"])
+            self.assertEqual(managed_boundary["blocked_until_review_surface"], bridge_preflight["blocked_direct_methods"])
+            self.assertIn("error.code", " ".join(managed_boundary["must_preserve"]))
+            self.assertIn("approved:true", " ".join(managed_boundary["enable_writes_only_when"]))
+            self.assertIn("tool execution is treated as approval", managed_boundary["unsafe_to_enable_writes_when"])
+            self.assertIn("read-only startup context", managed_boundary["fallback"])
             external_promotion = discovered["external_memory_promotion"]
             self.assertEqual(external_promotion["format"], "akbp-external-memory-promotion-v1")
             self.assertEqual(external_promotion["safe_default"], "import_check_before_apply")

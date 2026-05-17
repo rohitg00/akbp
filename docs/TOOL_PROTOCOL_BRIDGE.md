@@ -15,6 +15,15 @@ direct-write methods, fields the host must preserve, and the runnable
 `examples/tool-protocol-bridge/run.sh` preflight. Treat that as the decision
 point before generating a full host manifest.
 
+Discovery also includes `managed_tool_host_boundary` for hosted or managed
+tool-protocol environments. Use it before generating `client-config` when the
+agent host is remote, cannot run the local stdio server beside AKBP artifacts,
+or may not have a local review surface. Its default is read-only startup
+context. Durable writes stay blocked unless the host reaches a user-controlled
+AKBP bridge, preserves citations, warnings, budgets, `ok`, and `error.code`,
+renders dry-run review metadata outside autonomous tool execution, and repeats
+the exact reviewed request with `approved:true`.
+
 Use `akbp client-config --profile read-only` as the machine-readable starting point for an adapter installer. The generated `tool_protocol_bridge` section includes the read-only allowlist, blocked write methods, reviewed-write wrapper names, and the apply rule for repeating the exact reviewed method, path, and params.
 
 It also includes `tool_protocol_bridge.forward_tools`: a ready wrapper map for tool-protocol hosts. Each entry gives the host-facing tool name, AKBP JSONL method, method-parameter schema reference, and response fields the bridge should preserve in its own response. Use that map when generating tool-protocol tools, IDE commands, or local assistant actions instead of inventing a second memory contract.

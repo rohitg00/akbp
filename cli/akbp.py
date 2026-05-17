@@ -1284,6 +1284,40 @@ def cmd_discover(args: argparse.Namespace) -> int:
         ],
         "fallback": "If the host cannot preserve these fields, expose AKBP as read-only startup context or continue without recalled AKBP memory.",
     }
+    managed_tool_host_boundary = {
+        "format": "akbp-discovery-managed-tool-host-boundary-v1",
+        "purpose": "Let hosted or managed tool-protocol installers decide the safe AKBP boundary before generating a full client-config manifest.",
+        "research_signal": "Recent managed tool-runtime signals make agent tools easy to publish remotely, but tool reachability is not the same as approval to write durable project memory.",
+        "safe_default": "read_only_hosted_startup_context",
+        "next_command": f"akbp --path {kb_arg} client-config --profile read-only",
+        "use_when": [
+            "the agent host is remote, managed, or cannot run the local stdio server beside AKBP artifacts",
+            "the host can call a user-controlled bridge but may not have a local review surface",
+            "an installer wants to publish host-native tools from AKBP without exposing direct write methods",
+        ],
+        "hosted_read_only_allowlist": tool_protocol_bridge_preflight["read_only_methods"],
+        "blocked_until_review_surface": tool_protocol_bridge_preflight["blocked_direct_methods"],
+        "must_preserve": [
+            "AKBP response envelope ok/result/error",
+            "error.code for approval_required and invalid_params",
+            "citations, source ids, warnings, and context budget fields",
+            "dry-run review metadata and would-write paths before any approved write",
+        ],
+        "enable_writes_only_when": [
+            "the host reaches a user-controlled AKBP bridge",
+            "doctor --profile reviewed-writes passes for the selected KB",
+            "the host shows dry-run review metadata outside autonomous tool execution",
+            "approved apply repeats the exact reviewed method, path, and params with approved:true",
+            "the structured-output harness passes across the host boundary",
+        ],
+        "unsafe_to_enable_writes_when": [
+            "tool execution is treated as approval",
+            "the host cannot surface dry-run review metadata to a human reviewer",
+            "the bridge stores durable memory outside AKBP artifacts",
+            "the host drops citations, warnings, budget fields, ok, or error.code",
+        ],
+        "fallback": "Expose only read-only startup context or skip AKBP memory for that run until the hosted boundary can preserve citations, structured errors, budgets, and review metadata.",
+    }
     first_run_proof = {
         "goal": "prove cited, review-gated recall before enabling durable writes",
         "safe_default": "read_only",
@@ -1634,6 +1668,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         "memory_adoption_matrix": adoption_matrix,
         "knowledge_base_scope": scope_contract,
         "tool_protocol_bridge_preflight": tool_protocol_bridge_preflight,
+        "managed_tool_host_boundary": managed_tool_host_boundary,
         "external_memory_promotion": external_memory_promotion,
         "profile_selection": profile_selection,
         "tool_schema_budget": tool_schema_budget,
