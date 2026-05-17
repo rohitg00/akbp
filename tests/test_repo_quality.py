@@ -1247,6 +1247,8 @@ class RepoQualityTest(unittest.TestCase):
         text = (ROOT / "examples" / "structured-output-harness" / "README.md").read_text(encoding="utf-8")
         for required in [
             "## Adapter confidence scorecard",
+            "scorecard_gates",
+            "minimum_pass",
             "Capability negotiation",
             "Repairable params",
             "Startup trust",

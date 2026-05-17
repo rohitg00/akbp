@@ -683,6 +683,8 @@
                 "evidence_gate",
                 "preflight_methods",
                 "required_before",
+                "scorecard_gates",
+                "minimum_pass",
                 "must_preserve_fields",
                 "required_reports",
                 "fail_closed_policy"
@@ -719,6 +721,29 @@
                       "exposing_reviewed_write_tools"
                     ]
                   }
+                },
+                "scorecard_gates": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "enum": [
+                      "envelope",
+                      "capability_negotiation",
+                      "repairable_params",
+                      "repair_map",
+                      "startup_trust",
+                      "context_use_report",
+                      "review_preview",
+                      "approval_stop",
+                      "approved_apply",
+                      "recalled_proof",
+                      "prompt_contract"
+                    ]
+                  }
+                },
+                "minimum_pass": {
+                  "const": "all_scorecard_gates_plus_make_adapter_quality"
                 },
                 "must_preserve_fields": {
                   "type": "array",

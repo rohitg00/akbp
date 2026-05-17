@@ -408,6 +408,8 @@ class ToolServerTest(unittest.TestCase):
         adapter_quality = knowledge_capability["properties"]["adapter_quality"]
         self.assertIn("preflight_methods", adapter_quality["required"])
         self.assertIn("required_before", adapter_quality["required"])
+        self.assertIn("scorecard_gates", adapter_quality["required"])
+        self.assertIn("minimum_pass", adapter_quality["required"])
         negotiation = capabilities["properties"]["negotiation"]
         self.assertFalse(negotiation["additionalProperties"])
         self.assertIn("requested_features", negotiation["required"])
@@ -703,6 +705,9 @@ class ToolServerTest(unittest.TestCase):
             adapter_quality = lines[0]["result"]["knowledge_capability"]["adapter_quality"]
             self.assertEqual(adapter_quality["harness"], "examples/structured-output-harness/run.sh")
             self.assertIn("citations", adapter_quality["must_preserve_fields"][2])
+            self.assertEqual(adapter_quality["minimum_pass"], "all_scorecard_gates_plus_make_adapter_quality")
+            self.assertIn("startup_trust", adapter_quality["scorecard_gates"])
+            self.assertIn("approval_stop", adapter_quality["scorecard_gates"])
             self.assertIn("read-only", adapter_quality["fail_closed_policy"])
             boundary = lines[0]["result"]["knowledge_capability"]["session_boundary"]
             self.assertEqual(boundary["transient_state_policy"], "runtime_owned_until_reviewed_promotion")

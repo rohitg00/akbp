@@ -146,6 +146,9 @@ The same block lists the preflight methods that must survive translation
 (`akbp.capabilities`, `akbp.doctor`, and `akbp.session.start`) plus the two
 trust boundaries where the harness is required: planning from recalled context
 and exposing reviewed-write tools.
+It also exposes `scorecard_gates` and `minimum_pass` so installers can map the
+README confidence scorecard into a concrete pass/fail gate instead of relying on
+free-form adapter instructions.
 
 ```json
 {
