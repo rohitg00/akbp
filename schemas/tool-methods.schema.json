@@ -94,6 +94,18 @@
           "type": "boolean",
           "default": false,
           "description": "Return a failing context quality gate when max_chars clips or omits context items."
+        },
+        "output_mode": {
+          "type": "string",
+          "enum": ["inline", "file"],
+          "default": "inline",
+          "description": "inline returns the full context pack in the response body. file writes a JSONL artifact to output_dir and returns only a path + sha256 + line count envelope, letting the harness grep, jq, or stream the artifact instead of loading it into the prompt."
+        },
+        "output_dir": {
+          "type": "string",
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$",
+          "description": "Directory for file-mode artifacts. Defaults to AKBP_OUTPUT_DIR or <cwd>/.akbp/artifacts."
         }
       }
     },
@@ -430,6 +442,18 @@
         },
         "limit": {
           "$ref": "#/$defs/limit"
+        },
+        "output_mode": {
+          "type": "string",
+          "enum": ["inline", "file"],
+          "default": "inline",
+          "description": "inline returns search results in the response body. file writes a JSONL artifact to output_dir and returns only a path + sha256 + line count envelope so the harness can grep, jq, or stream the artifact instead of inlining results."
+        },
+        "output_dir": {
+          "type": "string",
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000\\n\\r]*$",
+          "description": "Directory for file-mode artifacts. Defaults to AKBP_OUTPUT_DIR or <cwd>/.akbp/artifacts."
         }
       }
     },

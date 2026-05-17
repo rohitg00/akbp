@@ -1,0 +1,160 @@
+{
+  "id": "tool-output-presentation-001",
+  "task": "Validate that akbp.search and akbp.context preserve the same cited evidence under both inline and file output_mode presentations, so a harness can choose grep/jq over a JSONL artifact without losing recall.",
+  "profiles": ["read_only", "startup_context"],
+  "setup": {
+    "sources": [
+      {
+        "id": "source_release_rollback_runbook",
+        "type": "file",
+        "locator": "docs/release/rollback-runbook.md",
+        "title": "Release rollback runbook"
+      },
+      {
+        "id": "source_operator_review",
+        "type": "file",
+        "locator": "docs/release/operator-review.md",
+        "title": "Operator review"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim_release_rollback_owner",
+        "text": "Each release window must declare a rollback owner before deployment, recorded in the release runbook.",
+        "type": "decision",
+        "status": "stable",
+        "confidence": 0.92,
+        "evidence": [
+          "source_release_rollback_runbook",
+          "source_operator_review"
+        ],
+        "entities": [
+          "release",
+          "rollback owner",
+          "deployment window"
+        ],
+        "scope": "project"
+      }
+    ],
+    "tool_server_requests": [
+      {
+        "id": "index-presentation",
+        "method": "akbp.index",
+        "approved": true,
+        "params": {"incremental": true},
+        "expected_result_fields": ["ok", "rows", "indexed"],
+        "expected_result_values": {"ok": true},
+        "expected_result_schema": "#/$defs/index_result"
+      },
+      {
+        "id": "search-inline",
+        "method": "akbp.search",
+        "params": {
+          "query": "release rollback owner",
+          "limit": 5,
+          "output_mode": "inline"
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "output_mode",
+          "results",
+          "warnings"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "output_mode": "inline"
+        },
+        "expected_result_contains": {
+          "results[].id": ["claim_release_rollback_owner"]
+        },
+        "expected_result_schema": "#/$defs/search_result"
+      },
+      {
+        "id": "search-file",
+        "method": "akbp.search",
+        "params": {
+          "query": "release rollback owner",
+          "limit": 5,
+          "output_mode": "file"
+        },
+        "expected_result_fields": [
+          "query",
+          "backend",
+          "fts_query",
+          "output_mode",
+          "artifact",
+          "result_count",
+          "warnings"
+        ],
+        "expected_result_values": {
+          "backend": "sqlite_fts5",
+          "output_mode": "file"
+        },
+        "expected_result_contains": {
+          "artifact.format": ["jsonl"],
+          "artifact.kind": ["search"]
+        },
+        "expected_result_schema": "#/$defs/search_result_file"
+      },
+      {
+        "id": "context-inline",
+        "method": "akbp.context",
+        "params": {
+          "task": "release rollback owner deployment window",
+          "limit": 5,
+          "output_mode": "inline"
+        },
+        "expected_result_fields": [
+          "query",
+          "items",
+          "warnings",
+          "quality"
+        ],
+        "expected_result_contains": {
+          "items[].id": ["claim_release_rollback_owner"]
+        },
+        "expected_result_schema": "#/$defs/context_result"
+      },
+      {
+        "id": "context-file",
+        "method": "akbp.context",
+        "params": {
+          "task": "release rollback owner deployment window",
+          "limit": 5,
+          "output_mode": "file"
+        },
+        "expected_result_fields": [
+          "query",
+          "generated_at",
+          "output_mode",
+          "artifact",
+          "item_count",
+          "warnings"
+        ],
+        "expected_result_values": {
+          "output_mode": "file"
+        },
+        "expected_result_contains": {
+          "artifact.format": ["jsonl"],
+          "artifact.kind": ["context"]
+        },
+        "expected_result_schema": "#/$defs/context_result_file"
+      }
+    ]
+  },
+  "query": "release rollback owner",
+  "expected": {
+    "must_retrieve": ["claim_release_rollback_owner"],
+    "must_cite": [
+      "source_release_rollback_runbook",
+      "source_operator_review"
+    ],
+    "answer_should_include": [
+      "rollback owner",
+      "deployment window",
+      "release"
+    ]
+  }
+}

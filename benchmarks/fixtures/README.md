@@ -90,3 +90,4 @@ runtime.
 - `unapproved-write-rejection`: verify non-dry-run JSONL writes, including import apply, without `approved:true` return structured `approval_required` errors.
 - `unknown-method-rejection` checks that unsupported JSONL tool methods return structured `unknown_method` errors with advertised alternatives.
 - `capability-negotiation` checks that runtimes can discover method schemas, structured errors, and write-review policy before invoking tools.
+- `tool-output-presentation`: verify `akbp.search` and `akbp.context` preserve the same cited evidence under inline and file `output_mode`, so a harness can grep or stream a JSONL artifact instead of inlining results. Motivated by recent agent-harness research showing that tool-output presentation choice influences agentic retrieval scores independent of the underlying data; see `docs/HARNESS_AND_PRESENTATION.md`.

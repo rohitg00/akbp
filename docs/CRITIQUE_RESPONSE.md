@@ -15,6 +15,7 @@ This note converts the main public critiques around LLM Wiki style systems and A
 | Provenance and auditability matter more than memory hype. | Strongly valid. | AKBP should continue emphasizing source ids, source hashes, citations, audit events, export manifests, and conformance checks. |
 | Claims need measured repeated-session improvement. | Valid and still not fully solved. | The benchmark runner exercises repeated-session recall scenarios, but larger quality benchmarks and real adapter dogfooding remain 1.0 blockers. |
 | Adoption is not proof yet. | Valid. | Keep public language as alpha protocol scaffolding. Do not imply mature ecosystem or production readiness. |
+| Grep beat vector retrieval on a long-memory sample, and tool-output presentation changed scores even with identical retrieved evidence (Sen et al., *Is Grep All You Need? How Agent Harnesses Reshape Agentic Search*, arXiv:2605.15184). | Valid; presentation is part of the protocol surface, not a UI concern. | `akbp.search` and `akbp.context` accept an `output_mode` parameter. `inline` is default; `file` writes a grep-friendly JSONL artifact with sha256, byte size, and line count, and returns only an envelope. Schemas, the tool contract, and a `tool-output-presentation` benchmark fixture cover both shapes. Full position: `docs/HARNESS_AND_PRESENTATION.md`. |
 
 ## Positioning rules
 

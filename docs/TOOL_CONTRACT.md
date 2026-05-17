@@ -24,19 +24,24 @@ Input:
 ```json
 {
   "query": "string",
-  "limit": 10
+  "limit": 10,
+  "output_mode": "inline",
+  "output_dir": null
 }
 ```
 
 Current backend: `sqlite_fts5`. Vector and graph retrieval are protocol roadmap items, not accepted `akbp.search` parameters in the reference tool server yet.
 
-Output:
+`output_mode` controls how results are presented to the harness. `inline` (default) returns full results in the response body. `file` writes a JSONL artifact to `output_dir` (or `AKBP_OUTPUT_DIR`, or `<cwd>/.akbp/artifacts`) and returns a path + sha256 + line-count envelope. File mode lets a harness grep, jq, or stream the artifact instead of inlining results into the prompt; see `docs/HARNESS_AND_PRESENTATION.md`.
+
+Output (inline):
 
 ```json
 {
   "query": "rollback release",
   "backend": "sqlite_fts5",
   "fts_query": "\"rollback\" \"release\"",
+  "output_mode": "inline",
   "results": [
     {
       "type": "claim",
@@ -45,11 +50,33 @@ Output:
       "snippet": "Agents need rollback paths",
       "rank": -0.42
     }
-  ]
+  ],
+  "warnings": []
 }
 ```
 
-Schema: `#/$defs/search_result`.
+Output (file):
+
+```json
+{
+  "query": "rollback release",
+  "backend": "sqlite_fts5",
+  "fts_query": "\"rollback\" \"release\"",
+  "output_mode": "file",
+  "artifact": {
+    "path": ".akbp/artifacts/akbp-search-...jsonl",
+    "sha256": "<64-hex>",
+    "bytes": 812,
+    "lines": 4,
+    "format": "jsonl",
+    "kind": "search"
+  },
+  "result_count": 3,
+  "warnings": []
+}
+```
+
+Schema: `#/$defs/search_result` for inline, `#/$defs/search_result_file` for file mode.
 
 ### akbp.context
 
@@ -61,9 +88,13 @@ Input:
 {
   "task": "string",
   "limit": 10,
-  "max_chars": 4000
+  "max_chars": 4000,
+  "output_mode": "inline",
+  "output_dir": null
 }
 ```
+
+`output_mode` mirrors `akbp.search`. File mode returns a path + sha256 envelope and writes one JSONL line per context item, plus a header line carrying `query`, `generated_at`, `warnings`, and the request `quality` gate. Schema: `#/$defs/context_result` for inline, `#/$defs/context_result_file` for file mode.
 
 Output:
 

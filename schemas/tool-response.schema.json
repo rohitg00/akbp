@@ -1865,6 +1865,46 @@
         }
       }
     },
+    "presentation_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes", "lines", "format", "kind"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "bytes": {"type": "integer", "minimum": 0},
+        "lines": {"type": "integer", "minimum": 0},
+        "format": {"type": "string", "enum": ["jsonl"]},
+        "kind": {"type": "string", "enum": ["search", "context"]}
+      }
+    },
+    "presentation_artifact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes", "lines", "format", "kind"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "bytes": {"type": "integer", "minimum": 0},
+        "lines": {"type": "integer", "minimum": 0},
+        "format": {"type": "string", "enum": ["jsonl"]},
+        "kind": {"type": "string", "enum": ["search", "context"]}
+      }
+    },
+    "context_result_file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "generated_at", "output_mode", "artifact", "item_count", "warnings"],
+      "properties": {
+        "query": {"type": "string"},
+        "generated_at": {"type": "string", "minLength": 1},
+        "output_mode": {"const": "file"},
+        "artifact": {"$ref": "#/$defs/presentation_artifact_ref"},
+        "item_count": {"type": "integer", "minimum": 0},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+        "quality": {"type": "object"}
+      }
+    },
     "context_result": {
       "type": "object",
       "additionalProperties": false,
@@ -1882,6 +1922,11 @@
         "generated_at": {
           "type": "string",
           "minLength": 1
+        },
+        "output_mode": {
+          "type": "string",
+          "enum": ["inline"],
+          "description": "Inline presentation echoes the request mode so adapters can confirm the response shape."
         },
         "items": {
           "type": "array",
@@ -1909,17 +1954,10 @@
             "failed"
           ],
           "properties": {
-            "ok": {
-              "type": "boolean"
-            },
-            "trusted_for_planning": {
-              "type": "boolean"
-            },
+            "ok": {"type": "boolean"},
+            "trusted_for_planning": {"type": "boolean"},
             "fallback_reason": {
-              "type": [
-                "string",
-                "null"
-              ],
+              "type": ["string", "null"],
               "enum": [
                 "no_context",
                 "uncited_context",
@@ -1929,50 +1967,17 @@
                 null
               ]
             },
-            "minimum_items": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "require_citations": {
-              "type": "boolean"
-            },
-            "fail_on_warnings": {
-              "type": "boolean"
-            },
-            "fail_on_budget_truncation": {
-              "type": "boolean"
-            },
-            "budget_truncated": {
-              "type": "boolean"
-            },
-            "budget_omitted_items": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "budget_clipped_items": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "items": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "uncited_items": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "warnings": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "failed": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+            "minimum_items": {"type": "integer", "minimum": 0},
+            "require_citations": {"type": "boolean"},
+            "fail_on_warnings": {"type": "boolean"},
+            "fail_on_budget_truncation": {"type": "boolean"},
+            "budget_truncated": {"type": "boolean"},
+            "budget_omitted_items": {"type": "integer", "minimum": 0},
+            "budget_clipped_items": {"type": "integer", "minimum": 0},
+            "items": {"type": "integer", "minimum": 0},
+            "uncited_items": {"type": "array", "items": {"type": "string"}},
+            "warnings": {"type": "integer", "minimum": 0},
+            "failed": {"type": "array", "items": {"type": "string"}}
           }
         },
         "budget": {
@@ -2045,27 +2050,38 @@
         "warnings"
       ],
       "properties": {
-        "query": {
-          "type": "string"
-        },
-        "backend": {
+        "query": {"type": "string"},
+        "backend": {"type": "string", "minLength": 1},
+        "fts_query": {"type": "string"},
+        "output_mode": {
           "type": "string",
-          "minLength": 1
-        },
-        "fts_query": {
-          "type": "string"
+          "enum": ["inline"],
+          "description": "Inline presentation echoes the request mode so adapters can confirm the response shape."
         },
         "results": {
           "type": "array",
-          "items": {
-            "$ref": "#/$defs/search_result_row"
-          }
+          "items": {"$ref": "#/$defs/search_result_row"}
         },
         "warnings": {
           "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "search_result_file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "backend", "output_mode", "artifact", "result_count", "warnings"],
+      "properties": {
+        "query": {"type": "string"},
+        "backend": {"type": "string", "minLength": 1},
+        "fts_query": {"type": "string"},
+        "output_mode": {"const": "file"},
+        "artifact": {"$ref": "#/$defs/presentation_artifact_ref"},
+        "result_count": {"type": "integer", "minimum": 0},
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string"}
         }
       }
     },
